@@ -177,8 +177,14 @@ select is_empty(
     cross join (values ('anon'), ('authenticated')) r(rolname)
     cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
     where n.nspname = 'public' and c.relkind in ('r', 'p')
-      and has_table_privilege(r.rolname, c.oid, p.priv)$$,
-  'אין הרשאת כתיבה ציבורית לאף טבלה'
+      and has_table_privilege(r.rolname, c.oid, p.priv)
+      -- תוכנית 2ב: משתמש מחובר כותב ברשימות האישיות שלו, ורק בהרשאות האלה. ההגבלה לשורות שלו ב-RLS.
+      and (r.rolname, c.relname, p.priv) not in (
+        ('authenticated', 'saved_courses', 'INSERT'), ('authenticated', 'saved_courses', 'DELETE'),
+        ('authenticated', 'compare_items', 'INSERT'), ('authenticated', 'compare_items', 'DELETE'),
+        ('authenticated', 'user_answers', 'INSERT'), ('authenticated', 'user_answers', 'UPDATE')
+      )$$,
+  'אין הרשאת כתיבה ציבורית, חוץ מהרשימות האישיות של משתמש מחובר'
 );
 
 -- ===== השרת, שכותב עם המפתח הסודי =====

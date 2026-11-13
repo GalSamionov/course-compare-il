@@ -43,6 +43,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"compare_items": {
+                  Row: {
+                    "course_id": string,"created_at": string,"position": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "course_id": string,"created_at"?: string,"position": number,"user_id": string
+                  }
+                  Update: {
+                    "course_id"?: string,"created_at"?: string,"position"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "compare_items_user_id_course_id_fkey"
+      columns: ["user_id","course_id"]
+isOneToOne: true
+      referencedRelation: "saved_courses"
+      referencedColumns: ["user_id","course_id"]
+    }
+                  ]
                 },"course_lecturers": {
                   Row: {
                     "course_id": string,"lecturer_id": string,"role": string | null,"sort_order": number
@@ -197,6 +217,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"saved_courses": {
+                  Row: {
+                    "course_id": string,"created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "course_id": string,"created_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "course_id"?: string,"created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "saved_courses_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"scores": {
                   Row: {
                     "computed_at": string,"course_id": string,"expires_at": string | null,"explanation": NonNullable<Json>,"id": number,"kind": Database["public"]['Enums']["score_kind"],"method_version": string,"per_metric": NonNullable<Json>,"recommend_pct": number | null,"review_count": number,"reviews_needed": number | null,"stale": boolean,"status": string,"value": number | null
@@ -222,6 +262,20 @@ isOneToOne: false
       referencedRelation: "method_changes"
       referencedColumns: ["version"]
     }
+                  ]
+                },"user_answers": {
+                  Row: {
+                    "answers": NonNullable<Json>,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answers": NonNullable<Json>,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "answers"?: NonNullable<Json>,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"vendor_responses": {
                   Row: {
@@ -253,6 +307,9 @@ isOneToOne: false
 { Args: { "p_course_id": string }; Returns: {
               "invoice_count": number,"max_ils": number,"min_ils": number
             }[]
+                           },
+"forget_auth_log":
+{ Args: { "p_user_id": string }; Returns: undefined
                            }
           }
           Enums: {
