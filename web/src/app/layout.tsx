@@ -18,6 +18,8 @@ const pen = Playpen_Sans_Hebrew({
 export const metadata: Metadata = {
   title: '[שם האתר]',
   description: 'השוואת קורסים עצמאית בישראל. אף מוכר לא משלם לנו.',
+  // עד ההשקה האתר מציג נתוני דוגמה, ולכן מנועי חיפוש לא מאנדקסים אותו.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
