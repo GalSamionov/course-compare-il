@@ -9,7 +9,16 @@ import {
   WEIGHTS,
   WINDOW_MONTHS,
 } from './constants';
-import type { MetricKey, MetricMeans, MetricResult, ReviewForScore, ScoreInput, ScoreResult } from './types';
+import type {
+  MetricBreakdown,
+  MetricKey,
+  MetricMeans,
+  MetricResult,
+  ReviewForScore,
+  ScoredMetricKey,
+  ScoreInput,
+  ScoreResult,
+} from './types';
 
 export function monthsBefore(date: Date, months: number): Date {
   const d = new Date(date.getTime());
@@ -47,7 +56,8 @@ export function metricMeans(reviews: ReviewForScore[]): MetricMeans {
 }
 
 const toTen = (mean: number) => ((mean - 1) / 4) * 10;
-const round1 = (x: number) => Math.round(x * 10) / 10;
+/** עיגול לספרה אחת. האפסילון מונע מ-5.95, שמחושב כ-5.9499999, להתעגל ל-5.9. */
+const round1 = (x: number) => Math.round(x * 10 + 1e-9) / 10;
 
 export function computeGraduateScore(input: ScoreInput): ScoreResult {
   const reviews = eligibleReviews(input.reviews, input.now);
@@ -60,19 +70,34 @@ export function computeGraduateScore(input: ScoreInput): ScoreResult {
     };
   }
 
-  const prior = input.categoryReviewCount >= CATEGORY_PRIOR_MIN_REVIEWS ? input.categoryPrior : input.typePrior;
+  const useCategory = input.categoryReviewCount >= CATEGORY_PRIOR_MIN_REVIEWS;
+  const priorFor = (key: ScoredMetricKey) =>
+    (useCategory ? input.categoryPrior[key] : undefined) ?? input.typePrior[key] ?? NEUTRAL_MEAN;
   const perMetric = metricResults(reviews);
 
-  let weighted = 0;
-  let weightSum = 0;
-  for (const [key, weight] of Object.entries(WEIGHTS[input.courseType]) as [MetricKey, number][]) {
+  // שאלה שאף בוגר לא ענה עליה, או שאלת התוצאה עם פחות מ-3 תשובות, לא נכנסת לציון,
+  // והמשקל שלה מתחלק בין שאר השאלות.
+  const counted: { key: ScoredMetricKey; weight: number; result: MetricResult }[] = [];
+  for (const [key, weight] of Object.entries(WEIGHTS[input.courseType]) as [ScoredMetricKey, number][]) {
     const result = perMetric[key];
-    const n = result?.n ?? 0;
-    if (key === 'outcome_3m' && n < MIN_OUTCOME_ANSWERS) continue;
-    const priorMean = prior[key] ?? NEUTRAL_MEAN;
-    const shrunk = (n * (result?.mean ?? 0) + PRIOR_WEIGHT * priorMean) / (n + PRIOR_WEIGHT);
-    weighted += weight * toTen(shrunk);
-    weightSum += weight;
+    if (!result) continue;
+    if (key === 'outcome_3m' && result.n < MIN_OUTCOME_ANSWERS) continue;
+    counted.push({ key, weight, result });
+  }
+  const weightSum = counted.reduce((sum, c) => sum + c.weight, 0);
+  if (weightSum === 0) {
+    throw new Error('No scored metric has answers. Check review_answers for this course.');
+  }
+
+  const breakdown: Partial<Record<ScoredMetricKey, MetricBreakdown>> = {};
+  let value = 0;
+  for (const { key, weight, result } of counted) {
+    const prior = priorFor(key);
+    const shrunk = (result.n * result.mean + PRIOR_WEIGHT * prior) / (result.n + PRIOR_WEIGHT);
+    const score10 = toTen(shrunk);
+    const effectiveWeight = weight / weightSum;
+    breakdown[key] = { mean: result.mean, n: result.n, prior, shrunk, score10, weight: effectiveWeight };
+    value += effectiveWeight * score10;
   }
 
   const recommend = perMetric.recommend;
@@ -85,10 +110,12 @@ export function computeGraduateScore(input: ScoreInput): ScoreResult {
 
   return {
     status: 'scored',
-    value: round1(weighted / weightSum),
+    value: round1(value),
     reviewCount: reviews.length,
     recommendPct,
     perMetric,
+    priorSource: useCategory ? 'category' : 'type',
+    breakdown,
     stale,
     methodVersion: METHOD_VERSION,
   };
