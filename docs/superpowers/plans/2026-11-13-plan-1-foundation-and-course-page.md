@@ -145,7 +145,7 @@ export default defineConfig({
 "test": "vitest run",
 "test:watch": "vitest",
 "e2e": "playwright test",
-"score:recompute": "node --env-file=.env.local --import tsx scripts/recompute-scores.ts"
+"score:recompute": "node --env-file-if-exists=.env.local --import tsx scripts/recompute-scores.ts"
 ```
 
 - [ ] **Step 6: לוודא ש-Vitest רץ**
@@ -2271,6 +2271,22 @@ export function CourseActions({ slug }: { slug: string }) {
 
 - [ ] **Step 8: העמוד**
 
+> **הערה ל-Next.js 16:** הגרסה שהותקנה היא Next 16.4.6, ו-`web/next.config.ts` מגדיר `cacheComponents: true`. במצב הזה:
+> - `export const revalidate` לא נתמך, ובמקומו משתמשים ב-`'use cache'` עם `cacheLife('hours')` ו-`cacheTag(\`course:${slug}\`)` בתוך `getCoursePage`.
+> - כשקוראים נתונים בלי מטמון מחוץ ל-`<Suspense>`, הבנייה נכשלת.
+> - צריך `generateStaticParams` שמחזיר לפחות slug אמיתי אחד. לכן הבנייה צריכה גישה למסד.
+>
+> **לפני הכתיבה:** קוראים את `web/AGENTS.md` ואת המדריכים ב-`web/node_modules/next/dist/docs/01-app/02-guides/` (`migrating-to-cache-components.md`, `incremental-static-regeneration-cache-components.md`).
+>
+> **דרישה שלא מתפשרים עליה:** כתובת של קורס שלא קיים מחזירה סטטוס HTTP 404 אמיתי, ולא 200 עם מסך "לא נמצא". זה חשוב לגוגל.
+>
+> **אם `cacheComponents` מונע 404 אמיתי:**
+> 1. מכבים אותו: `cacheComponents: false`, ומסירים את `partialPrefetching`.
+> 2. משאירים את `export const revalidate = 3600`, כמו בקוד שלמטה.
+> 3. מדווחים על הבחירה.
+>
+> הקוד שלמטה כתוב לגרסה בלי `cacheComponents`.
+
 Create `web/src/app/courses/[slug]/page.tsx`:
 
 ```tsx
@@ -2417,10 +2433,11 @@ export default defineConfig({
   use: { baseURL: 'http://localhost:3000' },
   projects: [{ name: 'mobile', use: { ...devices['Pixel 7'] } }],
   webServer: {
-    command: 'pnpm dev',
+    // בנייה מלאה ולא dev, כי ההתנהגות של המטמון וסטטוס ה-404 נראים רק בבנייה לייצור.
+    command: 'pnpm build && pnpm start',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
-    timeout: 120_000,
+    timeout: 300_000,
   },
 });
 ```
@@ -2553,7 +2570,6 @@ jobs:
         working-directory: web
         run: |
           pnpm exec playwright install --with-deps chromium
-          pnpm build
           pnpm e2e
 ```
 
