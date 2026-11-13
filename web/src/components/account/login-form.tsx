@@ -248,7 +248,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                   <button
                     type="submit"
                     disabled={sending}
-                    className={cn(buttonVariants(), 'h-[50px] w-full text-base font-bold')}
+                    className={cn(buttonVariants(), 'h-[50px] w-full font-sans text-base font-bold')}
                   >
                     לשלוח לי קישור
                   </button>

@@ -1,8 +1,12 @@
 import Link from 'next/link';
+import { AccountLink } from './account-link';
 
 const navLink = 'inline-flex min-h-11 items-center underline-offset-[3px] hover:text-link-hover hover:underline';
 
-/** הכותרת של כל עמוד: שם האתר, "אף מוכר לא משלם לנו", והתפריט (מסמך העיצוב, 3א.1). */
+/**
+ * הכותרת של כל עמוד: שם האתר, "אף מוכר לא משלם לנו", והתפריט (מסמך העיצוב, 3א.1).
+ * הקישור האחרון: "התחברות", או "האזור שלי" למי שמחובר (סעיף 5).
+ */
 export function SiteHeader() {
   return (
     // pt-[11px]: הקישור לשם האתר בגובה 44, והטקסט שלו נשאר 16 פיקסלים מראש הדף, כמו בציור.
@@ -20,9 +24,7 @@ export function SiteHeader() {
         <Link href="/method" className={navLink}>
           איך אנחנו מדרגים
         </Link>
-        <Link href="/login" className={navLink}>
-          התחברות
-        </Link>
+        <AccountLink className={navLink} />
       </nav>
     </header>
   );

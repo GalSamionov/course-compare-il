@@ -3,6 +3,7 @@ import { Mark } from '@/components/course/marks';
 import { formatIls } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { PRODUCT_TYPE_LABEL } from '@/lib/search/types';
+import { cn } from '@/lib/utils';
 
 /** כותרת הרשימה כשלפחות שורה אחת מסננת. */
 export function coursesTitle(n: number): string {
@@ -20,12 +21,29 @@ const verifiedText = (n: number) =>
   n === 0 ? 'עוד אין בוגרים מאומתים' : n === 1 ? 'בוגר מאומת אחד' : `${n} בוגרים מאומתים`;
 const missingText = (n: number) => (n === 1 ? 'חסרה עוד ביקורת אחת.' : `חסרות עוד ${n} ביקורות.`);
 
-/** שורת תוצאה בסגנון הסיכום: ההערה בעט בשוליים מימין, והקורס משמאלה. */
-export function ResultRow({ result }: { result: MatchResult }) {
+/**
+ * שורת תוצאה בסגנון הסיכום: ההערה בעט בשוליים מימין, והקורס משמאלה.
+ * actions: הכפתורים בסוף השורה ("לשמור", ובאזור האישי גם "להשוואה").
+ * highlight: באזור האישי השורה בלי העובדה המודגשת, כמו בציור (Me.dc.html).
+ */
+export function ResultRow({
+  result,
+  highlight = true,
+  actions,
+}: {
+  result: MatchResult;
+  highlight?: boolean;
+  actions?: React.ReactNode;
+}) {
   const { course, note } = result;
   const product = PRODUCT_TYPE_LABEL[course.productType];
   return (
-    <article className="grid grid-cols-[70px_minmax(0,1fr)] border-b border-rule pt-4 pb-[18px]">
+    <article
+      className={cn(
+        'grid grid-cols-[70px_minmax(0,1fr)] border-b border-rule pt-4',
+        actions ? 'pb-3' : 'pb-[18px]',
+      )}
+    >
       {/* הקורס ראשון בקוד, כדי שקורא מסך יקרא את השם לפני ההערה. העמודות קובעות את המיקום. */}
       <div className="col-start-2 row-start-1 ps-3">
         <h3 className="text-[19px] leading-snug font-bold">
@@ -66,13 +84,14 @@ export function ResultRow({ result }: { result: MatchResult }) {
             <span className="text-ink-soft">המוסד לא מפרסם מחיר</span>
           )}
         </p>
-        {course.highlight && (
+        {highlight && course.highlight && (
           <p className="mt-1.5 font-sans text-[15px] leading-normal">
             <Mark source="grads">
               {course.highlight.label}: {course.highlight.text}
             </Mark>
           </p>
         )}
+        {actions && <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2">{actions}</div>}
       </div>
       <p className="col-start-1 row-start-1 -rotate-3 pt-1.5 pe-2 font-pen text-sm leading-snug font-medium text-pen">
         {note && (
