@@ -1888,7 +1888,10 @@ export interface CoursePageData {
   outcome: { n: number; mean: number } | null;
   paid: PaidRange | null;
   costPerHandsOnHour: number | null;
+  /** הביקורות הראשונות שמוצגות בעמוד. */
   reviews: ReviewView[];
+  /** כל הביקורות שפורסמו לקורס, לא רק אלה שבעמוד. */
+  reviewTotal: number;
 }
 
 const REVIEWS_ON_PAGE = 5;
@@ -1904,13 +1907,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   if (error) throw error;
   if (!course) return null;
 
-  const [
-    { data: scoreRow },
-    { data: metricDefs },
-    { data: reviewRows },
-    { data: lecturerRows },
-    { data: paidRows },
-  ] = await Promise.all([
+  const [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes] = await Promise.all([
     db
       .from('scores')
       .select('*')
@@ -1921,11 +1918,17 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       .limit(1)
       .maybeSingle(),
     db.from('metrics').select('key, label, sort_order').order('sort_order'),
+    // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
     db
       .from('reviews')
-      .select('id, display_name, cohort_month, body, follow_up_text, published_at, vendor_responses(body)')
+      .select('id, display_name, cohort_month, body, follow_up_text, published_at, vendor_responses(body)', {
+        count: 'exact',
+      })
       .eq('course_id', course.id)
-      .order('published_at', { ascending: false }),
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(REVIEWS_ON_PAGE),
     db
       .from('course_lecturers')
       .select('role, sort_order, lecturers(slug, name, institution_bio, verified_facts, course_lecturers(count))')
@@ -1934,6 +1937,15 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     // הסכום של כל בוגר לא חשוף. המסד מחזיר רק טווח, ורק משלוש חשבוניות.
     db.rpc('course_paid_range', { p_course_id: course.id }),
   ]);
+
+  // שאילתה שנכשלה זורקת שגיאה. אחרת העמוד היה מציג בשקט "אין ציון" או "אין ביקורות".
+  for (const res of [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes]) {
+    if (res.error) throw res.error;
+  }
+  const scoreRow = scoreRes.data;
+  const metricDefs = metricsRes.data;
+  const lecturerRows = lecturersRes.data;
+  const paidRows = paidRes.data;
 
   const one = <T,>(ref: T | T[] | null): T | null => (Array.isArray(ref) ? (ref[0] ?? null) : ref);
   const institution = one(course.institutions as { name: string } | { name: string }[] | null);
@@ -1985,7 +1997,6 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     .map((m) => ({ key: m.key, label: m.label, mean: perMetric[m.key].mean, n: perMetric[m.key].n }));
   const outcomeResult = perMetric.outcome_3m;
 
-  const rows = reviewRows ?? [];
   const paidRow = paidRows?.[0];
   const paid: PaidRange | null = paidRow
     ? { min: paidRow.min_ils, max: paidRow.max_ils, count: paidRow.invoice_count }
@@ -2022,7 +2033,8 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     outcome: outcomeResult && outcomeResult.n >= 3 ? outcomeResult : null,
     paid,
     costPerHandsOnHour: costPerHandsOnHour(course.site_price_ils, course.hands_on_hours),
-    reviews: rows.slice(0, REVIEWS_ON_PAGE).map((r) => ({
+    reviewTotal: reviewsRes.count ?? 0,
+    reviews: (reviewsRes.data ?? []).map((r) => ({
       id: r.id,
       displayName: r.display_name,
       cohortMonth: r.cohort_month,
@@ -2757,7 +2769,7 @@ export default async function CoursePage({ params }: Props) {
   const course = await getCoursePage(slug);
   if (!course) notFound();
 
-  const reviewCount = course.score.status === 'none' ? course.reviews.length : course.score.reviewCount;
+  const reviewCount = course.reviewTotal;
 
   return (
     <div className="mx-auto max-w-[680px] px-[22px] pb-12">
