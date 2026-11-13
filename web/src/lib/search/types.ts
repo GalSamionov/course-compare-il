@@ -51,6 +51,8 @@ export interface Highlight {
 
 /** קורס בשורת תוצאה. רק מה שהרשימה צריכה, כדי שהדפדפן יקבל מעט נתונים. */
 export interface CourseSummary {
+  /** המזהה במסד. הרשימות של המשתמש (saved_courses, compare_items) שומרות אותו. */
+  id: string;
   slug: string;
   title: string;
   institutionName: string;

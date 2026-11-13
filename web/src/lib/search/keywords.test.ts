@@ -47,6 +47,7 @@ describe('matchKeywords', () => {
 
 describe('matchNames', () => {
   const course = (slug: string, title: string, institutionName: string): CourseSummary => ({
+    id: slug,
     slug,
     title,
     institutionName,

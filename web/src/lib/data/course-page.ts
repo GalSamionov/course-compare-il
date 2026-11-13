@@ -45,6 +45,8 @@ export type ScoreView =
   | { status: 'none' };
 
 export interface CoursePageData {
+  /** המזהה במסד, ל"לשמור" ול"להשוואה". */
+  id: string;
   slug: string;
   title: string;
   status: Exclude<Database['public']['Enums']['course_status'], 'draft'>;
@@ -230,6 +232,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     : null;
 
   return {
+    id: course.id,
     slug: course.slug,
     title: course.title,
     status: course.status as CoursePageData['status'],

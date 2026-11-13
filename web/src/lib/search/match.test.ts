@@ -4,6 +4,7 @@ import { EMPTY_QUERY, type CourseSummary } from './types';
 
 function course(over: Partial<CourseSummary> & { slug: string }): CourseSummary {
   return {
+    id: over.slug,
     title: over.slug,
     institutionName: 'מוסד לדוגמה',
     categorySlug: 'cooking',

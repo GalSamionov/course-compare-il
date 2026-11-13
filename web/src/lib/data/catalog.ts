@@ -82,6 +82,7 @@ export async function loadCatalog(): Promise<Catalog> {
 
     return [
       {
+        id: row.id,
         slug: row.slug,
         title: row.title,
         institutionName: one(row.institutions as { name: string } | { name: string }[] | null)?.name ?? '',
