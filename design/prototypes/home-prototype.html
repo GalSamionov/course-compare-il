@@ -1,0 +1,394 @@
+<title>אב-טיפוס דף הבית</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Hebrew:wght@400;600;700&family=Assistant:wght@400;600;700&family=Playpen+Sans+Hebrew:wght@500&display=swap">
+<style>
+/* layout: a clickable copy of the approved comp HomeB ("שאלה בשוליים"). A 70px ruled margin on the right holds the printed questions; the visitor's answers are written in blue pen; choices open inside the notebook under the line. Single light look on purpose (the site has no dark mode). */
+:root {
+  --paper: #FFFFFF;
+  --ink: #1C1C1C;
+  --ink-soft: #555555;
+  --rule: #DADADA;
+  --line: #BDBDBD;
+  --pen: #1F3FBF;
+  --band: #F1F0EC;
+  --note-grad: #FFF27A;
+  --mark-grads: #FFEA3D;
+  --serif: 'Noto Serif Hebrew', 'David', 'Times New Roman', serif;
+  --sans: 'Assistant', 'Arial Hebrew', Arial, sans-serif;
+  --hand: 'Playpen Sans Hebrew', 'Assistant', cursive;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { direction: rtl; }
+body { background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 16px; line-height: 1.8; }
+a { color: var(--ink); text-underline-offset: 3px; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+::selection { background: rgba(31, 63, 191, .2); }
+.page { max-width: 440px; margin: 0 auto; padding-left: max(22px, env(safe-area-inset-left, 0px)); padding-right: max(22px, env(safe-area-inset-right, 0px)); padding-block: 0; }
+
+.proto { background: var(--band); border-bottom: 1px solid var(--rule); font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--ink-soft); }
+.proto .page { padding-block: 10px; }
+
+header.site { display: flex; justify-content: space-between; align-items: center; padding-block: 16px 12px; border-bottom: 1px solid var(--rule); font-family: var(--sans); }
+header.site b { font-size: 19px; }
+header.site span { font-size: 12px; color: var(--ink-soft); }
+h1 { margin: 22px 0 0; font-weight: 700; font-size: 30px; line-height: 1.2; text-wrap: balance; }
+.lead { margin: 8px 0 0; font-family: var(--sans); font-size: 15px; line-height: 1.5; color: var(--ink-soft); }
+
+/* the notebook */
+.book { position: relative; margin-top: 16px; }
+.book::before { content: ""; position: absolute; top: 0; bottom: 0; right: 70px; width: 1px; background: var(--rule); }
+.opening { margin: 0 70px 0 0; padding: 4px 12px 6px 0; font-size: 18px; line-height: 1.5; }
+ol.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 70px minmax(0, 1fr) 44px; align-items: center; min-height: 60px; border-bottom: 1px solid var(--line); }
+.row.open { border-bottom: 2px solid var(--ink); }
+.q { font-family: var(--sans); font-size: 13px; line-height: 1.25; color: var(--ink-soft); }
+.q strong { display: block; font-size: 16px; color: var(--ink); }
+.ans { align-self: stretch; margin: 0; padding: 16px 12px 4px 4px; font-size: 18px; line-height: 1.5; cursor: pointer; background: none; border: 0; text-align: start; width: 100%; }
+.pen { display: inline-block; font-family: var(--hand); font-weight: 500; font-size: 21px; color: var(--pen); transform: rotate(-1.5deg); }
+.row.off .pen { text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .5; }
+.placeholder { font-family: var(--sans); font-size: 15px; color: var(--ink-soft); }
+.caret { display: inline-block; width: 2px; height: 22px; margin-right: 4px; background: var(--pen); vertical-align: -4px; }
+.tick { position: relative; width: 44px; height: 44px; padding: 0; border: 0; background: none; cursor: pointer; }
+.tick:disabled { cursor: default; opacity: .45; }
+.tick .box { position: absolute; top: 11px; left: 11px; width: 22px; height: 22px; border: 1.5px solid var(--ink); border-radius: 2px; }
+.tick svg { position: absolute; top: 2px; left: 10px; width: 32px; height: 32px; overflow: visible; }
+
+/* choices that open under the line, inside the notebook */
+.choices { display: grid; grid-template-columns: 70px minmax(0, 1fr); row-gap: 10px; padding: 14px 0 16px; border-bottom: 1px solid var(--line); font-family: var(--sans); }
+.choices .lbl { padding-top: 11px; font-size: 13px; line-height: 1.3; color: var(--ink-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding-right: 12px; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; border: 1px solid var(--ink); border-radius: 4px; background: var(--paper); font-family: var(--sans); font-weight: 600; font-size: 15px; cursor: pointer; text-align: start; }
+.chip[aria-checked="true"] { font-weight: 700; }
+.chip .cb { position: relative; flex: none; width: 16px; height: 16px; border: 1.5px solid var(--ink); border-radius: 2px; }
+.chip .cb svg { position: absolute; top: -9px; left: -2px; width: 23px; height: 23px; overflow: visible; }
+.write { width: 100%; min-height: 48px; border: 0; border-bottom: 1px solid var(--ink); background: none; font-family: var(--hand); font-weight: 500; font-size: 20px; color: var(--pen); padding: 4px 0; }
+.write::placeholder { font-family: var(--sans); font-weight: 400; font-size: 15px; color: var(--ink-soft); }
+.field { padding-right: 12px; min-width: 0; }
+
+.after { margin-right: 70px; padding-right: 12px; }
+.small { margin: 12px 0 0; font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--ink-soft); }
+.small + .small { margin-top: 4px; }
+.cta { display: block; width: 100%; height: 50px; margin-top: 14px; background: var(--ink); color: #fff; border: 0; border-radius: 4px; font-family: var(--sans); font-weight: 700; font-size: 16px; cursor: pointer; }
+nav.or { display: grid; grid-template-columns: 70px minmax(0, 1fr); margin-top: 12px; font-family: var(--sans); }
+nav.or .lbl { padding-top: 11px; font-size: 13px; line-height: 1.3; color: var(--ink-soft); }
+nav.or .links { padding-right: 12px; font-size: 15px; line-height: 1.4; }
+nav.or button { display: flex; align-items: center; min-height: 44px; padding: 0; border: 0; background: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-align: start; }
+.soon { font-family: var(--hand); font-size: 14px; color: var(--pen); padding-right: 12px; min-height: 0; }
+
+h2 { display: inline-block; margin: 0; padding-bottom: 2px; border-bottom: 2px solid var(--ink); font-weight: 700; font-size: 21px; line-height: 1.4; }
+#results { margin-top: 30px; }
+.res-head { margin-right: 70px; padding-right: 12px; }
+article.course { display: grid; grid-template-columns: 70px minmax(0, 1fr); padding: 16px 0 18px; border-bottom: 1px solid var(--rule); }
+.why { margin: 0; padding: 6px 0 0 8px; font-family: var(--hand); font-weight: 500; font-size: 14px; line-height: 1.4; color: var(--pen); transform: rotate(-3deg); }
+.body { padding-right: 12px; min-width: 0; }
+.body h3 { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.3; }
+.body h3 a { text-decoration: none; }
+.inst { margin: 2px 0 0; font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+.score { margin: 8px 0 0; display: flex; align-items: baseline; gap: 6px; font-family: var(--sans); font-size: 14px; line-height: 1.3; }
+.score b { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1; }
+.noscore { margin: 8px 0 0; font-family: var(--sans); font-size: 15px; line-height: 1.4; }
+.noscore span { color: var(--ink-soft); }
+.meta { margin: 6px 0 0; font-family: var(--sans); font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.fact { margin: 4px 0 0; font-family: var(--sans); font-size: 14px; line-height: 1.6; }
+mark.grads { background: var(--mark-grads); color: inherit; padding: 0 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.sticky { margin: 10px 0 0 40px; background: var(--note-grad); padding: 8px 11px; transform: rotate(1.2deg); box-shadow: 0 8px 12px -6px rgba(40, 40, 20, .4); font-family: var(--sans); font-size: 13px; line-height: 1.4; }
+.none-left { margin: 16px 70px 0 0; padding-right: 12px; font-family: var(--hand); color: var(--pen); font-size: 15px; line-height: 1.5; }
+
+#subjects { margin-top: 36px; margin-right: 70px; padding-right: 12px; }
+.toc-head { display: flex; justify-content: flex-end; margin-top: 10px; font-family: var(--sans); font-size: 12px; line-height: 1.3; color: var(--ink-soft); }
+.toc-head span { text-align: left; }
+ol.toc { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; }
+ol.toc button { display: flex; align-items: baseline; width: 100%; min-height: 44px; padding: 6px 0 0; border: 0; background: none; cursor: pointer; text-align: start; font-family: var(--serif); font-size: 16px; }
+ol.toc .dots { flex: 1; margin: 0 8px; border-bottom: 2px dotted #9A9A9A; }
+ol.toc .n { text-align: left; font-family: var(--sans); font-size: 15px; }
+
+footer { margin-top: 32px; padding-block: 16px 30px; border-top: 1px solid var(--rule); font-family: var(--sans); font-size: 13px; line-height: 1.55; color: var(--ink-soft); }
+footer .big { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); text-wrap: balance; }
+footer p { margin: 4px 0 0; }
+footer a { color: var(--ink-soft); }
+</style>
+
+<div class="proto"><div class="page">אב-טיפוס עם נתוני דוגמה. לוחצים על שורה כדי לענות, ואפשר לדלג על כל שאלה.</div></div>
+
+<div class="page">
+  <header class="site"><b>[שם האתר]</b><span>אף מוכר לא משלם לנו</span></header>
+  <h1>מה אתם רוצים ללמוד, ולמה?</h1>
+  <p class="lead">ארבע שורות, ונראה רק קורסים שמתאימים לכם. אפשר לכתוב במילים שלכם.</p>
+
+  <div class="book">
+    <form id="form" aria-label="אני מחפש קורס">
+      <p class="opening">אני רוצה ללמוד</p>
+      <ol class="rows" id="rows"></ol>
+      <div class="after">
+        <p class="small" id="understood" aria-live="polite"></p>
+        <p class="small">שורה בלי סימון לא מסננת את התוצאות.</p>
+        <button class="cta" id="cta" type="submit"></button>
+      </div>
+    </form>
+    <nav class="or" aria-label="לא מחפשים קורס">
+      <span class="lbl">או</span>
+      <div class="links">
+        <button type="button" data-soon="כתיבת ביקורת תיפתח בקרוב">סיימתי קורס, רוצה לכתוב עליו</button>
+        <button type="button" data-soon="הוספת קורס על ידי מוסד תיפתח בקרוב">אני מוסד או מרצה, רוצה להוסיף קורס</button>
+        <div class="soon" id="soon" aria-live="polite"></div>
+      </div>
+    </nav>
+
+    <section id="results" aria-labelledby="res-title">
+      <div class="res-head">
+        <h2 id="res-title"></h2>
+        <p class="small" style="margin-top:8px">מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.</p>
+      </div>
+      <div id="list"></div>
+    </section>
+
+    <section id="subjects" aria-labelledby="toc-title">
+      <h2 id="toc-title">או לפי תחום</h2>
+      <div class="toc-head" aria-hidden="true"><span style="width:44px">קורסים</span><span style="width:52px">בוגרים</span></div>
+      <ol class="toc" id="toc"></ol>
+    </section>
+  </div>
+
+  <footer>
+    <p class="big">אף מוכר לא משלם לנו. לא על מקום, לא על ציון ולא על הסרת ביקורת.</p>
+    <p>ביקורת מתפרסמת רק מבוגר שהעלה הוכחה: חשבונית, קבלה או תעודת סיום.</p>
+    <p style="margin-top:8px"><a href="#">איך אנחנו מדרגים</a> · <a href="#">מי משלם לנו</a></p>
+  </footer>
+</div>
+
+<script>
+const TICK = '<svg aria-hidden="true" viewBox="0 0 30 30"><path d="M5 16 C8 19, 10 22, 12 25 C16 15, 21 8, 29 1" fill="none" stroke="#1F3FBF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+
+const CATEGORIES = [
+  { id: 'dev', name: 'תכנות ופיתוח', type: 'career', words: ['תכנות', 'פיתוח', 'אתר', 'אתרים', 'קוד', 'full stack', 'פולסטאק', 'react', 'ריאקט', 'פייתון', 'python', 'מתכנת', 'אפליקציה', 'אפליקציות'] },
+  { id: 'data', name: 'דאטה ובינה מלאכותית', type: 'career', words: ['דאטה', 'נתונים', 'ai', 'בינה', 'מלאכותית', 'למידת מכונה', 'אנליסט', 'sql', 'אקסל', 'gpt'] },
+  { id: 'design', name: 'עיצוב גרפי ו-UX', type: 'career', words: ['עיצוב', 'מעצב', 'גרפי', 'ux', 'ui', 'פיגמה', 'figma', 'חוויית משתמש', 'לוגו'] },
+  { id: 'marketing', name: 'שיווק דיגיטלי', type: 'career', words: ['שיווק', 'פרסום', 'קמפיין', 'קמפיינים', 'גוגל', 'פייסבוק', 'אינסטגרם', 'רשתות', 'seo', 'קידום'] },
+  { id: 'exams', name: 'הכנה למבחנים', type: 'exam', words: ['מבחן', 'רישיון', 'רשיון', 'תיווך', 'מתווך', 'הסמכה'] },
+  { id: 'accounting', name: 'הנהלת חשבונות', type: 'exam', words: ['הנהלת חשבונות', 'חשבונות', 'שכר', 'חשב', 'מס', 'מיסים'] },
+  { id: 'lang', name: 'שפות', type: 'hobby', words: ['שפה', 'שפות', 'אנגלית', 'ספרדית', 'ערבית', 'צרפתית', 'איטלקית'] },
+  { id: 'cooking', name: 'בישול ואפייה', type: 'hobby', words: ['בישול', 'אפייה', 'אפיה', 'מטבח', 'עוגות', 'לחם', 'שף'] },
+  { id: 'photo', name: 'צילום ווידאו', type: 'hobby', words: ['צילום', 'צלם', 'וידאו', 'עריכה', 'מצלמה', 'סרטים'] }
+];
+
+// sample data only: no real institutions
+const COURSES = [
+  { t: 'פיתוח Full Stack', i: 'מכללה לדוגמה', c: 'dev', s: 7.9, g: 23, p: 14900, when: ['evening'], how: ['online', 'class'], fact: '9 מתוך 14 עובדים בתחום', quote: ['״את הפרויקט המסכם הראיתי בכל ראיון.״', 'נועה ר.'] },
+  { t: 'בניית אתרים מאפס', i: 'בית ספר לדוגמה', c: 'dev', s: 7.4, g: 11, p: 9800, when: ['evening'], how: ['class'], fact: '5 מתוך 9 עובדים בתחום' },
+  { t: 'פיתוח צד לקוח עם React', i: 'מרצה עצמאית לדוגמה', c: 'dev', s: null, g: 3, p: 6400, when: ['evening', 'weekend'], how: ['online'] },
+  { t: 'פייתון למתחילים', i: 'מכללה לדוגמה', c: 'dev', s: 8.1, g: 17, p: 5200, when: ['morning'], how: ['online'], fact: '6 מתוך 12 עובדים בתחום' },
+  { t: 'אנליסט נתונים', i: 'מכון לדוגמה', c: 'data', s: 7.7, g: 19, p: 12500, when: ['evening'], how: ['online', 'class'], fact: '8 מתוך 15 עובדים בתחום' },
+  { t: 'כלי AI לעבודה יומיומית', i: 'מכללה לדוגמה', c: 'data', s: null, g: 3, p: 2900, when: ['evening'], how: ['online'] },
+  { t: 'עיצוב UX/UI', i: 'סטודיו לדוגמה', c: 'design', s: 8.4, g: 21, p: 13900, when: ['evening'], how: ['class'], fact: '11 מתוך 16 עובדים בתחום', quote: ['״התיק שבנינו בקורס הוא מה שהביא לי את העבודה.״', 'דני ל.'] },
+  { t: 'עיצוב גרפי בפיגמה', i: 'בית ספר לדוגמה', c: 'design', s: 6.9, g: 8, p: 4800, when: ['weekend'], how: ['online'], fact: '2 מתוך 6 עובדים בתחום' },
+  { t: 'שיווק דיגיטלי וקמפיינים', i: 'מכון לדוגמה', c: 'marketing', s: 7.2, g: 14, p: 8900, when: ['morning', 'evening'], how: ['online'], fact: '7 מתוך 11 עובדים בתחום' },
+  { t: 'הנהלת חשבונות סוג 1 ו-2', i: 'מכללה לדוגמה', c: 'accounting', s: 8.0, g: 26, p: 7600, when: ['evening'], how: ['class'], fact: '19 מתוך 22 עברו את המבחן' },
+  { t: 'חשבות שכר', i: 'מכון לדוגמה', c: 'accounting', s: null, g: 4, p: 6900, when: ['morning'], how: ['class'] },
+  { t: 'הכנה למבחן התיווך', i: 'בית ספר לדוגמה', c: 'exams', s: 7.5, g: 12, p: 3400, when: ['weekend'], how: ['online', 'class'], fact: '10 מתוך 12 עברו את המבחן' },
+  { t: 'בישול ביתי', i: 'סטודיו לדוגמה', c: 'cooking', s: null, g: 0, p: 1200, when: ['evening'], how: ['class'] },
+  { t: 'אפיית לחמים ומחמצת', i: 'מטבח לדוגמה', c: 'cooking', s: 8.6, g: 9, p: 1600, when: ['weekend'], how: ['class'], fact: '״אופה כל שבוע לבד, בלי מתכון מול העיניים״' },
+  { t: 'צילום ועריכה בטלפון', i: 'מרצה עצמאי לדוגמה', c: 'photo', s: 7.8, g: 7, p: 990, when: ['evening'], how: ['online'], fact: '״ערכתי סרטון מלא כבר בשבוע השני״' },
+  { t: 'ספרדית למטיילים', i: 'בית ספר לדוגמה', c: 'lang', s: null, g: 2, p: 1800, when: ['morning', 'evening'], how: ['online'] }
+];
+
+const WHY = [
+  { id: 'switch', label: 'להחליף מקצוע', type: 'career' },
+  { id: 'advance', label: 'להתקדם בעבודה', type: 'career' },
+  { id: 'cert', label: 'לקבל תעודה מקצועית', type: 'exam' },
+  { id: 'exam', label: 'לעבור מבחן', type: 'exam' },
+  { id: 'fun', label: 'בשביל הכיף', type: 'hobby' }
+];
+const WHEN = [{ id: 'evening', label: 'ערבים' }, { id: 'morning', label: 'בקרים' }, { id: 'weekend', label: 'סופ״ש' }];
+const HOW = [{ id: 'online', label: 'אונליין' }, { id: 'class', label: 'בכיתה' }];
+const FACT_LABEL = { career: 'אחרי 3 חודשים:', exam: 'עברו את המבחן:', hobby: 'מה למדו בפועל:' };
+const ROWS = [{ key: 'what', n: '1', q: 'מה?' }, { key: 'why', n: '2', q: 'למה?' }, { key: 'when', n: '3', q: 'מתי ואיך?' }, { key: 'budget', n: '4', q: 'כמה?' }];
+
+const labelOf = (list, id) => list.find((x) => x.id === id).label;
+const ils = (n) => n.toLocaleString('he-IL') + ' ₪';
+const catOf = (id) => CATEGORIES.find((c) => c.id === id);
+const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+
+const state = { what: { text: '', cats: [] }, why: null, when: [], how: [], budget: null, on: { what: true, why: true, when: true, budget: true }, open: null };
+
+// keyword matching. On the real site an AI model also understands freer wording.
+function understand(text) {
+  const q = text.trim().toLowerCase();
+  if (!q) return [];
+  return CATEGORIES.filter((c) => c.name.toLowerCase().includes(q) || c.words.some((w) => q.includes(w) || (q.length > 2 && w.includes(q)))).map((c) => c.id);
+}
+
+const hasAnswer = (k) => k === 'what' ? state.what.cats.length > 0 || state.what.text.trim() !== '' : k === 'why' ? !!state.why : k === 'when' ? state.when.length + state.how.length > 0 : !!state.budget;
+const active = (k) => hasAnswer(k) && state.on[k];
+
+function whenHowText() {
+  const parts = [];
+  if (state.when.length) parts.push(state.when.map((w) => labelOf(WHEN, w)).join(' או '));
+  if (state.how.length) parts.push(state.how.map((h) => labelOf(HOW, h)).join(' או '));
+  return parts.join(', ');
+}
+
+function answerHtml(k) {
+  const caret = state.open === k ? '<span class="caret" aria-hidden="true"></span>' : '';
+  if (k === 'what') {
+    if (!hasAnswer('what')) return state.open === k ? caret : '<span class="placeholder">לבחור תחום, או לכתוב במילים שלכם</span>';
+    const shown = state.what.text.trim() || state.what.cats.map((id) => catOf(id).name).join(', ');
+    return '<span class="pen">' + esc(shown) + '</span>' + caret;
+  }
+  if (k === 'why') return 'כדי ' + (state.why ? '<span class="pen">' + labelOf(WHY, state.why) + '</span>,' : '<span class="placeholder">…</span>') + caret;
+  if (k === 'when') {
+    // the ב belongs to the answer: "בערבים", but "אונליין" without it
+    if (!hasAnswer('when')) return '<span class="placeholder">מתי ואיך…</span>' + caret;
+    const prefix = state.when.length ? 'ב' : (state.how.length === 1 && state.how[0] === 'class' ? 'ב' : '');
+    let text = whenHowText();
+    if (!state.when.length && state.how.length === 1 && state.how[0] === 'class') text = 'כיתה';
+    return prefix + '<span class="pen">' + text + '</span>,' + caret;
+  }
+  return 'עד ' + (state.budget ? '<span class="pen">' + state.budget.toLocaleString('he-IL') + '</span>' : '<span class="placeholder">…</span>') + ' ₪' + caret;
+}
+
+function chip(attr, id, text, checked) {
+  return '<button type="button" class="chip" role="checkbox" ' + attr + '="' + id + '" aria-checked="' + checked + '"><span class="cb">' + (checked ? TICK : '') + '</span>' + text + '</button>';
+}
+
+function choicesHtml(k) {
+  if (k === 'what') {
+    return '<div class="choices" role="group" aria-label="מה ללמוד"><span class="lbl">לכתוב</span><div class="field"><input class="write" id="what-text" type="text" autocomplete="off" placeholder="למשל: לבנות אתרים, אקסל לעבודה, עוגות" value="' + esc(state.what.text) + '"></div>' +
+      '<span class="lbl">או לבחור</span><div class="chips">' + CATEGORIES.map((c) => chip('data-cat-pick', c.id, c.name, state.what.cats.includes(c.id))).join('') + '</div></div>';
+  }
+  if (k === 'why') {
+    return '<div class="choices" role="group" aria-label="למה ללמוד"><span class="lbl">כדי</span><div class="chips">' + WHY.map((w) => chip('data-why', w.id, w.label, state.why === w.id)).join('') + '</div></div>';
+  }
+  if (k === 'when') {
+    return '<div class="choices" role="group" aria-label="מתי ואיך: אפשר לבחור כמה"><span class="lbl">מתי</span><div class="chips">' + WHEN.map((w) => chip('data-when', w.id, w.label, state.when.includes(w.id))).join('') + '</div>' +
+      '<span class="lbl">איך</span><div class="chips">' + HOW.map((h) => chip('data-how', h.id, h.label, state.how.includes(h.id))).join('') + '</div></div>';
+  }
+  return '<div class="choices" role="group" aria-label="תקציב"><span class="lbl">סכום</span><div class="field"><input class="write" id="budget" type="number" inputmode="numeric" min="0" step="500" placeholder="למשל 10000" value="' + (state.budget || '') + '"></div>' +
+    '<span class="lbl">או</span><div class="chips">' + [3000, 5000, 10000, 15000].map((n) => chip('data-budget', n, 'עד ' + n.toLocaleString('he-IL'), state.budget === n)).join('') + '</div></div>';
+}
+
+function renderRows() {
+  document.getElementById('rows').innerHTML = ROWS.map((r) => {
+    const on = active(r.key);
+    const off = hasAnswer(r.key) && !state.on[r.key];
+    return '<li><div class="row' + (state.open === r.key ? ' open' : '') + (off ? ' off' : '') + '">' +
+      '<span class="q"><strong>' + r.n + '</strong>' + r.q + '</span>' +
+      '<button type="button" class="ans" data-open="' + r.key + '" aria-expanded="' + (state.open === r.key) + '" id="ans-' + r.key + '">' + answerHtml(r.key) + '</button>' +
+      '<button type="button" class="tick" role="checkbox" data-tick="' + r.key + '" aria-checked="' + on + '" aria-label="שורה ' + r.n + ' מסננת את התוצאות"' + (hasAnswer(r.key) ? '' : ' disabled') + '><span class="box"></span>' + (on ? TICK : '') + '</button>' +
+      '</div>' + (state.open === r.key ? choicesHtml(r.key) : '') + '</li>';
+  }).join('');
+}
+
+function renderUnderstood() {
+  const out = document.getElementById('understood');
+  const text = state.what.text.trim();
+  if (!text) { out.textContent = ''; return; }
+  out.innerHTML = state.what.cats.length
+    ? 'את ״' + esc(text) + '״ הבנו כ' + state.what.cats.map((id) => catOf(id).name).join(', ') + '. <a href="#" data-open="what">לא מדויק?</a>'
+    : 'עוד לא ברור לנו לאיזה תחום ״' + esc(text) + '״ שייך. אפשר לבחור מהרשימה.';
+}
+
+function evaluate(course) {
+  const cat = catOf(course.c);
+  if (active('what') && state.what.cats.length && !state.what.cats.includes(course.c)) return null;
+  if (active('what') && !state.what.cats.length) return null;
+  if (active('why') && WHY.find((w) => w.id === state.why).type !== cat.type) return null;
+  const hits = [], misses = [];
+  if (active('when') && state.when.length) {
+    const ok = state.when.filter((w) => course.when.includes(w));
+    if (ok.length) hits.push(ok.map((w) => labelOf(WHEN, w)).join(' ו'));
+    else misses.push('רק ' + course.when.map((w) => 'ב' + labelOf(WHEN, w)).join(' ו'));
+  }
+  if (active('when') && state.how.length) {
+    const ok = state.how.filter((h) => course.how.includes(h));
+    if (ok.length) hits.push(ok.map((h) => labelOf(HOW, h)).join(' ו'));
+    else misses.push('רק ' + course.how.map((h) => (h === 'class' ? 'בכיתה' : 'אונליין')).join(' ו'));
+  }
+  if (active('budget')) {
+    if (course.p <= state.budget) hits.push('בתקציב');
+    else misses.push((course.p - state.budget).toLocaleString('he-IL') + ' ₪ מעל התקציב');
+  }
+  let note = '';
+  if (hits.length || misses.length) note = '← ' + hits.join(', ') + (misses.length ? (hits.length ? ', אבל ' : '') + misses.join(', ') : '');
+  return { course, cat, partial: misses.length > 0, note };
+}
+
+function matches() {
+  return COURSES.map(evaluate).filter(Boolean).sort((a, b) => {
+    if (a.partial !== b.partial) return a.partial ? 1 : -1;
+    if ((a.course.s === null) !== (b.course.s === null)) return a.course.s === null ? 1 : -1;
+    return (b.course.s || 0) - (a.course.s || 0);
+  });
+}
+
+function renderResults() {
+  const list = matches();
+  const filtering = ROWS.some((r) => active(r.key));
+  document.getElementById('cta').textContent = 'לראות ' + list.length + ' קורסים';
+  document.getElementById('res-title').textContent = filtering ? list.length + ' קורסים מתאימים' : 'כל ' + list.length + ' הקורסים';
+  const box = document.getElementById('list');
+  if (!list.length) {
+    box.innerHTML = '<p class="none-left">← אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והרשימה תתרחב.</p>';
+    return;
+  }
+  box.innerHTML = list.map(({ course, cat, note }) => {
+    const score = course.s === null
+      ? '<p class="noscore"><strong>עוד אין ציון בוגרים.</strong> <span>' + (course.g < 5 ? 'חסרות עוד ' + (5 - course.g) + ' ביקורות.' : '') + '</span></p>'
+      : '<p class="score"><b>' + course.s.toFixed(1) + '</b>ציון בוגרים מתוך 10</p>';
+    const fact = course.fact ? '<p class="fact">' + FACT_LABEL[cat.type] + ' <mark class="grads">' + course.fact + '</mark></p>' : '';
+    const quote = course.quote ? '<div class="sticky">' + course.quote[0] + '<br><strong>' + course.quote[1] + '</strong>, ביקורת מאומתת</div>' : '';
+    return '<article class="course"><p class="why">' + note + '</p><div class="body"><h3><a href="#">' + course.t + '</a></h3><p class="inst">' + course.i + '</p>' + score +
+      '<p class="meta">' + course.g + ' בוגרים מאומתים · <strong><bdi dir="rtl">' + ils(course.p) + '</bdi></strong></p>' + fact + quote + '</div></article>';
+  }).join('');
+}
+
+function renderToc() {
+  document.getElementById('toc').innerHTML = CATEGORIES.map((c) => {
+    const cs = COURSES.filter((x) => x.c === c.id);
+    return '<li><button type="button" data-cat="' + c.id + '"><span>' + c.name + '</span><span class="dots" aria-hidden="true"></span><span class="n" style="width:36px;font-weight:700">' + cs.length + '</span><span class="n" style="width:52px">' + cs.reduce((n, x) => n + x.g, 0) + '</span></button></li>';
+  }).join('');
+}
+
+function render() { renderRows(); renderUnderstood(); renderResults(); }
+
+function refreshAnswer(k) {
+  const el = document.getElementById('ans-' + k);
+  if (el) el.innerHTML = answerHtml(k);
+  const tick = document.querySelector('[data-tick="' + k + '"]');
+  if (tick) { tick.disabled = !hasAnswer(k); tick.setAttribute('aria-checked', String(active(k))); tick.innerHTML = '<span class="box"></span>' + (active(k) ? TICK : ''); }
+  renderUnderstood(); renderResults();
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'what-text') {
+    state.what.text = e.target.value; state.what.cats = understand(e.target.value); state.on.what = true;
+    document.querySelectorAll('[data-cat-pick]').forEach((b) => { const c = state.what.cats.includes(b.dataset.catPick); b.setAttribute('aria-checked', String(c)); b.querySelector('.cb').innerHTML = c ? TICK : ''; });
+    refreshAnswer('what');
+  } else if (e.target.id === 'budget') {
+    const v = parseInt(e.target.value, 10); state.budget = v > 0 ? v : null; state.on.budget = true; refreshAnswer('budget');
+  }
+});
+
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('button, a[data-open]');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.open) { e.preventDefault(); state.open = state.open === d.open ? null : d.open; render(); const inp = document.querySelector('.choices input'); if (inp) inp.focus({ preventScroll: true }); return; }
+  if (d.tick) { state.on[d.tick] = !state.on[d.tick]; render(); return; }
+  if (d.catPick) { const i = state.what.cats.indexOf(d.catPick); if (i >= 0) state.what.cats.splice(i, 1); else state.what.cats.push(d.catPick); state.what.text = ''; state.on.what = true; render(); return; }
+  if (d.why) { state.why = state.why === d.why ? null : d.why; state.on.why = true; state.open = null; render(); return; }
+  if (d.when || d.how) { const arr = d.when ? state.when : state.how; const id = d.when || d.how; const i = arr.indexOf(id); if (i >= 0) arr.splice(i, 1); else arr.push(id); state.on.when = true; render(); return; }
+  if (d.budget) { state.budget = Number(d.budget); state.on.budget = true; render(); return; }
+  if (d.cat) { state.what = { text: '', cats: [d.cat] }; state.on.what = true; state.open = null; render(); document.getElementById('form').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (d.soon) { document.getElementById('soon').textContent = '← ' + d.soon; return; }
+});
+
+document.getElementById('form').addEventListener('submit', (e) => {
+  e.preventDefault(); state.open = null; render();
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+renderToc();
+render();
+</script>

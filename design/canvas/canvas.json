@@ -18,9 +18,12 @@
     "Chosen.dc.html": { "x": 630, "y": 9420, "w": 390, "h": 3170, "title": "יב · הכיוון שנבחר: סיכום עם מרקרים ופתקים" },
     "HomeA.dc.html": { "x": 1100, "y": 13100, "w": 390, "h": 2370, "title": "בית א · דף עבודה" },
     "HomeB.dc.html": { "x": 630, "y": 13100, "w": 390, "h": 2590, "title": "בית ב · שאלה בשוליים" },
-    "HomeC.dc.html": { "x": 160, "y": 13100, "w": 390, "h": 2320, "title": "בית ג · בין השורות" }
+    "HomeC.dc.html": { "x": 160, "y": 13100, "w": 390, "h": 2320, "title": "בית ג · בין השורות" },
+    "Login.dc.html": { "x": 1100, "y": 15900, "w": 390, "h": 1480, "title": "התחברות" },
+    "Me.dc.html": { "x": 630, "y": 15900, "w": 390, "h": 2450, "title": "האזור שלי" },
+    "Advisor.dc.html": { "x": 160, "y": 15900, "w": 390, "h": 1300, "title": "יועץ הלימודים" }
   },
-  "order": ["Main.dc.html", "Receipt.dc.html", "ReportCard.dc.html", "Label.dc.html", "MarkedReceipt.dc.html", "ShukSigns.dc.html", "BallotCount.dc.html", "StickyNotes.dc.html", "Binder.dc.html", "Summary.dc.html", "Chosen.dc.html", "HomeA.dc.html", "HomeB.dc.html", "HomeC.dc.html"],
+  "order": ["Main.dc.html", "Receipt.dc.html", "ReportCard.dc.html", "Label.dc.html", "MarkedReceipt.dc.html", "ShukSigns.dc.html", "BallotCount.dc.html", "StickyNotes.dc.html", "Binder.dc.html", "Summary.dc.html", "Chosen.dc.html", "HomeA.dc.html", "HomeB.dc.html", "HomeC.dc.html", "Login.dc.html", "Me.dc.html", "Advisor.dc.html"],
   "notes": {
     "head": { "x": 160, "y": -300, "text": "עמוד קורס: שלושה כיוונים", "kind": "title1", "maxW": 1330 },
     "head2": { "x": 630, "y": 1800, "text": "סבב שני: המשך של ב' ו-ג'", "kind": "title1", "maxW": 860 },
@@ -28,7 +31,8 @@
     "head4": { "x": 160, "y": 6080, "text": "סבב רביעי: עולם הלימודים (Impeccable)", "kind": "title1", "maxW": 1330 },
     "head5": { "x": 630, "y": 9120, "text": "הכיוון שנבחר", "kind": "title1", "maxW": 860 },
     "head6": { "x": 630, "y": 12800, "text": "דף הבית: משפט להשלמה", "kind": "title1", "maxW": 860 },
-    "sample": { "x": 1570, "y": 0, "w": 280, "text": "כל השמות והמספרים הם לדוגמה בלבד. בוחרים כיוון אחד, וממנו בונים את שאר העמודים: בית, תחום, השוואה וכתיבת ביקורת." }
+    "sample": { "x": 1570, "y": 0, "w": 280, "text": "כל השמות והמספרים הם לדוגמה בלבד. בוחרים כיוון אחד, וממנו בונים את שאר העמודים: בית, תחום, השוואה וכתיבת ביקורת." },
+    "head7": { "x": 160, "y": 15600, "text": "סבב 2: התחברות, אזור אישי ויועץ", "kind": "title1", "maxW": 1330 }
   },
   "designSystems": []
 }

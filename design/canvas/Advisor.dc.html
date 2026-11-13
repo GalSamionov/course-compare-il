@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>יועץ הלימודים</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Hebrew:wght@400;600;700&amp;family=Assistant:wght@400;600;700&amp;family=Playpen+Sans+Hebrew:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1C1C1C;text-underline-offset:3px}a:hover{color:#132A85}
+::selection{background:#FFEA3D;color:#000000}
+</style>
+</helmet>
+<div dir="rtl" style="width: 390px; height: 1300px; box-sizing: border-box; overflow: hidden; background: #FFFFFF; color: #1C1C1C; font-family: 'Noto Serif Hebrew', serif; font-size: 16px; line-height: 1.8; padding: 0 22px">
+<aside aria-label="הערות לציור" style="margin: 0 -22px; padding: 14px 22px 16px 22px; background: #F1F0EC; border-bottom: 1px solid #DADADA; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.5; color: #555555">
+<p style="margin: 0; font-size: 14px; font-weight: 700; color: #1C1C1C">בדף הבית, מתחת לתוצאות</p>
+<p style="margin: 4px 0 0 0">ממשיך את ״בית ב״: אחרי הקורס האחרון ברשימה, ולפני ״או לפי תחום״.</p>
+<p style="margin: 8px 0 0 0">השורה מופיעה רק כשיש באתר מפתח AI. השאלות והתשובות לא נשמרות בשרת.</p>
+</aside>
+<div style="position: relative">
+<div aria-hidden="true" style="position: absolute; top: 0; bottom: 0; right: 70px; width: 1px; background: #DADADA"></div>
+<article style="display: grid; grid-template-columns: 70px minmax(0, 1fr); padding: 16px 0 18px 0; border-bottom: 1px solid #DADADA">
+<p style="margin: 0; padding: 6px 0 0 8px; font-family: 'Playpen Sans Hebrew', cursive; font-weight: 500; font-size: 14px; line-height: 1.4; color: #1F3FBF; transform: rotate(-3deg)">← ערבים, אבל רק בכיתה</p>
+<div style="padding-right: 12px">
+<h3 style="margin: 0; font-size: 19px; font-weight: 700; line-height: 1.3"><a href="#c3" style="display: block; padding: 10px 0; margin: -10px 0; text-decoration: none">פיתוח צד לקוח עם React</a></h3>
+<p style="margin: 2px 0 0 0; font-family: 'Assistant', sans-serif; font-size: 14px; line-height: 1.5; color: #555555">מרצה עצמאית לדוגמה</p>
+<p style="margin: 8px 0 0 0; font-family: 'Assistant', sans-serif; font-size: 15px; line-height: 1.4"><strong>עוד אין ציון בוגרים.</strong> <span style="color: #555555">חסרות עוד 2 ביקורות.</span></p>
+<p style="margin: 6px 0 0 0; font-family: 'Assistant', sans-serif; font-size: 15px; line-height: 1.5; font-variant-numeric: tabular-nums">3 בוגרים מאומתים · <strong>6,400 ₪</strong></p>
+</div>
+</article>
+<p style="margin: 0; padding: 6px 82px 0 0; font-family: 'Assistant', sans-serif; font-size: 15px; font-weight: 600"><a href="#all-results" style="display: inline-flex; align-items: center; min-height: 44px">לכל 14 הקורסים</a></p>
+
+<section id="ask" aria-labelledby="ask-h" style="margin-top: 30px">
+<div style="margin-right: 70px; padding-right: 12px">
+<h2 id="ask-h" style="display: inline-block; margin: 0; padding-bottom: 2px; border-bottom: 2px solid #1C1C1C; font-weight: 700; font-size: 21px; line-height: 1.4">לשאול על הקורסים האלה</h2>
+<p style="margin: 8px 0 0 0; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.5; color: #555555">במילים שלכם, על 14 הקורסים ברשימה. עונים רק ממה שיש עליהם באתר.</p>
+</div>
+<form aria-label="שאלה על הקורסים ברשימה" style="margin: 14px 0 0 0">
+<div style="display: grid; grid-template-columns: 70px minmax(0, 1fr); border-top: 1px solid #BDBDBD; background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 43px, #BDBDBD 43px, #BDBDBD 44px)">
+<label for="question" style="padding-top: 13px; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.25; color: #555555">מה לשאול?</label>
+<p id="question" role="textbox" aria-multiline="true" aria-label="השאלה שלכם" style="box-sizing: border-box; min-height: 132px; margin: 0; padding: 0 12px 0 0; line-height: 44px; cursor: text"><span style="font-family: 'Playpen Sans Hebrew', cursive; font-weight: 500; font-size: 19px; color: #1F3FBF">מה ההבדל בין שני הראשונים למי שעובד במשרה מלאה?</span></p>
+</div>
+<div style="margin: 14px 70px 0 0; padding-right: 12px">
+<button type="submit" style="display: block; width: 100%; height: 50px; background: #1C1C1C; color: #FFFFFF; border: 0; border-radius: 4px; font-family: 'Assistant', sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">לשאול</button>
+<p aria-live="polite" style="margin: 8px 0 0 0; font-family: 'Assistant', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.4; font-variant-numeric: tabular-nums">נשארו 9 שאלות היום</p>
+</div>
+</form>
+
+<section aria-label="התשובה" style="margin-top: 24px; border-top: 1px solid #BDBDBD">
+<div style="display: grid; grid-template-columns: 70px minmax(0, 1fr); padding-top: 12px">
+<span style="font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.25; color: #555555">התשובה</span>
+<div style="padding-right: 12px">
+<p style="margin: 0; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.5; color: #555555">את ״שני הראשונים״ הבנו כ״פיתוח Full Stack״ ו״בניית אתרים מאפס״. <a href="#fix" style="padding: 14px 0; color: #555555; white-space: nowrap">לא מדויק?</a></p>
+<p style="margin: 10px 0 0 0; font-size: 16px; line-height: 1.85; text-wrap: pretty"><a href="#c1" style="padding: 12px 0; font-family: 'Assistant', sans-serif; font-weight: 700; white-space: nowrap">פיתוח Full Stack</a> נמשך <mark style="background: #9BEA8A; color: inherit; padding: 0 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone">7 חודשים, בשני ערבים קבועים בשבוע</mark>. בוגרי <a href="#c1" style="padding: 12px 0; font-family: 'Assistant', sans-serif; font-weight: 700; white-space: nowrap">פיתוח Full Stack</a> שעבדו במשרה מלאה אמרו ש<mark style="background: #FFEA3D; color: inherit; padding: 0 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone">הערבים הקבועים עזרו להם להתמיד, אבל החודש השני היה עמוס</mark>. <a href="#c2" style="padding: 12px 0; font-family: 'Assistant', sans-serif; font-weight: 700; white-space: nowrap">בניית אתרים מאפס</a> <span style="text-decoration: underline; text-decoration-color: #2F5FE0; text-decoration-thickness: 2px; text-underline-offset: 5px">מוקלט כולו, ואפשר לסיים אותו בקצב שלכם תוך שנה</span>, לפי המוסד.</p>
+<p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.85"><strong style="font-family: 'Assistant', sans-serif">חסר לנו:</strong> על העומס ב<a href="#c2" style="padding: 12px 0; font-family: 'Assistant', sans-serif; font-weight: 700; white-space: nowrap">בניית אתרים מאפס</a> אין עדיין מספיק ביקורות.</p>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 70px minmax(0, 1fr); align-items: start; margin-top: 14px">
+<p style="margin: 0; padding: 2px 0 0 6px; font-family: 'Playpen Sans Hebrew', cursive; font-weight: 500; font-size: 14px; line-height: 1.4; color: #1F3FBF; transform: rotate(-3deg)">← הצבע הוא המקור</p>
+<div aria-label="מקרא הסימונים" style="padding-right: 12px; display: grid; row-gap: 4px; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.5">
+<span><span style="background: #9BEA8A; padding: 0 6px">ירוק</span> נבדק מול מסמך</span>
+<span><span style="background: #FFEA3D; padding: 0 6px">צהוב</span> מה שבוגרים אמרו</span>
+<span><span style="text-decoration: underline; text-decoration-color: #2F5FE0; text-decoration-thickness: 2px; text-underline-offset: 4px">קו כחול</span> המוסד אומר, לא נבדק</span>
+</div>
+</div>
+<div style="margin: 14px 70px 0 0; padding: 10px 12px 0 0; border-top: 1px solid #DADADA; font-family: 'Assistant', sans-serif; font-size: 13px; line-height: 1.5; color: #555555">
+<p style="margin: 0; text-wrap: pretty">התשובה נכתבה רק ממה שיש באתר על הקורסים ברשימה, בלי מידע מבחוץ. היא לא ממליצה איפה להירשם.</p>
+<p style="margin: 6px 0 0 0"><strong style="color: #1C1C1C">נתוני דוגמה.</strong> הקורסים, המספרים והביקורות כאן לדוגמה.</p>
+</div>
+</section>
+</section>
+</div>
+<div style="height: 30px"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
