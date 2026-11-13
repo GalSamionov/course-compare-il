@@ -4,17 +4,14 @@ import './globals.css';
 
 const serif = Noto_Serif_Hebrew({
   subsets: ['hebrew', 'latin'],
-  weight: ['400', '600', '700'],
   variable: '--font-noto-serif-hebrew',
 });
 const sans = Assistant({
   subsets: ['hebrew', 'latin'],
-  weight: ['400', '600', '700'],
   variable: '--font-assistant',
 });
 const pen = Playpen_Sans_Hebrew({
-  subsets: ['hebrew'],
-  weight: ['500'],
+  subsets: ['hebrew', 'latin'],
   variable: '--font-playpen',
 });
 
