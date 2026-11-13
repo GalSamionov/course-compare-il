@@ -49,11 +49,10 @@ fi
   fi
 } >> "$log"
 
+rm -f "$state"
 git add -A >/dev/null 2>&1
 git commit -q -m "chore: גיבוי אוטומטי בסוף סשן ($now)" >/dev/null 2>&1 || true
 if git remote get-url origin >/dev/null 2>&1; then
   git push -q origin HEAD >/dev/null 2>&1 || true
 fi
-
-rm -f "$state"
 exit 0

@@ -21,6 +21,6 @@ fi
 latest="$(ls -1 docs/sessions/20*.md 2>/dev/null | sort | tail -n 1)"
 if [ -n "$latest" ]; then
   echo "הסשן הקודם: $latest"
-  sed -n '/^## מה צריך לבדוק בסשן הבא/,/^## [^מ]/p' "$latest" | head -n 20
+  awk '/^## מה צריך לבדוק בסשן הבא/{f=1; print; next} /^## /{if (f) exit} f' "$latest" | head -n 20
 fi
 exit 0
