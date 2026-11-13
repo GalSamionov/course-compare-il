@@ -118,7 +118,7 @@ export default async function CoursePage({ params }: Props) {
         <PriceSection course={course} />
         {hasGrads && <GradsSection course={course} />}
         <ReviewsSection slug={course.slug} reviews={course.reviews} total={reviewCount} />
-        <CourseActions slug={course.slug} />
+        <CourseActions courseId={course.id} slug={course.slug} title={course.title} />
 
         {course.lastCheckedAt && (
           <p className="mt-4 font-sans text-[13px] text-ink-soft">

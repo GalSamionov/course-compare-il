@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SaveButton } from '@/components/account/save-button';
 import { Mark } from '@/components/course/marks';
 import { formatIls } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
@@ -139,7 +140,13 @@ export function Results({
           אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והיא לא תסנן.
         </p>
       ) : (
-        results.map((result) => <ResultRow key={result.course.slug} result={result} />)
+        results.map((result) => (
+          <ResultRow
+            key={result.course.slug}
+            result={result}
+            actions={<SaveButton courseId={result.course.id} title={result.course.title} />}
+          />
+        ))
       )}
       {/* למי שלא מצא (מסמך העיצוב, 3א.6). */}
       <p className="ms-[70px] mt-3.5 ps-3 font-sans text-[15px] font-semibold">

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { SaveAnswers } from '@/components/account/save-answers';
 import { buttonVariants } from '@/components/ui/button';
 import { formatAmount, formatIls } from '@/lib/format';
 import { matchKeywords, matchNames, type KeywordCategory } from '@/lib/search/keywords';
@@ -48,6 +49,8 @@ export interface NotebookProps {
   alwaysShowResults: boolean;
   /** מוצג מתחת לטופס, בתוך קו השוליים. בדף הבית: "או" והמסלולים. */
   afterForm?: React.ReactNode;
+  /** "לשמור את התשובות באזור שלי". רק בדף הבית: "התשובות שלי" הן המשפט מהבית (מסמך העיצוב, סעיף 5). */
+  saveAnswers?: boolean;
 }
 
 /**
@@ -143,6 +146,7 @@ export function Notebook({
   fixedWhat,
   alwaysShowResults,
   afterForm,
+  saveAnswers = false,
   query,
   update,
 }: NotebookProps & { query: SearchQuery; update?: Update }) {
@@ -562,9 +566,10 @@ export function Notebook({
               </>
             )}
             <p className={cn(smallNote, 'mt-1')}>שורה בלי סימון לא מסננת את התוצאות.</p>
-            <button type="submit" className={cn(buttonVariants(), 'mt-3.5 h-[50px] w-full text-base font-bold')}>
+            <button type="submit" className={cn(buttonVariants(), 'mt-3.5 h-[50px] w-full font-sans text-base font-bold')}>
               {buttonLabel}
             </button>
+            {saveAnswers && activeLines(query).length > 0 && <SaveAnswers query={query} />}
           </div>
         </form>
         {afterForm}

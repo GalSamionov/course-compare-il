@@ -17,6 +17,7 @@ export default async function HomePage() {
       base={EMPTY_QUERY}
       fixedWhat={false}
       alwaysShowResults={false}
+      saveAnswers
       heading="מה אתם רוצים ללמוד, ולמה?"
       tagline="השוואת קורסים לפי בוגרים שהעלו הוכחה. אף מוכר לא משלם לנו."
       intro="ארבע שורות, ונראה רק קורסים שמתאימים לכם. אפשר לכתוב במילים שלכם."
