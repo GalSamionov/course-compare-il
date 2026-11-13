@@ -2657,7 +2657,8 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
             >
               <article>
                 <p className="text-[13px]">
-                  <strong>{r.displayName}</strong>, בוגר מאומת, מחזור {cohortLabel(r.cohortMonth)}
+                  {/* לשם יש מין דקדוקי שאנחנו לא יודעים עדיין, ולכן ליד שם לא כותבים "בוגר" או "בוגרת". */}
+                  <strong>{r.displayName ?? 'בוגר מאומת'}</strong>, מחזור {cohortLabel(r.cohortMonth)}
                 </p>
                 <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
               </article>
@@ -2788,6 +2789,11 @@ export default async function CoursePage({ params }: Props) {
           {course.institutionName}
           {course.region ? `, ${course.region}` : ''}
         </p>
+        {course.status === 'removed' && (
+          <p role="status" className="mt-2 font-sans text-[15px] font-semibold">
+            הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
+          </p>
+        )}
         <nav aria-label="בעמוד הזה" className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 font-sans text-[15px] font-semibold">
           {course.videoUrl && <a href="#video">סרטון</a>}
           <a href="#about">על הקורס</a>
