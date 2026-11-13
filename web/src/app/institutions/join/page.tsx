@@ -1,0 +1,14 @@
+import type { Metadata } from 'next';
+import { ComingSoon } from '@/components/site/coming-soon';
+
+export const metadata: Metadata = { title: 'הוספת קורס | [שם האתר]' };
+
+/** המסלול "אני מוסד או מרצה, רוצה להוסיף קורס" מדף הבית. */
+export default function InstitutionJoinPage() {
+  return (
+    <ComingSoon
+      title="הוספת קורס על ידי מוסד או מרצה"
+      line="מוסד או מרצה יוכלו לבקש להוסיף קורס. אנחנו בודקים כל קורס לפני שהוא עולה, ואף אחד לא משלם על מקום."
+    />
+  );
+}
