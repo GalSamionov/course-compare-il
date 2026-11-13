@@ -1,11 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Results, allCoursesTitle } from '@/components/notebook/results';
-import { SiteFooter } from '@/components/site/site-footer';
-import { SiteHeader } from '@/components/site/site-header';
+import { NotebookPage } from '@/components/notebook/notebook-page';
 import { getCatalog } from '@/lib/data/catalog';
-import { matchCourses } from '@/lib/search/match';
 import { EMPTY_QUERY } from '@/lib/search/types';
 
 /**
@@ -33,18 +30,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 const crumb = 'underline decoration-1 underline-offset-[3px] hover:text-link-hover';
 
+/** אותה מחברת, עם שורה 1 קבועה: התחום של העמוד. */
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const catalog = await getCatalog();
   const category = catalog.categories.find((c) => c.slug === slug);
   if (!category) notFound();
   const parent = catalog.categories.find((c) => c.slug === category.parentSlug);
-  const results = matchCourses(catalog.courses, { ...EMPTY_QUERY, cats: [category.slug] });
 
   return (
-    <div className="mx-auto max-w-[680px] px-[22px]">
-      <SiteHeader />
-      <main>
+    <NotebookPage
+      catalog={catalog}
+      base={{ ...EMPTY_QUERY, cats: [category.slug] }}
+      fixedWhat
+      alwaysShowResults
+      heading={category.name}
+      intro="כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4."
+      before={
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
           <Link href="/courses" className={crumb}>
             קורסים
@@ -58,13 +60,7 @@ export default async function CategoryPage({ params }: Props) {
             </>
           )}
         </nav>
-        <h1 className="mt-[22px] text-[30px] leading-tight font-bold text-balance">{category.name}</h1>
-        <p className="mt-2 font-sans text-[15px] leading-normal text-ink-soft">
-          כל הקורסים בתחום, לפי ציון הבוגרים.
-        </p>
-        <Results heading={allCoursesTitle(results.length)} results={results} />
-      </main>
-      <SiteFooter />
-    </div>
+      }
+    />
   );
 }

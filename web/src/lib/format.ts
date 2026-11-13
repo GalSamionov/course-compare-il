@@ -1,7 +1,12 @@
 const ilsNumber = new Intl.NumberFormat('he-IL', { maximumFractionDigits: 0 });
 
+/** מספר עם מפרידי אלפים, בלי ₪. לשורת התקציב במחברת. */
+export function formatAmount(amount: number): string {
+  return ilsNumber.format(amount);
+}
+
 export function formatIls(amount: number): string {
-  return `${ilsNumber.format(amount)} ₪`;
+  return `${formatAmount(amount)} ₪`;
 }
 
 /**

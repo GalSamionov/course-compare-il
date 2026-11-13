@@ -1,16 +1,25 @@
-import Link from 'next/link';
+import { NotebookPage } from '@/components/notebook/notebook-page';
+import { SecondaryPaths } from '@/components/site/secondary-paths';
+import { SubjectsToc } from '@/components/site/subjects-toc';
+import { getCatalog } from '@/lib/data/catalog';
+import { EMPTY_QUERY } from '@/lib/search/types';
 
-/** עמוד בית זמני. העמוד הראשי ייבנה בהמשך. */
-export default function Home() {
+/** הדף כולו סטטי. התשובות מהכתובת נקראות בדפדפן, ולכן הדף לא נבנה מחדש לכל בקשה. */
+export const ensureStatic = 'navigation';
+
+export default async function HomePage() {
+  const catalog = await getCatalog();
   return (
-    <main className="mx-auto max-w-[680px] px-[22px] py-16">
-      <h1 className="text-2xl font-bold">[שם האתר]</h1>
-      <p className="mt-2 font-sans text-ink-soft">השוואת קורסים עצמאית. העמוד הראשי ייבנה בהמשך.</p>
-      <p className="mt-4 font-sans">
-        <Link href="/courses/full-stack-sample" className="underline underline-offset-4">
-          עמוד קורס לדוגמה
-        </Link>
-      </p>
-    </main>
+    <NotebookPage
+      catalog={catalog}
+      base={EMPTY_QUERY}
+      fixedWhat={false}
+      alwaysShowResults={false}
+      heading="מה אתם רוצים ללמוד, ולמה?"
+      tagline="השוואת קורסים לפי בוגרים שהעלו הוכחה. אף מוכר לא משלם לנו."
+      intro="ארבע שורות, ונראה רק קורסים שמתאימים לכם. אפשר לכתוב במילים שלכם."
+      afterForm={<SecondaryPaths />}
+      after={<SubjectsToc categories={catalog.categories} />}
+    />
   );
 }
