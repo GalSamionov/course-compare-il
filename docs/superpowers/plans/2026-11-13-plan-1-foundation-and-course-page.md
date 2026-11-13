@@ -594,7 +594,9 @@ create policy "responses to published reviews are public" on vendor_responses
   );
 
 create function forbid_change() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = ''
+as $$
 begin
   raise exception '% rows are append-only', tg_table_name;
 end $$;
