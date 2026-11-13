@@ -13,6 +13,7 @@
     "score:recompute": "node --env-file-if-exists=.env.local --import tsx scripts/recompute-scores.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@base-ui/react": "^1.9.0",
     "@supabase/supabase-js": "^2.119.0",
     "class-variance-authority": "^0.7.1",
