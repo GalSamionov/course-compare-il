@@ -425,52 +425,135 @@ Create `supabase/tests/rls.test.sql`:
 ```sql
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(24);
 
--- נתוני בדיקה. נכתבים כמשתמש-על, שעוקף את ההרשאות.
+-- נתוני בדיקה. נכתבים כ-postgres, שעוקף את ההרשאות.
 insert into categories (id, slug, name, course_type)
 values ('aaaaaaaa-0000-0000-0000-000000000001', 'test-cat', 'תחום בדיקה', 'career');
-insert into institutions (id, slug, name, kind)
-values ('aaaaaaaa-0000-0000-0000-000000000002', 'test-inst', 'מוסד בדיקה', 'school');
+insert into institutions (id, slug, name, kind, business_number)
+values ('aaaaaaaa-0000-0000-0000-000000000002', 'test-inst', 'מוסד בדיקה', 'independent', '123456789');
 insert into courses (id, slug, institution_id, category_id, title, status) values
   ('aaaaaaaa-0000-0000-0000-000000000003', 'test-active', 'aaaaaaaa-0000-0000-0000-000000000002',
    'aaaaaaaa-0000-0000-0000-000000000001', 'קורס פעיל', 'active'),
   ('aaaaaaaa-0000-0000-0000-000000000004', 'test-draft', 'aaaaaaaa-0000-0000-0000-000000000002',
-   'aaaaaaaa-0000-0000-0000-000000000001', 'קורס טיוטה', 'draft');
+   'aaaaaaaa-0000-0000-0000-000000000001', 'קורס טיוטה', 'draft'),
+  ('aaaaaaaa-0000-0000-0000-000000000009', 'test-two', 'aaaaaaaa-0000-0000-0000-000000000002',
+   'aaaaaaaa-0000-0000-0000-000000000001', 'שתי חשבוניות', 'active');
 insert into reviews (
   id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
 ) values
   ('aaaaaaaa-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
    repeat('א', 80), 'בודק', 'published', 'invoice', 12500, now(), now()),
+  -- ביקורת שלא פורסמה עם סכום גבוה: אסור שתשפיע על הטווח.
   ('aaaaaaaa-0000-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
-   repeat('ב', 80), 'בודק', 'pending', null, null, null, null),
+   repeat('ב', 80), 'בודק', 'pending', 'invoice', 99000, null, null),
   ('aaaaaaaa-0000-0000-0000-000000000007', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
    repeat('ג', 80), 'בודק', 'published', 'invoice', 13000, now(), now()),
   ('aaaaaaaa-0000-0000-0000-000000000008', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
-   repeat('ד', 80), 'בודק', 'published', 'invoice', 14000, now(), now());
+   repeat('ד', 80), 'בודק', 'published', 'invoice', 14000, now(), now()),
+  -- הוכחה שאינה חשבונית: אסור שתשפיע על הטווח.
+  ('aaaaaaaa-0000-0000-0000-000000000013', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('ח', 80), 'בודק', 'published', 'certificate', 50000, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000010', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('ו', 80), 'בודק', 'published', 'invoice', 5000, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000011', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('ז', 80), 'בודק', 'published', 'invoice', 6000, now(), now()),
+  -- ביקורת שפורסמה בקורס טיוטה: לא ציבורית.
+  ('aaaaaaaa-0000-0000-0000-000000000014', 'aaaaaaaa-0000-0000-0000-000000000004', '2026-03-01',
+   repeat('ט', 80), 'בודק', 'published', 'invoice', 1000, now(), now());
 insert into method_changes (version, summary, reason) values ('test', 'בדיקה', 'בדיקה');
-insert into scores (course_id, kind, status, value, review_count, method_version)
-values ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 8.2, 23, 'test');
+insert into scores (course_id, kind, status, value, review_count, method_version) values
+  ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 8.2, 23, 'test'),
+  ('aaaaaaaa-0000-0000-0000-000000000004', 'graduate', 'scored', 7.0, 9, 'test');
+insert into metrics (key, label, scale, course_types, sort_order)
+values ('test_m', 'בדיקה', 'likert5', '{career}', 99);
+insert into review_answers (review_id, metric_key, value)
+values ('aaaaaaaa-0000-0000-0000-000000000005', 'test_m', 5);
+insert into vendor_responses (review_id, body) values
+  ('aaaaaaaa-0000-0000-0000-000000000005', 'תגובה לביקורת שפורסמה'),
+  ('aaaaaaaa-0000-0000-0000-000000000006', 'תגובה לביקורת שלא פורסמה');
+insert into lecturers (id, slug, name) values
+  ('aaaaaaaa-0000-0000-0000-000000000012', 'test-lec', 'מרצה בקורס טיוטה'),
+  ('aaaaaaaa-0000-0000-0000-000000000015', 'test-lec-pub', 'מרצה בקורס פעיל');
+insert into course_lecturers (course_id, lecturer_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000012'),
+  ('aaaaaaaa-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000015');
 
+-- ===== אנונימי =====
 set local role anon;
 
 select results_eq(
   $$select slug from courses where slug like 'test-%' order by slug$$,
-  $$values ('test-active')$$,
+  $$values ('test-active'), ('test-two')$$,
   'אנונימי רואה רק קורסים שאינם טיוטה'
 );
 
 select results_eq(
   $$select count(*)::int from reviews where id in (
-      'aaaaaaaa-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006')$$,
+      'aaaaaaaa-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006',
+      'aaaaaaaa-0000-0000-0000-000000000014')$$,
   $$values (1)$$,
-  'אנונימי רואה רק ביקורות שפורסמו'
+  'אנונימי רואה רק ביקורות שפורסמו, ורק בקורס שאינו טיוטה'
 );
 
 select results_eq(
-  $$select count(*)::int from scores where course_id = 'aaaaaaaa-0000-0000-0000-000000000003'$$,
+  $$select count(*)::int from scores where course_id in (
+      'aaaaaaaa-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000004')$$,
   $$values (1)$$,
-  'אנונימי רואה ציונים'
+  'אנונימי רואה ציונים רק של קורסים שאינם טיוטה'
+);
+
+select results_eq(
+  $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
+  $$values (12500, 14500, 3)$$,
+  'טווח מחירים משלוש חשבוניות שפורסמו, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
+);
+
+select is_empty(
+  $$select * from course_paid_range('aaaaaaaa-0000-0000-0000-000000000009')$$,
+  'אין טווח מחירים משתי חשבוניות'
+);
+
+select throws_ok(
+  $$select paid_bucket_ils from reviews$$,
+  '42501',
+  null,
+  'אנונימי לא רואה כמה שילם בוגר מסוים'
+);
+
+select throws_ok(
+  $$select business_number from institutions$$,
+  '42501',
+  null,
+  'אנונימי לא רואה מספר עוסק'
+);
+
+select throws_ok(
+  $$select * from review_answers$$,
+  '42501',
+  null,
+  'אנונימי לא רואה תשובות של ביקורת בודדת'
+);
+
+select is_empty(
+  $$select 1 from vendor_responses where review_id = 'aaaaaaaa-0000-0000-0000-000000000006'$$,
+  'תגובת מוסד לביקורת שלא פורסמה מוסתרת'
+);
+
+select results_eq(
+  $$select count(*)::int from vendor_responses where review_id = 'aaaaaaaa-0000-0000-0000-000000000005'$$,
+  $$values (1)$$,
+  'תגובת מוסד לביקורת שפורסמה גלויה'
+);
+
+select is_empty(
+  $$select 1 from lecturers where slug = 'test-lec'$$,
+  'מרצה שמלמד רק בקורס טיוטה מוסתר'
+);
+
+select is_empty(
+  $$select 1 from course_lecturers where course_id = 'aaaaaaaa-0000-0000-0000-000000000004'$$,
+  'מרצים של קורס טיוטה מוסתרים'
 );
 
 select throws_ok(
@@ -482,48 +565,78 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$insert into reviews (course_id, cohort_month, body, display_name, status)
-    values ('aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01', repeat('ג', 80), 'x', 'published')$$,
+  $$update courses set title = 'x'$$,
   '42501',
   null,
-  'אנונימי לא יכול להוסיף ביקורת'
+  'אנונימי לא יכול לשנות קורס'
 );
 
 select throws_ok(
-  $$insert into scores (course_id, kind, status, value, review_count, method_version)
-    values ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 10, 1, 'x')$$,
+  $$delete from scores$$,
   '42501',
   null,
-  'אנונימי לא יכול להוסיף ציון'
-);
-
-select throws_ok(
-  $$select paid_bucket_ils from reviews$$,
-  '42501',
-  null,
-  'אנונימי לא רואה כמה שילם בוגר מסוים'
-);
-
-select results_eq(
-  $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
-  $$values (12500, 14500, 3)$$,
-  'טווח מחירים מוצג משלוש חשבוניות, בלי סכום של אדם אחד'
+  'אנונימי לא יכול למחוק ציון'
 );
 
 reset role;
+
+-- ===== בדיקות על הרשאות, בלי תלות בנתונים =====
+select is_empty(
+  $$select r, c
+    from unnest(array['anon', 'authenticated']) r,
+         unnest(array['author_id', 'proof_kind', 'paid_bucket_ils', 'verified_at', 'excluded_reason', 'created_at']) c
+    where has_column_privilege(r, 'public.reviews', c, 'select')$$,
+  'עמודות פרטיות של ביקורות חסומות לכל משתמש ציבורי'
+);
+
+select is_empty(
+  $$select c.relname
+    from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public' and c.relkind in ('r', 'p') and not c.relrowsecurity$$,
+  'הרשאות ברמת השורה פעילות בכל טבלה'
+);
+
+select is_empty(
+  $$select c.relname, r.rolname, p.priv
+    from pg_class c join pg_namespace n on n.oid = c.relnamespace
+    cross join (values ('anon'), ('authenticated')) r(rolname)
+    cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
+    where n.nspname = 'public' and c.relkind in ('r', 'p')
+      and has_table_privilege(r.rolname, c.oid, p.priv)$$,
+  'אין הרשאת כתיבה ציבורית לאף טבלה'
+);
+
+-- ===== השרת, שכותב עם המפתח הסודי =====
+set local role service_role;
 
 select throws_ok(
   $$update scores set value = 9.9 where course_id = 'aaaaaaaa-0000-0000-0000-000000000003'$$,
   'P0001',
   'scores rows are append-only',
-  'אי אפשר לשנות ציון, גם כמשתמש-על'
+  'גם השרת לא יכול לשנות ציון'
 );
 
 select throws_ok(
   $$delete from scores where course_id = 'aaaaaaaa-0000-0000-0000-000000000003'$$,
   'P0001',
   'scores rows are append-only',
-  'אי אפשר למחוק ציון, גם כמשתמש-על'
+  'גם השרת לא יכול למחוק ציון'
+);
+
+select throws_ok(
+  $$update method_changes set summary = 'x' where version = 'test'$$,
+  'P0001',
+  'method_changes rows are append-only',
+  'גם השרת לא יכול לשנות את יומן השיטה'
+);
+
+reset role;
+
+select throws_ok(
+  $$truncate scores$$,
+  'P0001',
+  'scores rows are append-only',
+  'אי אפשר לרוקן את טבלת הציונים'
 );
 
 select throws_ok(
@@ -531,7 +644,15 @@ select throws_ok(
     values ('aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01', repeat('ה', 80), 'x', 'published')$$,
   '23514',
   null,
-  'ביקורת לא מתפרסמת בלי אימות, גם כמשתמש-על'
+  'ביקורת לא מתפרסמת בלי אימות'
+);
+
+create table public.test_future_table (id integer);
+select ok(
+  not has_table_privilege('anon', 'public.test_future_table', 'select')
+  and not has_table_privilege('anon', 'public.test_future_table', 'insert')
+  and not has_table_privilege('authenticated', 'public.test_future_table', 'insert'),
+  'טבלה חדשה לא נפתחת לציבור מעצמה'
 );
 
 select * from finish();
@@ -552,7 +673,7 @@ Create `supabase/migrations/20261113000002_rls_and_append_only.sql`:
 
 ```sql
 -- קריאה ציבורית בלבד. כתיבה נעשית רק בשרת, עם המפתח הסודי.
--- הרשאות כתיבה למשתמשים מחוברים נוספות בתוכנית 2.
+-- הרשאות כתיבה למשתמשים מחוברים נוספות בתוכנית 2, כל אחת במפורש.
 
 alter table categories enable row level security;
 alter table institutions enable row level security;
@@ -567,31 +688,46 @@ alter table lecturers enable row level security;
 alter table course_lecturers enable row level security;
 
 create policy "categories are public" on categories for select using (true);
-create policy "lecturers are public" on lecturers for select using (true);
-create policy "lecturers of non-draft courses are public" on course_lecturers
-  for select using (
-    exists (select 1 from courses c where c.id = course_id and c.status <> 'draft')
-  );
 create policy "institutions are public" on institutions for select using (true);
 create policy "metrics are public" on metrics for select using (true);
-create policy "scores are public" on scores for select using (true);
 create policy "method changes are public" on method_changes for select using (true);
 
 create policy "non-draft courses are public" on courses
   for select using (status <> 'draft');
 
-create policy "published reviews are public" on reviews
-  for select using (status = 'published');
-
-create policy "answers of published reviews are public" on review_answers
+create policy "course lecturers of non-draft courses are public" on course_lecturers
   for select using (
-    exists (select 1 from reviews r where r.id = review_id and r.status = 'published')
+    exists (select 1 from courses c where c.id = course_lecturers.course_id and c.status <> 'draft')
+  );
+
+create policy "lecturers of non-draft courses are public" on lecturers
+  for select using (
+    exists (
+      select 1
+      from course_lecturers cl
+      join courses c on c.id = cl.course_id
+      where cl.lecturer_id = lecturers.id and c.status <> 'draft'
+    )
+  );
+
+create policy "scores of non-draft courses are public" on scores
+  for select using (
+    exists (select 1 from courses c where c.id = scores.course_id and c.status <> 'draft')
+  );
+
+create policy "published reviews of non-draft courses are public" on reviews
+  for select using (
+    status = 'published'
+    and exists (select 1 from courses c where c.id = reviews.course_id and c.status <> 'draft')
   );
 
 create policy "responses to published reviews are public" on vendor_responses
   for select using (
-    exists (select 1 from reviews r where r.id = review_id and r.status = 'published')
+    exists (select 1 from reviews r where r.id = vendor_responses.review_id and r.status = 'published')
   );
+
+-- review_answers: אין מדיניות קריאה. התשובות של כל ביקורת לא ציבוריות,
+-- והעמוד מציג רק את הממוצעים שבטבלת הציונים.
 
 create function forbid_change() returns trigger
 language plpgsql
@@ -603,11 +739,25 @@ end $$;
 
 create trigger scores_append_only before update or delete on scores
   for each row execute function forbid_change();
+create trigger scores_no_truncate before truncate on scores
+  for each statement execute function forbid_change();
 create trigger method_changes_append_only before update or delete on method_changes
   for each row execute function forbid_change();
+create trigger method_changes_no_truncate before truncate on method_changes
+  for each statement execute function forbid_change();
 
--- בתוכנית 1 אין כתיבה ציבורית בכלל. תוכנית 2 תפתח רק את מה שצריך.
-revoke insert, update, delete on all tables in schema public from anon, authenticated;
+-- בתוכנית 1 אין כתיבה ציבורית בכלל.
+revoke insert, update, delete, truncate, references, trigger on all tables in schema public from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+
+-- טבלאות, רצפים ופונקציות שייווצרו בעתיד לא נפתחים לציבור מעצמם. כל הרשאה ניתנת במפורש.
+alter default privileges for role postgres in schema public revoke all on tables from anon, authenticated;
+alter default privileges for role postgres in schema public revoke all on sequences from anon, authenticated;
+alter default privileges for role postgres in schema public revoke execute on functions from anon, authenticated;
+alter default privileges for role postgres revoke execute on functions from public;
+
+-- תשובות לשאלון של כל ביקורת: לא ציבוריות.
+revoke select on review_answers from anon, authenticated;
 
 -- ביקורות: רק העמודות הציבוריות.
 -- author_id, proof_kind, paid_bucket_ils, verified_at ו-excluded_reason לא נחשפים.
@@ -615,7 +765,12 @@ revoke select on reviews from anon, authenticated;
 grant select (id, course_id, cohort_month, body, display_name, display_mode, status, published_at, follow_up_text)
   on reviews to anon, authenticated;
 
--- טווח מה ששולם בפועל, רק כשיש לפחות 3 חשבוניות, כדי שאי אפשר יהיה לזהות סכום של אדם אחד.
+-- מוסדות: בלי מספר עוסק. אצל עוסק יחיד זה מספר תעודת הזהות שלו.
+revoke select on institutions from anon, authenticated;
+grant select (id, slug, name, website, kind, created_at) on institutions to anon, authenticated;
+
+-- טווח מה ששולם בפועל: רק מחשבוניות, רק בקורס שאינו טיוטה, ורק כשיש לפחות 3,
+-- כדי שאי אפשר יהיה לזהות סכום של אדם אחד.
 create function course_paid_range(p_course_id uuid)
 returns table (min_ils integer, max_ils integer, invoice_count integer)
 language sql stable security definer
@@ -623,7 +778,11 @@ set search_path = ''
 as $$
   select min(r.paid_bucket_ils), max(r.paid_bucket_ils) + 500, count(*)::integer
   from public.reviews r
-  where r.course_id = p_course_id and r.status = 'published' and r.paid_bucket_ils is not null
+  join public.courses c on c.id = r.course_id and c.status <> 'draft'
+  where r.course_id = p_course_id
+    and r.status = 'published'
+    and r.proof_kind = 'invoice'
+    and r.paid_bucket_ils is not null
   having count(*) >= 3;
 $$;
 revoke execute on function course_paid_range(uuid) from public;
@@ -636,7 +795,7 @@ grant execute on function course_paid_range(uuid) to anon, authenticated;
 pnpm db:reset && pnpm db:test
 ```
 
-Expected: `rls.test.sql .. ok`, `All tests successful.`, ו-11 בדיקות שעברו.
+Expected: `rls.test.sql .. ok`, `All tests successful.`, ו-24 בדיקות שעברו.
 
 - [ ] **Step 5: Commit**
 
@@ -804,7 +963,7 @@ from generate_series(1, 3) as g;
 pnpm db:reset && pnpm db:test
 ```
 
-Expected: הטעינה עוברת בלי שגיאות, ו-`All tests successful.` (11 בדיקות).
+Expected: הטעינה עוברת בלי שגיאות, ו-`All tests successful.` (24 בדיקות).
 
 - [ ] **Step 3: Commit**
 
