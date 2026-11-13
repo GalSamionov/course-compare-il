@@ -1,10 +1,11 @@
+import Link from 'next/link';
 import type { ReviewView } from '@/lib/data/course-page';
 import { StickyNote } from './marks';
 
 const cohortLabel = (iso: string) =>
   new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
 
-export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; total: number }) {
+export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews: ReviewView[]; total: number }) {
   if (reviews.length === 0) return null;
   return (
     <section id="reviews" className="mt-7">
@@ -47,9 +48,9 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
       </div>
       {total > reviews.length && (
         <p className="mt-3.5 font-sans text-[15px] font-semibold">
-          <a href="#all-reviews" className="underline underline-offset-4">
+          <Link href={`/courses/${slug}/reviews`} className="underline underline-offset-4">
             לכל {total} הביקורות
-          </a>
+          </Link>
         </p>
       )}
     </section>

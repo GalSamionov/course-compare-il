@@ -7,6 +7,8 @@ import { GradsSection, hasGradsSection } from '@/components/course/grads-section
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
+import { SiteFooter } from '@/components/site/site-footer';
+import { SiteHeader } from '@/components/site/site-header';
 import { ScoreBox } from '@/components/course/score-box';
 import { SourceLegend } from '@/components/course/source-legend';
 import { VideoSection } from '@/components/course/video-section';
@@ -52,11 +54,8 @@ export default async function CoursePage({ params }: Props) {
   const hasReviews = course.reviews.length > 0;
 
   return (
-    <div className="mx-auto max-w-[680px] px-[22px] pb-12">
-      <header className="flex items-center justify-between border-b border-rule pt-4 pb-3 font-sans">
-        <span className="text-[19px] font-bold">[שם האתר]</span>
-        <span className="text-xs text-ink-soft">אף מוכר לא משלם לנו</span>
-      </header>
+    <div className="mx-auto max-w-[680px] px-[22px]">
+      <SiteHeader />
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
@@ -119,7 +118,7 @@ export default async function CoursePage({ params }: Props) {
         <LecturersSection course={course} />
         <PriceSection course={course} />
         {hasGrads && <GradsSection course={course} />}
-        <ReviewsSection reviews={course.reviews} total={reviewCount} />
+        <ReviewsSection slug={course.slug} reviews={course.reviews} total={reviewCount} />
         <CourseActions slug={course.slug} />
 
         {course.lastCheckedAt && (
@@ -131,6 +130,7 @@ export default async function CoursePage({ params }: Props) {
           </p>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

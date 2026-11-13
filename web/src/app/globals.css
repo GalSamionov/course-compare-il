@@ -19,6 +19,9 @@
   --color-note-grad-light: #fffbd0;
   --color-note-institution: #b9ddf5;
   --color-pen: #1f3fbf;
+  --color-line: #bdbdbd;
+  --color-leader: #9a9a9a;
+  --color-link-hover: #132a85;
   --font-serif: var(--font-noto-serif-hebrew), serif;
   --font-sans: var(--font-assistant), sans-serif;
   --font-heading: var(--font-assistant), sans-serif;
@@ -90,4 +93,35 @@ body {
 ::selection {
   background: rgb(47 95 224 / 0.25);
   color: inherit;
+}
+
+@layer base {
+  /* טבעת פוקוס בצבע של המערכת, גם במקומות שלא עיצבנו במפורש.
+     בשכבת base, כדי ש-outline-none של רכיב שמסמן פוקוס בדרך אחרת (שורות המחברת) עדיין יגבר. */
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* עמודי טקסט: כותרת משנה עם קו קצר מתחתיה, כמו בעמוד הקורס. */
+  .text-page h2 {
+    @apply mt-8 inline-block border-b-2 border-ink pb-0.5 text-[21px] leading-snug font-bold;
+  }
+  .text-page p,
+  .text-page ul,
+  .text-page ol,
+  .text-page table {
+    @apply mt-3;
+  }
+  .text-page ul {
+    @apply list-disc ps-5;
+  }
+  .text-page li + li {
+    @apply mt-1;
+  }
+  .text-page a {
+    @apply underline underline-offset-[3px] hover:text-link-hover;
+  }
 }
