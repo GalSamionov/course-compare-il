@@ -852,8 +852,8 @@ insert into courses (
   ('eeeeeeee-0000-0000-0000-000000000001', 'full-stack-sample',
    'dddddddd-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000002',
    'פיתוח Full Stack', 'active', 'listed',
-   14900, 420, 160, 260, 7,
-   'פעמיים בשבוע, ימים א׳ ו-ד׳, 18:00–21:30', '{online,in_person}', 'תל אביב', '2027-01-12',
+   14900, 420, 160, 260, 8,
+   'שלוש פעמים בשבוע, ימים א׳, ג׳ ו-ה׳, 18:00–22:00', '{online,in_person}', 'תל אביב', '2027-01-10',
    '[{"title":"HTML, CSS ו-JavaScript","weak":false},
      {"title":"React לבניית ממשקים","weak":false},
      {"title":"Node.js ושרתים","weak":false},
@@ -861,7 +861,7 @@ insert into courses (
      {"title":"Git ועבודה בצוות","weak":false},
      {"title":"פריסה לענן AWS","weak":true},
      {"title":"פרויקט מסכם","weak":false}]'::jsonb,
-   '3 מרצים, כולם מפתחים פעילים', 'ראיון ומבחן התאמה. לא צריך ניסיון קודם.',
+   '2 מרצים', 'ראיון ומבחן התאמה. לא צריך ניסיון קודם.',
    'עד 25 תלמידים', 'תעודת סיום של המוסד. לא תעודה ממשלתית.', 'ליווי השמה במשך 6 חודשים',
    'https://example.com/video-sample', 'https://example.com/full-stack',
    'הרבה תרגול אמיתי, ופרויקט מסכם שאפשר להראות בראיון עבודה.',
@@ -870,7 +870,7 @@ insert into courses (
   ('eeeeeeee-0000-0000-0000-000000000002', 'ai-tools-sample',
    'dddddddd-0000-0000-0000-000000000001', 'cccccccc-0000-0000-0000-000000000003',
    'כלי AI לעבודה יומיומית', 'active', 'listed',
-   2900, 24, 8, 16, 1,
+   2900, 24, 8, 16, 2,
    'פעם בשבוע, יום ב׳, 18:00–21:00', '{online}', null, '2026-12-07',
    '[{"title":"כתיבת הנחיות","weak":false},{"title":"אוטומציה של משימות","weak":false}]'::jsonb,
    null, null, null, 'תעודת השתתפות', null,
@@ -885,6 +885,7 @@ insert into courses (
    null, 'https://example.org/cooking', null, null, '2026-11-06 10:00:00+02');
 
 -- 23 ביקורות דוגמה לקורס Full Stack. שתי הראשונות עם טקסט מלא.
+-- cohort_month הוא חודש פתיחת המחזור. הקורס נמשך 8 חודשים, ולכן הביקורות מתפרסמות אחרי הסיום.
 insert into reviews (
   id, course_id, cohort_month, body, display_name, display_mode, status,
   proof_kind, paid_bucket_ils, verified_at, published_at, follow_up_text
@@ -892,7 +893,7 @@ insert into reviews (
 select
   ('bbbbbbbb-0000-0000-0000-' || lpad(g::text, 12, '0'))::uuid,
   'eeeeeeee-0000-0000-0000-000000000001',
-  case when g % 2 = 0 then date '2025-11-01' else date '2026-03-01' end,
+  case when g % 2 = 0 then date '2025-09-01' else date '2025-07-01' end,
   case g
     when 1 then 'הרבה תרגול אמיתי ופרויקט מסכם שהראיתי בראיונות. החלק על ענן הרגיש ישן, והתמיכה בין המפגשים הייתה איטית.'
     when 2 then 'המרצים טובים, אבל הקצב בחודש השני היה מהיר מדי בשביל מי שעובד במשרה מלאה. בסוף הצלחתי לסיים את הפרויקט.'
@@ -903,8 +904,8 @@ select
   'published',
   'invoice',
   case when g <= 6 then 12500 + (g % 3) * 1000 else null end,
-  timestamptz '2026-04-01 12:00:00+03' + (g * interval '6 days'),
-  timestamptz '2026-04-02 12:00:00+03' + (g * interval '6 days'),
+  timestamptz '2026-05-01 12:00:00+03' + (g * interval '6 days'),
+  timestamptz '2026-05-02 12:00:00+03' + (g * interval '6 days'),
   case g when 1 then 'התחלתי לעבוד כמפתחת ג׳וניור' else null end
 from generate_series(1, 23) as g;
 
@@ -920,6 +921,8 @@ select
     when 'outcome_3m' then case when g % 3 = 0 then 3 else 4 end
     when 'recommend' then case when g % 8 = 0 then 1 else 5 end
   end
+-- recommend: ביקורות 8 ו-16 עונות "לא", כלומר 21 מתוך 23 ממליצים.
+-- outcome_3m: רק 14 הראשונות ענו על שאלת ההמשך.
 from generate_series(1, 23) as g
 cross join (values ('teaching'), ('hands_on'), ('up_to_date'), ('value'), ('outcome_3m'), ('recommend')) as m(key)
 where m.key <> 'outcome_3m' or g <= 14;
@@ -949,11 +952,11 @@ insert into reviews (id, course_id, cohort_month, body, display_name, display_mo
 select
   ('bbbbbbbb-0000-0000-0001-' || lpad(g::text, 12, '0'))::uuid,
   'eeeeeeee-0000-0000-0000-000000000002',
-  date '2026-09-01',
+  date '2026-06-01',
   'ביקורת לדוגמה מספר ' || g || ' על קורס ה-AI: נתוני דמה לבדיקת העמוד בלבד, לא ביקורת אמיתית של בוגר.',
   'בוגר מאומת', 'anonymous', 'published', 'certificate',
-  timestamptz '2026-10-01 12:00:00+03' + (g * interval '1 day'),
-  timestamptz '2026-10-02 12:00:00+03' + (g * interval '1 day')
+  timestamptz '2026-09-01 12:00:00+03' + (g * interval '1 day'),
+  timestamptz '2026-09-02 12:00:00+03' + (g * interval '1 day')
 from generate_series(1, 3) as g;
 ```
 
