@@ -2171,12 +2171,59 @@ Expected: נוצרו `components.json` ו-`src/components/ui/button.tsx`, ובל
 
 - [ ] **Step 2: טוקנים בקובץ `globals.css`**
 
-ב-`web/src/app/globals.css`:
-1. מוחקים את הבלוק `.dark { ... }`. לגרסה הראשונה אין מצב כהה.
-2. מחליפים את ערכי `:root` שיצר shadcn בבלוק הבא.
-3. מוסיפים את בלוק `@theme` ואת הבסיס שבסופו, מתחת ל-`@import "tailwindcss";` ומתחת לשורות ה-import של shadcn.
+`web/src/app/globals.css` אחרי `shadcn init`, בצורתו הסופית:
+- הטוקנים מוזגו לבלוק `@theme inline` של shadcn.
+- נמחקו: מצב כהה (`.dark` ו-`@custom-variant dark`), משתני תרשימים וסרגל צד, ומיפויי הגופן של Geist.
+- בחירת טקסט בכחול שקוף, כי צהוב היה נעלם בתוך מרקר צהוב.
 
 ```css
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-ink: #1c1c1c;
+  --color-ink-soft: #555555;
+  --color-rule: #dadada;
+  --color-mark-verified: #9bea8a;
+  --color-mark-grads: #ffea3d;
+  --color-mark-weak: #ffb0d3;
+  --color-claim: #2f5fe0;
+  --color-note-grad: #fff27a;
+  --color-note-grad-light: #fffbd0;
+  --color-note-institution: #b9ddf5;
+  --color-pen: #1f3fbf;
+  --font-serif: var(--font-noto-serif-hebrew), serif;
+  --font-sans: var(--font-assistant), sans-serif;
+  --font-heading: var(--font-assistant), sans-serif;
+  --font-pen: var(--font-playpen), cursive;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
 :root {
   --radius: 0.25rem;
   --background: #ffffff;
@@ -2199,32 +2246,25 @@ Expected: נוצרו `components.json` ו-`src/components/ui/button.tsx`, ובל
   --ring: #2f5fe0;
 }
 
-@theme inline {
-  --color-ink: #1c1c1c;
-  --color-ink-soft: #555555;
-  --color-rule: #dadada;
-  --color-mark-verified: #9bea8a;
-  --color-mark-grads: #ffea3d;
-  --color-mark-weak: #ffb0d3;
-  --color-claim: #2f5fe0;
-  --color-note-grad: #fff27a;
-  --color-note-grad-light: #fffbd0;
-  --color-note-institution: #b9ddf5;
-  --color-pen: #1f3fbf;
-  --font-serif: var(--font-noto-serif-hebrew), serif;
-  --font-sans: var(--font-assistant), sans-serif;
-  --font-pen: var(--font-playpen), cursive;
-}
 
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: var(--font-serif);
 }
 
 ::selection {
-  background: var(--color-mark-grads);
-  color: #000000;
+  background: rgb(47 95 224 / 0.25);
+  color: inherit;
 }
 ```
 
@@ -2239,17 +2279,14 @@ import './globals.css';
 
 const serif = Noto_Serif_Hebrew({
   subsets: ['hebrew', 'latin'],
-  weight: ['400', '600', '700'],
   variable: '--font-noto-serif-hebrew',
 });
 const sans = Assistant({
   subsets: ['hebrew', 'latin'],
-  weight: ['400', '600', '700'],
   variable: '--font-assistant',
 });
 const pen = Playpen_Sans_Hebrew({
-  subsets: ['hebrew'],
-  weight: ['500'],
+  subsets: ['hebrew', 'latin'],
   variable: '--font-playpen',
 });
 
@@ -2287,19 +2324,39 @@ const markColor: Record<MarkSource, string> = {
   weak: 'bg-mark-weak',
 };
 
+const markLabel: Record<MarkSource, string> = {
+  verified: 'נבדק מול מסמך',
+  grads: 'בוגרים אמרו',
+  weak: 'נקודת חולשה',
+};
+
 /** מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה. */
 export function Mark({ source, children }: { source: MarkSource; children: React.ReactNode }) {
-  return <mark className={cn('px-0.5 text-inherit', markColor[source])}>{children}</mark>;
+  return (
+    <mark data-source={source} className={cn('px-0.5 text-inherit', markColor[source])}>
+      <span className="sr-only">{markLabel[source]}: </span>
+      {children}
+    </mark>
+  );
 }
 
 /** טענה של המוסד שלא בדקנו: קו כחול מתחת לטקסט. */
 export function Claim({ children }: { children: React.ReactNode }) {
   return (
-    <span className="underline decoration-claim decoration-2 underline-offset-[5px]">{children}</span>
+    <span
+      data-source="claim"
+      className="underline decoration-claim decoration-2 underline-offset-[5px]"
+    >
+      <span className="sr-only">המוסד אומר, לא נבדק: </span>
+      {children}
+    </span>
   );
 }
 
-/** הערה קצרה של האתר לקורא, בכתב יד בעט כחול. */
+/**
+ * הערה קצרה של האתר לקורא, בכתב יד בעט כחול.
+ * רכיב בלוק (p): אסור למקם אותו בתוך <p>.
+ */
 export function PenNote({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <p className={cn('font-pen text-[15px] leading-snug text-pen -rotate-1', className)}>{children}</p>
@@ -2314,7 +2371,10 @@ const noteColor: Record<NoteTone, string> = {
   institution: 'bg-note-institution',
 };
 
-/** פתק דביק: צהוב לקול של בוגר, כחול לקול של המוסד. */
+/**
+ * פתק דביק: צהוב לקול של בוגר, כחול לקול של המוסד.
+ * רכיב בלוק (div): אסור למקם אותו בתוך <p>.
+ */
 export function StickyNote({
   tone,
   tilt = 0,
@@ -2333,7 +2393,8 @@ export function StickyNote({
         noteColor[tone],
         className,
       )}
-      style={{ transform: `rotate(${tilt}deg)` }}
+      // הטיה מוגבלת ל-4 מעלות, כדי שהפתק לא יצא מהעמוד
+      style={{ transform: `rotate(${Math.max(-4, Math.min(4, tilt))}deg)` }}
     >
       {children}
     </div>
