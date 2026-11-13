@@ -69,6 +69,7 @@ web/src/components/course/source-legend.tsx
 web/src/components/course/score-box.tsx
 web/src/components/course/video-section.tsx
 web/src/components/course/about-section.tsx
+web/src/components/course/lecturers-section.tsx
 web/src/components/course/price-section.tsx
 web/src/components/course/grads-section.tsx
 web/src/components/course/reviews-section.tsx
@@ -275,6 +276,7 @@ create table courses (
   page_url text,
   summary_good text,
   summary_weak text,
+  lecturers_summary text,
   last_checked_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -291,6 +293,26 @@ end $$;
 
 create trigger courses_updated_at before update on courses
   for each row execute function set_updated_at();
+
+-- מרצים. institution_bio היא טענה של המוסד שלא נבדקה.
+-- verified_facts: [{ "text": "...", "source_url": "https://..." }], רק מה שבדקנו בעצמנו.
+create table lecturers (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  name text not null,
+  institution_bio text,
+  verified_facts jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table course_lecturers (
+  course_id uuid not null references courses(id) on delete cascade,
+  lecturer_id uuid not null references lecturers(id) on delete cascade,
+  role text,
+  sort_order integer not null default 1,
+  primary key (course_id, lecturer_id)
+);
+create index course_lecturers_lecturer_idx on course_lecturers (lecturer_id);
 
 create table metrics (
   key text primary key,
@@ -504,8 +526,15 @@ alter table review_answers enable row level security;
 alter table vendor_responses enable row level security;
 alter table scores enable row level security;
 alter table method_changes enable row level security;
+alter table lecturers enable row level security;
+alter table course_lecturers enable row level security;
 
 create policy "categories are public" on categories for select using (true);
+create policy "lecturers are public" on lecturers for select using (true);
+create policy "lecturers of non-draft courses are public" on course_lecturers
+  for select using (
+    exists (select 1 from courses c where c.id = course_id and c.status <> 'draft')
+  );
 create policy "institutions are public" on institutions for select using (true);
 create policy "metrics are public" on metrics for select using (true);
 create policy "scores are public" on scores for select using (true);
@@ -676,6 +705,23 @@ where m.key <> 'outcome_3m' or g <= 14;
 
 insert into vendor_responses (review_id, body) values
   ('bbbbbbbb-0000-0000-0000-000000000001', 'פרק הענן עודכן במחזור ספטמבר.');
+
+-- מרצים לדוגמה. יעל מלמדת בשני קורסים, ולעומר אין עובדות שבדקנו.
+insert into lecturers (id, slug, name, institution_bio, verified_facts) values
+  ('ffffffff-0000-0000-0000-000000000001', 'yael-cohen-sample', 'יעל כהן',
+   'מפתחת בכירה עם 10 שנות ניסיון בתעשייה',
+   '[{"text":"בנתה ומתחזקת ספריית קוד פתוח עם אלפי משתמשים","source_url":"https://example.com/open-source-sample"}]'::jsonb),
+  ('ffffffff-0000-0000-0000-000000000002', 'omer-sagi-sample', 'עומר שגיא',
+   'מפתח Full Stack בחברת סטארט-אפ', '[]'::jsonb);
+
+insert into course_lecturers (course_id, lecturer_id, role, sort_order) values
+  ('eeeeeeee-0000-0000-0000-000000000001', 'ffffffff-0000-0000-0000-000000000001', 'מרצה ראשית, מלמדת 4 מתוך 7 הפרקים', 1),
+  ('eeeeeeee-0000-0000-0000-000000000001', 'ffffffff-0000-0000-0000-000000000002', 'מתרגל, מלווה את הפרויקט המסכם', 2),
+  ('eeeeeeee-0000-0000-0000-000000000002', 'ffffffff-0000-0000-0000-000000000001', 'מרצה', 1);
+
+update courses
+set lecturers_summary = 'יעל מסבירה מצוין ועונה גם בין המפגשים. בפרויקט המסכם היה קשה להשיג את עומר.'
+where slug = 'full-stack-sample';
 
 -- 3 ביקורות לקורס ה-AI: לא מספיק לציון.
 insert into reviews (id, course_id, cohort_month, body, display_name, display_mode, status, proof_kind, verified_at, published_at)
@@ -1384,6 +1430,17 @@ export interface ReviewView {
   vendorResponse: string | null;
 }
 
+export interface LecturerView {
+  slug: string;
+  name: string;
+  role: string | null;
+  /** טענה של המוסד, לא נבדקה. */
+  institutionBio: string | null;
+  /** רק מה שבדקנו בעצמנו, עם קישור למקור. */
+  verifiedFacts: { text: string; sourceUrl: string }[];
+  otherCoursesCount: number;
+}
+
 export type ScoreView =
   | { status: 'scored'; value: number; reviewCount: number; recommendPct: number | null; stale: boolean }
   | { status: 'not_enough_reviews'; reviewCount: number; reviewsNeeded: number }
@@ -1412,6 +1469,8 @@ export interface CoursePageData {
   videoUrl: string | null;
   summaryGood: string | null;
   summaryWeak: string | null;
+  lecturers: LecturerView[];
+  lecturersSummary: string | null;
   lastCheckedAt: string | null;
   score: ScoreView;
   metrics: MetricRow[];
@@ -1434,7 +1493,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   if (error) throw error;
   if (!course) return null;
 
-  const [{ data: scoreRow }, { data: metricDefs }, { data: reviewRows }] = await Promise.all([
+  const [{ data: scoreRow }, { data: metricDefs }, { data: reviewRows }, { data: lecturerRows }] = await Promise.all([
     db
       .from('scores')
       .select('*')
@@ -1449,11 +1508,39 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       .select('id, display_name, cohort_month, body, follow_up_text, paid_bucket_ils, published_at, vendor_responses(body)')
       .eq('course_id', course.id)
       .order('published_at', { ascending: false }),
+    db
+      .from('course_lecturers')
+      .select('role, sort_order, lecturers(slug, name, institution_bio, verified_facts, course_lecturers(count))')
+      .eq('course_id', course.id)
+      .order('sort_order'),
   ]);
 
   const one = <T,>(ref: T | T[] | null): T | null => (Array.isArray(ref) ? (ref[0] ?? null) : ref);
   const institution = one(course.institutions as { name: string } | { name: string }[] | null);
   const category = one(course.categories as { name: string; slug: string } | { name: string; slug: string }[] | null);
+
+  type LecturerRef = {
+    slug: string;
+    name: string;
+    institution_bio: string | null;
+    verified_facts: unknown;
+    course_lecturers: { count: number }[];
+  };
+  const lecturers: LecturerView[] = (lecturerRows ?? [])
+    .map((row) => ({ role: row.role, lecturer: one(row.lecturers as unknown as LecturerRef | LecturerRef[] | null) }))
+    .filter((x): x is { role: string | null; lecturer: LecturerRef } => x.lecturer !== null)
+    .map(({ role, lecturer }) => ({
+      slug: lecturer.slug,
+      name: lecturer.name,
+      role,
+      institutionBio: lecturer.institution_bio,
+      verifiedFacts: ((lecturer.verified_facts ?? []) as { text: string; source_url: string }[]).map((f) => ({
+        text: f.text,
+        sourceUrl: f.source_url,
+      })),
+      // ההרשאות סופרות רק קורסים שאינם טיוטה, כולל הקורס הזה. לכן מורידים 1.
+      otherCoursesCount: Math.max(0, (lecturer.course_lecturers[0]?.count ?? 1) - 1),
+    }));
 
   let score: ScoreView = { status: 'none' };
   if (scoreRow?.status === 'scored' && scoreRow.value !== null) {
@@ -1504,6 +1591,8 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     videoUrl: course.video_url,
     summaryGood: course.summary_good,
     summaryWeak: course.summary_weak,
+    lecturers,
+    lecturersSummary: course.lecturers_summary,
     lastCheckedAt: course.last_checked_at,
     score,
     metrics,
@@ -1786,6 +1875,7 @@ git commit -m "feat: מערכת העיצוב: גופנים עבריים, טוק�
 - Create: `web/src/components/course/score-box.tsx`
 - Create: `web/src/components/course/video-section.tsx`
 - Create: `web/src/components/course/about-section.tsx`
+- Create: `web/src/components/course/lecturers-section.tsx`
 - Create: `web/src/components/course/price-section.tsx`
 - Create: `web/src/components/course/grads-section.tsx`
 - Create: `web/src/components/course/reviews-section.tsx`
@@ -1866,7 +1956,7 @@ export function VideoSection({ url }: { url: string }) {
 }
 ```
 
-- [ ] **Step 3: על הקורס**
+- [ ] **Step 3: על הקורס ועל המרצים**
 
 Create `web/src/components/course/about-section.tsx`:
 
@@ -1921,7 +2011,7 @@ export function AboutSection({ course }: { course: CoursePageData }) {
         {course.schedule && <Row label="מתי">{course.schedule}</Row>}
         {formats && <Row label="איך">{course.region ? `${formats}, ${course.region}` : formats}</Row>}
         {course.nextCohortDate && <Row label="המחזור הבא">{formatHebrewDate(course.nextCohortDate)}</Row>}
-        {course.lecturersNote && (
+        {course.lecturersNote && course.lecturers.length === 0 && (
           <Row label="מרצים">
             <Claim>{course.lecturersNote}</Claim>
           </Row>
@@ -1944,6 +2034,80 @@ export function AboutSection({ course }: { course: CoursePageData }) {
         <StickyNote tone="grad" tilt={1} className="mt-4 ml-8 px-3 py-2.5 text-sm">
           <strong>מה קרה בפועל:</strong> {course.outcome.n} בוגרים ענו 3 חודשים אחרי הסיום. ציון התוצאה:{' '}
           {course.outcome.mean.toFixed(1)} מתוך 5.
+        </StickyNote>
+      )}
+    </section>
+  );
+}
+```
+
+Create `web/src/components/course/lecturers-section.tsx`:
+
+```tsx
+import type { CoursePageData } from '@/lib/data/course-page';
+import { formatHebrewDate } from '@/lib/format';
+import { Claim, Mark, PenNote, StickyNote } from './marks';
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('');
+
+const otherCoursesText = (n: number) => (n === 1 ? 'מרצה גם בקורס נוסף אחד באתר' : `מרצה גם ב-${n} קורסים נוספים באתר`);
+
+export function LecturersSection({ course }: { course: CoursePageData }) {
+  if (course.lecturers.length === 0) return null;
+  return (
+    <section id="lecturers" className="mt-7">
+      <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">על המרצים</h2>
+      <p className="mt-1.5 font-sans text-[13px] text-ink-soft">
+        המרצים משתנים בין מחזורים. הרשימה לפי אתר המוסד
+        {course.nextCohortDate ? `, למחזור שנפתח ב-${formatHebrewDate(course.nextCohortDate)}` : ''}.
+      </p>
+
+      <div className="mt-4 flex flex-col gap-5">
+        {course.lecturers.map((lecturer) => (
+          <article key={lecturer.slug} className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
+            <div
+              aria-hidden="true"
+              className="flex size-[52px] items-center justify-center rounded-full border-[1.5px] border-ink font-sans text-lg font-bold"
+            >
+              {initials(lecturer.name)}
+            </div>
+            <div>
+              <h3 className="text-lg leading-snug font-bold">{lecturer.name}</h3>
+              {lecturer.role && <p className="font-sans text-sm text-ink-soft">{lecturer.role}</p>}
+              {lecturer.institutionBio && (
+                <p className="mt-1.5 text-[15px] leading-relaxed">
+                  <span className="font-sans font-bold">לפי המוסד:</span> <Claim>{lecturer.institutionBio}</Claim>
+                </p>
+              )}
+              <p className="mt-1 text-[15px] leading-relaxed">
+                <span className="font-sans font-bold">מה בדקנו:</span>{' '}
+                {lecturer.verifiedFacts.length > 0 ? (
+                  lecturer.verifiedFacts.map((fact) => (
+                    <a key={fact.text} href={fact.sourceUrl} target="_blank" rel="noopener noreferrer" className="me-1">
+                      <Mark source="verified">{fact.text}</Mark>
+                    </a>
+                  ))
+                ) : (
+                  <span className="text-ink-soft">לא מצאנו מידע ציבורי שאפשר לבדוק.</span>
+                )}
+              </p>
+              {lecturer.otherCoursesCount > 0 && (
+                <PenNote className="mt-0.5 text-sm">← {otherCoursesText(lecturer.otherCoursesCount)}</PenNote>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {course.lecturersSummary && (
+        <StickyNote tone="grad" tilt={-1} className="mt-5 ml-6 px-3 py-2.5 text-sm">
+          <strong>מה הבוגרים אומרים על המרצים:</strong> {course.lecturersSummary}
         </StickyNote>
       )}
     </section>
@@ -2115,6 +2279,7 @@ import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
 import { CourseActions } from '@/components/course/course-actions';
 import { GradsSection } from '@/components/course/grads-section';
+import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
 import { ScoreBox } from '@/components/course/score-box';
@@ -2165,6 +2330,7 @@ export default async function CoursePage({ params }: Props) {
         <nav aria-label="בעמוד הזה" className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 font-sans text-[15px] font-semibold">
           {course.videoUrl && <a href="#video">סרטון</a>}
           <a href="#about">על הקורס</a>
+          {course.lecturers.length > 0 && <a href="#lecturers">מרצים</a>}
           <a href="#price">מחיר</a>
           <a href="#grads">מה הבוגרים אומרים</a>
           <a href="#reviews">ביקורות ({reviewCount})</a>
@@ -2174,6 +2340,7 @@ export default async function CoursePage({ params }: Props) {
         <SourceLegend />
         {course.videoUrl && <VideoSection url={course.videoUrl} />}
         <AboutSection course={course} />
+        <LecturersSection course={course} />
         <PriceSection course={course} />
         <GradsSection course={course} />
         <ReviewsSection reviews={course.reviews} total={reviewCount} />
@@ -2216,6 +2383,7 @@ cd web && pnpm dev
 - מופיע מקרא הסימונים.
 - הסרטון עם פתק כחול.
 - ב"על הקורס" יש מרקר ורוד על "פריסה לענן AWS", וקו כחול מתחת להבטחות.
+- ב"על המרצים" יש שני מרצים עם ראשי תיבות, קו כחול על "לפי המוסד", ומרקר ירוק על "מה בדקנו" אצל יעל. אצל עומר כתוב "לא מצאנו מידע ציבורי שאפשר לבדוק". אצל יעל יש הערת עט "מרצה גם בקורס נוסף אחד באתר", ובסוף החלק פתק צהוב.
 - המחיר מופיע עם מרקר ירוק.
 - הביקורות מופיעות כפתקים, עם הפתק של שאלת ההמשך ועם תגובת המוסד.
 
@@ -2272,9 +2440,12 @@ test('course page shows the score, the legend and every section', async ({ page 
   await expect(page.getByText('23 בוגרים מאומתים')).toBeVisible();
   await expect(page.getByText('את הקורס עצמו עוד לא בדקנו')).toBeVisible();
   await expect(page.getByLabel('מקרא הסימונים')).toBeVisible();
-  for (const name of ['על הקורס', 'מחיר', 'מה הבוגרים אומרים', 'ביקורות']) {
+  for (const name of ['על הקורס', 'על המרצים', 'מחיר', 'מה הבוגרים אומרים', 'ביקורות']) {
     await expect(page.getByRole('heading', { level: 2, name })).toBeVisible();
   }
+  await expect(page.getByRole('heading', { level: 3, name: 'יעל כהן' })).toBeVisible();
+  await expect(page.getByText('מרצה גם בקורס נוסף אחד באתר')).toBeVisible();
+  await expect(page.getByText('לא מצאנו מידע ציבורי שאפשר לבדוק.')).toBeVisible();
   await expect(page.getByText('נועה ר.')).toBeVisible();
   await expect(page.getByText('פרק הענן עודכן במחזור ספטמבר.')).toBeVisible();
   await expect(page.getByText('לכל 23 הביקורות')).toBeVisible();
@@ -2426,4 +2597,5 @@ git push
 
 - **ההגדרות של Supabase בענן ושל Vercel:** בתוכנית 5. הן דורשות אישור של גל, כי פתיחת פרויקט ב-Supabase עשויה לעלות כסף.
 - **עמוד הביקורת ועמוד ההשוואה:** בתוכניות 2 ו-4. הכפתורים בעמוד הקורס כבר מקשרים אליהם, ועד אז הקישורים מחזירים 404.
+- **עמוד נפרד לכל מרצה** (`/lecturers/[slug]`, עם כל הקורסים שלו והממוצע של הבוגרים שלו): בתוכנית 4. בעמוד הקורס יש כבר חלק "על המרצים" מלא.
 - **"מה קרה בפועל" בפירוט** (כמה עובדים בתחום, כמה קיבלו קידום): דורש שאלון המשך מובנה, ונבנה בתוכנית 2. בינתיים מוצג ציון התוצאה.

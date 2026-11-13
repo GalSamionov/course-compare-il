@@ -15,7 +15,7 @@
     "StickyNotes.dc.html": { "x": 1100, "y": 6380, "w": 390, "h": 2620, "title": "ט · פתקים דביקים (Impeccable)" },
     "Binder.dc.html": { "x": 630, "y": 6380, "w": 390, "h": 1700, "title": "י · קלסר וחוצצים (Impeccable)" },
     "Summary.dc.html": { "x": 160, "y": 6380, "w": 390, "h": 2560, "title": "יא · סיכום עם מרקרים (Impeccable)" },
-    "Chosen.dc.html": { "x": 630, "y": 9420, "w": 390, "h": 2780, "title": "יב · הכיוון שנבחר: סיכום עם מרקרים ופתקים" }
+    "Chosen.dc.html": { "x": 630, "y": 9420, "w": 390, "h": 3170, "title": "יב · הכיוון שנבחר: סיכום עם מרקרים ופתקים" }
   },
   "order": ["Main.dc.html", "Receipt.dc.html", "ReportCard.dc.html", "Label.dc.html", "MarkedReceipt.dc.html", "ShukSigns.dc.html", "BallotCount.dc.html", "StickyNotes.dc.html", "Binder.dc.html", "Summary.dc.html", "Chosen.dc.html"],
   "notes": {
