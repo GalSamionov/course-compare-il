@@ -15,21 +15,26 @@ export interface PaidRange {
 }
 
 export function formatPaidRange(range: PaidRange): string {
+  if (range.min === range.max) return formatIls(range.min);
   return `${ilsNumber.format(range.min)}–${ilsNumber.format(range.max)} ₪`;
 }
 
+// מחיר 0 או null אומר "לא מציגים" (לקורס חינם אין עלות לשעה), ולכן מחזירים null.
 export function costPerHandsOnHour(price: number | null, handsOnHours: number | null): number | null {
   if (!price || !handsOnHours) return null;
   return Math.round(price / handsOnHours);
 }
 
+const israelDate = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Jerusalem',
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+});
+
+// תאריך לא תקין זורק שגיאה בכוונה, והקוראים מעבירים רק ערכים שאינם null.
 export function formatHebrewDate(iso: string): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Jerusalem',
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-  }).formatToParts(new Date(iso));
-  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+  const parts = israelDate.formatToParts(new Date(iso));
+  const get = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value);
   return `${get('day')}.${get('month')}.${get('year')}`;
 }
