@@ -232,16 +232,18 @@ create type display_name_mode as enum ('full', 'first_initial', 'anonymous');
 
 create table categories (
   id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   name text not null,
   parent_id uuid references categories(id),
   course_type course_type not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (parent_id is null or parent_id <> id)
 );
+create index categories_parent_idx on categories (parent_id);
 
 create table institutions (
   id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   name text not null,
   website text,
   kind text not null check (kind in ('college', 'school', 'independent', 'university', 'other')),
@@ -251,7 +253,7 @@ create table institutions (
 
 create table courses (
   id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   institution_id uuid not null references institutions(id),
   category_id uuid not null references categories(id),
   title text not null,
@@ -261,12 +263,12 @@ create table courses (
   total_hours integer check (total_hours between 1 and 3000),
   lecture_hours integer check (lecture_hours >= 0),
   hands_on_hours integer check (hands_on_hours >= 0),
-  duration_months numeric(4, 1),
+  duration_months numeric(4, 1) check (duration_months > 0),
   schedule text,
   formats text[] not null default '{}',
   region text,
   next_cohort_date date,
-  syllabus jsonb not null default '[]'::jsonb,
+  syllabus jsonb not null default '[]'::jsonb check (jsonb_typeof(syllabus) = 'array'),
   lecturers_note text,
   admission text,
   class_size_note text,
@@ -285,7 +287,9 @@ create index courses_category_idx on courses (category_id);
 create index courses_institution_idx on courses (institution_id);
 
 create function set_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql
+set search_path = ''
+as $$
 begin
   new.updated_at := now();
   return new;
@@ -298,10 +302,10 @@ create trigger courses_updated_at before update on courses
 -- verified_facts: [{ "text": "...", "source_url": "https://..." }], רק מה שבדקנו בעצמנו.
 create table lecturers (
   id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   name text not null,
   institution_bio text,
-  verified_facts jsonb not null default '[]'::jsonb,
+  verified_facts jsonb not null default '[]'::jsonb check (jsonb_typeof(verified_facts) = 'array'),
   created_at timestamptz not null default now()
 );
 
@@ -326,23 +330,26 @@ create table metrics (
 create table reviews (
   id uuid primary key default gen_random_uuid(),
   course_id uuid not null references courses(id),
-  author_id uuid references auth.users(id),
-  cohort_month date not null,
+  author_id uuid references auth.users(id) on delete set null,
+  cohort_month date not null check (cohort_month = date_trunc('month', cohort_month)::date),
   body text not null check (char_length(body) between 80 and 2000),
   display_name text not null,
   display_mode display_name_mode not null default 'first_initial',
   status review_status not null default 'draft',
   proof_kind proof_kind,
-  paid_bucket_ils integer check (paid_bucket_ils % 500 = 0),
+  paid_bucket_ils integer check (paid_bucket_ils >= 0 and paid_bucket_ils % 500 = 0),
   verified_at timestamptz,
   published_at timestamptz,
   follow_up_text text,
   excluded_reason text,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- ביקורת מתפרסמת רק אחרי אימות.
+  check (status <> 'published' or (verified_at is not null and published_at is not null and proof_kind is not null))
 );
 create unique index reviews_one_per_cohort
   on reviews (author_id, course_id, cohort_month) where author_id is not null;
-create index reviews_course_status_idx on reviews (course_id, status);
+create index reviews_course_published_idx
+  on reviews (course_id, published_at desc) where status = 'published';
 
 -- תשובה "כן" נשמרת כ-5 ו"לא" כ-1, כדי שכל השאלות יהיו בסולם אחד.
 create table review_answers (
@@ -359,23 +366,7 @@ create table vendor_responses (
   body text not null,
   posted_at timestamptz not null default now()
 );
-
-create table scores (
-  id bigint generated always as identity primary key,
-  course_id uuid not null references courses(id),
-  kind score_kind not null,
-  status text not null check (status in ('scored', 'not_enough_reviews')),
-  value numeric(3, 1),
-  review_count integer not null,
-  reviews_needed integer,
-  recommend_pct integer,
-  per_metric jsonb not null default '{}'::jsonb,
-  stale boolean not null default false,
-  method_version text not null,
-  computed_at timestamptz not null default now(),
-  expires_at timestamptz
-);
-create index scores_course_latest_idx on scores (course_id, kind, computed_at desc);
+create unique index vendor_responses_review_idx on vendor_responses (review_id);
 
 create table method_changes (
   id bigint generated always as identity primary key,
@@ -384,6 +375,24 @@ create table method_changes (
   reason text not null,
   changed_at timestamptz not null default now()
 );
+
+create table scores (
+  id bigint generated always as identity primary key,
+  course_id uuid not null references courses(id),
+  kind score_kind not null,
+  status text not null check (status in ('scored', 'not_enough_reviews')),
+  value numeric(3, 1) check (value between 0 and 10),
+  review_count integer not null check (review_count >= 0),
+  reviews_needed integer check (reviews_needed >= 0),
+  recommend_pct integer check (recommend_pct between 0 and 100),
+  per_metric jsonb not null default '{}'::jsonb,
+  stale boolean not null default false,
+  method_version text not null references method_changes(version),
+  computed_at timestamptz not null default now(),
+  expires_at timestamptz,
+  check ((status = 'scored') = (value is not null))
+);
+create index scores_course_latest_idx on scores (course_id, kind, computed_at desc, id desc);
 ```
 
 - [ ] **Step 4: להריץ את ה-migration**
@@ -416,7 +425,7 @@ Create `supabase/tests/rls.test.sql`:
 ```sql
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(8);
+select plan(11);
 
 -- נתוני בדיקה. נכתבים כמשתמש-על, שעוקף את ההרשאות.
 insert into categories (id, slug, name, course_type)
@@ -428,11 +437,18 @@ insert into courses (id, slug, institution_id, category_id, title, status) value
    'aaaaaaaa-0000-0000-0000-000000000001', 'קורס פעיל', 'active'),
   ('aaaaaaaa-0000-0000-0000-000000000004', 'test-draft', 'aaaaaaaa-0000-0000-0000-000000000002',
    'aaaaaaaa-0000-0000-0000-000000000001', 'קורס טיוטה', 'draft');
-insert into reviews (id, course_id, cohort_month, body, display_name, status, published_at) values
+insert into reviews (
+  id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
+) values
   ('aaaaaaaa-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
-   repeat('א', 80), 'בודק', 'published', now()),
+   repeat('א', 80), 'בודק', 'published', 'invoice', 12500, now(), now()),
   ('aaaaaaaa-0000-0000-0000-000000000006', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
-   repeat('ב', 80), 'בודק', 'pending', null);
+   repeat('ב', 80), 'בודק', 'pending', null, null, null, null),
+  ('aaaaaaaa-0000-0000-0000-000000000007', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('ג', 80), 'בודק', 'published', 'invoice', 13000, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000008', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('ד', 80), 'בודק', 'published', 'invoice', 14000, now(), now());
+insert into method_changes (version, summary, reason) values ('test', 'בדיקה', 'בדיקה');
 insert into scores (course_id, kind, status, value, review_count, method_version)
 values ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 8.2, 23, 'test');
 
@@ -481,6 +497,19 @@ select throws_ok(
   'אנונימי לא יכול להוסיף ציון'
 );
 
+select throws_ok(
+  $$select paid_bucket_ils from reviews$$,
+  '42501',
+  null,
+  'אנונימי לא רואה כמה שילם בוגר מסוים'
+);
+
+select results_eq(
+  $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
+  $$values (12500, 14500, 3)$$,
+  'טווח מחירים מוצג משלוש חשבוניות, בלי סכום של אדם אחד'
+);
+
 reset role;
 
 select throws_ok(
@@ -495,6 +524,14 @@ select throws_ok(
   'P0001',
   'scores rows are append-only',
   'אי אפשר למחוק ציון, גם כמשתמש-על'
+);
+
+select throws_ok(
+  $$insert into reviews (course_id, cohort_month, body, display_name, status)
+    values ('aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01', repeat('ה', 80), 'x', 'published')$$,
+  '23514',
+  null,
+  'ביקורת לא מתפרסמת בלי אימות, גם כמשתמש-על'
 );
 
 select * from finish();
@@ -566,6 +603,29 @@ create trigger scores_append_only before update or delete on scores
   for each row execute function forbid_change();
 create trigger method_changes_append_only before update or delete on method_changes
   for each row execute function forbid_change();
+
+-- בתוכנית 1 אין כתיבה ציבורית בכלל. תוכנית 2 תפתח רק את מה שצריך.
+revoke insert, update, delete on all tables in schema public from anon, authenticated;
+
+-- ביקורות: רק העמודות הציבוריות.
+-- author_id, proof_kind, paid_bucket_ils, verified_at ו-excluded_reason לא נחשפים.
+revoke select on reviews from anon, authenticated;
+grant select (id, course_id, cohort_month, body, display_name, display_mode, status, published_at, follow_up_text)
+  on reviews to anon, authenticated;
+
+-- טווח מה ששולם בפועל, רק כשיש לפחות 3 חשבוניות, כדי שאי אפשר יהיה לזהות סכום של אדם אחד.
+create function course_paid_range(p_course_id uuid)
+returns table (min_ils integer, max_ils integer, invoice_count integer)
+language sql stable security definer
+set search_path = ''
+as $$
+  select min(r.paid_bucket_ils), max(r.paid_bucket_ils) + 500, count(*)::integer
+  from public.reviews r
+  where r.course_id = p_course_id and r.status = 'published' and r.paid_bucket_ils is not null
+  having count(*) >= 3;
+$$;
+revoke execute on function course_paid_range(uuid) from public;
+grant execute on function course_paid_range(uuid) to anon, authenticated;
 ```
 
 - [ ] **Step 4: להריץ ולוודא שהבדיקה עוברת**
@@ -574,7 +634,7 @@ create trigger method_changes_append_only before update or delete on method_chan
 pnpm db:reset && pnpm db:test
 ```
 
-Expected: `rls.test.sql .. ok`, `All tests successful.`, ו-8 בדיקות שעברו.
+Expected: `rls.test.sql .. ok`, `All tests successful.`, ו-11 בדיקות שעברו.
 
 - [ ] **Step 5: Commit**
 
@@ -742,7 +802,7 @@ from generate_series(1, 3) as g;
 pnpm db:reset && pnpm db:test
 ```
 
-Expected: הטעינה עוברת בלי שגיאות, ו-`All tests successful.` (8 בדיקות).
+Expected: הטעינה עוברת בלי שגיאות, ו-`All tests successful.` (11 בדיקות).
 
 - [ ] **Step 3: Commit**
 
@@ -1286,20 +1346,11 @@ Create `web/src/lib/format.test.ts`:
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { costPerHandsOnHour, formatHebrewDate, formatIls, formatPaidRange, paidRange } from './format';
+import { costPerHandsOnHour, formatHebrewDate, formatIls, formatPaidRange } from './format';
 
 describe('formatIls', () => {
   it('adds thousands separators and the shekel sign', () => {
     expect(formatIls(14900)).toBe('14,900 ₪');
-  });
-});
-
-describe('paidRange', () => {
-  it('needs at least three invoices', () => {
-    expect(paidRange([12500, 13500])).toBeNull();
-  });
-  it('spans the lowest bucket to the top of the highest bucket', () => {
-    expect(paidRange([13500, 12500, 14500])).toEqual({ min: 12500, max: 15000, count: 3 });
   });
 });
 
@@ -1345,16 +1396,14 @@ export function formatIls(amount: number): string {
   return `${ilsNumber.format(amount)} ₪`;
 }
 
+/**
+ * טווח מה ששולם בפועל. המסד מחשב אותו בפונקציה course_paid_range,
+ * ומחזיר אותו רק כשיש לפחות 3 חשבוניות, כדי שאי אפשר יהיה לזהות אף אחד.
+ */
 export interface PaidRange {
   min: number;
   max: number;
   count: number;
-}
-
-/** טווח מה ששולם בפועל. מוצג רק כשיש לפחות 3 חשבוניות, כדי שאי אפשר יהיה לזהות אף אחד. */
-export function paidRange(buckets: number[]): PaidRange | null {
-  if (buckets.length < 3) return null;
-  return { min: Math.min(...buckets), max: Math.max(...buckets) + 500, count: buckets.length };
 }
 
 export function formatPaidRange(range: PaidRange): string {
@@ -1384,7 +1433,7 @@ export function formatHebrewDate(iso: string): string {
 pnpm test
 ```
 
-Expected: `15 passed`, מתוכן 8 בדיקות ציון ו-7 בדיקות תצוגה.
+Expected: `13 passed`, מתוכן 8 בדיקות ציון ו-5 בדיקות תצוגה.
 
 - [ ] **Step 5: Commit**
 
@@ -1407,7 +1456,7 @@ Create `web/src/lib/data/course-page.ts`:
 
 ```ts
 import { createPublicClient } from '@/lib/supabase/public-client';
-import { costPerHandsOnHour, paidRange, type PaidRange } from '@/lib/format';
+import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
 
 export interface SyllabusItem {
   title: string;
@@ -1493,19 +1542,26 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   if (error) throw error;
   if (!course) return null;
 
-  const [{ data: scoreRow }, { data: metricDefs }, { data: reviewRows }, { data: lecturerRows }] = await Promise.all([
+  const [
+    { data: scoreRow },
+    { data: metricDefs },
+    { data: reviewRows },
+    { data: lecturerRows },
+    { data: paidRows },
+  ] = await Promise.all([
     db
       .from('scores')
       .select('*')
       .eq('course_id', course.id)
       .eq('kind', 'graduate')
       .order('computed_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(1)
       .maybeSingle(),
     db.from('metrics').select('key, label, sort_order').order('sort_order'),
     db
       .from('reviews')
-      .select('id, display_name, cohort_month, body, follow_up_text, paid_bucket_ils, published_at, vendor_responses(body)')
+      .select('id, display_name, cohort_month, body, follow_up_text, published_at, vendor_responses(body)')
       .eq('course_id', course.id)
       .order('published_at', { ascending: false }),
     db
@@ -1513,6 +1569,8 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       .select('role, sort_order, lecturers(slug, name, institution_bio, verified_facts, course_lecturers(count))')
       .eq('course_id', course.id)
       .order('sort_order'),
+    // הסכום של כל בוגר לא חשוף. המסד מחזיר רק טווח, ורק משלוש חשבוניות.
+    db.rpc('course_paid_range', { p_course_id: course.id }),
   ]);
 
   const one = <T,>(ref: T | T[] | null): T | null => (Array.isArray(ref) ? (ref[0] ?? null) : ref);
@@ -1566,7 +1624,10 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   const outcomeResult = perMetric.outcome_3m;
 
   const rows = reviewRows ?? [];
-  const buckets = rows.map((r) => r.paid_bucket_ils).filter((b): b is number => b !== null);
+  const paidRow = paidRows?.[0];
+  const paid: PaidRange | null = paidRow
+    ? { min: paidRow.min_ils, max: paidRow.max_ils, count: paidRow.invoice_count }
+    : null;
 
   return {
     slug: course.slug,
@@ -1597,7 +1658,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     score,
     metrics,
     outcome: outcomeResult && outcomeResult.n >= 3 ? outcomeResult : null,
-    paid: paidRange(buckets),
+    paid,
     costPerHandsOnHour: costPerHandsOnHour(course.site_price_ils, course.hands_on_hours),
     reviews: rows.slice(0, REVIEWS_ON_PAGE).map((r) => ({
       id: r.id,
