@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
 import { CourseActions } from '@/components/course/course-actions';
@@ -59,15 +60,16 @@ export default async function CoursePage({ params }: Props) {
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
-          <a href="/courses" className={textLink}>
+          {/* העמודים האלה ייבנו עם האתר הציבורי. עד אז בלי טעינה מראש, כדי שלא יירשמו בקשות 404. */}
+          <Link href="/courses" prefetch={false} className={textLink}>
             קורסים
-          </a>
+          </Link>
           {course.categorySlug && (
             <>
               {' › '}
-              <a href={`/categories/${course.categorySlug}`} className={textLink}>
+              <Link href={`/categories/${course.categorySlug}`} prefetch={false} className={textLink}>
                 {course.categoryName}
-              </a>
+              </Link>
             </>
           )}
         </nav>
@@ -123,7 +125,9 @@ export default async function CoursePage({ params }: Props) {
         {course.lastCheckedAt && (
           <p className="mt-4 font-sans text-[13px] text-ink-soft">
             פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
-            <a href="/method" className="underline">איך אנחנו מסכמים ומי משלם לנו</a>
+            <Link href="/method" prefetch={false} className="underline">
+              איך אנחנו מסכמים ומי משלם לנו
+            </Link>
           </p>
         )}
       </main>

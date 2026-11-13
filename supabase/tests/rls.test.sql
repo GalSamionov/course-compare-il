@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(24);
+select plan(25);
 
 -- נתוני בדיקה. נכתבים כ-postgres, שעוקף את ההרשאות.
 insert into categories (id, slug, name, course_type)
@@ -220,6 +220,14 @@ select throws_ok(
   '23514',
   null,
   'ביקורת לא מתפרסמת בלי אימות'
+);
+
+select throws_ok(
+  $$insert into reviews (course_id, cohort_month, body, display_name, display_mode, status)
+    values ('aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01', repeat('ה', 80), 'דנה כהן', 'anonymous', 'draft')$$,
+  '23514',
+  null,
+  'ביקורת אנונימית לא שומרת שם אמיתי'
 );
 
 create table public.test_future_table (id integer);

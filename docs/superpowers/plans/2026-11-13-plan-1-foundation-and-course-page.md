@@ -807,6 +807,8 @@ git commit -m "feat: הרשאות קריאה ציבורית וטבלאות צי�
 
 ---
 
+> **נוסף אחרי הסקירה הסופית:** מיגרציה `20261113000004_anonymous_display_name.sql` מוסיפה אילוץ: בביקורת אנונימית `display_name` הוא תמיד "בוגר מאומת". העמודה פתוחה לקריאה ציבורית, ולכן אסור ששם אמיתי יישמר בה. נוספה בדיקת pgTAP, ועכשיו יש 25.
+
 ### Task 4: נתוני דוגמה
 
 **Files:**
@@ -2160,7 +2162,7 @@ cd web && pnpm exec tsc --noEmit
 Expected: אין שגיאות. אם יש שגיאות טיפוס על `institutions` או `categories`, ה-cast שבקוד מכסה את שתי הצורות. בודקים שהשמות ב-`database.types.ts` תואמים.
 
 בדיקה מול המסד המקומי, אחרי `pnpm db:reset` ו-`pnpm score:recompute`: סקריפט זמני מחוץ למאגר (סיומת `.mts`), שמורץ מתוך `web/` עם `node --env-file=.env.local --import tsx <script>` וקורא ל-`getCoursePage`. Expected:
-- `full-stack-sample`: ציון 7.9 מ-23 ביקורות, `reviewTotal` 23, 5 ביקורות בעמוד מהחדשה לישנה, `paid` 12,500 עד 15,000 משש חשבוניות, `costPerHandsOnHour` 57, 2 מרצים, `outcome` עם n=14, `status` 'active'.
+- `full-stack-sample`: ציון 7.9 מ-23 ביקורות, `reviewTotal` 23, 3 ביקורות בעמוד מהחדשה לישנה, `paid` 12,500 עד 15,000 משש חשבוניות, `costPerHandsOnHour` 57, 2 מרצים, `outcome` עם n=14, `status` 'active'.
 - `ai-tools-sample`: `not_enough_reviews`, חסרות 2, `paid` null.
 - `home-cooking-sample`: `reviewTotal` 0.
 - `does-not-exist`: null.
@@ -2970,6 +2972,7 @@ Create `web/src/app/courses/[slug]/page.tsx`:
 
 ```tsx
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
 import { CourseActions } from '@/components/course/course-actions';
@@ -3030,15 +3033,16 @@ export default async function CoursePage({ params }: Props) {
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
-          <a href="/courses" className={textLink}>
+          {/* העמודים האלה ייבנו עם האתר הציבורי. עד אז בלי טעינה מראש, כדי שלא יירשמו בקשות 404. */}
+          <Link href="/courses" prefetch={false} className={textLink}>
             קורסים
-          </a>
+          </Link>
           {course.categorySlug && (
             <>
               {' › '}
-              <a href={`/categories/${course.categorySlug}`} className={textLink}>
+              <Link href={`/categories/${course.categorySlug}`} prefetch={false} className={textLink}>
                 {course.categoryName}
-              </a>
+              </Link>
             </>
           )}
         </nav>
@@ -3094,7 +3098,9 @@ export default async function CoursePage({ params }: Props) {
         {course.lastCheckedAt && (
           <p className="mt-4 font-sans text-[13px] text-ink-soft">
             פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
-            <a href="/method" className="underline">איך אנחנו מסכמים ומי משלם לנו</a>
+            <Link href="/method" prefetch={false} className="underline">
+              איך אנחנו מסכמים ומי משלם לנו
+            </Link>
           </p>
         )}
       </main>
@@ -3250,6 +3256,13 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -3278,17 +3291,29 @@ jobs:
         working-directory: web
         run: pnpm install --frozen-lockfile
 
+      - name: Lint and types
+        working-directory: web
+        run: |
+          pnpm lint
+          pnpm exec tsc --noEmit
+
       - name: Unit tests
         working-directory: web
         run: pnpm test
 
+      # המפתחות של Supabase המקומי ב-CI. מעדיפים את השמות החדשים (PUBLISHABLE/SECRET),
+      # ונופלים לשמות הישנים (ANON/SERVICE_ROLE) רק אם הם חסרים.
       - name: Write env
         working-directory: web
         run: |
           pnpm --dir .. exec supabase status -o env > /tmp/sb.env
-          API_URL=$(grep '^API_URL=' /tmp/sb.env | cut -d= -f2- | tr -d '"')
-          PUBLIC_KEY=$(grep -E '^(PUBLISHABLE_KEY|ANON_KEY)=' /tmp/sb.env | head -n1 | cut -d= -f2- | tr -d '"')
-          SECRET_KEY=$(grep -E '^(SECRET_KEY|SERVICE_ROLE_KEY)=' /tmp/sb.env | head -n1 | cut -d= -f2- | tr -d '"')
+          pick() { for k in "$@"; do v=$(grep "^$k=" /tmp/sb.env | head -n1 | cut -d= -f2- | tr -d '"'); if [ -n "$v" ]; then printf '%s' "$v"; return; fi; done; }
+          API_URL=$(pick API_URL)
+          PUBLIC_KEY=$(pick PUBLISHABLE_KEY ANON_KEY)
+          SECRET_KEY=$(pick SECRET_KEY SERVICE_ROLE_KEY)
+          if [ -z "$API_URL" ] || [ -z "$PUBLIC_KEY" ] || [ -z "$SECRET_KEY" ]; then
+            echo "Missing a Supabase value. Names found:"; cut -d= -f1 /tmp/sb.env; exit 1
+          fi
           printf 'NEXT_PUBLIC_SUPABASE_URL=%s\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\nSUPABASE_SECRET_KEY=%s\n' \
             "$API_URL" "$PUBLIC_KEY" "$SECRET_KEY" > .env.local
 
