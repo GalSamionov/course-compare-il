@@ -84,6 +84,7 @@
 }
 body {
   font-family: var(--font-serif);
+  line-height: 1.8;
 }
 
 ::selection {

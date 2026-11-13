@@ -1,8 +1,13 @@
 import type { CoursePageData } from '@/lib/data/course-page';
 import { Mark } from './marks';
 
+/** האם יש מה להציג בחלק. גם הניווט בראש העמוד משתמש בזה, כדי לא לקשר לחלק שלא קיים. */
+export function hasGradsSection(course: CoursePageData): boolean {
+  return Boolean(course.summaryGood || course.summaryWeak || course.metrics.length > 0);
+}
+
 export function GradsSection({ course }: { course: CoursePageData }) {
-  if (!course.summaryGood && !course.summaryWeak && course.metrics.length === 0) return null;
+  if (!hasGradsSection(course)) return null;
   return (
     <section id="grads" className="mt-7">
       <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">מה הבוגרים אומרים</h2>

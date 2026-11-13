@@ -9,19 +9,19 @@ export function PriceSection({ course }: { course: CoursePageData }) {
       <p className="mt-2.5">
         {course.sitePrice !== null ? (
           <>
-            <bdi>{formatIls(course.sitePrice)}</bdi> באתר המוסד.
+            <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi> באתר המוסד.
           </>
         ) : (
           'המוסד לא מפרסם מחיר.'
         )}{' '}
         {course.paid && (
           <Mark source="verified">
-            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi>{formatPaidRange(course.paid)}</bdi>
+            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
           </Mark>
         )}
         {course.costPerHandsOnHour !== null && (
           <>
-            , כלומר כ-<bdi>{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
+            , כלומר כ-<bdi dir="rtl">{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
           </>
         )}
       </p>

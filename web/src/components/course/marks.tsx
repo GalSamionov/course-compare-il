@@ -17,7 +17,7 @@ const markLabel: Record<MarkSource, string> = {
 /** מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה. */
 export function Mark({ source, children }: { source: MarkSource; children: React.ReactNode }) {
   return (
-    <mark data-source={source} className={cn('px-0.5 text-inherit', markColor[source])}>
+    <mark data-source={source} className={cn('box-decoration-clone px-0.5 text-inherit', markColor[source])}>
       <span className="sr-only">{markLabel[source]}: </span>
       {children}
     </mark>

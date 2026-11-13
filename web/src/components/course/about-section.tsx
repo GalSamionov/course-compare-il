@@ -20,6 +20,19 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 export function AboutSection({ course }: { course: CoursePageData }) {
   const formats = course.formats.map((f) => formatLabels[f] ?? f).join(' או ');
+  // שורת המשך מציגה רק את מה שידוע. חודשים ושעות נבדקו מול אתר המוסד, ולכן הם במרקר ירוק.
+  const duration = [
+    course.durationMonths !== null ? `${course.durationMonths} חודשים` : null,
+    course.totalHours !== null ? `${course.totalHours} שעות` : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const handsOn =
+    course.handsOnHours === null
+      ? null
+      : course.totalHours !== null
+        ? `מהן ${course.handsOnHours} שעות עשייה`
+        : `${course.handsOnHours} שעות עשייה`;
   return (
     <section id="about" className="mt-7">
       <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">על הקורס</h2>
@@ -28,21 +41,19 @@ export function AboutSection({ course }: { course: CoursePageData }) {
         <>
           <h3 className="mt-4 font-sans text-base font-bold">מה לומדים, {course.syllabus.length} פרקים</h3>
           <ol className="mt-1 list-decimal pr-6">
-            {course.syllabus.map((item) => (
-              <li key={item.title}>{item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}</li>
+            {course.syllabus.map((item, i) => (
+              <li key={`${i}-${item.title}`}>{item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}</li>
             ))}
           </ol>
         </>
       )}
 
       <dl className="mt-4 grid grid-cols-[112px_minmax(0,1fr)] gap-x-3 gap-y-2 text-[15px] leading-relaxed">
-        {course.totalHours !== null && (
+        {(duration || handsOn) && (
           <Row label="משך">
-            <Mark source="verified">
-              {course.durationMonths !== null ? `${course.durationMonths} חודשים, ` : ''}
-              {course.totalHours} שעות
-            </Mark>
-            {course.handsOnHours !== null && `, מהן ${course.handsOnHours} שעות עשייה`}
+            {duration && <Mark source="verified">{duration}</Mark>}
+            {duration && handsOn && ', '}
+            {handsOn}
           </Row>
         )}
         {course.schedule && <Row label="מתי">{course.schedule}</Row>}

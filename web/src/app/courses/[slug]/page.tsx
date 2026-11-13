@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
 import { CourseActions } from '@/components/course/course-actions';
-import { GradsSection } from '@/components/course/grads-section';
+import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
@@ -26,6 +26,9 @@ export async function generateStaticParams() {
 
 type Props = { params: Promise<{ slug: string }> };
 
+/** קישור בתוך טקסט, עם קו דק כמו בלוח. כפתורים וקישורי מקור נשארים בלי זה. */
+const textLink = 'underline decoration-1 underline-offset-[3px]';
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const course = await getCoursePage(slug);
@@ -43,6 +46,9 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
+  // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג.
+  const hasGrads = hasGradsSection(course);
+  const hasReviews = course.reviews.length > 0;
 
   return (
     <div className="mx-auto max-w-[680px] px-[22px] pb-12">
@@ -53,8 +59,17 @@ export default async function CoursePage({ params }: Props) {
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
-          <a href="/courses" className="hover:underline">קורסים</a> ›{' '}
-          <a href={`/categories/${course.categorySlug}`} className="hover:underline">{course.categoryName}</a>
+          <a href="/courses" className={textLink}>
+            קורסים
+          </a>
+          {course.categorySlug && (
+            <>
+              {' › '}
+              <a href={`/categories/${course.categorySlug}`} className={textLink}>
+                {course.categoryName}
+              </a>
+            </>
+          )}
         </nav>
         <h1 className="mt-0.5 text-[30px] leading-tight font-bold">{course.title}</h1>
         <p className="mt-1 font-sans text-[15px] text-ink-soft">
@@ -67,12 +82,32 @@ export default async function CoursePage({ params }: Props) {
           </p>
         )}
         <nav aria-label="בעמוד הזה" className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 font-sans text-[15px] font-semibold">
-          {course.videoUrl && <a href="#video">סרטון</a>}
-          <a href="#about">על הקורס</a>
-          {course.lecturers.length > 0 && <a href="#lecturers">מרצים</a>}
-          <a href="#price">מחיר</a>
-          <a href="#grads">מה הבוגרים אומרים</a>
-          <a href="#reviews">ביקורות ({reviewCount})</a>
+          {course.videoUrl && (
+            <a href="#video" className={textLink}>
+              סרטון
+            </a>
+          )}
+          <a href="#about" className={textLink}>
+            על הקורס
+          </a>
+          {course.lecturers.length > 0 && (
+            <a href="#lecturers" className={textLink}>
+              מרצים
+            </a>
+          )}
+          <a href="#price" className={textLink}>
+            מחיר
+          </a>
+          {hasGrads && (
+            <a href="#grads" className={textLink}>
+              מה הבוגרים אומרים
+            </a>
+          )}
+          {hasReviews && (
+            <a href="#reviews" className={textLink}>
+              ביקורות ({reviewCount})
+            </a>
+          )}
         </nav>
 
         <ScoreBox score={course.score} />
@@ -81,7 +116,7 @@ export default async function CoursePage({ params }: Props) {
         <AboutSection course={course} />
         <LecturersSection course={course} />
         <PriceSection course={course} />
-        <GradsSection course={course} />
+        {hasGrads && <GradsSection course={course} />}
         <ReviewsSection reviews={course.reviews} total={reviewCount} />
         <CourseActions slug={course.slug} />
 

@@ -81,7 +81,7 @@ export interface CoursePageData {
   reviewTotal: number;
 }
 
-const REVIEWS_ON_PAGE = 5;
+const REVIEWS_ON_PAGE = 3;
 
 function queryError(what: string, error: { message: string }): Error {
   return new Error(`${what} query failed: ${error.message}`, { cause: error });

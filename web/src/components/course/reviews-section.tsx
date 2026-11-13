@@ -11,19 +11,26 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
       <h2 className="mb-3.5 inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">ביקורות</h2>
       <div className="flex flex-col gap-6">
         {reviews.map((r, i) => (
-          <div key={r.id}>
+          // הביקורת כולה, כולל הפתק של שאלת ההמשך ותגובת המוסד, היא article אחד.
+          // פתק ההמשך תלוי מתחת לפתק, ולכן בלי תגובת מוסד מפנים לו מקום לפני הביקורת הבאה.
+          <article key={r.id} className={r.followUp && !r.vendorResponse ? 'pb-8' : undefined}>
             <StickyNote
               tone="grad"
               tilt={i % 2 === 0 ? 0.6 : -0.8}
               className={`relative px-4 pt-3.5 ${r.followUp ? 'pb-8' : 'pb-3.5'}`}
             >
-              <article>
-                <p className="text-[13px]">
-                  {/* לשם יש מין דקדוקי שאנחנו לא יודעים עדיין, ולכן ליד שם לא כותבים "בוגר" או "בוגרת". */}
-                  <strong>{r.displayName ?? 'בוגר מאומת'}</strong>, מחזור {cohortLabel(r.cohortMonth)}
-                </p>
-                <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
-              </article>
+              <p className="text-[13px]">
+                {/* כל פתק אומר שהביקורת מאומתת: זו ההבטחה של האתר. אנחנו לא יודעים את המין הדקדוקי של הכותב, ולכן "ביקורת מאומתת" ולא "בוגר" או "בוגרת". */}
+                {r.displayName ? (
+                  <>
+                    <strong>{r.displayName}</strong>, ביקורת מאומתת
+                  </>
+                ) : (
+                  <strong>ביקורת מאומתת</strong>
+                )}
+                , מחזור {cohortLabel(r.cohortMonth)}
+              </p>
+              <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
               {r.followUp && (
                 <StickyNote tone="grad-light" tilt={-4} className="absolute -bottom-6 left-2.5 w-[164px] px-2.5 py-1.5">
                   <strong>אחרי 3 חודשים:</strong> {r.followUp}
@@ -35,7 +42,7 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
                 <strong>תגובת המוסד:</strong> {r.vendorResponse}
               </StickyNote>
             )}
-          </div>
+          </article>
         ))}
       </div>
       {total > reviews.length && (

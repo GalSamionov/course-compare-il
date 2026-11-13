@@ -42,9 +42,16 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
               <p className="mt-1 text-[15px] leading-relaxed">
                 <span className="font-sans font-bold">מה בדקנו:</span>{' '}
                 {lecturer.verifiedFacts.length > 0 ? (
-                  lecturer.verifiedFacts.map((fact) => (
-                    <a key={fact.text} href={fact.sourceUrl} target="_blank" rel="noopener noreferrer" className="me-1">
+                  lecturer.verifiedFacts.map((fact, i) => (
+                    <a
+                      key={`${i}-${fact.text}`}
+                      href={fact.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="me-1"
+                    >
                       <Mark source="verified">{fact.text}</Mark>
+                      <span className="sr-only"> (נפתח בחלון חדש)</span>
                     </a>
                   ))
                 ) : (
