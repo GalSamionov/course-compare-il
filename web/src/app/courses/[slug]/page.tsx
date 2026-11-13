@@ -1,0 +1,97 @@
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import { AboutSection } from '@/components/course/about-section';
+import { CourseActions } from '@/components/course/course-actions';
+import { GradsSection } from '@/components/course/grads-section';
+import { LecturersSection } from '@/components/course/lecturers-section';
+import { PriceSection } from '@/components/course/price-section';
+import { ReviewsSection } from '@/components/course/reviews-section';
+import { ScoreBox } from '@/components/course/score-box';
+import { SourceLegend } from '@/components/course/source-legend';
+import { VideoSection } from '@/components/course/video-section';
+import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
+import { formatHebrewDate } from '@/lib/format';
+
+/**
+ * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
+ * קורס שלא נבנה מראש נבנה בבקשה הראשונה, והבקשה מחכה לעמוד המלא במקום לקבל שלד.
+ * כך notFound() רץ לפני שהתשובה מתחילה, וכתובת של קורס שלא קיים מחזירה 404 אמיתי.
+ */
+export const ensureStatic = 'navigation';
+
+export async function generateStaticParams() {
+  const slugs = await getCourseSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await getCoursePage(slug);
+  if (!course) return {};
+  const scoreText = course.score.status === 'scored' ? ` ציון בוגרים ${course.score.value.toFixed(1)} מתוך 10.` : '';
+  return {
+    title: `${course.title}, ${course.institutionName} | [שם האתר]`,
+    description: `מה באמת לומדים, כמה שילמו בפועל ומה אומרים בוגרים מאומתים.${scoreText}`,
+  };
+}
+
+export default async function CoursePage({ params }: Props) {
+  const { slug } = await params;
+  const course = await getCoursePage(slug);
+  if (!course) notFound();
+
+  const reviewCount = course.reviewTotal;
+
+  return (
+    <div className="mx-auto max-w-[680px] px-[22px] pb-12">
+      <header className="flex items-center justify-between border-b border-rule pt-4 pb-3 font-sans">
+        <span className="text-[19px] font-bold">[שם האתר]</span>
+        <span className="text-xs text-ink-soft">אף מוכר לא משלם לנו</span>
+      </header>
+
+      <main>
+        <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
+          <a href="/courses" className="hover:underline">קורסים</a> ›{' '}
+          <a href={`/categories/${course.categorySlug}`} className="hover:underline">{course.categoryName}</a>
+        </nav>
+        <h1 className="mt-0.5 text-[30px] leading-tight font-bold">{course.title}</h1>
+        <p className="mt-1 font-sans text-[15px] text-ink-soft">
+          {course.institutionName}
+          {course.region ? `, ${course.region}` : ''}
+        </p>
+        {course.status === 'removed' && (
+          <p role="status" className="mt-2 font-sans text-[15px] font-semibold">
+            הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
+          </p>
+        )}
+        <nav aria-label="בעמוד הזה" className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 font-sans text-[15px] font-semibold">
+          {course.videoUrl && <a href="#video">סרטון</a>}
+          <a href="#about">על הקורס</a>
+          {course.lecturers.length > 0 && <a href="#lecturers">מרצים</a>}
+          <a href="#price">מחיר</a>
+          <a href="#grads">מה הבוגרים אומרים</a>
+          <a href="#reviews">ביקורות ({reviewCount})</a>
+        </nav>
+
+        <ScoreBox score={course.score} />
+        <SourceLegend />
+        {course.videoUrl && <VideoSection url={course.videoUrl} />}
+        <AboutSection course={course} />
+        <LecturersSection course={course} />
+        <PriceSection course={course} />
+        <GradsSection course={course} />
+        <ReviewsSection reviews={course.reviews} total={reviewCount} />
+        <CourseActions slug={course.slug} />
+
+        {course.lastCheckedAt && (
+          <p className="mt-4 font-sans text-[13px] text-ink-soft">
+            פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
+            <a href="/method" className="underline">איך אנחנו מסכמים ומי משלם לנו</a>
+          </p>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -1,3 +1,4 @@
+import { cacheLife, cacheTag } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
 import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
@@ -86,7 +87,26 @@ function queryError(what: string, error: { message: string }): Error {
   return new Error(`${what} query failed: ${error.message}`, { cause: error });
 }
 
+/**
+ * עמוד הקורס, מהמטמון של Next. נשמר לשעה, ו-`revalidateTag('course:<slug>')` מרענן אותו לפני הזמן.
+ * עם `cacheComponents` אין `export const revalidate`, ולכן המטמון מוגדר כאן.
+ */
 export async function getCoursePage(slug: string): Promise<CoursePageData | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`course:${slug}`);
+  return loadCoursePage(slug);
+}
+
+/** כל הקורסים שאינם טיוטה, לבנייה מראש של העמודים. שאילתה שנכשלה זורקת שגיאה, כדי שהבנייה תיכשל ולא תדלג בשקט. */
+export async function getCourseSlugs(): Promise<string[]> {
+  const { data, error } = await createPublicClient().from('courses').select('slug').neq('status', 'draft').order('slug');
+  if (error) throw queryError('course slugs', error);
+  return data.map((row) => row.slug);
+}
+
+/** הטעינה עצמה, בלי מטמון. סקריפטים מחוץ ל-Next קוראים לה ישירות. */
+export async function loadCoursePage(slug: string): Promise<CoursePageData | null> {
   const db = createPublicClient();
 
   const { data: course, error } = await db
