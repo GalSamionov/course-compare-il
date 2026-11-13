@@ -1,0 +1,37 @@
+# תלויות ובנייה
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# סודות ומשתני סביבה
+.env
+.env.*
+!.env.example
+supabase/.temp/
+
+# מצב מקומי של Claude ושל כלים
+.claude/settings.local.json
+.claude/state/
+.claude/skills/impeccable/
+.claude/agents/impeccable-*
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/review/
+
+# תיקיית בנייה זמנית של אב-טיפוס shadcn
+design/_shadcn-build/
+
+# מערכת הפעלה
+.DS_Store
+Thumbs.db
+desktop.ini

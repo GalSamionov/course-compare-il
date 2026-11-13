@@ -1,0 +1,8 @@
+# כל קובצי הטקסט נשמרים עם סוף שורה של יוניקס, כדי שסקריפטי bash יעבדו גם ב-Windows.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary

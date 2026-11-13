@@ -1,0 +1,30 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-13T08:00:00Z" },
+  "title": "עיצוב עמוד קורס",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 1100, "y": 0, "w": 390, "h": 1560, "title": "א · דו״ח צרכני" },
+    "Receipt.dc.html": { "x": 630, "y": 0, "w": 390, "h": 1560, "title": "ב · קבלה" },
+    "ReportCard.dc.html": { "x": 160, "y": 0, "w": 390, "h": 1560, "title": "ג · תעודת בוגרים" },
+    "Label.dc.html": { "x": 1100, "y": 2100, "w": 390, "h": 1720, "title": "ד · תווית צרכנית (frontend-design)" },
+    "MarkedReceipt.dc.html": { "x": 630, "y": 2100, "w": 390, "h": 1640, "title": "ו · קבלה מסומנת בעט (Claude Design)" },
+    "ShukSigns.dc.html": { "x": 1100, "y": 4240, "w": 390, "h": 1680, "title": "ז · שלטי שוק (Impeccable, הכיוון שהוגרל)" },
+    "BallotCount.dc.html": { "x": 630, "y": 4240, "w": 390, "h": 1720, "title": "ח · ספירת קולות (Impeccable, ההמלצה)" },
+    "StickyNotes.dc.html": { "x": 1100, "y": 6380, "w": 390, "h": 2620, "title": "ט · פתקים דביקים (Impeccable)" },
+    "Binder.dc.html": { "x": 630, "y": 6380, "w": 390, "h": 1700, "title": "י · קלסר וחוצצים (Impeccable)" },
+    "Summary.dc.html": { "x": 160, "y": 6380, "w": 390, "h": 2560, "title": "יא · סיכום עם מרקרים (Impeccable)" },
+    "Chosen.dc.html": { "x": 630, "y": 9420, "w": 390, "h": 2780, "title": "יב · הכיוון שנבחר: סיכום עם מרקרים ופתקים" }
+  },
+  "order": ["Main.dc.html", "Receipt.dc.html", "ReportCard.dc.html", "Label.dc.html", "MarkedReceipt.dc.html", "ShukSigns.dc.html", "BallotCount.dc.html", "StickyNotes.dc.html", "Binder.dc.html", "Summary.dc.html", "Chosen.dc.html"],
+  "notes": {
+    "head": { "x": 160, "y": -300, "text": "עמוד קורס: שלושה כיוונים", "kind": "title1", "maxW": 1330 },
+    "head2": { "x": 630, "y": 1800, "text": "סבב שני: המשך של ב' ו-ג'", "kind": "title1", "maxW": 860 },
+    "head3": { "x": 630, "y": 3940, "text": "סבב שלישי: Impeccable", "kind": "title1", "maxW": 860 },
+    "head4": { "x": 160, "y": 6080, "text": "סבב רביעי: עולם הלימודים (Impeccable)", "kind": "title1", "maxW": 1330 },
+    "head5": { "x": 630, "y": 9120, "text": "הכיוון שנבחר", "kind": "title1", "maxW": 860 },
+    "sample": { "x": 1570, "y": 0, "w": 280, "text": "כל השמות והמספרים הם לדוגמה בלבד. בוחרים כיוון אחד, וממנו בונים את שאר העמודים: בית, תחום, השוואה וכתיבת ביקורת." }
+  },
+  "designSystems": []
+}
