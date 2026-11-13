@@ -59,14 +59,13 @@ export default async function CoursePage({ params }: Props) {
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
-          {/* העמודים האלה ייבנו עם האתר הציבורי. עד אז בלי טעינה מראש, כדי שלא יירשמו בקשות 404. */}
-          <Link href="/courses" prefetch={false} className={textLink}>
+          <Link href="/courses" className={textLink}>
             קורסים
           </Link>
           {course.categorySlug && (
             <>
               {' › '}
-              <Link href={`/categories/${course.categorySlug}`} prefetch={false} className={textLink}>
+              <Link href={`/categories/${course.categorySlug}`} className={textLink}>
                 {course.categoryName}
               </Link>
             </>
@@ -124,7 +123,7 @@ export default async function CoursePage({ params }: Props) {
         {course.lastCheckedAt && (
           <p className="mt-4 font-sans text-[13px] text-ink-soft">
             פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
-            <Link href="/method" prefetch={false} className="underline">
+            <Link href="/method" className="underline">
               איך אנחנו מסכמים ומי משלם לנו
             </Link>
           </p>
