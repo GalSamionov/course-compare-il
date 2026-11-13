@@ -905,8 +905,9 @@ select
   'published',
   'invoice',
   case when g <= 6 then 12500 + (g % 3) * 1000 else null end,
-  timestamptz '2026-05-01 12:00:00+03' + (g * interval '6 days'),
-  timestamptz '2026-05-02 12:00:00+03' + (g * interval '6 days'),
+  -- הסדר הפוך: הביקורות עם שם (נועה, דני) הן החדשות ביותר, ולכן העמוד מציג אותן.
+  timestamptz '2026-05-01 12:00:00+03' + ((24 - g) * interval '6 days'),
+  timestamptz '2026-05-02 12:00:00+03' + ((24 - g) * interval '6 days'),
   case g when 1 then 'התחלתי לעבוד כמפתחת ג׳וניור' else null end
 from generate_series(1, 23) as g;
 
@@ -1493,7 +1494,12 @@ export function createPublicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
-  return createClient<Database>(url, key, { auth: { persistSession: false } });
+  return createClient<Database>(url, key, {
+    auth: { persistSession: false },
+    // 'use cache' הוא שכבת המטמון היחידה. בלי no-store, `next build` משתמש שוב במטמון ה-fetch של Next
+    // שנשמר בדיסק (כ-15 דקות), ובנייה אחרי שינוי במסד מציגה נתונים ישנים.
+    global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }) },
+  });
 }
 ```
 
@@ -1863,6 +1869,7 @@ export function safeHttpUrl(value: unknown): string | null {
 Create `web/src/lib/data/course-page.ts`:
 
 ```ts
+import { cacheLife, cacheTag } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
 import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
@@ -1945,13 +1952,32 @@ export interface CoursePageData {
   reviewTotal: number;
 }
 
-const REVIEWS_ON_PAGE = 5;
+const REVIEWS_ON_PAGE = 3;
 
 function queryError(what: string, error: { message: string }): Error {
   return new Error(`${what} query failed: ${error.message}`, { cause: error });
 }
 
+/**
+ * עמוד הקורס, מהמטמון של Next. נשמר לשעה, ו-`revalidateTag('course:<slug>')` מרענן אותו לפני הזמן.
+ * עם `cacheComponents` אין `export const revalidate`, ולכן המטמון מוגדר כאן.
+ */
 export async function getCoursePage(slug: string): Promise<CoursePageData | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`course:${slug}`);
+  return loadCoursePage(slug);
+}
+
+/** כל הקורסים שאינם טיוטה, לבנייה מראש של העמודים. שאילתה שנכשלה זורקת שגיאה, כדי שהבנייה תיכשל ולא תדלג בשקט. */
+export async function getCourseSlugs(): Promise<string[]> {
+  const { data, error } = await createPublicClient().from('courses').select('slug').neq('status', 'draft').order('slug');
+  if (error) throw queryError('course slugs', error);
+  return data.map((row) => row.slug);
+}
+
+/** הטעינה עצמה, בלי מטמון. סקריפטים מחוץ ל-Next קוראים לה ישירות. */
+export async function loadCoursePage(slug: string): Promise<CoursePageData | null> {
   const db = createPublicClient();
 
   const { data: course, error } = await db
@@ -2181,6 +2207,9 @@ Expected: נוצרו `components.json` ו-`src/components/ui/button.tsx`, ובל
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* אף רכיב לא מוסיף .dark, ולכן מחלקות dark: לא חלות לעולם, ולא נופלות ל-prefers-color-scheme. */
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -2260,6 +2289,7 @@ Expected: נוצרו `components.json` ו-`src/components/ui/button.tsx`, ובל
 }
 body {
   font-family: var(--font-serif);
+  line-height: 1.8;
 }
 
 ::selection {
@@ -2333,7 +2363,7 @@ const markLabel: Record<MarkSource, string> = {
 /** מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה. */
 export function Mark({ source, children }: { source: MarkSource; children: React.ReactNode }) {
   return (
-    <mark data-source={source} className={cn('px-0.5 text-inherit', markColor[source])}>
+    <mark data-source={source} className={cn('box-decoration-clone px-0.5 text-inherit', markColor[source])}>
       <span className="sr-only">{markLabel[source]}: </span>
       {children}
     </mark>
@@ -2469,31 +2499,42 @@ git commit -m "feat: מערכת העיצוב: גופנים עבריים, טוק�
 Create `web/src/components/course/score-box.tsx`:
 
 ```tsx
+import { cn } from '@/lib/utils';
 import type { ScoreView } from '@/lib/data/course-page';
 import { StickyNote } from './marks';
 
 export function ScoreBox({ score }: { score: ScoreView }) {
   return (
-    <section aria-label="ציון בוגרים" className="relative mt-5 flex items-center gap-4 border-[1.5px] border-ink px-4 py-3">
+    <section
+      aria-label="ציון בוגרים"
+      className={cn(
+        'relative mt-5 flex items-center gap-4 border-[1.5px] border-ink px-4 py-3',
+        // שורת "ייתכן שהתיישן" מאריכה את הטקסט, ולכן מפנים מקום לפתק שתלוי למטה.
+        score.status === 'scored' && score.stale && 'pb-8',
+      )}
+    >
       {score.status === 'scored' ? (
         <>
-          <span data-testid="score-value" className="text-[52px] font-bold leading-none">
+          <span aria-hidden="true" data-testid="score-value" className="text-[52px] font-bold leading-none">
             {score.value.toFixed(1)}
           </span>
+          <span className="sr-only">ציון בוגרים {score.value.toFixed(1)} מתוך 10.</span>
           <div className="font-sans text-sm leading-snug">
             <p className="font-bold">ציון בוגרים מתוך 10</p>
             <p>{score.reviewCount} בוגרים מאומתים</p>
-            {score.recommendPct !== null && <p>{score.recommendPct}% ממליצים</p>}
+            {score.recommendPct !== null && <p>{Math.round(score.recommendPct)}% ממליצים</p>}
             {score.stale && <p className="text-ink-soft">ייתכן שהתיישן: אין ביקורת חדשה כבר שנה</p>}
           </div>
         </>
       ) : (
-        <div className="font-sans text-sm leading-snug">
+        // הפתק תלוי בפינה השמאלית, ולכן הטקסט לא נכנס מתחתיו.
+        <div className="pe-[112px] font-sans text-sm leading-snug">
           <p className="font-bold">עוד אין ציון בוגרים</p>
           {score.status === 'not_enough_reviews' && (
-            <p>
-              {score.reviewCount} ביקורות מאומתות. עוד {score.reviewsNeeded} ביקורות עד לציון.
-            </p>
+            <>
+              <p>{score.reviewCount} ביקורות מאומתות.</p>
+              {score.reviewsNeeded > 0 && <p>עוד {score.reviewsNeeded} ביקורות עד לציון.</p>}
+            </>
           )}
         </div>
       )}
@@ -2564,6 +2605,19 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 export function AboutSection({ course }: { course: CoursePageData }) {
   const formats = course.formats.map((f) => formatLabels[f] ?? f).join(' או ');
+  // שורת המשך מציגה רק את מה שידוע. חודשים ושעות נבדקו מול אתר המוסד, ולכן הם במרקר ירוק.
+  const duration = [
+    course.durationMonths !== null ? `${course.durationMonths} חודשים` : null,
+    course.totalHours !== null ? `${course.totalHours} שעות` : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const handsOn =
+    course.handsOnHours === null
+      ? null
+      : course.totalHours !== null
+        ? `מהן ${course.handsOnHours} שעות עשייה`
+        : `${course.handsOnHours} שעות עשייה`;
   return (
     <section id="about" className="mt-7">
       <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">על הקורס</h2>
@@ -2572,21 +2626,19 @@ export function AboutSection({ course }: { course: CoursePageData }) {
         <>
           <h3 className="mt-4 font-sans text-base font-bold">מה לומדים, {course.syllabus.length} פרקים</h3>
           <ol className="mt-1 list-decimal pr-6">
-            {course.syllabus.map((item) => (
-              <li key={item.title}>{item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}</li>
+            {course.syllabus.map((item, i) => (
+              <li key={`${i}-${item.title}`}>{item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}</li>
             ))}
           </ol>
         </>
       )}
 
       <dl className="mt-4 grid grid-cols-[112px_minmax(0,1fr)] gap-x-3 gap-y-2 text-[15px] leading-relaxed">
-        {course.totalHours !== null && (
+        {(duration || handsOn) && (
           <Row label="משך">
-            <Mark source="verified">
-              {course.durationMonths !== null ? `${course.durationMonths} חודשים, ` : ''}
-              {course.totalHours} שעות
-            </Mark>
-            {course.handsOnHours !== null && `, מהן ${course.handsOnHours} שעות עשייה`}
+            {duration && <Mark source="verified">{duration}</Mark>}
+            {duration && handsOn && ', '}
+            {handsOn}
           </Row>
         )}
         {course.schedule && <Row label="מתי">{course.schedule}</Row>}
@@ -2669,9 +2721,16 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
               <p className="mt-1 text-[15px] leading-relaxed">
                 <span className="font-sans font-bold">מה בדקנו:</span>{' '}
                 {lecturer.verifiedFacts.length > 0 ? (
-                  lecturer.verifiedFacts.map((fact) => (
-                    <a key={fact.text} href={fact.sourceUrl} target="_blank" rel="noopener noreferrer" className="me-1">
+                  lecturer.verifiedFacts.map((fact, i) => (
+                    <a
+                      key={`${i}-${fact.text}`}
+                      href={fact.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="me-1"
+                    >
                       <Mark source="verified">{fact.text}</Mark>
+                      <span className="sr-only"> (נפתח בחלון חדש)</span>
                     </a>
                   ))
                 ) : (
@@ -2712,19 +2771,19 @@ export function PriceSection({ course }: { course: CoursePageData }) {
       <p className="mt-2.5">
         {course.sitePrice !== null ? (
           <>
-            <bdi>{formatIls(course.sitePrice)}</bdi> באתר המוסד.
+            <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi> באתר המוסד.
           </>
         ) : (
           'המוסד לא מפרסם מחיר.'
         )}{' '}
         {course.paid && (
           <Mark source="verified">
-            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi>{formatPaidRange(course.paid)}</bdi>
+            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
           </Mark>
         )}
         {course.costPerHandsOnHour !== null && (
           <>
-            , כלומר כ-<bdi>{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
+            , כלומר כ-<bdi dir="rtl">{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
           </>
         )}
       </p>
@@ -2742,8 +2801,13 @@ Create `web/src/components/course/grads-section.tsx`:
 import type { CoursePageData } from '@/lib/data/course-page';
 import { Mark } from './marks';
 
+/** האם יש מה להציג בחלק. גם הניווט בראש העמוד משתמש בזה, כדי לא לקשר לחלק שלא קיים. */
+export function hasGradsSection(course: CoursePageData): boolean {
+  return Boolean(course.summaryGood || course.summaryWeak || course.metrics.length > 0);
+}
+
 export function GradsSection({ course }: { course: CoursePageData }) {
-  if (!course.summaryGood && !course.summaryWeak && course.metrics.length === 0) return null;
+  if (!hasGradsSection(course)) return null;
   return (
     <section id="grads" className="mt-7">
       <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">מה הבוגרים אומרים</h2>
@@ -2795,19 +2859,26 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
       <h2 className="mb-3.5 inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">ביקורות</h2>
       <div className="flex flex-col gap-6">
         {reviews.map((r, i) => (
-          <div key={r.id}>
+          // הביקורת כולה, כולל הפתק של שאלת ההמשך ותגובת המוסד, היא article אחד.
+          // פתק ההמשך תלוי מתחת לפתק, ולכן בלי תגובת מוסד מפנים לו מקום לפני הביקורת הבאה.
+          <article key={r.id} className={r.followUp && !r.vendorResponse ? 'pb-8' : undefined}>
             <StickyNote
               tone="grad"
               tilt={i % 2 === 0 ? 0.6 : -0.8}
               className={`relative px-4 pt-3.5 ${r.followUp ? 'pb-8' : 'pb-3.5'}`}
             >
-              <article>
-                <p className="text-[13px]">
-                  {/* לשם יש מין דקדוקי שאנחנו לא יודעים עדיין, ולכן ליד שם לא כותבים "בוגר" או "בוגרת". */}
-                  <strong>{r.displayName ?? 'בוגר מאומת'}</strong>, מחזור {cohortLabel(r.cohortMonth)}
-                </p>
-                <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
-              </article>
+              <p className="text-[13px]">
+                {/* כל פתק אומר שהביקורת מאומתת: זו ההבטחה של האתר. אנחנו לא יודעים את המין הדקדוקי של הכותב, ולכן "ביקורת מאומתת" ולא "בוגר" או "בוגרת". */}
+                {r.displayName ? (
+                  <>
+                    <strong>{r.displayName}</strong>, ביקורת מאומתת
+                  </>
+                ) : (
+                  <strong>ביקורת מאומתת</strong>
+                )}
+                , מחזור {cohortLabel(r.cohortMonth)}
+              </p>
+              <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
               {r.followUp && (
                 <StickyNote tone="grad-light" tilt={-4} className="absolute -bottom-6 left-2.5 w-[164px] px-2.5 py-1.5">
                   <strong>אחרי 3 חודשים:</strong> {r.followUp}
@@ -2819,7 +2890,7 @@ export function ReviewsSection({ reviews, total }: { reviews: ReviewView[]; tota
                 <strong>תגובת המוסד:</strong> {r.vendorResponse}
               </StickyNote>
             )}
-          </div>
+          </article>
         ))}
       </div>
       {total > reviews.length && (
@@ -2842,18 +2913,34 @@ Create `web/src/components/course/course-actions.tsx`:
 
 ```tsx
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-/** כתיבת ביקורת נבנית בתוכנית 2, והשוואה בתוכנית 4. */
+/**
+ * כתיבת ביקורת נבנית בתוכנית 2, והשוואה בתוכנית 4.
+ * ה-Button של shadcn בנוי על Base UI ואין לו asChild, ולכן הקישורים מקבלים את המחלקות של הכפתור.
+ * prefetch כבוי: שני העמודים עוד לא קיימים, וטעינה מוקדמת שלהם רק רושמת 404.
+ */
 export function CourseActions({ slug }: { slug: string }) {
   return (
     <div className="mt-6 flex gap-2.5 font-sans">
-      <Button asChild className="h-[50px] flex-1 text-base font-bold">
-        <Link href={`/courses/${slug}/review`}>כתיבת ביקורת</Link>
-      </Button>
-      <Button asChild variant="outline" className="h-[50px] flex-1 border-[1.5px] border-ink text-base font-bold">
-        <Link href={`/compare?add=${slug}`}>להשוואה (עד 3)</Link>
-      </Button>
+      <Link
+        href={`/courses/${slug}/review`}
+        prefetch={false}
+        className={cn(buttonVariants(), 'h-[50px] flex-1 text-base font-bold')}
+      >
+        כתיבת ביקורת
+      </Link>
+      <Link
+        href={`/compare?add=${slug}`}
+        prefetch={false}
+        className={cn(
+          buttonVariants({ variant: 'outline' }),
+          'h-[50px] flex-1 border-[1.5px] border-ink text-base font-bold',
+        )}
+      >
+        להשוואה (עד 3)
+      </Link>
     </div>
   );
 }
@@ -2877,7 +2964,7 @@ export function CourseActions({ slug }: { slug: string }) {
 > 2. משאירים את `export const revalidate = 3600`, כמו בקוד שלמטה.
 > 3. מדווחים על הבחירה.
 >
-> הקוד שלמטה כתוב לגרסה בלי `cacheComponents`.
+> **מה נבחר בפועל:** `cacheComponents` נשאר פעיל. `getCoursePage` עטוף ב-`'use cache'`, `generateStaticParams` מחזיר את הקורסים, ו-`export const ensureStatic = 'navigation'` גורם לכתובת שלא קיימת להחזיר 404 אמיתי. הקוד שלמטה הוא הגרסה הזו. ה-fallback שלמעלה לא היה צריך.
 
 Create `web/src/app/courses/[slug]/page.tsx`:
 
@@ -2886,19 +2973,32 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
 import { CourseActions } from '@/components/course/course-actions';
-import { GradsSection } from '@/components/course/grads-section';
+import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
 import { ScoreBox } from '@/components/course/score-box';
 import { SourceLegend } from '@/components/course/source-legend';
 import { VideoSection } from '@/components/course/video-section';
-import { getCoursePage } from '@/lib/data/course-page';
+import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
 
-export const revalidate = 3600;
+/**
+ * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
+ * קורס שלא נבנה מראש נבנה בבקשה הראשונה, והבקשה מחכה לעמוד המלא במקום לקבל שלד.
+ * כך notFound() רץ לפני שהתשובה מתחילה, וכתובת של קורס שלא קיים מחזירה 404 אמיתי.
+ */
+export const ensureStatic = 'navigation';
+
+export async function generateStaticParams() {
+  const slugs = await getCourseSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 type Props = { params: Promise<{ slug: string }> };
+
+/** קישור בתוך טקסט, עם קו דק כמו בלוח. כפתורים וקישורי מקור נשארים בלי זה. */
+const textLink = 'underline decoration-1 underline-offset-[3px]';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -2917,6 +3017,9 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
+  // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג.
+  const hasGrads = hasGradsSection(course);
+  const hasReviews = course.reviews.length > 0;
 
   return (
     <div className="mx-auto max-w-[680px] px-[22px] pb-12">
@@ -2927,8 +3030,17 @@ export default async function CoursePage({ params }: Props) {
 
       <main>
         <nav aria-label="מיקום" className="mt-3.5 font-sans text-[13px] text-ink-soft">
-          <a href="/courses" className="hover:underline">קורסים</a> ›{' '}
-          <a href={`/categories/${course.categorySlug}`} className="hover:underline">{course.categoryName}</a>
+          <a href="/courses" className={textLink}>
+            קורסים
+          </a>
+          {course.categorySlug && (
+            <>
+              {' › '}
+              <a href={`/categories/${course.categorySlug}`} className={textLink}>
+                {course.categoryName}
+              </a>
+            </>
+          )}
         </nav>
         <h1 className="mt-0.5 text-[30px] leading-tight font-bold">{course.title}</h1>
         <p className="mt-1 font-sans text-[15px] text-ink-soft">
@@ -2941,12 +3053,32 @@ export default async function CoursePage({ params }: Props) {
           </p>
         )}
         <nav aria-label="בעמוד הזה" className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5 font-sans text-[15px] font-semibold">
-          {course.videoUrl && <a href="#video">סרטון</a>}
-          <a href="#about">על הקורס</a>
-          {course.lecturers.length > 0 && <a href="#lecturers">מרצים</a>}
-          <a href="#price">מחיר</a>
-          <a href="#grads">מה הבוגרים אומרים</a>
-          <a href="#reviews">ביקורות ({reviewCount})</a>
+          {course.videoUrl && (
+            <a href="#video" className={textLink}>
+              סרטון
+            </a>
+          )}
+          <a href="#about" className={textLink}>
+            על הקורס
+          </a>
+          {course.lecturers.length > 0 && (
+            <a href="#lecturers" className={textLink}>
+              מרצים
+            </a>
+          )}
+          <a href="#price" className={textLink}>
+            מחיר
+          </a>
+          {hasGrads && (
+            <a href="#grads" className={textLink}>
+              מה הבוגרים אומרים
+            </a>
+          )}
+          {hasReviews && (
+            <a href="#reviews" className={textLink}>
+              ביקורות ({reviewCount})
+            </a>
+          )}
         </nav>
 
         <ScoreBox score={course.score} />
@@ -2955,7 +3087,7 @@ export default async function CoursePage({ params }: Props) {
         <AboutSection course={course} />
         <LecturersSection course={course} />
         <PriceSection course={course} />
-        <GradsSection course={course} />
+        {hasGrads && <GradsSection course={course} />}
         <ReviewsSection reviews={course.reviews} total={reviewCount} />
         <CourseActions slug={course.slug} />
 
@@ -2977,6 +3109,7 @@ Create `web/src/app/courses/[slug]/not-found.tsx`:
 export default function CourseNotFound() {
   return (
     <main className="mx-auto max-w-[680px] px-[22px] py-16">
+      <title>הקורס לא נמצא | [שם האתר]</title>
       <h1 className="text-2xl font-bold">הקורס לא נמצא</h1>
       <p className="mt-2 font-sans text-ink-soft">ייתכן שהקישור שגוי, או שהקורס הוסר מהקטלוג.</p>
     </main>
