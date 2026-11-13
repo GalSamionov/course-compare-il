@@ -86,8 +86,9 @@ select
   'published',
   'invoice',
   case when g <= 6 then 12500 + (g % 3) * 1000 else null end,
-  timestamptz '2026-05-01 12:00:00+03' + (g * interval '6 days'),
-  timestamptz '2026-05-02 12:00:00+03' + (g * interval '6 days'),
+  -- הסדר הפוך: הביקורות עם שם (נועה, דני) הן החדשות ביותר, ולכן העמוד מציג אותן.
+  timestamptz '2026-05-01 12:00:00+03' + ((24 - g) * interval '6 days'),
+  timestamptz '2026-05-02 12:00:00+03' + ((24 - g) * interval '6 days'),
   case g when 1 then 'התחלתי לעבוד כמפתחת ג׳וניור' else null end
 from generate_series(1, 23) as g;
 

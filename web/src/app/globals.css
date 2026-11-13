@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* אף רכיב לא מוסיף .dark, ולכן מחלקות dark: לא חלות לעולם, ולא נופלות ל-prefers-color-scheme. */
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
