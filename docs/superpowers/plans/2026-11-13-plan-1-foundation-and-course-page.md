@@ -1697,12 +1697,16 @@ import { costPerHandsOnHour, formatHebrewDate, formatIls, formatPaidRange } from
 describe('formatIls', () => {
   it('adds thousands separators and the shekel sign', () => {
     expect(formatIls(14900)).toBe('14,900 ₪');
+    expect(formatIls(1500)).toBe('1,500 ₪');
   });
 });
 
 describe('formatPaidRange', () => {
   it('writes the range with an en dash', () => {
     expect(formatPaidRange({ min: 12500, max: 15000, count: 6 })).toBe('12,500–15,000 ₪');
+  });
+  it('shows one amount when min equals max', () => {
+    expect(formatPaidRange({ min: 14900, max: 14900, count: 3 })).toBe('14,900 ₪');
   });
 });
 
@@ -1719,6 +1723,13 @@ describe('costPerHandsOnHour', () => {
 describe('formatHebrewDate', () => {
   it('writes day.month.year in Israel time', () => {
     expect(formatHebrewDate('2026-11-06T08:00:00Z')).toBe('6.11.2026');
+  });
+  it('uses Israel time near midnight', () => {
+    expect(formatHebrewDate('2026-11-05T22:30:00Z')).toBe('6.11.2026');
+    expect(formatHebrewDate('2026-12-31T22:30:00Z')).toBe('1.1.2027');
+  });
+  it('accepts a date-only string from a Postgres date column', () => {
+    expect(formatHebrewDate('2027-01-10')).toBe('10.1.2027');
   });
 });
 ```
@@ -1753,22 +1764,27 @@ export interface PaidRange {
 }
 
 export function formatPaidRange(range: PaidRange): string {
+  if (range.min === range.max) return formatIls(range.min);
   return `${ilsNumber.format(range.min)}–${ilsNumber.format(range.max)} ₪`;
 }
 
+// מחיר 0 או null אומר "לא מציגים" (לקורס חינם אין עלות לשעה), ולכן מחזירים null.
 export function costPerHandsOnHour(price: number | null, handsOnHours: number | null): number | null {
   if (!price || !handsOnHours) return null;
   return Math.round(price / handsOnHours);
 }
 
+const israelDate = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Asia/Jerusalem',
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+});
+
+// תאריך לא תקין זורק שגיאה בכוונה, והקוראים מעבירים רק ערכים שאינם null.
 export function formatHebrewDate(iso: string): string {
-  const parts = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Jerusalem',
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric',
-  }).formatToParts(new Date(iso));
-  const get = (type: string) => parts.find((p) => p.type === type)?.value;
+  const parts = israelDate.formatToParts(new Date(iso));
+  const get = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value);
   return `${get('day')}.${get('month')}.${get('year')}`;
 }
 ```
@@ -1779,7 +1795,7 @@ export function formatHebrewDate(iso: string): string {
 pnpm test
 ```
 
-Expected: `23 passed`, מתוכן 18 בדיקות ציון ו-5 בדיקות תצוגה.
+Expected: `26 passed`, מתוכן 18 בדיקות ציון ו-8 בדיקות תצוגה.
 
 - [ ] **Step 5: Commit**
 
@@ -2536,13 +2552,23 @@ export function PriceSection({ course }: { course: CoursePageData }) {
     <section id="price" className="mt-7">
       <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">מחיר</h2>
       <p className="mt-2.5">
-        {course.sitePrice !== null ? `${formatIls(course.sitePrice)} באתר המוסד.` : 'המוסד לא מפרסם מחיר.'}{' '}
+        {course.sitePrice !== null ? (
+          <>
+            <bdi>{formatIls(course.sitePrice)}</bdi> באתר המוסד.
+          </>
+        ) : (
+          'המוסד לא מפרסם מחיר.'
+        )}{' '}
         {course.paid && (
           <Mark source="verified">
-            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל {formatPaidRange(course.paid)}
+            לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi>{formatPaidRange(course.paid)}</bdi>
           </Mark>
         )}
-        {course.costPerHandsOnHour !== null && `, כלומר כ-${formatIls(course.costPerHandsOnHour)} לשעת עשייה.`}
+        {course.costPerHandsOnHour !== null && (
+          <>
+            , כלומר כ-<bdi>{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
+          </>
+        )}
       </p>
       {course.paid && <PenNote className="mt-1">← שווה לשאול על הנחה לפני שנרשמים</PenNote>}
     </section>
