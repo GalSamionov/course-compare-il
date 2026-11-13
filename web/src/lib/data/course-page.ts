@@ -89,9 +89,6 @@ function queryError(what: string, error: { message: string }): Error {
 export async function getCoursePage(slug: string): Promise<CoursePageData | null> {
   const db = createPublicClient();
 
-  // השאילתה לא תלויה בקורס, אז מתחילים אותה לפני שממתינים לקורס.
-  const metricsPromise = db.from('metrics').select('key, label, sort_order').order('sort_order');
-
   const { data: course, error } = await db
     .from('courses')
     .select(
@@ -100,10 +97,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     .eq('slug', slug)
     .maybeSingle();
   if (error) throw queryError('course', error);
-  if (!course) {
-    await metricsPromise;
-    return null;
-  }
+  if (!course) return null;
 
   const [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes] = await Promise.all([
     db
@@ -115,7 +109,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       .order('id', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    metricsPromise,
+    db.from('metrics').select('key, label, sort_order').order('sort_order'),
     // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
     db
       .from('reviews')
