@@ -1811,6 +1811,52 @@ git commit -m "feat: פונקציות תצוגה למחיר, טווח תשלום
 
 **Files:**
 - Create: `web/src/lib/data/course-page.ts`
+- Create: `web/src/lib/safe-url.ts`
+- Test: `web/src/lib/safe-url.test.ts`
+
+- [ ] **Step 0: כתובות בטוחות (TDD)**
+
+קישורי המקור של עובדות על מרצים, וכתובת הסרטון, עוברים דרך `safeHttpUrl`. כך כתובת כמו `javascript:` לא מגיעה ל-`href`, ועובדה "שנבדקה" בלי מקור תקין לא מוצגת.
+
+Create `web/src/lib/safe-url.test.ts`:
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { safeHttpUrl } from './safe-url';
+
+describe('safeHttpUrl', () => {
+  it('returns an https URL unchanged', () => {
+    expect(safeHttpUrl('https://example.com/a?b=1')).toBe('https://example.com/a?b=1');
+  });
+  it('rejects javascript: URLs', () => {
+    expect(safeHttpUrl('javascript:alert(1)')).toBeNull();
+  });
+  it('rejects non-strings and unparseable strings', () => {
+    expect(safeHttpUrl(undefined)).toBeNull();
+    expect(safeHttpUrl(42)).toBeNull();
+    expect(safeHttpUrl('not a url')).toBeNull();
+  });
+});
+```
+
+מריצים `cd web && pnpm test`. Expected: FAIL, כי `./safe-url` לא קיים.
+
+Create `web/src/lib/safe-url.ts`:
+
+```ts
+/** מחזיר את הכתובת רק אם היא מחרוזת http או https תקינה. אחרת null. */
+export function safeHttpUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  try {
+    const { protocol } = new URL(value);
+    return protocol === 'http:' || protocol === 'https:' ? value : null;
+  } catch {
+    return null;
+  }
+}
+```
+
+מריצים `pnpm test`. Expected: `29 passed` (18 ציון, 8 תצוגה, 3 כתובות).
 
 - [ ] **Step 1: לכתוב את הטעינה**
 
@@ -1819,6 +1865,9 @@ Create `web/src/lib/data/course-page.ts`:
 ```ts
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
+import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
+import { safeHttpUrl } from '@/lib/safe-url';
+import type { Database } from '@/lib/database.types';
 
 export interface SyllabusItem {
   title: string;
@@ -1834,7 +1883,8 @@ export interface MetricRow {
 
 export interface ReviewView {
   id: string;
-  displayName: string;
+  /** null כשהבוגר בחר להישאר אנונימי. */
+  displayName: string | null;
   cohortMonth: string;
   body: string;
   followUp: string | null;
@@ -1860,6 +1910,7 @@ export type ScoreView =
 export interface CoursePageData {
   slug: string;
   title: string;
+  status: Exclude<Database['public']['Enums']['course_status'], 'draft'>;
   institutionName: string;
   categoryName: string;
   categorySlug: string;
@@ -1896,21 +1947,27 @@ export interface CoursePageData {
 
 const REVIEWS_ON_PAGE = 5;
 
+function queryError(what: string, error: { message: string }): Error {
+  return new Error(`${what} query failed: ${error.message}`, { cause: error });
+}
+
 export async function getCoursePage(slug: string): Promise<CoursePageData | null> {
   const db = createPublicClient();
 
   const { data: course, error } = await db
     .from('courses')
-    .select('*, institutions(name), categories(name, slug)')
+    .select(
+      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, institutions(name), categories(name, slug)',
+    )
     .eq('slug', slug)
     .maybeSingle();
-  if (error) throw error;
+  if (error) throw queryError('course', error);
   if (!course) return null;
 
   const [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes] = await Promise.all([
     db
       .from('scores')
-      .select('*')
+      .select('status, value, review_count, reviews_needed, recommend_pct, stale, per_metric')
       .eq('course_id', course.id)
       .eq('kind', 'graduate')
       .order('computed_at', { ascending: false })
@@ -1921,7 +1978,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
     db
       .from('reviews')
-      .select('id, display_name, cohort_month, body, follow_up_text, published_at, vendor_responses(body)', {
+      .select('id, display_name, display_mode, cohort_month, body, follow_up_text, published_at, vendor_responses(body)', {
         count: 'exact',
       })
       .eq('course_id', course.id)
@@ -1933,15 +1990,18 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       .from('course_lecturers')
       .select('role, sort_order, lecturers(slug, name, institution_bio, verified_facts, course_lecturers(count))')
       .eq('course_id', course.id)
-      .order('sort_order'),
+      .order('sort_order')
+      .order('lecturer_id'),
     // הסכום של כל בוגר לא חשוף. המסד מחזיר רק טווח, ורק משלוש חשבוניות.
     db.rpc('course_paid_range', { p_course_id: course.id }),
   ]);
 
   // שאילתה שנכשלה זורקת שגיאה. אחרת העמוד היה מציג בשקט "אין ציון" או "אין ביקורות".
-  for (const res of [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes]) {
-    if (res.error) throw res.error;
-  }
+  if (scoreRes.error) throw queryError('score', scoreRes.error);
+  if (metricsRes.error) throw queryError('metrics', metricsRes.error);
+  if (reviewsRes.error) throw queryError('reviews', reviewsRes.error);
+  if (lecturersRes.error) throw queryError('lecturers', lecturersRes.error);
+  if (paidRes.error) throw queryError('paid range', paidRes.error);
   const scoreRow = scoreRes.data;
   const metricDefs = metricsRes.data;
   const lecturerRows = lecturersRes.data;
@@ -1966,10 +2026,16 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
       name: lecturer.name,
       role,
       institutionBio: lecturer.institution_bio,
-      verifiedFacts: ((lecturer.verified_facts ?? []) as { text: string; source_url: string }[]).map((f) => ({
-        text: f.text,
-        sourceUrl: f.source_url,
-      })),
+      // עובדה בלי טקסט או בלי קישור תקין למקור לא מוצגת: ההבטחה היא שלכל עובדה שנבדקה יש מקור.
+      verifiedFacts: (Array.isArray(lecturer.verified_facts) ? (lecturer.verified_facts as unknown[]) : []).flatMap(
+        (f) => {
+          const fact = f as { text?: unknown; source_url?: unknown } | null;
+          const sourceUrl = safeHttpUrl(fact?.source_url);
+          return typeof fact?.text === 'string' && fact.text !== '' && sourceUrl
+            ? [{ text: fact.text, sourceUrl }]
+            : [];
+        },
+      ),
       // ההרשאות סופרות רק קורסים שאינם טיוטה, כולל הקורס הזה. לכן מורידים 1.
       otherCoursesCount: Math.max(0, (lecturer.course_lecturers[0]?.count ?? 1) - 1),
     }));
@@ -1992,10 +2058,19 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   }
 
   const perMetric = (scoreRow?.per_metric ?? {}) as Record<string, { mean: number; n: number }>;
+  const valid = (key: string) => {
+    const m = perMetric[key];
+    return m && Number.isFinite(m.mean) && Number.isFinite(m.n) ? m : null;
+  };
   const metrics: MetricRow[] = (metricDefs ?? [])
-    .filter((m) => m.key !== 'recommend' && perMetric[m.key])
+    .filter((m) => {
+      const entry = valid(m.key);
+      if (m.key === 'recommend' || !entry) return false;
+      // תוצאה אחרי שלושה חודשים מוצגת רק מ-MIN_OUTCOME_ANSWERS תשובות.
+      return m.key !== 'outcome_3m' || entry.n >= MIN_OUTCOME_ANSWERS;
+    })
     .map((m) => ({ key: m.key, label: m.label, mean: perMetric[m.key].mean, n: perMetric[m.key].n }));
-  const outcomeResult = perMetric.outcome_3m;
+  const outcomeResult = valid('outcome_3m');
 
   const paidRow = paidRows?.[0];
   const paid: PaidRange | null = paidRow
@@ -2005,6 +2080,7 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
   return {
     slug: course.slug,
     title: course.title,
+    status: course.status as CoursePageData['status'],
     institutionName: institution?.name ?? '',
     categoryName: category?.name ?? '',
     categorySlug: category?.slug ?? '',
@@ -2016,13 +2092,15 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     durationMonths: course.duration_months === null ? null : Number(course.duration_months),
     schedule: course.schedule,
     nextCohortDate: course.next_cohort_date,
-    syllabus: (course.syllabus as unknown as SyllabusItem[]) ?? [],
+    syllabus: (Array.isArray(course.syllabus) ? (course.syllabus as unknown as SyllabusItem[]) : [])
+      .filter((i) => typeof i?.title === 'string')
+      .map((i) => ({ title: i.title, weak: i.weak === true })),
     lecturersNote: course.lecturers_note,
     admission: course.admission,
     classSizeNote: course.class_size_note,
     certificate: course.certificate,
     institutionPromises: course.institution_promises,
-    videoUrl: course.video_url,
+    videoUrl: safeHttpUrl(course.video_url),
     summaryGood: course.summary_good,
     summaryWeak: course.summary_weak,
     lecturers,
@@ -2030,13 +2108,14 @@ export async function getCoursePage(slug: string): Promise<CoursePageData | null
     lastCheckedAt: course.last_checked_at,
     score,
     metrics,
-    outcome: outcomeResult && outcomeResult.n >= 3 ? outcomeResult : null,
+    outcome: outcomeResult && outcomeResult.n >= MIN_OUTCOME_ANSWERS ? outcomeResult : null,
     paid,
     costPerHandsOnHour: costPerHandsOnHour(course.site_price_ils, course.hands_on_hours),
     reviewTotal: reviewsRes.count ?? 0,
     reviews: (reviewsRes.data ?? []).map((r) => ({
       id: r.id,
-      displayName: r.display_name,
+      // אנונימי: השם השמור אף פעם לא עובר הלאה.
+      displayName: r.display_mode === 'anonymous' ? null : r.display_name,
       cohortMonth: r.cohort_month,
       body: r.body,
       followUp: r.follow_up_text,
@@ -2054,11 +2133,17 @@ cd web && pnpm exec tsc --noEmit
 
 Expected: אין שגיאות. אם יש שגיאות טיפוס על `institutions` או `categories`, ה-cast שבקוד מכסה את שתי הצורות. בודקים שהשמות ב-`database.types.ts` תואמים.
 
+בדיקה מול המסד המקומי, אחרי `pnpm db:reset` ו-`pnpm score:recompute`: סקריפט זמני מחוץ למאגר (סיומת `.mts`), שמורץ מתוך `web/` עם `node --env-file=.env.local --import tsx <script>` וקורא ל-`getCoursePage`. Expected:
+- `full-stack-sample`: ציון 7.9 מ-23 ביקורות, `reviewTotal` 23, 5 ביקורות בעמוד מהחדשה לישנה, `paid` 12,500 עד 15,000 משש חשבוניות, `costPerHandsOnHour` 57, 2 מרצים, `outcome` עם n=14, `status` 'active'.
+- `ai-tools-sample`: `not_enough_reviews`, חסרות 2, `paid` null.
+- `home-cooking-sample`: `reviewTotal` 0.
+- `does-not-exist`: null.
+
 - [ ] **Step 3: Commit**
 
 ```bash
 cd ..
-git add web/src/lib/data
+git add web/src/lib/data web/src/lib/safe-url.ts web/src/lib/safe-url.test.ts
 git commit -m "feat: טעינת הנתונים של עמוד קורס"
 ```
 
