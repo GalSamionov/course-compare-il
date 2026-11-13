@@ -4,6 +4,7 @@ import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
 import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
 import { safeHttpUrl } from '@/lib/safe-url';
 import type { Database } from '@/lib/database.types';
+import { one, queryError } from './shared';
 
 export interface SyllabusItem {
   title: string;
@@ -83,9 +84,6 @@ export interface CoursePageData {
 
 const REVIEWS_ON_PAGE = 3;
 
-function queryError(what: string, error: { message: string }): Error {
-  return new Error(`${what} query failed: ${error.message}`, { cause: error });
-}
 
 /**
  * עמוד הקורס, מהמטמון של Next. נשמר לשעה, ו-`revalidateTag('course:<slug>')` מרענן אותו לפני הזמן.
@@ -162,7 +160,6 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const lecturerRows = lecturersRes.data;
   const paidRows = paidRes.data;
 
-  const one = <T,>(ref: T | T[] | null): T | null => (Array.isArray(ref) ? (ref[0] ?? null) : ref);
   const institution = one(course.institutions as { name: string } | { name: string }[] | null);
   const category = one(course.categories as { name: string; slug: string } | { name: string; slug: string }[] | null);
 
