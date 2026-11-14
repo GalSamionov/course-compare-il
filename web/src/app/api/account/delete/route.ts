@@ -1,21 +1,7 @@
 import type { NextRequest } from 'next/server';
+import { fromThisSite } from '@/lib/server/same-origin';
 import { createAdminClient } from '@/lib/supabase/admin-client';
 import { createServerSupabase } from '@/lib/supabase/server-client';
-
-/**
- * רק דף מהאתר עצמו יכול לבקש מחיקה (הגנה מ-CSRF): הדפדפן שולח Origin בכל POST של fetch,
- * ואתר אחר לא יכול לזייף אותו. עוגיית ההתחברות היא גם SameSite=Lax, ולא נשלחת ב-POST מאתר אחר.
- */
-function fromThisSite(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * מוחק את המשתמש המחובר מ-Supabase Auth. המסד מוחק איתו את הקורסים השמורים, ההשוואה והתשובות
