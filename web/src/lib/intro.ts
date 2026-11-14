@@ -7,11 +7,11 @@ export function introAllowedOn(pathname: string) {
   return !/^\/(login|me)(\/|$)/.test(pathname) && !/\/review(\/|$)/.test(pathname);
 }
 
-/** סרטון ההדרכה (video/ במאגר): 9:16 לטלפון ו-16:9 למחשב, באורך 33 שניות. */
+/** סרטון ההדרכה (video/ במאגר): 9:16 לטלפון ו-16:9 למחשב, באורך 35 שניות. */
 export const WALKTHROUGH = {
   wide: { src: '/video/lamadti-walkthrough-16x9.mp4', poster: '/video/lamadti-walkthrough-16x9.jpg' },
   tall: { src: '/video/lamadti-walkthrough-9x16.mp4', poster: '/video/lamadti-walkthrough-9x16.jpg' },
-  seconds: 33,
+  seconds: 35,
 } as const;
 
 export function hasSeenIntro() {

@@ -256,45 +256,54 @@ export function Legend({ layout }: SceneProps) {
           <OffthreadVideo src={staticFile('legend/legend.mp4')} muted style={{ width: side, height: side, display: 'block' }} />
         </Sequence>
       </PageWindow>
-      <Caption layout={layout} n={3} title="הצבע אומר מה המקור" />
+      <Caption layout={layout} n={4} title="הצבע אומר מה המקור" />
     </AbsoluteFill>
   );
 }
 
-/* ===== 4. משווים: "ההשוואה שלי" ===== */
+/* ===== 3. היועץ: שאלה בשורה הראשונה, והתשובה מעל הרשימה ===== */
 
-export function Compare({ layout }: SceneProps) {
+/** מתי מתחלף כל פריים: מילה כל 6 פריימים, ואז התשובה נשארת על המסך עד הסוף. */
+function advisorTimeline(frames: { file: string; phase: string }[]) {
+  const holds: Record<string, number> = { 'adv-00.png': 12, 'adv-asking.png': 12 };
+  let at = 0;
+  return frames.map((f, i) => {
+    const start = at;
+    const lastWord = f.phase === 'question' && frames[i + 1]?.phase !== 'question';
+    at += holds[f.file] ?? (f.phase === 'answer' ? 999 : lastWord ? 14 : 6);
+    return { ...f, start };
+  });
+}
+
+export function Advisor({ layout }: SceneProps) {
+  const frame = useCurrentFrame();
   const m = META[layout];
   const dir = DIR[layout];
   const wide = layout === 'wide';
-  const tray = m.tray.boxes.section;
-  if (wide) {
-    // במחשב "ההשוואה שלי" רחבה: חלון נמוך, זום שבו הטקסט קריא, ותנועה מהקורס הראשון (מימין) לשלישי.
-    const s = 1.6;
-    const h = Math.min(952, Math.round(tray.h * s + 120));
-    const box = { x: 600, y: Math.round((1080 - h) / 2), w: 1256, h };
-    const half = 1256 / s / 2;
-    const keys: Key[] = [
-      { f: 0, x: tray.w - half, y: tray.h / 2, s },
-      { f: 14, x: tray.w - half, y: tray.h / 2, s },
-      { f: 96, x: half, y: tray.h / 2, s },
-    ];
-    return (
-      <AbsoluteFill>
-        <PageWindow layout={layout} box={box}>
-          <Shot src={`${dir}/tray-only.png`} w={tray.w} h={tray.h} keys={keys} />
-        </PageWindow>
-        <Caption layout={layout} n={4} title="משווים עד 3 קורסים" />
-      </AbsoluteFill>
-    );
-  }
-  const { width: vw, height: vh } = m.viewport;
+  const a = m.advisor;
+  const timeline = advisorTimeline(a.frames);
+  const current = [...timeline].reverse().find((f) => frame >= f.start) ?? timeline[0];
+  const tAnswer = timeline.find((f) => f.phase === 'answer')?.start ?? 0;
+  const s = wide ? 1.6 : 952 / 390;
+  const ans = a.boxes.answer;
+  // קודם השאלה בשורה הראשונה, ואז המצלמה יורדת אל התשובה: "שאלתם" והמשפטים המסומנים.
+  const questionY = wide ? 400 : 330;
+  // במחשב התשובה רחבה (כל רוחב הדף), ולכן המצלמה מתרחקת קצת כשהיא יורדת אליה, כדי שאף שורה לא תיחתך.
+  const answerS = wide ? Math.min(s, 1256 / (ans.w + 60)) : s;
+  const answerY = wide ? ans.y + Math.min(ans.h, 952 / answerS) / 2 - 10 : ans.y + 270;
+  const keys: Key[] = [
+    { f: 0, x: 900, y: questionY, s },
+    { f: tAnswer + 4, x: 900, y: questionY, s },
+    { f: tAnswer + 28, x: wide ? ans.x + ans.w / 2 : 195, y: answerY, s: answerS },
+  ];
   return (
     <AbsoluteFill>
       <PageWindow layout={layout}>
-        <Shot src={`${dir}/tray.png`} w={vw} h={vh} keys={[center(tray, 952 / 390, 0, 0, -20)]} bounds={sheetBounds(layout)} />
+        <Shot src={`${dir}/${current.file}`} w={a.clip.w} h={a.clip.h} keys={keys} bounds={sheetBounds(layout)}>
+          {current.file === 'adv-00.png' ? <PenUnderline box={a.boxes.note} from={2} dur={10} /> : null}
+        </Shot>
       </PageWindow>
-      <Caption layout={layout} n={4} title="משווים עד 3 קורסים" />
+      <Caption layout={layout} n={3} title="שואלים שאלה, והיועץ עונה" />
     </AbsoluteFill>
   );
 }

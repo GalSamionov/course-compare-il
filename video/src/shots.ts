@@ -14,6 +14,8 @@ export type Meta = {
   compare: { boxes: Boxes };
   tray: { boxes: Boxes };
   compareCourses: { title: string; score: string | null; price: string | null }[];
+  /** היועץ מהשאלה הראשונה (scripts/capture-advisor.mjs), מבנייה מקומית עם תשובה מדומה. */
+  advisor: { question: string; top: number; clip: { w: number; h: number }; frames: { file: string; phase: string }[]; boxes: Boxes };
 };
 
 export const META: Record<Layout, Meta> = { wide: desk as unknown as Meta, tall: phone as unknown as Meta };
