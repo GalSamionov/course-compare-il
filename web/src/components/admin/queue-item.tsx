@@ -41,7 +41,7 @@ function Waiting({ hours }: { hours: number }) {
 }
 
 /**
- * מה המודל מצא: אי-ההתאמות קודם, ואחריהן מה שהוא קרא. אי-התאמה מודגשת בדיו, בלי צבע (מסמך העיצוב של התור).
+ * מה המודל קרא, מתחת למסמך. אי-ההתאמות עצמן עולות לבלוק "לשים לב" שליד ההחלטה (warningsOf).
  * רמז בלבד: טקסט מוסתר במסמך יכול לגרום למודל לקרוא מוסד, שם או סכום אחרים. ההחלטה רק מול המסמך עצמו.
  */
 function CheckView({ proof }: { proof: QueueProof }) {
@@ -54,11 +54,7 @@ function CheckView({ proof }: { proof: QueueProof }) {
       {check.mismatches.length === 0 ? (
         <p className="font-semibold">הקריאה האוטומטית לא מצאה אי-התאמות. זה לא אימות: לפתוח את המסמך.</p>
       ) : (
-        <ul aria-label="אי-התאמות" className="space-y-0.5 font-bold">
-          {check.mismatches.map((m) => (
-            <li key={m.field}>{m.message}</li>
-          ))}
-        </ul>
+        <p className="font-semibold">הקריאה האוטומטית מצאה אי-התאמות: ליד ההחלטה.</p>
       )}
       <p className="mt-1 text-ink-soft">
         המודל קרא (רמז בלבד, המסמך קובע): {found.institutionName || 'בלי מוסד'}
@@ -98,15 +94,23 @@ function ProofView({ proof }: { proof: QueueProof }) {
       </div>
       <div className="mt-2.5 space-y-1 text-[13px] leading-normal">
         <p className="text-ink-soft">הקישור תקף לעשר דקות. לקישור חדש מרעננים את הדף.</p>
-        {proof.flags.map((flag) => (
-          <p key={flag} className="font-bold">
-            לשים לב: {FLAG_LABEL[flag] ?? flag}
-          </p>
-        ))}
         <CheckView proof={proof} />
       </div>
     </li>
   );
+}
+
+/**
+ * מה שגל צריך לראות לפני שהוא מאשר: מה המערכת סימנה (אותו קובץ, יותר מדי ביקורות ביממה) ואי-ההתאמות שהמודל
+ * מצא. עם שתי הוכחות, כל שורה אומרת על איזו מהן.
+ */
+function warningsOf(proofs: readonly QueueProof[]): { flags: string[]; mismatches: string[] } {
+  const prefix = (proof: QueueProof) => (proofs.length > 1 ? `${PROOF_KIND_LABEL[proof.claimedKind]}: ` : '');
+  const flags = proofs.flatMap((p) => p.flags.map((flag) => `${prefix(p)}${FLAG_LABEL[flag] ?? flag}`));
+  const mismatches = proofs.flatMap((p) =>
+    p.check && 'found' in p.check ? p.check.mismatches.map((m) => `${prefix(p)}${m.message}`) : [],
+  );
+  return { flags: [...new Set(flags)], mismatches: [...new Set(mismatches)] };
 }
 
 export function QueueItemView({ item }: { item: QueueItem }) {
@@ -181,6 +185,7 @@ export function QueueItemView({ item }: { item: QueueItem }) {
               defaultKind={defaultKind}
               modelAmount={modelAmount}
               sitePrice={item.sitePrice}
+              {...warningsOf(item.proofs)}
             />
           </div>
         </section>

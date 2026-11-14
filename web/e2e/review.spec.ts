@@ -71,13 +71,25 @@ test('a graduate writes a review with a proof, the admin approves it, it is on t
     expect((await page.request.get('/admin')).status()).toBe(404);
 
     await page.getByRole('button', { name: 'להתחיל' }).click();
-    await page.getByLabel('חודש ההתחלה').selectOption('2026-03-01');
+    // בלי חודש: ההודעה מתחת לשדה של חודש ההתחלה, והפוקוס עובר אליו.
+    await page.getByRole('button', { name: 'הבא' }).click();
+    const start = page.getByLabel('חודש ההתחלה');
+    await expect(start).toBeFocused();
+    await expect(start).toHaveAttribute('aria-invalid', 'true');
+    await expect(start).toHaveAccessibleDescription('בחרו את חודש ההתחלה.');
+    await start.selectOption('2026-03-01');
     await shot(page, '02-when');
     await page.getByRole('button', { name: 'הבא' }).click();
 
     // השאלון מופיע רק אחרי שהצעד נשמר. התשובה הכי גבוהה בכל שאלה, וגם "כן" נשמר כ-5.
-    const questions = page.locator('fieldset[data-question]');
+    const questions = page.locator('[data-question]');
     await expect(questions.first()).toBeVisible();
+    // כל שאלה היא קבוצת רדיו: מימין לשמאל, חץ שמאלה בוחר את התשובה הבאה.
+    const first = questions.first().getByRole('radiogroup');
+    await first.getByRole('radio').first().focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(first.getByRole('radio').nth(1)).toBeFocused();
+    await expect(first.getByRole('radio').nth(1)).toHaveAttribute('aria-checked', 'true');
     for (const question of await questions.all()) {
       await question.locator('[data-value="5"]').click();
     }
@@ -89,11 +101,17 @@ test('a graduate writes a review with a proof, the admin approves it, it is on t
     await page.getByRole('button', { name: 'הבא' }).click();
 
     await page.getByLabel('השם שלכם').fill('בודקת קצה');
-    await page.getByRole('button', { name: 'בוגרת', exact: true }).click();
+    await page.getByRole('radio', { name: 'בוגרת', exact: true }).click();
+    await expect(page.getByRole('radio', { name: 'בוגרת', exact: true })).toHaveAttribute('aria-checked', 'true');
     await expect(page.getByText('בודקת ק., בוגרת מאומתת')).toBeVisible();
     await shot(page, '05-name');
     await page.getByRole('button', { name: 'הבא' }).click();
 
+    // בלי קובץ: ההודעה מתחת לבחירת הקובץ, ו"חזרה" ליד הכפתור.
+    await page.getByRole('button', { name: 'לשלוח לבדיקה' }).click();
+    await expect(page.getByText('צריך לצרף קובץ אחד לפחות.')).toBeVisible();
+    await expect(page.locator('input[type=file]')).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByRole('button', { name: 'חזרה' })).toBeVisible();
     await page.getByLabel('סוג ההוכחה', { exact: true }).selectOption('invoice');
     await page.locator('input[type=file]').setInputFiles({ name: 'invoice.pdf', mimeType: 'application/pdf', buffer: PDF });
     await expect(page.getByRole('list', { name: 'הקבצים שהוצמדו' })).toContainText('invoice.pdf');
@@ -133,6 +151,7 @@ test('a graduate writes a review with a proof, the admin approves it, it is on t
     // השדה ריק תמיד: גל מקליד את הסכום מהמסמך.
     await expect(item.getByLabel('סכום ששולם, בשקלים')).toHaveValue('');
     await item.getByLabel('סכום ששולם, בשקלים').fill('1800');
+    await expect(item.getByText('יישמר כ: \u200E1,500–2,000 ₪')).toBeVisible();
     await item.getByRole('button', { name: 'לאשר ולפרסם' }).click();
     await expect(page.getByRole('list', { name: 'מה הוחלט עכשיו' })).toContainText('פורסם.', { timeout: 30_000 });
     await expect(item).toHaveCount(0);

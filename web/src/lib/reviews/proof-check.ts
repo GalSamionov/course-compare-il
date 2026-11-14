@@ -193,9 +193,3 @@ export function compareProof(found: ExtractedProof, expected: ProofExpectations)
 
   return out;
 }
-
-/** הסכום נשמר במדרגות של 500, למטה (מסמך העיצוב של חלק 1, סעיף 6). null: סכום לא תקין. */
-export function paidBucket(amount: number): number | null {
-  if (!Number.isFinite(amount) || amount <= 0 || amount > 1_000_000) return null;
-  return Math.floor(amount / 500) * 500;
-}
