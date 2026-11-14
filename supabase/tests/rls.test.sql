@@ -33,6 +33,15 @@ insert into reviews (
    repeat('ו', 80), 'בודק', 'published', 'invoice', 5000, now(), now()),
   ('aaaaaaaa-0000-0000-0000-000000000011', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
    repeat('ז', 80), 'בודק', 'published', 'invoice', 6000, now(), now()),
+  -- סבב 3: הטווח מופיע רק מ-5 חשבוניות. לקורס הפעיל עוד שתיים (סך הכול 5), ולקורס השני עוד שתיים (סך הכול 4).
+  ('aaaaaaaa-0000-0000-0000-000000000016', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('י', 80), 'בודק', 'published', 'invoice', 15500, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000017', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('כ', 80), 'בודק', 'published', 'invoice', 16000, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000018', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('ל', 80), 'בודק', 'published', 'invoice', 5500, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000019', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('מ', 80), 'בודק', 'published', 'invoice', 6500, now(), now()),
   -- ביקורת שפורסמה בקורס טיוטה: לא ציבורית.
   ('aaaaaaaa-0000-0000-0000-000000000014', 'aaaaaaaa-0000-0000-0000-000000000004', '2026-03-01',
    repeat('ט', 80), 'בודק', 'published', 'invoice', 1000, now(), now());
@@ -80,13 +89,13 @@ select results_eq(
 
 select results_eq(
   $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
-  $$values (12500, 14500, 3)$$,
-  'טווח מחירים משלוש חשבוניות שפורסמו, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
+  $$values (12000, 18000, 5)$$,
+  'טווח מ-5 חשבוניות שפורסמו, מעוגל החוצה ל-2,000, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
 );
 
 select is_empty(
   $$select * from course_paid_range('aaaaaaaa-0000-0000-0000-000000000009')$$,
-  'אין טווח מחירים משתי חשבוניות'
+  'אין טווח מארבע חשבוניות'
 );
 
 select throws_ok(
@@ -159,7 +168,8 @@ reset role;
 select is_empty(
   $$select r, c
     from unnest(array['anon', 'authenticated']) r,
-         unnest(array['author_id', 'proof_kind', 'paid_bucket_ils', 'verified_at', 'excluded_reason', 'created_at']) c
+         unnest(array['author_id', 'proof_kind', 'paid_bucket_ils', 'verified_at', 'excluded_reason', 'created_at',
+                      'finished_month', 'decision_note', 'read_count', 'submitted_at', 'disputed_at', 'updated_at']) c
     where has_column_privilege(r, 'public.reviews', c, 'select')$$,
   'עמודות פרטיות של ביקורות חסומות לכל משתמש ציבורי'
 );
@@ -177,14 +187,22 @@ select is_empty(
     cross join (values ('anon'), ('authenticated')) r(rolname)
     cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
     where n.nspname = 'public' and c.relkind in ('r', 'p')
-      and has_table_privilege(r.rolname, c.oid, p.priv)
+      and (
+        has_table_privilege(r.rolname, c.oid, p.priv)
+        -- הרשאה לעמודות בודדות (מסבב 3) לא נראית ב-has_table_privilege.
+        or (p.priv in ('INSERT', 'UPDATE', 'REFERENCES') and has_any_column_privilege(r.rolname, c.oid, p.priv))
+      )
       -- תוכנית 2ב: משתמש מחובר כותב ברשימות האישיות שלו, ורק בהרשאות האלה. ההגבלה לשורות שלו ב-RLS.
+      -- סבב 3: כותב שומר טיוטה ועונה בה. אילו עמודות בדיוק: reviews.test.sql.
       and (r.rolname, c.relname, p.priv) not in (
         ('authenticated', 'saved_courses', 'INSERT'), ('authenticated', 'saved_courses', 'DELETE'),
         ('authenticated', 'compare_items', 'INSERT'), ('authenticated', 'compare_items', 'DELETE'),
-        ('authenticated', 'user_answers', 'INSERT'), ('authenticated', 'user_answers', 'UPDATE')
+        ('authenticated', 'user_answers', 'INSERT'), ('authenticated', 'user_answers', 'UPDATE'),
+        ('authenticated', 'reviews', 'INSERT'), ('authenticated', 'reviews', 'UPDATE'),
+        ('authenticated', 'review_answers', 'INSERT'), ('authenticated', 'review_answers', 'UPDATE'),
+        ('authenticated', 'review_answers', 'DELETE')
       )$$,
-  'אין הרשאת כתיבה ציבורית, חוץ מהרשימות האישיות של משתמש מחובר'
+  'אין הרשאת כתיבה ציבורית, חוץ מהרשימות האישיות ומהטיוטה של משתמש מחובר'
 );
 
 -- ===== השרת, שכותב עם המפתח הסודי =====
