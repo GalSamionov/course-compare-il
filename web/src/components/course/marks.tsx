@@ -1,5 +1,5 @@
 import { Children, isValidElement } from 'react';
-import { PenArrow } from '@/components/site/pen';
+import { PenArrow, PenArrowUp } from '@/components/site/pen';
 import { cn } from '@/lib/utils';
 
 type MarkSource = 'verified' | 'grads' | 'weak';
@@ -70,8 +70,10 @@ export function Claim({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * הערה קצרה של האתר לקורא, בכתב יד בעט כחול.
- * arrow: חץ בעט לפני ההערה. רכיב בלוק (p): אסור למקם אותו בתוך <p>.
+ * הערה קצרה של האתר לקורא, בכתב יד בעט כחול. זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
+ * arrow: חץ בעט לפני ההערה. true: חץ קטן בכיוון הקריאה. 'up': חץ מעוקל שעולה מתחילת ההערה אל מה שמעליה,
+ * ולא תופס מקום בשורה. 'back': חץ קטן שמצביע אחורה, אל מה שעומד מימין להערה.
+ * רכיב בלוק (p): אסור למקם אותו בתוך <p>.
  */
 export function PenNote({
   children,
@@ -79,12 +81,14 @@ export function PenNote({
   className,
 }: {
   children: React.ReactNode;
-  arrow?: boolean;
+  arrow?: boolean | 'up' | 'back';
   className?: string;
 }) {
   return (
-    <p className={cn('-rotate-1 font-pen text-[15px] leading-snug text-pen', className)}>
-      {arrow && <PenArrow />}
+    <p className={cn('-rotate-1 font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}>
+      {arrow === true && <PenArrow />}
+      {arrow === 'back' && <PenArrow className="-scale-x-100" />}
+      {arrow === 'up' && <PenArrowUp className="absolute start-0 -top-[15px] h-[26px] w-[22px]" />}
       {children}
     </p>
   );
@@ -140,19 +144,23 @@ const noteColor: Record<NoteTone, string> = {
 export function StickyNote({
   tone,
   tilt = 0,
+  tiltLg,
   tape = true,
   className,
   children,
 }: {
   tone: NoteTone;
   tilt?: number;
+  /** הטיה אחרת מרוחב מחשב: פתק צר בעמודה מוטה יותר מפתק ברוחב מלא בנייד. */
+  tiltLg?: number;
   /** בלי סלוטייפ: פתק שמודבק מעל פתק אחר נשען עליו. */
   tape?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   // הטיה מוגבלת ל-4 מעלות, כדי שהפתק לא יצא מהעמוד
-  const angle = Math.max(-4, Math.min(4, tilt));
+  const clamp = (deg: number) => Math.max(-4, Math.min(4, deg));
+  const angle = clamp(tilt);
   return (
     <div
       className={cn(
@@ -161,9 +169,14 @@ export function StickyNote({
         'bg-[linear-gradient(to_bottom,transparent_70%,rgb(0_0_0/0.035))]',
         'shadow-[0_1px_1px_rgb(0_0_0/0.08),0_10px_14px_-9px_rgb(40_40_20/0.45)]',
         noteColor[tone],
+        tiltLg !== undefined && 'rotate-(--tilt) lg:rotate-(--tilt-lg)',
         className,
       )}
-      style={{ transform: `rotate(${angle}deg)` }}
+      style={
+        tiltLg === undefined
+          ? { transform: `rotate(${angle}deg)` }
+          : ({ '--tilt': `${angle}deg`, '--tilt-lg': `${clamp(tiltLg)}deg` } as React.CSSProperties)
+      }
     >
       {tape && <Tape width={58} tilt={angle > 0 ? -4 : 3} />}
       {children}

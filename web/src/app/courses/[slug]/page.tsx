@@ -12,6 +12,7 @@ import { ScoreBox } from '@/components/course/score-box';
 import { SourceLegend } from '@/components/course/source-legend';
 import { Stamp } from '@/components/course/stamp';
 import { VideoSection } from '@/components/course/video-section';
+import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
 import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
@@ -61,9 +62,17 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
-  // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג.
+  // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג, ומספר הפרקים סופר רק אותם.
   const hasGrads = hasGradsSection(course);
   const hasReviews = course.reviews.length > 0;
+  const sections = [
+    { id: 'about', label: 'על הקורס', shown: true },
+    { id: 'video', label: 'סרטון', shown: Boolean(course.videoUrl) },
+    { id: 'lecturers', label: 'מרצים', shown: course.lecturers.length > 0 },
+    { id: 'price', label: 'מחיר', shown: true },
+    { id: 'grads', label: 'מה הבוגרים אומרים', shown: hasGrads },
+    { id: 'reviews', label: `ביקורות (${reviewCount})`, shown: hasReviews },
+  ].filter((s) => s.shown);
 
   return (
     <Sheet>
@@ -101,36 +110,20 @@ export default async function CoursePage({ params }: Props) {
                 הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
               </p>
             )}
+            {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
             <nav
               aria-label="בעמוד הזה"
-              className="mt-1.5 flex flex-wrap gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:gap-x-6 lg:text-base"
+              className="mt-1.5 flex flex-wrap items-center gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:gap-x-6 lg:text-base"
             >
-              <a href="#about" className={navLink}>
-                על הקורס
-              </a>
-              {course.videoUrl && (
-                <a href="#video" className={navLink}>
-                  סרטון
+              <span className="inline-flex min-h-11 -rotate-1 items-center font-pen text-[15px] font-medium text-pen lg:text-base">
+                {sections.length} פרקים בעמוד
+                <PenArrow className="ms-1.5 me-0" />
+              </span>
+              {sections.map((s) => (
+                <a key={s.id} href={`#${s.id}`} className={navLink}>
+                  {s.label}
                 </a>
-              )}
-              {course.lecturers.length > 0 && (
-                <a href="#lecturers" className={navLink}>
-                  מרצים
-                </a>
-              )}
-              <a href="#price" className={navLink}>
-                מחיר
-              </a>
-              {hasGrads && (
-                <a href="#grads" className={navLink}>
-                  מה הבוגרים אומרים
-                </a>
-              )}
-              {hasReviews && (
-                <a href="#reviews" className={navLink}>
-                  ביקורות ({reviewCount})
-                </a>
-              )}
+              ))}
             </nav>
           </header>
 

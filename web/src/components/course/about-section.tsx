@@ -82,7 +82,7 @@ export function AboutSection({ course }: { course: CoursePageData }) {
       {course.outcome && (
         // מול "המוסד מבטיח": מה הבוגרים עצמם אמרו. במספר אנשים כשהנתונים מאפשרים. בשאלת ההמשך נשמר רק ממוצע,
         // ולכן כתוב כמה ענו ומה הממוצע, ולא "כמה עובדים בתחום".
-        <StickyNote tone="grad" tilt={1} className="mt-6 ml-8 px-3 pt-4 pb-2.5 text-sm lg:max-w-[460px] lg:text-[15px]">
+        <StickyNote tone="grad" tilt={1} tiltLg={1.6} className="mt-6 ml-8 px-3 pt-4 pb-2.5 text-sm lg:ml-0 lg:max-w-[340px] lg:text-[15px]">
           <strong>מה קרה בפועל:</strong> {outcomeHeadline(course.outcome)}
           {course.outcome.kind === 'after_3m'
             ? `, ובממוצע נתנו לתוצאה ${course.outcome.mean.toFixed(1)} מתוך 5.`

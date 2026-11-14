@@ -1,3 +1,4 @@
+import { PenBox } from '@/components/site/pen';
 import { cn } from '@/lib/utils';
 
 /** וי בכתב יד, בעט כחול. הקו מהציור. */
@@ -18,8 +19,8 @@ export function TickMark({ className, strokeWidth = 2.4 }: { className?: string;
 
 /**
  * הווי בסוף כל שורה. מסומן: השורה מסננת. הורדת הווי משאירה את התשובה, אבל השורה לא מסננת.
- * בשורה בלי תשובה אין מה לסמן: מוצג רק מקום מנוקד ודהוי, בלי מסגרת של כפתור,
- * כדי שלא ייראה כמו משהו שאפשר ללחוץ עליו.
+ * בשורה בלי תשובה אין מה לסמן: מוצגת תיבה ריקה שצוירה בעט, בהירה וקטנה מהתיבה המודפסת,
+ * בלי ריחוף ובלי סמן של לחיצה. היא מחכה לתשובה, ולא נראית כמו כפתור.
  */
 export function Tick({
   checked,
@@ -42,15 +43,14 @@ export function Tick({
       onClick={disabled ? undefined : onToggle}
       className={cn('group relative size-11 justify-self-center', disabled ? 'cursor-default' : 'cursor-pointer')}
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          'absolute rounded-[2px]',
-          disabled
-            ? 'top-[15px] left-[15px] size-[14px] border border-dashed border-line'
-            : 'top-[11px] left-[11px] size-[22px] border-[1.5px] border-ink transition-colors group-hover:border-pen',
-        )}
-      />
+      {disabled ? (
+        <PenBox className="absolute top-[12px] left-[12px] size-5 -rotate-3 opacity-55" />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="absolute top-[11px] left-[11px] size-[22px] rounded-[2px] border-[1.5px] border-ink transition-colors group-hover:border-pen"
+        />
+      )}
       {checked && <TickMark className="absolute top-0.5 left-2.5 size-8" />}
     </button>
   );

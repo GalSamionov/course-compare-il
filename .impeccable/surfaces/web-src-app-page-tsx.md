@@ -38,6 +38,6 @@ FIRST VIEWPORT:
   - **מתחת לשניהם:** תחילת המחברת עם השאלות.
 - **נייד:** ההבטחה, הסיכום לדוגמה בקטן, ואז המחברת.
 
-FORM: הרחבה של בית ב ("שאלה בשוליים") ושל העולם של עמוד הקורס. גל קבע את העולם ב-14.11.2026: להישאר בו, בביצוע עשיר. seed: none (unavailable)
+FORM: הרחבה של בית ב ("שאלה בשוליים") ושל העולם של עמוד הקורס. גל קבע את העולם ב-14.11.2026: להישאר בו, בביצוע עשיר. seed:c81c41ae8e27158d
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

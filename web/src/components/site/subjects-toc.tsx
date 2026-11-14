@@ -1,10 +1,14 @@
 import Link from 'next/link';
+import { PenNote } from '@/components/course/marks';
+import { PenLoop } from '@/components/site/pen';
 import type { CategoryEntry } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
 
 /**
  * תוכן עניינים של התחומים, עם מספר הקורסים ומספר הבוגרים המאומתים. כמו בציור.
  * id="subjects" הוא היעד של "תחומים" בתפריט העליון.
+ * המספר הגדול בעמודת הבוגרים מוקף בעט, והערה בעט אומרת מה העיגול אומר. עט ולא מרקר:
+ * מרקר הוא מקור (ירוק, צהוב, ורוד), ועיגול הוא האתר שמצביע על עובדה מהרשימה עצמה.
  */
 export function SubjectsToc({
   categories,
@@ -23,6 +27,8 @@ export function SubjectsToc({
     .filter((c) => c.isLeaf && c.courseCount > 0 && c.slug !== exclude)
     .sort((a, b) => b.courseCount - a.courseCount || a.name.localeCompare(b.name, 'he'));
   if (rows.length === 0) return null;
+  // התחום עם הכי הרבה בוגרים מאומתים. בתיקו, הראשון ברשימה. בלי בוגרים בכלל, אין עיגול.
+  const busiest = rows.reduce<CategoryEntry | null>((top, c) => (c.gradCount > (top?.gradCount ?? 0) ? c : top), null);
   return (
     <section
       id="subjects"
@@ -49,15 +55,20 @@ export function SubjectsToc({
                 {c.courseCount}
               </span>
               <span aria-hidden="true" className="w-[52px] text-end font-sans text-[15px]">
-                {c.gradCount}
+                {c === busiest ? <PenLoop className="font-bold">{c.gradCount}</PenLoop> : c.gradCount}
               </span>
               <span className="sr-only">
-                : {c.courseCount} קורסים, {c.gradCount} בוגרים מאומתים
+                : {c.courseCount} קורסים, {c.gradCount} בוגרים מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}
               </span>
             </Link>
           </li>
         ))}
       </ol>
+      {busiest && (
+        <PenNote className="ms-auto mt-2 w-fit lg:text-base">
+          בעיגול: הכי הרבה בוגרים מאומתים
+        </PenNote>
+      )}
     </section>
   );
 }

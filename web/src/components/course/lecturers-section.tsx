@@ -68,7 +68,7 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
       </div>
 
       {course.lecturersSummary && (
-        <StickyNote tone="grad" tilt={-1} className="mt-7 ml-6 px-3 pt-4 pb-2.5 text-sm lg:max-w-[460px] lg:text-[15px]">
+        <StickyNote tone="grad" tilt={-1} tiltLg={-1.4} className="mt-7 ml-6 px-3 pt-4 pb-2.5 text-sm lg:ml-0 lg:max-w-[340px] lg:text-[15px]">
           <strong>מה הבוגרים אומרים על המרצים:</strong> {course.lecturersSummary}
         </StickyNote>
       )}

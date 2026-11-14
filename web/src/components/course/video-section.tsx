@@ -1,4 +1,4 @@
-import { PenNote, StickyNote, Tape } from './marks';
+import { PenNote, Tape } from './marks';
 
 /**
  * הסרטון של המוסד, כתמונה קטנה שהודבקה בשוליים של הסיכום, אחרי "על הקורס".
@@ -24,13 +24,12 @@ export function VideoSection({ url }: { url: string }) {
           </span>
           <span className="sr-only">צפייה בסרטון של המוסד (נפתח בחלון חדש)</span>
         </a>
-        <div className="min-w-0 pt-0.5">
-          <StickyNote tone="institution" tilt={-1.5} tape={false} className="w-fit max-w-[200px] px-2.5 py-1.5">
-            סרטון של המוסד. לא ערכנו אותו.
-          </StickyNote>
-          <PenNote arrow className="mt-2.5">
-            זה שיווק. את הדעות תמצאו בביקורות
+        {/* ההערות הן האתר שמדבר, ולכן בעט. פתק כחול שמור למילים של המוסד עצמו, כמו "תגובת המוסד". */}
+        <div className="min-w-0 pt-1">
+          <PenNote arrow="back" className="lg:text-base">
+            סרטון של המוסד, לא ערכנו אותו
           </PenNote>
+          <PenNote className="mt-1.5 lg:text-base">זה שיווק. את הדעות תמצאו בביקורות</PenNote>
         </div>
       </div>
     </section>

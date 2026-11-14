@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { SourceLegend } from '@/components/course/source-legend';
 import { Claim, Mark, PenNote, StickyNote, Tape } from '@/components/course/marks';
+import { Stamp } from '@/components/course/stamp';
 import type { CoursePageData } from '@/lib/data/course-page';
 import { formatIls, formatPaidRange } from '@/lib/format';
 import type { CourseSummary } from '@/lib/search/types';
@@ -32,10 +33,17 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           לדוגמה
         </Tape>
 
-        <p className="font-sans text-[13px] leading-tight text-ink-soft lg:text-sm">
-          {course.categoryName} · {course.institutionName}
+        {/*
+          הכותרת קודם, ומתחתיה חותמת המוסד והתחום, כמו בראש עמוד הקורס. בלי שורה מעל הכותרת.
+          במחשב הפתק של הבוגר תלוי על הפינה השמאלית העליונה. המרווח הצף שומר לו מקום בשורה הראשונה של הכותרת,
+          כך שכותרת ארוכה נשברת לשורה שנייה במקום להיעלם מתחת לפתק.
+        */}
+        {review && <span aria-hidden="true" className="hidden lg:float-left lg:block lg:h-9 lg:w-[150px]" />}
+        <p className="font-serif text-[22px] leading-tight font-bold lg:text-[30px]">{course.title}</p>
+        <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-sans text-[13px] leading-tight text-ink-soft lg:mt-2.5 lg:text-sm">
+          <Stamp className="px-2 py-0.5 text-[13px] lg:px-2.5 lg:py-1 lg:text-[15px]">{course.institutionName}</Stamp>
+          {course.categoryName && <span>{course.categoryName}</span>}
         </p>
-        <p className="mt-1 font-serif text-[22px] leading-tight font-bold lg:text-[30px]">{course.title}</p>
 
         {value !== null && (
           <div className="mt-3.5 flex items-center gap-3.5 border-[1.5px] border-ink px-3.5 py-2.5 lg:mt-5 lg:gap-5 lg:px-5 lg:py-3.5">
@@ -94,7 +102,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           <StickyNote
             tone="grad"
             tilt={3}
-            className="mt-5 ms-6 -me-2.5 px-3.5 pt-5 pb-3 lg:absolute lg:-top-9 lg:-left-12 lg:m-0 lg:w-[248px]"
+            className="mt-5 ms-6 -me-2.5 px-3.5 pt-5 pb-3 lg:absolute lg:-top-10 lg:-left-14 lg:m-0 lg:w-[236px]"
           >
             <p className="font-serif text-[15px] leading-snug">״{firstSentence(review.body)}״</p>
             <p className="mt-1.5">

@@ -31,7 +31,7 @@ const sub = 'block text-[13px] leading-snug text-ink-soft lg:text-sm';
 export function AtAGlance({ course }: { course: CoursePageData }) {
   const weak = topWeakness(course);
   return (
-    <section aria-labelledby="glance-title" className="mt-11 font-sans lg:mt-14">
+    <section aria-labelledby="glance-title" className="mt-6 font-sans lg:mt-8">
       <h2 id="glance-title" className="text-[15px] font-bold lg:text-base">
         בקצרה
       </h2>

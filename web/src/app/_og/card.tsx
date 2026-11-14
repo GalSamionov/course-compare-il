@@ -372,15 +372,16 @@ export async function renderCourseCard(course: CoursePageData): Promise<ImageRes
         <SheetHeader />
         <div style={{ display: 'flex', flexDirection: 'row-reverse', flexGrow: 1, marginTop: 24 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexGrow: 1, flexBasis: 0 }}>
-            {meta && <Rtl text={meta} size={25} style={{ color: INK_SOFT }} />}
             <Rtl
               text={title}
               size={titleSize(title)}
-              style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700, lineHeight: 1.06, marginTop: 2, maxWidth: 560 }}
+              style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700, lineHeight: 1.06, maxWidth: 560 }}
             />
-            {course.institutionName && (
-              <div style={{ display: 'flex', marginTop: 16 }}>
-                <Stamp text={course.institutionName} />
+            {/* מתחת לכותרת: חותמת המוסד, ולידה התחום והעיר. כמו בראש עמוד הקורס, ובלי שורה מעל הכותרת. */}
+            {(course.institutionName || meta) && (
+              <div style={{ display: 'flex', flexDirection: 'row-reverse', flexWrap: 'wrap', alignItems: 'center', marginTop: 18 }}>
+                {course.institutionName && <Stamp text={course.institutionName} />}
+                {meta && <Rtl text={meta} size={25} style={{ color: INK_SOFT, marginRight: course.institutionName ? 20 : 0 }} />}
               </div>
             )}
           </div>
