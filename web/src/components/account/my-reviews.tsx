@@ -14,7 +14,7 @@ type Load = { status: 'loading' } | { status: 'error' } | { status: 'ready'; rev
 const monthLabel = (iso: string) =>
   new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
 const times = (n: number) => (n === 0 ? 'עוד לא קראו אותה' : n === 1 ? 'קראו אותה פעם אחת' : `קראו אותה ${n} פעמים`);
-const people = (n: number) => (n === 0 ? 'עוד אף אחד לא סימן ״עזר לי״' : n === 1 ? 'היא עזרה לאדם אחד' : `היא עזרה ל-${n} אנשים`);
+const people = (n: number) => (n === 0 ? 'עוד לא סימנו שהיא עזרה' : n === 1 ? 'היא עזרה לאדם אחד' : `היא עזרה ל-${n} אנשים`);
 const isPublished = (review: MyReview) => review.status === 'published' || review.status === 'disputed';
 const isReturned = (review: MyReview) => review.status === 'draft' && review.decisionNote !== null;
 
@@ -29,33 +29,26 @@ function statusWord(review: MyReview): string {
 
 const link = 'inline-flex min-h-11 items-center font-semibold underline underline-offset-[3px] hover:text-link-hover';
 
-/** מה שקורה עכשיו, ומה אפשר לעשות (מסמך העיצוב, סעיף 5). ההבטחה של האתר ("תוך 48 שעות") בעט. */
-function Details({ review, course }: { review: MyReview; course: CourseSummary | undefined }) {
+/** מה אפשר לעשות עכשיו עם הביקורת, אם בכלל. */
+function nextStep(review: MyReview, course: CourseSummary | undefined): { href: string; label: string } | null {
+  if (!course) return null;
+  if (isReturned(review)) return { href: `/courses/${course.slug}/review`, label: 'להעלות הוכחה אחרת' };
+  if (review.status === 'draft') return { href: `/courses/${course.slug}/review`, label: 'להמשיך לכתוב' };
+  if (isPublished(review)) return { href: `/courses/${course.slug}#reviews`, label: 'לראות בעמוד הקורס' };
+  return null;
+}
+
+/** מה שקורה עכשיו (מסמך העיצוב, סעיף 5). ההבטחה של האתר ("תוך 48 שעות") בעט. */
+function Details({ review }: { review: MyReview }) {
   if (isReturned(review)) {
     return (
       <div className="mt-1.5 font-sans text-[15px] leading-normal">
         <p className="font-bold">החזרנו אותה אליכם.</p>
         <p className="mt-0.5 max-w-[52ch] text-pretty">{review.decisionNote}</p>
-        {course && (
-          <Link href={`/courses/${course.slug}/review`} className={link}>
-            להעלות הוכחה אחרת
-          </Link>
-        )}
       </div>
     );
   }
-  if (review.status === 'draft') {
-    return (
-      <p className="mt-1 font-sans text-[15px] leading-normal">
-        עוד לא נשלחה לבדיקה.{' '}
-        {course && (
-          <Link href={`/courses/${course.slug}/review`} className={link}>
-            להמשיך לכתוב
-          </Link>
-        )}
-      </p>
-    );
-  }
+  if (review.status === 'draft') return <p className="mt-1 font-sans text-[15px] leading-normal">עוד לא נשלחה לבדיקה.</p>;
   if (review.status === 'pending') {
     return (
       <p className="mt-1.5 -rotate-1 font-pen text-[15px] leading-snug font-medium text-pen">
@@ -66,13 +59,8 @@ function Details({ review, course }: { review: MyReview; course: CourseSummary |
   }
   if (isPublished(review)) {
     return (
-      <p className="mt-1 font-sans text-[15px] leading-normal">
-        {times(review.readCount)}, ו{people(review.helpfulCount)}.{' '}
-        {course && (
-          <Link href={`/courses/${course.slug}#reviews`} className={link}>
-            לראות בעמוד הקורס
-          </Link>
-        )}
+      <p className="mt-1 font-sans text-[15px] leading-normal text-pretty">
+        {times(review.readCount)}, ו{people(review.helpfulCount)}.
       </p>
     );
   }
@@ -85,6 +73,7 @@ function ReviewRow({
   course,
   confirming,
   busy,
+  error,
   onAsk,
   onCancel,
   onDelete,
@@ -93,12 +82,15 @@ function ReviewRow({
   course: CourseSummary | undefined;
   confirming: boolean;
   busy: boolean;
+  /** למה המחיקה נכשלה, בתוך שלב האישור, ליד הכפתור שנלחץ. */
+  error: string | null;
   onAsk: () => void;
   onCancel: () => void;
   onDelete: () => void;
 }) {
   const question = useRef<HTMLParagraphElement>(null);
   const title = course?.title ?? 'קורס שכבר לא באתר';
+  const step = nextStep(review, course);
 
   // שלב האישור נפתח: הפוקוס עובר לשאלה, כדי שקורא מסך יקרא אותה.
   useEffect(() => {
@@ -126,7 +118,7 @@ function ReviewRow({
       </p>
       <div className="col-start-2 row-start-2 ps-3">
         <p className="mt-0.5 font-sans text-sm leading-normal text-ink-soft">מחזור {monthLabel(review.cohortMonth)}</p>
-        <Details review={review} course={course} />
+        <Details review={review} />
         {confirming ? (
           <div role="group" aria-labelledby={`delete-${review.id}`} className="mt-2.5 mb-1 border-t-2 border-ink pt-2.5 font-sans">
             <p id={`delete-${review.id}`} ref={question} tabIndex={-1} className="text-[15px] font-bold outline-none">
@@ -143,11 +135,24 @@ function ReviewRow({
                 לא, להשאיר
               </button>
             </div>
+            {error && (
+              <p role="alert" className="mb-1 text-[15px] leading-normal font-bold">
+                {error}
+              </p>
+            )}
           </div>
         ) : (
-          <button type="button" onClick={onAsk} className={cn(textButton, 'px-0 text-sm font-normal text-ink-soft')}>
-            למחוק<span className="sr-only"> את הביקורת על {title}</span>
-          </button>
+          // הצעד הבא והמחיקה בשורה אחת. המחיקה שקטה יותר: אפור, בלי הדגשה.
+          <div className="flex flex-wrap items-center gap-x-5">
+            {step && (
+              <Link href={step.href} className={cn(link, 'font-sans text-[15px]')}>
+                {step.label}
+              </Link>
+            )}
+            <button type="button" onClick={onAsk} className={cn(textButton, 'px-0 text-sm font-normal text-ink-soft')}>
+              למחוק<span className="sr-only"> את הביקורת על {title}</span>
+            </button>
+          </div>
         )}
       </div>
     </li>
@@ -219,6 +224,10 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
         sub="רק אתם רואים את המצב של כל ביקורת ואת המספרים."
         className="mt-8"
       >
+        {/* מה שנמחק נאמר מעל הרשימה, במקום שבו השורה הייתה, ולא מתחת לשורות הריקות. */}
+        <p role="status" className="ms-(--margin) mt-2.5 ps-3 font-sans text-[15px] leading-normal font-semibold empty:hidden">
+          {notice}
+        </p>
         {load.status === 'loading' && (
           <>
             <p role="status" className="sr-only">
@@ -252,24 +261,20 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 course={byId.get(review.courseId)}
                 confirming={confirming === review.id}
                 busy={busy}
+                error={confirming === review.id ? error : null}
                 onAsk={() => {
                   setError(null);
                   setConfirming(review.id);
                 }}
-                onCancel={() => setConfirming(null)}
+                onCancel={() => {
+                  setError(null);
+                  setConfirming(null);
+                }}
                 onDelete={() => void remove(review)}
               />
             ))}
           </ul>
         )}
-        {error && (
-          <p role="alert" className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-bold">
-            {error}
-          </p>
-        )}
-        <p role="status" className="ms-(--margin) ps-3 font-sans text-[15px] font-semibold empty:hidden">
-          {notice}
-        </p>
       </MeSection>
 
       <MeSection
