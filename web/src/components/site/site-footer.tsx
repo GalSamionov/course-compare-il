@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { IntroLink } from './intro-link';
 
 const footerLink = 'inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover';
 
@@ -14,6 +15,7 @@ export function SiteFooter() {
       </div>
       <div>
         <p className="mt-1 flex flex-wrap gap-x-3 lg:mt-0 lg:gap-x-5">
+          <IntroLink className={footerLink} />
           <Link href="/method" className={footerLink}>
             איך אנחנו מדרגים
           </Link>
