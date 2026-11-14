@@ -183,7 +183,7 @@ export function Ask({ layout }: SceneProps) {
   );
 }
 
-/* ===== 2. הרשימה, ואז עמוד הקורס: ציון מבוגרים ===== */
+/* ===== 2. בוחרים את התוצאה הראשונה, נכנסים, ורק שם הציון ===== */
 
 export function Results({ layout }: SceneProps) {
   const m = META[layout];
@@ -193,18 +193,34 @@ export function Results({ layout }: SceneProps) {
   const r = m.results.boxes;
   const c = m.course.boxes;
   const H = m.course.height;
-  const COURSE = 92;
+  // הסדר: הרשימה, העט מקיף את שם הקורס הראשון (הבחירה), זום פנימה אל השם, ועמוד הקורס. רק שם מוקף הציון.
+  const PICK = 34;
+  const ENTER = 64;
+  const COURSE = 74;
   const fade = useCrossfade(COURSE, 10);
   const base = wide ? 1.06 : 952 / 390;
+  const title = r.first;
   const listKeys: Key[] = wide
-    ? [{ f: 0, x: 720, y: vh / 2, s: base }, { f: 22, x: 720, y: vh / 2, s: base }, center(r.firstRow, 1.5, 46, 60, 0)]
-    : [{ f: 0, x: 195, y: r.first.y + 130, s: base }];
-  const courseKeys: Key[] = wide ? [{ f: 0, x: 720, y: 433, s: 1.08 }] : [{ f: 0, x: 195, y: c.h1.y + 230, s: base }];
+    ? [
+        { f: 0, x: 720, y: vh / 2, s: base },
+        center(r.firstRow, 1.5, PICK - 6, 60, 0),
+        center(r.firstRow, 1.5, ENTER, 60, 0),
+        center(title, 2.6, COURSE + 10),
+      ]
+    : [
+        { f: 0, x: 195, y: r.first.y + 130, s: base },
+        { f: ENTER, x: 195, y: r.first.y + 130, s: base },
+        center(title, base * 1.6, COURSE + 10),
+      ];
+  // עמוד הקורס "נוחת": מתחיל קרוב לשם הקורס, ומתרחק לראש העמוד.
+  const courseKeys: Key[] = wide
+    ? [center(c.h1, 1.6, COURSE), { f: COURSE + 24, x: 720, y: 433, s: 1.08 }]
+    : [center(c.h1, base * 1.3, COURSE), { f: COURSE + 24, x: 195, y: c.h1.y + 230, s: base }];
   return (
     <AbsoluteFill>
       <PageWindow layout={layout}>
         <Shot src={`${dir}/results.png`} w={vw} h={vh} keys={listKeys} bounds={sheetBounds(layout)} opacity={1 - fade}>
-          <PenLoopAround box={r.firstScore} from={wide ? 50 : 30} pad={wide ? 10 : 8} />
+          <PenLoopAround box={title} from={PICK} dur={14} pad={wide ? 10 : 8} />
         </Shot>
         <Shot
           src={`${dir}/course-full.png`}
@@ -215,8 +231,8 @@ export function Results({ layout }: SceneProps) {
           vbounds={wide ? [80, H] : undefined}
           opacity={fade}
         >
-          <PenLoopAround box={c.scoreFrame} from={COURSE + 16} pad={wide ? 12 : 10} />
-          <PenUnderline box={c.notChecked} from={COURSE + 38} />
+          <PenLoopAround box={c.scoreFrame} from={COURSE + 32} pad={wide ? 12 : 10} />
+          <PenUnderline box={c.notChecked} from={COURSE + 54} />
         </Shot>
       </PageWindow>
       <Caption layout={layout} n={2} title="ציון רק מבוגרים מאומתים" />
