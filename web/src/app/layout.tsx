@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Sans_Hebrew, Playpen_Sans_Hebrew } from 'next/font/google';
+import { FirstVisit } from '@/components/site/first-visit';
 import { MotionObserver } from '@/components/site/motion-observer';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
@@ -47,6 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         {children}
         <MotionObserver />
+        {/* ההיכרות למבקר ראשון: בכל עמוד ציבורי, כי רוב המבקרים נכנסים ישר לעמוד קורס מקישור. */}
+        <FirstVisit />
       </body>
     </html>
   );

@@ -105,8 +105,11 @@ export function checkFile(file: { type: string; size: number }): string | null {
   return isProofMime(file.type) && file.size > 0 && file.size <= MAX_PROOF_BYTES ? null : FILE_REJECTED;
 }
 
+/** בלי קובץ אין מה לשלוח. גם השרת בודק את זה (proofErrors). */
+export const NO_PROOF = 'צריך לצרף קובץ אחד לפחות.';
+
 export function proofErrors(files: readonly ProofChoice[]): string[] {
-  if (files.length === 0) return ['צריך לפחות קובץ אחד.'];
+  if (files.length === 0) return [NO_PROOF];
   const errors: string[] = [];
   if (files.length > MAX_PROOF_FILES) errors.push('אפשר להעלות עד שני קבצים.');
   for (const file of files) {
@@ -119,47 +122,63 @@ export function proofErrors(files: readonly ProofChoice[]): string[] {
   return [...new Set(errors)];
 }
 
-function whenErrors(draft: DraftFields, thisMonth: string): string[] {
-  if (!draft.cohortMonth) return ['בחרו את חודש ההתחלה.'];
+/**
+ * השדה שההודעה שייכת לו: ההודעה מוצגת מתחתיו, והפוקוס עובר לשדה הראשון שיש בו בעיה.
+ * `question:<key>` היא שאלה בשאלון. proofs: הקבצים שהוצמדו ובחירת הקובץ.
+ */
+export type ErrorField = 'cohortMonth' | 'finishedMonth' | `question:${string}` | 'body' | 'displayName' | 'proofs';
+
+export interface StepError {
+  field: ErrorField;
+  message: string;
+}
+
+const err = (field: ErrorField, message: string): StepError => ({ field, message });
+
+function whenErrors(draft: DraftFields, thisMonth: string): StepError[] {
+  if (!draft.cohortMonth) return [err('cohortMonth', 'בחרו את חודש ההתחלה.')];
   // חודשים בצורה '2026-03-01' משתווים נכון כמחרוזות.
-  if (draft.cohortMonth > thisMonth) return ['חודש ההתחלה עוד לא הגיע.'];
-  if (draft.finishedMonth && draft.finishedMonth < draft.cohortMonth) return ['חודש הסיום לפני חודש ההתחלה.'];
-  if (draft.finishedMonth && draft.finishedMonth > thisMonth) return ['חודש הסיום עוד לא הגיע.'];
+  if (draft.cohortMonth > thisMonth) return [err('cohortMonth', 'חודש ההתחלה עוד לא הגיע.')];
+  if (draft.finishedMonth && draft.finishedMonth < draft.cohortMonth) {
+    return [err('finishedMonth', 'חודש הסיום לפני חודש ההתחלה.')];
+  }
+  if (draft.finishedMonth && draft.finishedMonth > thisMonth) return [err('finishedMonth', 'חודש הסיום עוד לא הגיע.')];
   return [];
 }
 
-function answerErrors(answers: Record<string, number>, questions: readonly Question[]): string[] {
-  const missing = questions.filter((q) => answers[q.key] === undefined);
-  if (missing.length > 0) return [`חסרות תשובות: ${missing.map((q) => q.label).join(', ')}.`];
-  const invalid = questions.filter((q) => {
+/** הודעה לכל שאלה, מתחת לתשובות שלה, לפי סדר השאלון. */
+function answerErrors(answers: Record<string, number>, questions: readonly Question[]): StepError[] {
+  return questions.flatMap((q) => {
     const value = answers[q.key];
-    return q.scale === 'yes_no' ? value !== YES && value !== NO : !(Number.isInteger(value) && value >= 1 && value <= 5);
+    if (value === undefined) return [err(`question:${q.key}`, 'בחרו תשובה.')];
+    const valid =
+      q.scale === 'yes_no' ? value === YES || value === NO : Number.isInteger(value) && value >= 1 && value <= 5;
+    return valid ? [] : [err(`question:${q.key}`, 'התשובה לא תקינה. בחרו שוב.')];
   });
-  return invalid.length > 0 ? [`תשובה לא תקינה: ${invalid.map((q) => q.label).join(', ')}.`] : [];
 }
 
-function wordsErrors(body: string): string[] {
+function wordsErrors(body: string): StepError[] {
   const n = length(body);
-  if (n < BODY_MIN) return [`עוד ${chars(BODY_MIN - n)} לפחות.`];
-  if (n > BODY_MAX) return [`ארוך ב${n - BODY_MAX === 1 ? 'תו אחד' : `-${n - BODY_MAX} תווים`} מהמותר.`];
+  if (n < BODY_MIN) return [err('body', `עוד ${chars(BODY_MIN - n)} לפחות.`)];
+  if (n > BODY_MAX) return [err('body', `ארוך ב${n - BODY_MAX === 1 ? 'תו אחד' : `-${n - BODY_MAX} תווים`} מהמותר.`)];
   return [];
 }
 
-function nameErrors(draft: DraftFields): string[] {
+function nameErrors(draft: DraftFields): StepError[] {
   if (draft.displayMode === 'anonymous') return [];
   const name = draft.displayName.trim();
-  if (name === '') return ['כתבו איך להציג את השם.'];
-  if (name.length > NAME_MAX) return ['השם ארוך מדי.'];
+  if (name === '') return [err('displayName', 'כתבו איך להציג את השם.')];
+  if (name.length > NAME_MAX) return [err('displayName', 'השם ארוך מדי.')];
   return [];
 }
 
-/** ההודעות של צעד אחד, בעברית. רשימה ריקה: אפשר להמשיך. */
+/** ההודעות של צעד אחד, בעברית, כל אחת עם השדה שלה. רשימה ריקה: אפשר להמשיך. */
 export function stepErrors(
   step: StepId,
   draft: DraftFields,
   ctx: StepContext,
   proofs: readonly ProofChoice[] = [],
-): string[] {
+): StepError[] {
   switch (step) {
     case 'when':
       return whenErrors(draft, ctx.thisMonth);
@@ -170,7 +189,7 @@ export function stepErrors(
     case 'name':
       return nameErrors(draft);
     case 'proof':
-      return proofErrors(proofs);
+      return proofErrors(proofs).map((message) => err('proofs', message));
   }
 }
 

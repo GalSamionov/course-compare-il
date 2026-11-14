@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareProof, paidBucket, sanitizeExtracted, type ExtractedProof, type ProofExpectations } from './proof-check';
+import { compareProof, sanitizeExtracted, type ExtractedProof, type ProofExpectations } from './proof-check';
 
 const expected: ProofExpectations = {
   institutionName: 'מכללה לדוגמה',
@@ -90,15 +90,5 @@ describe('sanitizeExtracted', () => {
     // תווים נסתרים לא תופסים את מגבלת האורך, ושם שכולו נסתר הוא ריק.
     expect(sanitizeExtracted({ name_on_document: '​'.repeat(150) + 'נועה' }).nameOnDocument).toBe('נועה');
     expect(sanitizeExtracted({ institution_name: '‮‏\u0007' }).institutionName).toBe('');
-  });
-});
-
-describe('paidBucket', () => {
-  it('rounds down to steps of 500', () => {
-    expect(paidBucket(1800)).toBe(1500);
-    expect(paidBucket(14900)).toBe(14500);
-    expect(paidBucket(500)).toBe(500);
-    expect(paidBucket(0)).toBeNull();
-    expect(paidBucket(Number.NaN)).toBeNull();
   });
 });

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          "video/legend/index.html"
+        ],
+        "createdAt": "2026-11-14T18:27:26.375Z",
+        "reason": "Claude, intentional: the marker stroke in the legend scene copies .hl from web/src/app/globals.css (padding 0.04em 0.32em), a highlighter stroke behind text and not a container; the ruled lines are notebook lines, not borders"
+      }
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 import type { ScoreView } from '@/lib/data/course-page';
 import { PenLoop } from '@/components/site/pen';
+import { reviewsToScoreText, verifiedGraduatesText, verifiedReviewsText } from '@/lib/format';
 import { PenNote } from './marks';
 
 /**
@@ -26,7 +27,7 @@ export function ScoreBox({ score }: { score: ScoreView }) {
             <span className="sr-only">ציון בוגרים {score.value.toFixed(1)} מתוך 10.</span>
             <div className="font-sans text-sm leading-snug lg:text-[15px]">
               <p className="font-bold">ציון בוגרים מתוך 10</p>
-              <p>{score.reviewCount} בוגרים מאומתים</p>
+              <p>{verifiedGraduatesText(score.reviewCount)}</p>
               {score.recommendPct !== null && <p>{Math.round(score.recommendPct)}% ממליצים</p>}
               {score.stale && <p className="text-ink-soft">ייתכן שהתיישן: אין ביקורת חדשה כבר שנה</p>}
             </div>
@@ -36,8 +37,8 @@ export function ScoreBox({ score }: { score: ScoreView }) {
             <p className="font-bold">עוד אין ציון בוגרים</p>
             {score.status === 'not_enough_reviews' && (
               <>
-                <p>{score.reviewCount} ביקורות מאומתות.</p>
-                {score.reviewsNeeded > 0 && <p>עוד {score.reviewsNeeded} ביקורות עד לציון.</p>}
+                <p>{score.reviewCount > 0 ? verifiedReviewsText(score.reviewCount) : 'עוד אין ביקורות מאומתות'}.</p>
+                {score.reviewsNeeded > 0 && <p>{reviewsToScoreText(score.reviewsNeeded)}.</p>}
               </>
             )}
           </div>

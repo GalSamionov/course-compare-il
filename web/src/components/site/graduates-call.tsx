@@ -2,12 +2,11 @@ import Link from 'next/link';
 import { PenNote } from '@/components/course/marks';
 import { TickMark } from '@/components/notebook/tick';
 import { PenBox } from '@/components/site/pen';
+import { moreReviewsText } from '@/lib/format';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { closestToScore } from '@/lib/search/match';
 import type { CourseSummary } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
-
-const missingText = (n: number) => (n === 1 ? 'עוד ביקורת אחת' : `עוד ${n} ביקורות`);
 
 /**
  * כמה ביקורות כבר יש וכמה חסרות עד לציון: חמש תיבות בעט, וי בכל ביקורת שיש.
@@ -63,7 +62,7 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
                 <span className="flex items-center gap-2.5">
                   <ReviewBoxes have={Math.max(0, MIN_REVIEWS - needed)} />
                   <span className="inline-block -rotate-1 font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
-                    {missingText(needed)}
+                    {moreReviewsText(needed)}
                   </span>
                   <span className="sr-only"> עד לציון</span>
                 </span>

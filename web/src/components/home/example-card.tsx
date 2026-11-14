@@ -3,7 +3,7 @@ import { SourceLegend } from '@/components/course/source-legend';
 import { Claim, Mark, PenNote, StickyNote, Tape } from '@/components/course/marks';
 import { Stamp } from '@/components/course/stamp';
 import type { CoursePageData } from '@/lib/data/course-page';
-import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText, verifiedGraduatesText } from '@/lib/format';
 import { verifiedLabel } from '@/lib/reviews/types';
 import type { CourseSummary } from '@/lib/search/types';
 
@@ -56,7 +56,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
               <p className="font-bold">ציון בוגרים מתוך 10</p>
               {score?.status === 'scored' && (
                 <p>
-                  {score.reviewCount} בוגרים מאומתים
+                  {verifiedGraduatesText(score.reviewCount)}
                   {score.recommendPct !== null && ` · ${Math.round(score.recommendPct)}% ממליצים`}
                 </p>
               )}
