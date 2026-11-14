@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="he" dir="rtl" data-resolution="square">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1080" />
+    <!-- סצנת "מה אומר כל צבע" בסרטון של למדתי. HyperFrames מרנדר אותה ל-MP4 מרובע, ו-Remotion מניח אותה כדף על השולחן.
+         הצבעים, המשיכות והמספרים המוקפים הועתקו מ-web/src/app/globals.css ומ-web/src/components/site/pen.tsx. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700;800&family=Noto+Serif+Hebrew:wght@400;700;800&family=Playpen+Sans+Hebrew:wght@500;600&display=block"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ink: #1c1c1c;
+        --ink-soft: #555555;
+        --pen: #1f3fbf;
+        --claim: #2f5fe0;
+        --ruled: #c3cad3;
+        --margin-rule: #9ca5b0;
+        --serif: 'Noto Serif Hebrew', serif;
+        --sans: 'Assistant', sans-serif;
+        --pen-font: 'Playpen Sans Hebrew', cursive;
+        --margin: 168px;
+        --row: 174px;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 1080px;
+        height: 1080px;
+        overflow: hidden;
+        background: #ffffff;
+        color: var(--ink);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: var(--serif);
+      }
+
+      /* דף מחברת: קו שוליים כפול בצד הימני, ושורות שנמשכות עד קצה הנייר. */
+      .margin-rule {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: var(--margin);
+        width: 6px;
+        border-inline: 1.5px solid var(--margin-rule);
+        opacity: 0.75;
+      }
+      .rows {
+        position: absolute;
+        top: 226px;
+        inset-inline: 0;
+      }
+      .row {
+        position: relative;
+        height: var(--row);
+        border-top: 1.5px solid var(--ruled);
+      }
+      .row:last-child {
+        border-bottom: 1.5px solid var(--ruled);
+      }
+
+      h1 {
+        position: absolute;
+        top: 74px;
+        right: calc(var(--margin) + 34px);
+        font-size: 72px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+      }
+      /* קו העט מתחת לכותרת, אותו SVG כמו --pen-rule באתר. נמתח מימין לשמאל. */
+      .pen-rule {
+        position: absolute;
+        top: 166px;
+        right: calc(var(--margin) + 30px);
+        width: 520px;
+        height: 18px;
+        transform-origin: right center;
+      }
+
+      /* מספר מוקף בעט בשוליים. */
+      .num {
+        position: absolute;
+        top: 52px;
+        right: 52px;
+        width: 68px;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--pen-font);
+        font-weight: 600;
+        font-size: 36px;
+        color: var(--pen);
+      }
+      .num svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+      .num span {
+        position: relative;
+        transform: translateY(2px);
+      }
+
+      .content {
+        position: absolute;
+        top: 28px;
+        right: calc(var(--margin) + 34px);
+        left: 56px;
+      }
+      .label {
+        font-family: var(--sans);
+        font-size: 42px;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+      .example {
+        margin-top: 14px;
+        font-size: 40px;
+        line-height: 1.35;
+        white-space: nowrap;
+      }
+      .from {
+        font-family: var(--sans);
+        font-size: 28px;
+        color: var(--ink-soft);
+        margin-inline-start: 14px;
+      }
+
+      /* המרקר: אותה משיכה בשלושה חלקים כמו .hl באתר, בשכבה מתחת לטקסט. הטקסט גלוי כל הזמן. */
+      .mark {
+        position: relative;
+        display: inline-block;
+        padding: 0.04em 0.32em;
+        margin-inline: -0.12em;
+      }
+      .mark .ink {
+        position: absolute;
+        inset: 0;
+        background-repeat: no-repeat;
+        background-size: 0.55em 100%, 0.55em 100%, calc(100% - 0.9em) 100%;
+        background-position: left center, right center, right 0.45em center;
+        background-image: var(--hl-l), var(--hl-r), var(--hl-a);
+        clip-path: inset(0% 0% 0% 100%);
+      }
+      .mark .txt {
+        position: relative;
+      }
+      .verified {
+        --hl-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='%239BEA8A' d='M0 3.6C18 2.9 36 3.4 55 2.7S86 2.2 100 2.4L100 17.2C82 17.9 62 17.1 44 17.7S14 17.4 0 18Z'/%3E%3C/svg%3E");
+        --hl-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%239BEA8A' d='M10 2.6L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L10 17.8Z'/%3E%3Cpath fill='%2388DF76' d='M5.6 2.9L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L2.9 17.9C2.7 15.6 3.1 12.6 3.8 9.9 4.3 7.4 5 5 5.6 2.9Z'/%3E%3C/svg%3E");
+        --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%239BEA8A' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%2388DF76' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
+      }
+      .grads {
+        --hl-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFEA3D' d='M0 2.3C20 2.8 40 2.4 58 3.1S88 3.3 100 3.7L100 17.9C84 17.5 66 18.1 46 17.4S16 17.6 0 17.1Z'/%3E%3C/svg%3E");
+        --hl-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFEA3D' d='M10 2.6L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L10 17.8Z'/%3E%3Cpath fill='%23F9DC1E' d='M5.6 2.9L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L2.9 17.9C2.7 15.6 3.1 12.6 3.8 9.9 4.3 7.4 5 5 5.6 2.9Z'/%3E%3C/svg%3E");
+        --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFEA3D' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%23F9DC1E' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
+      }
+      .weak {
+        --hl-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 3.6C18 2.9 36 3.4 55 2.7S86 2.2 100 2.4L100 17.2C82 17.9 62 17.1 44 17.7S14 17.4 0 18Z'/%3E%3C/svg%3E");
+        --hl-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M10 2.6L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L10 17.8Z'/%3E%3Cpath fill='%23FF9DC7' d='M5.6 2.9L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L2.9 17.9C2.7 15.6 3.1 12.6 3.8 9.9 4.3 7.4 5 5 5.6 2.9Z'/%3E%3C/svg%3E");
+        --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%23FF9DC7' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
+      }
+      /* טענה של המוסד: קו כחול מתחת לטקסט, בלי מרקר. */
+      .claim {
+        position: relative;
+        display: inline-block;
+      }
+      .claim .line {
+        position: absolute;
+        right: 0;
+        left: 0;
+        bottom: -8px;
+        height: 4px;
+        background: var(--claim);
+        transform-origin: right center;
+        transform: scaleX(0);
+      }
+
+      /* הערת העט בתחתית הדף: הקול של האתר. */
+      .pen-note {
+        position: absolute;
+        bottom: 38px;
+        right: calc(var(--margin) + 34px);
+        font-family: var(--pen-font);
+        font-weight: 500;
+        font-size: 36px;
+        color: var(--pen);
+        transform: rotate(-1deg);
+        transform-origin: right center;
+      }
+      .pen-note svg {
+        width: 52px;
+        height: 26px;
+        margin-inline-end: 12px;
+        vertical-align: -2px;
+        overflow: visible;
+      }
+      .reveal {
+        clip-path: inset(0% 0% 0% 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="legend" data-start="0" data-duration="7.5" data-width="1080" data-height="1080">
+      <div class="margin-rule"></div>
+
+      <h1 id="title" class="clip" data-start="0" data-duration="7.5">מה אומר כל צבע</h1>
+      <svg id="rule" class="pen-rule clip" data-start="0" data-duration="7.5" viewBox="0 0 200 12" preserveAspectRatio="none">
+        <path fill="#1F3FBF" d="M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z" />
+      </svg>
+
+      <div class="rows">
+        <div class="row" id="r1">
+          <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M25.2 5.6C15.4 2.6 5.4 8.8 4.8 19.2 4.2 29.2 11.6 35.8 21 35.4 30.2 35 36 28.2 35.4 19 34.8 10.6 28 4.8 18.4 5.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>1</span></div>
+          <div class="content">
+            <p class="label">ירוק: נבדק מול מסמך</p>
+            <p class="example"><span class="mark verified"><span class="ink"></span><span class="txt">שילמו בפועל 12,500–15,000 ₪</span></span><span class="from">לפי 6 חשבוניות</span></p>
+          </div>
+        </div>
+        <div class="row" id="r2">
+          <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M14.4 6.2C23.6 2.8 34.8 8 35.4 18.6 36 28.8 29 35.6 19.4 35.6 9.8 35.6 4.2 28.4 4.8 19.4 5.4 11.6 11 6.6 21.2 5.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>2</span></div>
+          <div class="content">
+            <p class="label">צהוב: מה שבוגרים אמרו</p>
+            <p class="example"><span class="mark grads"><span class="ink"></span><span class="txt">14 בוגרים ענו 3 חודשים אחרי הסיום</span></span></p>
+          </div>
+        </div>
+        <div class="row" id="r3">
+          <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M28.4 8.4C22.6 3.8 11.8 4.2 7.2 11.4 2.8 18.4 5 29.6 13.4 33.8 22 38 32.6 33.4 35 24.6 37 17.2 33.4 9.6 23.8 6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>3</span></div>
+          <div class="content">
+            <p class="label">ורוד: נקודת חולשה</p>
+            <p class="example"><span class="mark weak"><span class="ink"></span><span class="txt">הקצב בחודש השני מהיר מדי</span></span></p>
+          </div>
+        </div>
+        <div class="row" id="r4">
+          <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M25.2 5.6C15.4 2.6 5.4 8.8 4.8 19.2 4.2 29.2 11.6 35.8 21 35.4 30.2 35 36 28.2 35.4 19 34.8 10.6 28 4.8 18.4 5.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>4</span></div>
+          <div class="content">
+            <p class="label">קו כחול: המוסד אומר, לא נבדק</p>
+            <p class="example"><span class="claim"><span class="txt">ליווי השמה במשך 6 חודשים</span><span class="line"></span></span></p>
+          </div>
+        </div>
+      </div>
+
+      <p id="note" class="pen-note reveal clip" data-start="0" data-duration="7.5">
+        <svg viewBox="0 0 28 14"><path d="M26.6 5.4C19.4 3.6 11.6 4.4 3.4 8.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /><path d="M8.6 3.4 2.8 8.5 9.6 11.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>הצבע אומר מאיפה המידע הגיע
+      </p>
+    </div>
+
+    <script>
+      // כל הזמנים בשניות. מריחת המרקר: 0.62 שניות, אותה עקומה כמו באתר (cubic-bezier(0.16, 1, 0.3, 1)) ≈ expo.out.
+      const tl = gsap.timeline({ paused: true });
+      const smear = 'expo.out';
+
+      tl.fromTo('#title', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, 0.1);
+      tl.fromTo('#rule', { scaleX: 0 }, { scaleX: 1, duration: 0.55, ease: 'power2.inOut' }, 0.35);
+
+      const rows = ['#r1', '#r2', '#r3', '#r4'];
+      rows.forEach((row, i) => {
+        const at = 0.85 + i * 1.25;
+        tl.fromTo(`${row} .num path`, { strokeDashoffset: 1.1 }, { strokeDashoffset: 0, duration: 0.45, ease: 'power1.inOut' }, at);
+        tl.fromTo(`${row} .num span`, { opacity: 0 }, { opacity: 1, duration: 0.2 }, at + 0.15);
+        tl.fromTo(`${row} .label`, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power2.out' }, at + 0.1);
+        tl.fromTo(`${row} .example`, { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + 0.3);
+        if (row === '#r4') {
+          tl.fromTo(`${row} .line`, { scaleX: 0 }, { scaleX: 1, duration: 0.62, ease: smear }, at + 0.5);
+        } else {
+          tl.fromTo(
+            `${row} .ink`,
+            { clipPath: 'inset(0% 0% 0% 100%)' },
+            { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.62, ease: smear },
+            at + 0.5,
+          );
+        }
+      });
+
+      tl.fromTo('#note', { clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: 'power1.inOut' }, 6.0);
+      tl.to({}, { duration: 0.01 }, 7.49);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['legend'] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

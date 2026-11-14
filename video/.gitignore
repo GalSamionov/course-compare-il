@@ -1,0 +1,6 @@
+# תוצרים שנוצרים מחדש: הצילומים מהאתר החי (pnpm shots), הסרטונים והפריימים לבדיקה.
+node_modules/
+out/
+public/shots/
+legend/.hyperframes/
+legend/renders/
