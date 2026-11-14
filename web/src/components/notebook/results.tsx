@@ -3,7 +3,7 @@ import { SaveButton } from '@/components/account/save-button';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
 import { Soon } from '@/components/site/soon';
-import { formatIls } from '@/lib/format';
+import { formatIls, missingReviewsText, verifiedGraduatesText } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
 import { PRODUCT_TYPE_LABEL } from '@/lib/search/types';
@@ -22,9 +22,7 @@ export function allCoursesTitle(n: number): string {
   return n === 1 ? 'קורס אחד' : `${n} קורסים`;
 }
 
-const verifiedText = (n: number) =>
-  n === 0 ? 'עוד אין בוגרים מאומתים' : n === 1 ? 'בוגר מאומת אחד' : `${n} בוגרים מאומתים`;
-const missingText = (n: number) => (n === 1 ? 'חסרה עוד ביקורת אחת.' : `חסרות עוד ${n} ביקורות.`);
+const verifiedText = (n: number) => (n === 0 ? 'עוד אין בוגרים מאומתים' : verifiedGraduatesText(n));
 
 /**
  * העמודות של שורת התוצאה ברשימה רחבה (מחשב): השוליים, הקורס, הציון, הבוגרים והמחיר, והכפתורים.
@@ -94,7 +92,7 @@ export function ResultRow({
               {course.score.status === 'not_enough_reviews' && course.score.reviewsNeeded > 0 && (
                 <>
                   {' '}
-                  <span className="text-ink-soft">{missingText(course.score.reviewsNeeded)}</span>
+                  <span className="text-ink-soft">{missingReviewsText(course.score.reviewsNeeded)}.</span>
                 </>
               )}
             </p>

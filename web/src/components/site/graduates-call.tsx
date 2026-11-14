@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import { PenNote } from '@/components/course/marks';
+import { moreReviewsText } from '@/lib/format';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { closestToScore } from '@/lib/search/match';
 import type { CourseSummary } from '@/lib/search/types';
-
-const missingText = (n: number) => (n === 1 ? 'עוד ביקורת אחת' : `עוד ${n} ביקורות`);
 
 /**
  * קו בעט שנמתח מהשם של הקורס אל מה שחסר לו, כמו קו מנקד בתוכן עניינים, אבל ביד.
@@ -58,7 +57,7 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
                 <span className="min-w-0 underline underline-offset-[3px]">{course.title}</span>
                 <PenLeader />
                 <span className="inline-block flex-none -rotate-1 font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
-                  {missingText(needed)}
+                  {moreReviewsText(needed)}
                 </span>
                 <span className="sr-only"> עד לציון</span>
               </Link>

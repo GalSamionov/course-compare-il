@@ -3,9 +3,15 @@ import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import type { CSSProperties, ReactNode } from 'react';
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatIls, invoiceCountText, paidRangeSentence } from '@/lib/format';
+import {
+  formatIls,
+  invoiceCountText,
+  paidRangeSentence,
+  reviewsToScoreText,
+  verifiedGraduatesText,
+  verifiedReviewsText,
+} from '@/lib/format';
 import { rtlTokens } from '@/lib/og/bidi';
-import { neededText, reviewsText, verifiedText } from '@/lib/og/share-text';
 import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
 
 /**
@@ -325,7 +331,7 @@ function ScoreBox({ score }: { score: CoursePageData['score'] }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 22, lineHeight: 1.3 }}>
           <Rtl text="ציון בוגרים מתוך 10" size={26} style={{ fontWeight: 800 }} />
-          <Rtl text={verifiedText(score.reviewCount)} size={26} />
+          <Rtl text={verifiedGraduatesText(score.reviewCount)} size={26} />
           {score.recommendPct !== null && <Rtl text={`${Math.round(score.recommendPct)}% ממליצים`} size={26} />}
         </div>
       </div>
@@ -336,8 +342,8 @@ function ScoreBox({ score }: { score: CoursePageData['score'] }) {
   return (
     <div style={{ ...box, flexDirection: 'column', alignItems: 'flex-end', padding: '22px 26px', lineHeight: 1.3 }}>
       <Rtl text="עוד אין ציון בוגרים" size={36} style={{ fontWeight: 800 }} />
-      <Rtl text={count > 0 ? reviewsText(count) : 'עוד אין ביקורות מאומתות'} size={26} style={{ marginTop: 6 }} />
-      {needed > 0 && <Rtl text={neededText(needed)} size={26} />}
+      <Rtl text={count > 0 ? verifiedReviewsText(count) : 'עוד אין ביקורות מאומתות'} size={26} style={{ marginTop: 6 }} />
+      {needed > 0 && <Rtl text={reviewsToScoreText(needed)} size={26} />}
     </div>
   );
 }
