@@ -4,9 +4,10 @@ import { useId, useState } from 'react';
 import { PenNote } from '@/components/course/marks';
 import { buttonVariants } from '@/components/ui/button';
 import { uploadProof, writeAttached, type AttachedProof } from '@/lib/reviews/browser';
+import type { StepError } from '@/lib/reviews/steps';
 import { MAX_PROOF_FILES, PROOF_KIND_LABEL, SUFFICIENT_KINDS, UPLOAD_KINDS, type ProofKind } from '@/lib/reviews/types';
 import { cn } from '@/lib/utils';
-import { fieldLabel, selectClass } from './review-steps';
+import { FieldError, fieldId, fieldLabel, invalidProps, selectClass } from './review-steps';
 
 const sizeLabel = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(bytes / 1024))}KB`;
@@ -38,30 +39,36 @@ export const primaryButton = cn(
 /**
  * צעד 5. הקובץ עולה מיד כשבוחרים אותו, ישר לאחסון. עד שני קבצים: צילום מסך או פרויקט רק יחד עם הוכחה
  * שמספיקה לבד. "להסיר" מוציא את הקובץ מהרשימה. הקובץ עצמו נמחק בניקוי היומי, כי למשתמש אין הרשאה למחוק.
+ * "לשלוח לבדיקה" ו"חזרה" בשורת הכפתורים של המסלול (review-flow.tsx), כמו בשאר הצעדים. שליחה בלי קובץ
+ * מחזירה הודעה מתחת לבחירת הקובץ, והפוקוס עובר אליה.
  */
 export function ProofStep({
   userId,
   reviewId,
   proofs,
   decisionNote,
-  busy,
+  uploading,
+  errors,
+  onUploading,
   onChange,
-  onSubmit,
 }: {
   userId: string;
   reviewId: string;
   proofs: AttachedProof[];
   decisionNote: string | null;
-  busy: boolean;
+  uploading: boolean;
+  errors: readonly StepError[];
+  onUploading: (uploading: boolean) => void;
   onChange: (proofs: AttachedProof[]) => void;
-  onSubmit: () => void;
 }) {
   const [kind, setKind] = useState<ProofKind>(() =>
     proofs.some((p) => SUFFICIENT_KINDS.includes(p.kind)) ? 'screenshot' : 'invoice',
   );
-  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const kindId = useId();
+  const hintId = useId();
+  // עם שני קבצים אין בחירת קובץ: ההודעה והפוקוס עוברים לרשימה.
+  const canAdd = proofs.length < MAX_PROOF_FILES;
 
   async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget;
@@ -70,9 +77,9 @@ export function ProofStep({
     input.value = '';
     if (!file) return;
     setError(null);
-    setUploading(true);
+    onUploading(true);
     const result = await uploadProof(userId, reviewId, file, kind);
-    setUploading(false);
+    onUploading(false);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -103,11 +110,18 @@ export function ProofStep({
         או פרויקט, רק יחד עם אחד מאלה.
       </p>
       <PenNote arrow className="mt-3 max-w-[40ch]">
-        רק אנחנו רואים את הקובץ. הוא נמחק מיד אחרי ההחלטה. נשאר רק סוג ההוכחה, החודש וטווח הסכום.
+        רק אנחנו רואים את הקובץ, והוא נמחק מיד אחרי ההחלטה. אחרי אישור נשארים סוג ההוכחה, תאריך האימות והסכום,
+        מעוגל למטה ל-500 ₪. הסכום מוצג רק בטווח של כמה בוגרים יחד.
       </PenNote>
 
       {proofs.length > 0 && (
-        <ul aria-label="הקבצים שהוצמדו" className="mt-10 space-y-10">
+        <ul
+          id={canAdd ? undefined : fieldId('proofs')}
+          tabIndex={canAdd ? undefined : -1}
+          aria-label="הקבצים שהוצמדו"
+          {...(canAdd ? {} : invalidProps(errors, 'proofs'))}
+          className="mt-10 space-y-10 outline-none"
+        >
           {proofs.map((proof, i) => (
             // מסמך שהוצמד לדף: כרטיס נייר עם צל של חפץ מונח, מוטה מעט, והמהדק מעליו.
             <li
@@ -135,7 +149,7 @@ export function ProofStep({
         </ul>
       )}
 
-      {proofs.length < MAX_PROOF_FILES && (
+      {canAdd && (
         <div className="mt-8 space-y-4">
           <div>
             <label htmlFor={kindId} className={fieldLabel}>
@@ -161,31 +175,29 @@ export function ProofStep({
           >
             {uploading ? 'מעלים…' : proofs.length === 0 ? 'לבחור קובץ' : 'לבחור עוד קובץ'}
             <input
+              id={fieldId('proofs')}
               type="file"
               accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
               className="sr-only"
               disabled={uploading}
+              {...invalidProps(errors, 'proofs', hintId)}
               onChange={(e) => void onFile(e)}
             />
           </label>
-          <p className="font-sans text-[13px] text-ink-soft">JPG, PNG או PDF, עד 10MB.</p>
+          <div>
+            <p id={hintId} className="font-sans text-[13px] text-ink-soft">
+              JPG, PNG או PDF, עד 10MB.
+            </p>
+            {error && (
+              <p role="alert" className="mt-2 font-sans text-[15px] font-bold">
+                {error}
+              </p>
+            )}
+            <FieldError errors={errors} field="proofs" />
+          </div>
         </div>
       )}
-
-      {error && (
-        <p role="alert" className="mt-3 font-sans text-[15px] font-bold">
-          {error}
-        </p>
-      )}
-
-      <button
-        type="button"
-        disabled={busy || uploading || proofs.length === 0}
-        onClick={onSubmit}
-        className={cn(primaryButton, 'mt-10 w-full max-w-[340px]')}
-      >
-        {busy ? 'שולחים…' : 'לשלוח לבדיקה'}
-      </button>
+      {!canAdd && <FieldError errors={errors} field="proofs" className="mt-6" />}
     </div>
   );
 }

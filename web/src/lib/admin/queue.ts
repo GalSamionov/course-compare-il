@@ -1,4 +1,5 @@
 import 'server-only';
+import { connection } from 'next/server';
 import { one } from '@/lib/data/shared';
 import { PROOF_BUCKET } from '@/lib/reviews/files';
 import type { CheckResult } from '@/lib/reviews/proof-check';
@@ -60,6 +61,8 @@ export async function loadQueue(db: AdminDb): Promise<QueueItem[]> {
   if (reviewsRes.error) throw new Error(`queue: ${reviewsRes.error.message}`);
   if (metricsRes.error) throw new Error(`queue metrics: ${metricsRes.error.message}`);
 
+  // השעה של הבקשה, ולא של הבנייה (08-caching.md, "Random values and timestamps"). העמוד כבר כולו בבקשה.
+  await connection();
   const now = Date.now();
   const metrics = new Map(metricsRes.data.map((m) => [m.key, m]));
   const rows = reviewsRes.data;

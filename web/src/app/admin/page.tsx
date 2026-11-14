@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { DecisionLog } from '@/components/admin/decision-log';
 import { QueueItemView } from '@/components/admin/queue-item';
@@ -35,6 +36,9 @@ function countLine(count: number): string {
 }
 
 async function AdminQueue() {
+  // הכול בבקשה, לפני שנוגעים בשעון: getUser של Supabase בודק תפוגה עם Date.now(), והתור מחשב כמה זמן כל
+  // ביקורת מחכה (08-caching.md, "Random values and timestamps").
+  await connection();
   const gate = await adminGate({ readOnly: true });
   if (gate.kind === 'not-admin') notFound();
   const items = gate.kind === 'ok' ? await loadQueue(gate.db) : [];
