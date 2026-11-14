@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { SaveButton } from '@/components/account/save-button';
 import { PenNote } from '@/components/course/marks';
 import { TickMark } from '@/components/notebook/tick';
-import { Soon } from '@/components/site/soon';
 import { buttonVariants } from '@/components/ui/button';
 import { toggleCompare, useAccount } from '@/lib/account/store';
 import { cn } from '@/lib/utils';
@@ -16,7 +15,7 @@ type Note = 'added-local' | 'added' | 'full' | 'error' | null;
  * שני הכפתורים מהציור (Chosen.dc.html), ומתחתם "לשמור".
  * "להשוואה" הוא הכפתור הראשי, כי הוא עובד היום: מכניס את הקורס להשוואה או מוציא אותו.
  * מבקר לא מחובר: ההשוואה נשמרת בדפדפן.
- * כתיבת ביקורת נבנית בסבב 3. עד אז היא כפתור משני עם הערה בעט "נפתח בקרוב", ומובילה לעמוד שמסביר מה יהיה שם.
+ * "כתיבת ביקורת" הוא כפתור משני, ומוביל למסלול הכתיבה (סבב 3).
  * ה-Button של shadcn בנוי על Base UI ואין לו asChild, ולכן הקישור מקבל את המחלקות של הכפתור.
  */
 export function CourseActions({
@@ -71,17 +70,15 @@ export function CourseActions({
           </span>
           להשוואה (עד 3)
         </button>
-        {/* כתיבת ביקורת נבנית בסבב 3. הקישור נשאר, וההערה בעט אומרת את זה לפני הלחיצה. */}
         <Link
           href={`/courses/${slug}/review`}
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'relative h-[50px] flex-1 border-[1.5px] border-ink text-base font-bold',
+            'h-[50px] flex-1 border-[1.5px] border-ink text-base font-bold',
             stacked && 'flex-none',
           )}
         >
           כתיבת ביקורת
-          <Soon className="absolute -top-2.5 left-2 bg-white px-1 lg:left-3" />
         </Link>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2">

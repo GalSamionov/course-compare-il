@@ -49,6 +49,8 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
         body: 'למדתי לאפות לחם כל שבוע.',
         followUp: null,
         vendorResponse: null,
+        authorTitle: 'graduate_f',
+        helpfulCount: 0,
       },
     ],
     reviewTotal: 6,

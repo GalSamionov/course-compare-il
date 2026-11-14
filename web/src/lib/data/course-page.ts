@@ -5,6 +5,7 @@ import { yesCount } from '@/lib/score/compute';
 import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
 import { safeHttpUrl } from '@/lib/safe-url';
 import type { Database } from '@/lib/database.types';
+import type { AuthorTitle } from '@/lib/reviews/types';
 import { one, queryError } from './shared';
 
 export interface SyllabusItem {
@@ -36,6 +37,10 @@ export interface ReviewView {
   body: string;
   followUp: string | null;
   vendorResponse: string | null;
+  /** "בוגר", "בוגרת" או בלי: מה שמופיע ליד השם (verifiedLabel). */
+  authorTitle: AuthorTitle;
+  /** "עזר לי". מהמטמון של העמוד, ולכן יכול לפגר בשעה. לא משנה את הסדר. */
+  helpfulCount: number;
 }
 
 export interface LecturerView {
@@ -144,9 +149,10 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
     db
       .from('reviews')
-      .select('id, display_name, display_mode, cohort_month, body, follow_up_text, published_at, vendor_responses(body)', {
-        count: 'exact',
-      })
+      .select(
+        'id, display_name, display_mode, author_title, helpful_count, cohort_month, body, follow_up_text, published_at, vendor_responses(body)',
+        { count: 'exact' },
+      )
       .eq('course_id', course.id)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
@@ -296,6 +302,8 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
       body: r.body,
       followUp: r.follow_up_text,
       vendorResponse: one(r.vendor_responses as { body: string } | { body: string }[] | null)?.body ?? null,
+      authorTitle: r.author_title,
+      helpfulCount: r.helpful_count,
     })),
   };
 }
