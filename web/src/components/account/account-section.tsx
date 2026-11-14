@@ -75,7 +75,8 @@ export function AccountSection({
               למחוק את החשבון לצמיתות?
             </p>
             <p className="mt-1 text-[13px] leading-normal text-pretty text-ink-soft">
-              המייל, הקורסים ששמרתם, ההשוואה והתשובות יימחקו עכשיו. אי אפשר לבטל את זה.
+              המייל, הקורסים ששמרתם, ההשוואה, התשובות וביקורות שעוד לא פורסמו יימחקו. ביקורות שפורסמו נשארות
+              באתר, בלי קשר לחשבון. כדי להסיר אחת, מוחקים אותה קודם ב״הביקורות שלי״. אי אפשר לבטל את זה.
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <button
