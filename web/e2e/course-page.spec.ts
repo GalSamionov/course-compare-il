@@ -20,7 +20,8 @@ test('course page shows the score, the legend and every section', async ({ page 
   await expect(page.locator('#reviews article')).toHaveCount(3);
   await expect(page.getByText('ביקורת מאומתת').first()).toBeVisible();
   await expect(page.getByText('התחלתי לעבוד כמפתחת ג׳וניור')).toBeVisible();
-  await expect(page.getByText('12,500–15,000 ₪')).toBeVisible();
+  // הטווח מופיע גם ב"בקצרה" ליד הציון. כאן בודקים את חלק המחיר.
+  await expect(page.locator('#price').getByText('12,500–15,000 ₪')).toBeVisible();
 });
 
 test('a course with too few reviews says how many are missing', async ({ page }) => {

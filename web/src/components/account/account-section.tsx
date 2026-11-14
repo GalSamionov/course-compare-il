@@ -51,13 +51,13 @@ export function AccountSection({
 
   return (
     <MeSection id="account" title="החשבון" className="mt-[34px]">
-      <div className="mt-3 grid min-h-[54px] grid-cols-[70px_minmax(0,1fr)] items-center border-y border-line">
+      <div className="ruled-top ruled-row mt-3 grid min-h-[54px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
         <span className="font-sans text-[13px] leading-tight text-ink-soft">מחוברים עם</span>
         <p dir="ltr" className="pr-3 text-right font-sans text-base leading-snug font-semibold">
           {email}
         </p>
       </div>
-      <div className="ms-[70px] ps-3">
+      <div className="ms-(--margin) ps-3">
         <button
           type="button"
           disabled={busy}

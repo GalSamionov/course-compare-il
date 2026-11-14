@@ -9,8 +9,8 @@ export function hasGradsSection(course: CoursePageData): boolean {
 export function GradsSection({ course }: { course: CoursePageData }) {
   if (!hasGradsSection(course)) return null;
   return (
-    <section id="grads" className="mt-7">
-      <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">מה הבוגרים אומרים</h2>
+    <section id="grads" className="mt-10 scroll-mt-6 lg:mt-14">
+      <h2 className="pen-rule text-[21px] font-bold lg:text-[28px]">מה הבוגרים אומרים</h2>
       {course.summaryGood && (
         <p className="mt-2.5">
           <strong className="font-sans">טוב:</strong> <Mark source="grads">{course.summaryGood}</Mark>

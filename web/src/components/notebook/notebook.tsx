@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SaveAnswers } from '@/components/account/save-answers';
+import { PenArrow } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { formatAmount, formatIls } from '@/lib/format';
 import { matchKeywords, matchNames, type KeywordCategory } from '@/lib/search/keywords';
@@ -94,20 +95,22 @@ async function understandText(text: string, categories: KeywordCategory[]): Prom
 /** סכומים מוכנים מתחת לשורה 4, כמו באב-טיפוס. */
 const BUDGET_PRESETS = [3000, 5000, 10000, 15000];
 
-const lineText = 'self-stretch pt-4 ps-3 pb-1 pe-1 text-start text-lg leading-normal';
+const lineText = 'self-stretch pt-4 ps-3 pb-1 pe-1 text-start text-lg leading-normal lg:text-xl';
 /** מה שהמבקר מקליד: עט כחול, מוטה מעט כמו בציור. הדוגמה (placeholder) נשארת ישרה. */
 const penInput =
-  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none not-placeholder-shown:-rotate-1';
-const inputExample = 'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft';
+  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none not-placeholder-shown:-rotate-1 lg:text-[23px]';
+const inputExample =
+  'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft lg:placeholder:text-[17px]';
 /**
  * שדה שגדל עם מה שכותבים, כמו כתב יד על הקו. עותק בלתי נראה של הטקסט (::after) יושב באותו תא של
  * הגריד וקובע את הגודל, ולכן תשובה או דוגמה ארוכה עוברת לשורה שנייה במקום להיחתך.
  * הגופן של העותק זהה לשדה: עט כשיש תשובה, ובגופן המודפס כשמוצגת הדוגמה (data-empty).
  */
 const growCopy =
-  'after:invisible after:col-start-1 after:row-start-1 after:whitespace-pre-wrap after:break-words after:content-[attr(data-copy)] after:font-pen after:text-[21px] after:font-medium after:leading-normal data-empty:after:font-sans data-empty:after:text-[15px] data-empty:after:font-normal';
+  'after:invisible after:col-start-1 after:row-start-1 after:whitespace-pre-wrap after:break-words after:content-[attr(data-copy)] after:font-pen after:text-[21px] after:font-medium after:leading-normal lg:after:text-[23px] data-empty:after:font-sans data-empty:after:text-[15px] data-empty:after:font-normal lg:data-empty:after:text-[17px]';
 const WHAT_EXAMPLE = 'למשל: לבנות אתרים, אקסל לעבודה, עוגות';
-const BUDGET_EXAMPLE = '10,000';
+/** הדוגמה לשורה 4 מוצגת ליד הקו הריק ולא בתוכו, כדי שלא תיראה כמו תקציב שכבר נקבע. */
+const BUDGET_EXAMPLE = 'למשל 10,000';
 
 /**
  * מעדכן את העותק שקובע את גודל השדה. נוגע רק במאפיינים של העטיפה, ש-React לא משנה עד שה-key שלה
@@ -128,12 +131,12 @@ function submitOnEnter(event: React.KeyboardEvent<HTMLTextAreaElement>) {
   }
 }
 /** דוגמה בשורה ריקה: בגופן המודפס ובאפור, כדי שלא תיראה כמו תשובה בעט (מסמך העיצוב, 3א.4). */
-const example = 'font-sans text-[15px] font-normal text-ink-soft';
+const example = 'font-sans text-[15px] font-normal text-ink-soft lg:text-[17px]';
 /** תשובה בשורה שהווי שלה הוסר: מחוקה, כמו באב-טיפוס. */
 const struck = 'line-through decoration-[1.5px] opacity-50';
-const panel = 'grid grid-cols-[70px_minmax(0,1fr)] gap-y-2.5 border-b border-line pt-3.5 pb-4 font-sans';
-const panelLabel = 'pt-[11px] text-[13px] leading-snug text-ink-soft';
-const smallNote = 'font-sans text-[13px] leading-normal text-ink-soft';
+const panel = 'ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] gap-y-2.5 pt-3.5 pb-4 font-sans';
+const panelLabel = 'pt-[11px] text-[13px] leading-snug text-ink-soft lg:text-[15px]';
+const smallNote = 'font-sans text-[13px] leading-normal text-ink-soft lg:text-sm';
 const smallLink = 'underline underline-offset-[3px] hover:text-link-hover';
 
 /**
@@ -143,6 +146,7 @@ const smallLink = 'underline underline-offset-[3px] hover:text-link-hover';
  */
 export function Notebook({
   catalog,
+  base,
   fixedWhat,
   alwaysShowResults,
   afterForm,
@@ -158,6 +162,9 @@ export function Notebook({
   const [working, setWorking] = useState(false);
   // הטקסט האחרון שנשלח להבנה. כך יציאה מהשדה ולחיצה על הכפתור לא שולחות אותו פעמיים.
   const lastCommitted = useRef<string | null>(null);
+  // גלילה לרשימה שמחכה לרינדור שבו התשובות מהכתובת כבר מוצגות (ראו scrollToResults).
+  const pendingScroll = useRef(false);
+  const [scrollRequest, setScrollRequest] = useState(0);
 
   const change: Update = update ?? (() => {});
   // מה שה-AI והתאמת המילים יכולים להחזיר: כל תחום עם קורסים, כולל תחומי אב.
@@ -178,6 +185,8 @@ export function Notebook({
   const whenHow = whenHowWords(query.when, query.how);
 
   const effective = budgetTyping === null ? query : { ...query, maxPrice: parsePrice(budgetTyping) };
+  // שורה 4 ריקה: אין סכום בכתובת, ושום דבר לא מוקלד עכשיו.
+  const budgetEmpty = (budgetTyping ?? (query.maxPrice === null ? '' : 'set')) === '';
   const active = activeLines(effective);
   const results = matchCourses(catalog.courses, effective);
   const showResults = alwaysShowResults || active.length > 0;
@@ -242,13 +251,31 @@ export function Notebook({
     answer('budget', (c) => ({ ...c, maxPrice: c.maxPrice === amount ? null : amount }));
   }
 
+  /**
+   * הרשימה מתעדכנת רק אחרי שהכתובת התעדכנה וש-useSearchParams הגיע לרינדור, וזה לא תמיד הציור הבא
+   * (ובדף הבית, בפעם הראשונה, הרשימה עוד לא קיימת). לכן הגלילה מחכה לרינדור שבו התשובות שמוצגות
+   * זהות לכתובת, והרשימה כבר בדף. הבקשה פגה אחרי שתי שניות, כדי שלא תקפוץ אחר כך.
+   */
   function scrollToResults() {
-    // הרשימה מופיעה רק אחרי שהכתובת התעדכנה, ולכן מחכים לציור הבא.
+    pendingScroll.current = true;
+    setScrollRequest((n) => n + 1);
+    window.setTimeout(() => {
+      pendingScroll.current = false;
+    }, 2000);
+  }
+
+  useEffect(() => {
+    if (!pendingScroll.current) return;
+    const fromUrl = serializeQuery(parseQuery(new URLSearchParams(window.location.search), base), base);
+    const target = document.getElementById('results');
+    // עוד לא: רינדור נוסף (כשהכתובת מגיעה ל-useSearchParams) יריץ את זה שוב.
+    if (fromUrl !== serializeQuery(query, base) || !target) return;
+    pendingScroll.current = false;
     requestAnimationFrame(() => {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      document.getElementById('results')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     });
-  }
+  }, [query, base, scrollRequest]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -268,11 +295,12 @@ export function Notebook({
 
   return (
     <>
-      {/* קו השוליים של המחברת מצויר ב-NotebookPage, כדי שימשיך לאורך הרשימה והחלקים שאחריה, כמו בציור. */}
-      <div>
+      {/* קו השוליים של המחברת מצויר ב-NotebookPage, כדי שימשיך לאורך הרשימה והחלקים שאחריה, כמו בציור.
+          במחשב, מה שאחרי הטופס (בדף הבית: "או" והמסלולים) עומד לצדו. */}
+      <div className={afterForm ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:items-start lg:gap-x-16' : undefined}>
         <form aria-label="אני מחפש קורס" onSubmit={(event) => void submit(event)}>
-          <p className="ms-[70px] pt-1 ps-3 pb-1.5 text-lg leading-normal">אני רוצה ללמוד</p>
-          <ol className="border-t border-line">
+          <p className="ms-(--margin) pt-1 ps-3 pb-1.5 text-lg leading-normal lg:text-xl">אני רוצה ללמוד</p>
+          <ol className="ruled-top">
             <li>
               <AnswerLine
                 number={1}
@@ -452,16 +480,22 @@ export function Notebook({
                 onTick={() => toggle('budget')}
                 open={open === 'budget'}
               >
-                {/* כל השורה היא התווית של השדה: נגיעה בכל מקום עליה מתחילה לכתוב (יעד מגע של 60 פיקסלים). */}
-                <label className={cn(lineText, 'flex cursor-text items-baseline')}>
-                  <span>עד</span>
+                {/* כל השורה היא התווית של השדה: נגיעה בכל מקום עליה מתחילה לכתוב (יעד מגע של 60 פיקסלים).
+                    בשורה ריקה "עד" ו-₪ אפורים, המקום לסכום הוא קו מנוקד, והדוגמה כתובה לידו:
+                    כך לא נראה שכבר נקבע תקציב. */}
+                <label className={cn(lineText, 'flex cursor-text flex-wrap items-baseline gap-x-1.5')}>
+                  <span className={cn(budgetEmpty && 'text-ink-soft')}>עד</span>
                   {/* השדה ברוחב המספר, כמו "עד 15,000 ₪" בציור, ולא שדה רחב עם רווחים סביב. */}
                   <span
                     key={query.maxPrice ?? 'none'}
-                    data-copy={query.maxPrice === null ? BUDGET_EXAMPLE : formatAmount(query.maxPrice)}
+                    data-copy={query.maxPrice === null ? '' : formatAmount(query.maxPrice)}
                     data-empty={query.maxPrice === null ? '' : undefined}
                     // השדה מונח מעל העותק (absolute), כי לשדה יש רוחב מינימלי משלו, רחב מהמספר.
-                    className={cn(growCopy, 'relative mx-1.5 inline-block min-w-[2ch] after:whitespace-pre')}
+                    className={cn(
+                      growCopy,
+                      'relative inline-block min-w-[2ch] after:whitespace-pre',
+                      budgetEmpty && 'min-w-[4.5em] border-b-[1.5px] border-dotted border-leader',
+                    )}
                   >
                     <input
                       name="budget"
@@ -470,22 +504,22 @@ export function Notebook({
                       inputMode="numeric"
                       autoComplete="off"
                       aria-label="תקציב בשקלים"
-                      placeholder={BUDGET_EXAMPLE}
+                      aria-describedby={budgetEmpty ? 'budget-example' : undefined}
                       onFocus={() => setOpen('budget')}
                       onChange={(event) => {
-                        syncCopy(event.currentTarget, BUDGET_EXAMPLE);
+                        syncCopy(event.currentTarget, '');
                         setBudgetTyping(event.currentTarget.value);
                       }}
                       onBlur={(event) => commitBudget(event.currentTarget.value)}
-                      className={cn(
-                        penInput,
-                        inputExample,
-                        'absolute inset-0 w-full min-w-0 text-center',
-                        isStruck('budget') && struck,
-                      )}
+                      className={cn(penInput, 'absolute inset-0 w-full min-w-0 text-center', isStruck('budget') && struck)}
                     />
                   </span>
-                  <span>₪</span>
+                  <span className={cn(budgetEmpty && 'text-ink-soft')}>₪</span>
+                  {budgetEmpty && (
+                    <span id="budget-example" className={cn(example, 'ms-1.5')}>
+                      {BUDGET_EXAMPLE}
+                    </span>
+                  )}
                 </label>
               </AnswerLine>
               {open === 'budget' && (
@@ -503,7 +537,7 @@ export function Notebook({
             </li>
           </ol>
 
-          <div className="ms-[70px] ps-3">
+          <div className="ms-(--margin) ps-3">
             {fixedWhat ? (
               <p className={cn(smallNote, 'mt-3')}>
                 <Link href="/" className={smallLink}>
@@ -534,8 +568,8 @@ export function Notebook({
                 {named && !working && (
                   <>
                     {/* הערה של האתר: עט, עם חץ (מסמך העיצוב, 3א.2). */}
-                    <p className="font-pen text-[15px] leading-snug font-medium text-pen">
-                      <span aria-hidden="true">← </span>
+                    <p className="font-pen text-[15px] leading-snug font-medium text-pen lg:text-[17px]">
+                      <PenArrow />
                       {named.by === 'title'
                         ? 'יש לנו קורס בשם הזה: '
                         : `יש לנו קורסים של ${named.courses[0].institutionName}: `}
@@ -566,7 +600,10 @@ export function Notebook({
               </>
             )}
             <p className={cn(smallNote, 'mt-1')}>שורה בלי סימון לא מסננת את התוצאות.</p>
-            <button type="submit" className={cn(buttonVariants(), 'mt-3.5 h-[50px] w-full font-sans text-base font-bold')}>
+            <button
+              type="submit"
+              className={cn(buttonVariants(), 'mt-3.5 h-[50px] w-full font-sans text-base font-bold lg:h-[54px] lg:max-w-[400px] lg:text-[17px]')}
+            >
               {buttonLabel}
             </button>
             {saveAnswers && activeLines(query).length > 0 && <SaveAnswers query={query} />}

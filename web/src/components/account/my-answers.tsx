@@ -1,5 +1,7 @@
+import { PenArrow } from '@/components/site/pen';
 import Link from 'next/link';
 import { PenAnswer } from '@/components/notebook/answer-line';
+import { PenNumber } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { formatAmount, formatHebrewDate } from '@/lib/format';
 import { matchCourses } from '@/lib/search/match';
@@ -11,9 +13,9 @@ import { MeSection, marginNote } from './me-section';
 
 function AnswerRow({ number, question, children }: { number: number; question: string; children?: React.ReactNode }) {
   return (
-    <li className="grid min-h-[58px] grid-cols-[70px_minmax(0,1fr)] items-center border-b border-line">
-      <span className="font-sans text-[13px] leading-tight text-ink-soft">
-        <strong className="block text-base text-ink">{number}</strong>
+    <li className="ruled-row grid min-h-[58px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
+      <span className="flex flex-col items-start gap-0.5 font-sans text-[13px] leading-tight text-ink-soft lg:flex-row lg:items-center lg:gap-2.5 lg:text-[15px]">
+        <PenNumber n={number} className="lg:size-[34px] lg:text-[19px]" />
         {question}
       </span>
       <p className="pt-3.5 ps-3 pb-0.5 text-lg leading-normal">{children}</p>
@@ -39,7 +41,7 @@ export function MyAnswers({
   if (!query || !savedAt) {
     return (
       <MeSection id="answers" title="התשובות שלי" sub="עוד לא שמרתם תשובות מדף הבית.">
-        <p className="ms-[70px] mt-2 ps-3 font-sans text-[15px] font-semibold">
+        <p className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-semibold">
           <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover">
             לענות על ארבע השאלות בדף הבית
           </Link>
@@ -62,8 +64,8 @@ export function MyAnswers({
       title="התשובות שלי"
       sub={`מהשאלות בדף הבית. שמרתם אותן ב-${formatHebrewDate(savedAt)}.`}
     >
-      <p className="ms-[70px] mt-2.5 pt-1 ps-3 pb-1.5 text-lg leading-normal">אני רוצה ללמוד</p>
-      <ol className="border-t border-line">
+      <p className="ms-(--margin) mt-2.5 pt-1 ps-3 pb-1.5 text-lg leading-normal">אני רוצה ללמוד</p>
+      <ol className="ruled-top">
         <AnswerRow number={1} question="מה?">
           {what && <PenAnswer struck={struck('what')}>{what}</PenAnswer>}
         </AnswerRow>
@@ -91,11 +93,11 @@ export function MyAnswers({
           )}
         </AnswerRow>
       </ol>
-      <div className="mt-3.5 grid grid-cols-[70px_minmax(0,1fr)] items-center">
+      <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
         <p className={marginNote}>
           {filtering && (
             <>
-              <span aria-hidden="true">← </span>
+              <PenArrow />
               {fitsText(matchCourses(catalog.courses, query).length)}
             </>
           )}

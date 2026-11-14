@@ -13,17 +13,14 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
   const closest = closestToScore(courses, 3);
   if (closest.length === 0) return null;
   return (
-    <section aria-labelledby="graduates-title" className="mt-9 ms-[70px] ps-3">
-      <h2
-        id="graduates-title"
-        className="inline-block border-b-2 border-ink pb-0.5 text-[21px] leading-snug font-bold"
-      >
+    <section aria-labelledby="graduates-title" className="mt-10 ms-(--margin) ps-3 lg:ms-0 lg:mt-16 lg:ps-0">
+      <h2 id="graduates-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
         סיימתם קורס?
       </h2>
-      <p className="mt-2 font-sans text-[15px] leading-normal">
+      <p className="mt-2 font-sans text-[15px] leading-normal lg:text-[17px]">
         ביקורת שלכם יכולה לתת לקורס ציון. מספיקות {MIN_REVIEWS} ביקורות מאומתות.
       </p>
-      <ul className="mt-1 font-sans text-[15px] leading-snug">
+      <ul className="mt-1 font-sans text-[15px] leading-snug lg:mt-2 lg:text-base">
         {closest.map((course) => {
           const needed = course.score.status === 'not_enough_reviews' ? course.score.reviewsNeeded : 0;
           return (

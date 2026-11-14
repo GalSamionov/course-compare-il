@@ -17,7 +17,18 @@ type Note = 'added-local' | 'added' | 'full' | 'error' | null;
  * "להשוואה" מכניס את הקורס להשוואה או מוציא אותו. מבקר לא מחובר: ההשוואה נשמרת בדפדפן.
  * ה-Button של shadcn בנוי על Base UI ואין לו asChild, ולכן הקישור מקבל את המחלקות של הכפתור.
  */
-export function CourseActions({ courseId, slug, title }: { courseId: string; slug: string; title: string }) {
+export function CourseActions({
+  courseId,
+  slug,
+  title,
+  stacked = false,
+}: {
+  courseId: string;
+  slug: string;
+  title: string;
+  /** בעמודה הצדדית במחשב: הכפתורים זה מתחת לזה. */
+  stacked?: boolean;
+}) {
   const account = useAccount();
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<Note>(null);
@@ -37,9 +48,9 @@ export function CourseActions({ courseId, slug, title }: { courseId: string; slu
   }
 
   return (
-    <div className="mt-6 font-sans">
-      <div className="flex gap-2.5">
-        <Link href={`/courses/${slug}/review`} className={cn(buttonVariants(), 'h-[50px] flex-1 text-base font-bold')}>
+    <div className={cn('mt-6 font-sans', stacked && 'mt-9')}>
+      <div className={cn('flex gap-2.5', stacked && 'flex-col')}>
+        <Link href={`/courses/${slug}/review`} className={cn(buttonVariants(), 'h-[50px] flex-1 text-base font-bold', stacked && 'flex-none')}>
           כתיבת ביקורת
         </Link>
         <button
@@ -51,6 +62,7 @@ export function CourseActions({ courseId, slug, title }: { courseId: string; slu
           className={cn(
             buttonVariants({ variant: 'outline' }),
             'h-[50px] flex-1 gap-2 border-[1.5px] border-ink text-base font-bold',
+            stacked && 'flex-none',
             busy && 'cursor-wait',
           )}
         >
@@ -67,19 +79,19 @@ export function CourseActions({ courseId, slug, title }: { courseId: string; slu
       </div>
       <div role="status">
         {note === 'added-local' && (
-          <PenNote className="mt-2.5">← נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.</PenNote>
+          <PenNote arrow className="mt-2.5">נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.</PenNote>
         )}
         {note === 'added' && (
-          <PenNote className="mt-2.5">
-            ← נוסף להשוואה ולשמורים.{' '}
+          <PenNote arrow className="mt-2.5">
+            נוסף להשוואה ולשמורים.{' '}
             <Link href="/me#compare" className="underline underline-offset-[3px]">
               לאזור שלי
             </Link>
           </PenNote>
         )}
         {note === 'full' && (
-          <PenNote className="mt-2.5">
-            ← בהשוואה כבר יש 3 קורסים.{' '}
+          <PenNote arrow className="mt-2.5">
+            בהשוואה כבר יש 3 קורסים.{' '}
             {account.status === 'signed-in' ? (
               <Link href="/me#compare" className="underline underline-offset-[3px]">
                 להוציא אחד באזור שלי

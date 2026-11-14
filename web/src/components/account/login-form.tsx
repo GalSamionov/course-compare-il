@@ -1,5 +1,6 @@
 'use client';
 
+import { PenArrow } from '@/components/site/pen';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -23,9 +24,9 @@ const REASONS = [
   'ובקרוב, לכתוב ביקורת על קורס שסיימתם',
 ];
 
-const marginLabel = 'font-sans text-[13px] leading-tight text-ink-soft';
+const marginLabel = 'font-sans text-[13px] leading-tight text-ink-soft lg:text-[15px]';
 /** הערה של האתר בשוליים: עט, עם חץ, מוטה (מסמך העיצוב, סעיף 8). */
-const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen';
+const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
 const smallLink = 'inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover';
 
 type SendError = 'rate' | 'not-allowed' | 'failed';
@@ -102,10 +103,14 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
 
   return (
     <>
-      <h1 ref={heading} tabIndex={-1} className="mt-[22px] text-[30px] leading-tight font-bold text-balance outline-none">
+      <h1
+        ref={heading}
+        tabIndex={-1}
+        className="mt-[22px] text-[30px] leading-tight font-bold text-balance outline-none lg:mt-12 lg:text-[54px] lg:font-extrabold"
+      >
         {sent ? 'עכשיו לתיבת המייל' : 'להתחבר בלי סיסמה'}
       </h1>
-      <p className="mt-2 font-sans text-[15px] leading-normal text-ink-soft">
+      <p className="mt-2 font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
         {sent
           ? 'שלחנו קישור כניסה. לוחצים עליו, וחוזרים לעמוד שבו הייתם, מחוברים.'
           : 'שולחים לכם קישור למייל. לוחצים עליו, ואתם בפנים.'}
@@ -116,14 +121,14 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
         </p>
       )}
 
-      <div className="relative mt-[18px]">
-        <div aria-hidden="true" className="absolute inset-y-0 start-[70px] w-px bg-rule" />
-
+      {/* במחשב שני עמודים: מימין למה להתחבר (או מה נשלח), משמאל הטופס. לכל אחד קו שוליים משלו. */}
+      <div className="mt-[18px] lg:mt-12 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-20">
         {sent ? (
           <>
+            <div className="margin-rule">
             <div
               role="status"
-              className="grid min-h-16 grid-cols-[70px_minmax(0,1fr)_44px] items-center border-y border-line"
+              className="ruled-top ruled-row grid min-h-16 grid-cols-[var(--margin)_minmax(0,1fr)_44px] items-center"
             >
               <span className={marginLabel}>לאן לשלוח?</span>
               <p className="min-w-0 self-stretch pt-5 ps-3 pb-1 text-lg leading-normal">
@@ -140,9 +145,9 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 <span className="sr-only">נשלח</span>
               </span>
             </div>
-            <div className="grid grid-cols-[70px_minmax(0,1fr)] items-start pt-3">
+            <div className="grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start pt-3">
               <p className={cn(marginNote, 'pt-0.5')}>
-                <span aria-hidden="true">← </span>נשלח עכשיו
+                <PenArrow />נשלח עכשיו
               </p>
               <div className="ps-3 font-sans text-[15px] leading-normal">
                 <p className="font-bold">לא מוצאים אותו?</p>
@@ -151,9 +156,11 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 <p className="mt-1.5">הקישור תקף לשעה, ועובד פעם אחת.</p>
               </div>
             </div>
-            <div className="mt-[18px] grid grid-cols-[70px_minmax(0,1fr)] items-center">
+            </div>
+            <div className="margin-rule lg:[--bleed:0px]">
+            <div className="mt-[18px] grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center lg:mt-0">
               <p className={marginNote}>
-                <span aria-hidden="true">← </span>פעם בדקה
+                <PenArrow />פעם בדקה
               </p>
               <div className="ps-3">
                 <button
@@ -170,11 +177,11 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
               </div>
             </div>
             {error && (
-              <p role="alert" className="ms-[70px] mt-2 ps-3 font-sans text-[15px] font-bold">
+              <p role="alert" className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-bold">
                 {SEND_ERROR_TEXT[error]}
               </p>
             )}
-            <div className="ms-[70px] mt-1.5 ps-3 font-sans text-[15px] font-semibold">
+            <div className="ms-(--margin) mt-1.5 ps-3 font-sans text-[15px] font-semibold">
               <button
                 type="button"
                 onClick={() => {
@@ -186,20 +193,24 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 טעיתי במייל
               </button>
             </div>
+            </div>
           </>
         ) : (
           <>
-            <ul className="border-t border-line">
+            <div className="margin-rule">
+            <ul className="ruled-top">
               {REASONS.map((reason, i) => (
                 <li
                   key={reason}
-                  className="grid grid-cols-[70px_minmax(0,1fr)] items-start border-b border-line"
+                  className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start"
                 >
                   <span className={cn(marginLabel, 'pt-3')}>{i === 0 ? 'למה להתחבר?' : ''}</span>
-                  <p className="pt-2.5 ps-3 pb-[7px] text-base leading-normal">{reason}</p>
+                  <p className="pt-2.5 ps-3 pb-[7px] text-base leading-normal lg:pt-3.5 lg:pb-2 lg:text-lg">{reason}</p>
                 </li>
               ))}
             </ul>
+            </div>
+            <div className="margin-rule lg:[--bleed:0px]">
             <form
               aria-label="כניסה עם קישור במייל"
               onSubmit={(event) => {
@@ -207,7 +218,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 void send();
               }}
             >
-              <div className="grid min-h-16 grid-cols-[70px_minmax(0,1fr)] items-center border-b-2 border-ink">
+              <div className="ruled-row grid min-h-16 grid-cols-[var(--margin)_minmax(0,1fr)] items-center after:h-0.5 after:bg-ink lg:min-h-[72px]">
                 <label htmlFor="email" className={marginLabel}>
                   לאן לשלוח?
                 </label>
@@ -226,23 +237,23 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   className={cn(
-                    'min-w-0 self-stretch bg-transparent pt-5 ps-3 pb-1 pe-1 text-right outline-none',
-                    'font-pen text-xl font-medium text-pen caret-pen not-placeholder-shown:-rotate-1',
+                    'min-w-0 self-stretch bg-transparent pt-5 pr-3 pb-1 pl-1 text-right outline-none',
+                    'font-pen text-xl font-medium text-pen caret-pen not-placeholder-shown:-rotate-1 lg:text-[23px]',
                     'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft',
                   )}
                 />
               </div>
-              <p className="ms-[70px] mt-3 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
+              <p className="ms-(--margin) mt-3 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
                 אין סיסמה לזכור. אם עוד אין לכם חשבון, הקישור פותח אחד.
               </p>
               {error && (
-                <p role="alert" className="ms-[70px] mt-2 ps-3 font-sans text-[15px] font-bold">
+                <p role="alert" className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-bold">
                   {SEND_ERROR_TEXT[error]}
                 </p>
               )}
-              <div className="mt-3.5 grid grid-cols-[70px_minmax(0,1fr)] items-center">
+              <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
                 <p className={marginNote}>
-                  <span aria-hidden="true">← </span>תקף לשעה
+                  <PenArrow />תקף לשעה
                 </p>
                 <div className="ps-3">
                   <button
@@ -255,11 +266,12 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 </div>
               </div>
             </form>
-            <div className="ms-[70px] mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
+            <div className="ms-(--margin) mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
               <p className="text-pretty">שומרים אצלנו רק שלושה דברים: המייל, הקורסים ששמרתם והתשובות שלכם.</p>
               <Link href="/privacy" className={smallLink}>
                 מדיניות הפרטיות
               </Link>
+            </div>
             </div>
           </>
         )}

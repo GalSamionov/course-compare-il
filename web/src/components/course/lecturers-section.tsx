@@ -15,8 +15,8 @@ const otherCoursesText = (n: number) => (n === 1 ? 'מרצה גם בקורס נ�
 export function LecturersSection({ course }: { course: CoursePageData }) {
   if (course.lecturers.length === 0) return null;
   return (
-    <section id="lecturers" className="mt-7">
-      <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">על המרצים</h2>
+    <section id="lecturers" className="mt-10 scroll-mt-6 lg:mt-14">
+      <h2 className="pen-rule text-[21px] font-bold lg:text-[28px]">על המרצים</h2>
       <p className="mt-1.5 font-sans text-[13px] text-ink-soft">
         המרצים משתנים בין מחזורים. הרשימה לפי אתר המוסד
         {course.nextCohortDate ? `, למחזור שנפתח ב-${formatHebrewDate(course.nextCohortDate)}` : ''}.
@@ -25,14 +25,15 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
       <div className="mt-4 flex flex-col gap-5">
         {course.lecturers.map((lecturer) => (
           <article key={lecturer.slug} className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
+            {/* ראשי תיבות בעיגול דיו: אין לנו תמונות של מרצים, ולא ממציאים. */}
             <div
               aria-hidden="true"
-              className="flex size-[52px] items-center justify-center rounded-full border-[1.5px] border-ink font-sans text-lg font-bold"
+              className="flex size-[52px] items-center justify-center rounded-full border-[1.5px] border-ink font-sans text-lg font-bold shadow-[inset_0_0_0_3px_white,inset_0_0_0_4px_var(--color-ink)]"
             >
               {initials(lecturer.name)}
             </div>
             <div>
-              <h3 className="text-lg leading-snug font-bold">{lecturer.name}</h3>
+              <h3 className="text-lg leading-snug font-bold lg:text-xl">{lecturer.name}</h3>
               {lecturer.role && <p className="font-sans text-sm text-ink-soft">{lecturer.role}</p>}
               {lecturer.institutionBio && (
                 <p className="mt-1.5 text-[15px] leading-relaxed">
@@ -59,7 +60,7 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
                 )}
               </p>
               {lecturer.otherCoursesCount > 0 && (
-                <PenNote className="mt-0.5 text-sm">← {otherCoursesText(lecturer.otherCoursesCount)}</PenNote>
+                <PenNote arrow className="mt-0.5 text-sm">{otherCoursesText(lecturer.otherCoursesCount)}</PenNote>
               )}
             </div>
           </article>
@@ -67,7 +68,7 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
       </div>
 
       {course.lecturersSummary && (
-        <StickyNote tone="grad" tilt={-1} className="mt-5 ml-6 px-3 py-2.5 text-sm">
+        <StickyNote tone="grad" tilt={-1} className="mt-7 ml-6 px-3 pt-4 pb-2.5 text-sm lg:max-w-[460px] lg:text-[15px]">
           <strong>מה הבוגרים אומרים על המרצים:</strong> {course.lecturersSummary}
         </StickyNote>
       )}

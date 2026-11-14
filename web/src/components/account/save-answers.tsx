@@ -29,8 +29,8 @@ export function SaveAnswers({ query }: { query: SearchQuery }) {
 
   if (saved) {
     return (
-      <PenNote className="mt-2.5">
-        ← התשובות נשמרו.{' '}
+      <PenNote arrow className="mt-2.5">
+        התשובות נשמרו.{' '}
         <Link href="/me#answers" className="underline underline-offset-[3px]">
           לאזור שלי
         </Link>

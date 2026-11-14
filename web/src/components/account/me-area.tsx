@@ -67,7 +67,10 @@ export function MeArea({ catalog }: { catalog: Catalog }) {
 
   return (
     <>
-      <nav aria-label="בעמוד הזה" className="mt-1.5 flex flex-wrap gap-x-4 font-sans text-[15px] leading-tight font-semibold">
+      <nav
+        aria-label="בעמוד הזה"
+        className="mt-1.5 flex flex-wrap gap-x-4 font-sans text-[15px] leading-tight font-semibold lg:mt-3 lg:gap-x-6 lg:text-base"
+      >
         <a href="#answers" className={navLink}>
           התשובות שלי
         </a>
@@ -84,21 +87,29 @@ export function MeArea({ catalog }: { catalog: Catalog }) {
           החשבון
         </a>
       </nav>
-      {/* קו השוליים ב-70 פיקסלים, לאורך כל החלקים, כמו בציור. */}
-      <div className="relative mt-[18px]">
-        <div aria-hidden="true" className="absolute inset-y-0 start-[70px] w-px bg-rule" />
-        <MyAnswers catalog={catalog} query={query} savedAt={account.answers?.updatedAt ?? null} />
-        <SavedCourses courses={saved} inCompare={inCompare} query={query} />
-        <CompareTray slots={slots} />
-        <MeSection id="reviews" title="הביקורות שלי" className="mt-8">
-          <p className="ms-[70px] mt-2.5 ps-3 text-base leading-[1.7]">
-            <strong className="font-sans">בקרוב.</strong> כאן יופיעו הביקורות שתכתבו על קורסים שסיימתם, ואם כל אחת
-            כבר אומתה.
-          </p>
-          <div aria-hidden="true" className="h-[30px] border-b border-line" />
-          <div aria-hidden="true" className="h-[38px] border-b border-line" />
-        </MeSection>
-        <AccountSection email={account.email} onLeave={setLeft} />
+      {/*
+        קו השוליים לאורך כל החלקים, כמו בציור. במחשב: מחברת פתוחה בשני עמודים, התשובות והשמורים מימין,
+        וההשוואה, הביקורות והחשבון משמאל, עם קפל באמצע.
+      */}
+      <div className="mt-[18px] lg:mt-10 lg:grid lg:grid-cols-2">
+        <div className="margin-rule flow-root lg:pe-10 lg:[background:linear-gradient(to_right,rgb(0_0_0/0.05),transparent_36px)_left/36px_100%_no-repeat]">
+          <MyAnswers catalog={catalog} query={query} savedAt={account.answers?.updatedAt ?? null} />
+          <SavedCourses courses={saved} inCompare={inCompare} query={query} />
+        </div>
+        <div className="lg:border-s lg:border-rule lg:ps-10 lg:[background:linear-gradient(to_left,rgb(0_0_0/0.06),transparent_36px)_right/36px_100%_no-repeat]">
+          <div className="margin-rule flow-root lg:[--bleed:2.5rem]">
+          <CompareTray slots={slots} />
+          <MeSection id="reviews" title="הביקורות שלי" className="mt-8">
+            <p className="ms-(--margin) mt-2.5 ps-3 text-base leading-[1.7]">
+              <strong className="font-sans">בקרוב.</strong> כאן יופיעו הביקורות שתכתבו על קורסים שסיימתם, ואם כל
+              אחת כבר אומתה.
+            </p>
+            <div aria-hidden="true" className="ruled-row h-[30px]" />
+            <div aria-hidden="true" className="ruled-row h-[38px]" />
+          </MeSection>
+          <AccountSection email={account.email} onLeave={setLeft} />
+          </div>
+        </div>
       </div>
     </>
   );

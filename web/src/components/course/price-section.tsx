@@ -4,9 +4,9 @@ import { Mark, PenNote } from './marks';
 
 export function PriceSection({ course }: { course: CoursePageData }) {
   return (
-    <section id="price" className="mt-7">
-      <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">מחיר</h2>
-      <p className="mt-2.5">
+    <section id="price" className="mt-10 scroll-mt-6 lg:mt-14">
+      <h2 className="pen-rule text-[21px] font-bold lg:text-[28px]">מחיר</h2>
+      <p className="mt-3">
         {course.sitePrice !== null ? (
           <>
             <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi> באתר המוסד.
@@ -25,7 +25,7 @@ export function PriceSection({ course }: { course: CoursePageData }) {
           </>
         )}
       </p>
-      {course.paid && <PenNote className="mt-1">← שווה לשאול על הנחה לפני שנרשמים</PenNote>}
+      {course.paid && <PenNote arrow className="mt-1">שווה לשאול על הנחה לפני שנרשמים</PenNote>}
     </section>
   );
 }

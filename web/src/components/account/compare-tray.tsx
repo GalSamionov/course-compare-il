@@ -1,5 +1,6 @@
 'use client';
 
+import { PenArrow } from '@/components/site/pen';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MAX_COMPARE } from '@/lib/account/lists';
@@ -32,7 +33,7 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
       id="compare"
       title="ההשוואה שלי"
       sub={`יש בה מקום ל-3 קורסים בדיוק, זה לצד זה. ${chosenText(slots.length)}`}
-      className="mt-9"
+      className="mt-9 lg:mt-0"
     >
       <ol
         aria-label={`${slots.length} מתוך ${MAX_COMPARE} מקומות תפוסים`}
@@ -98,13 +99,13 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
         })}
       </ol>
       {failed && (
-        <p role="status" className="ms-[70px] mt-2 ps-3 font-sans text-[13px] text-ink-soft">
+        <p role="status" className="ms-(--margin) mt-2 ps-3 font-sans text-[13px] text-ink-soft">
           לא הצלחנו לעדכן. נסו שוב.
         </p>
       )}
-      <div className="mt-2.5 grid grid-cols-[70px_minmax(0,1fr)] items-center">
+      <div className="mt-2.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
         <p className={marginNote}>
-          <span aria-hidden="true">← </span>עוד בבנייה
+          <PenArrow />עוד בבנייה
         </p>
         <div className="ps-3 font-sans text-[15px] font-semibold">
           <Link href="/compare" className={cn('inline-flex min-h-11 items-center', smallLink)}>

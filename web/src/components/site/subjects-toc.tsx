@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { CategoryEntry } from '@/lib/search/types';
+import { cn } from '@/lib/utils';
 
 /**
  * תוכן עניינים של התחומים, עם מספר הקורסים ומספר הבוגרים המאומתים. כמו בציור.
@@ -8,21 +9,30 @@ import type { CategoryEntry } from '@/lib/search/types';
 export function SubjectsToc({
   categories,
   heading = 'או לפי תחום',
+  exclude,
+  className,
 }: {
   categories: CategoryEntry[];
   heading?: string;
+  /** תחום שלא מופיע ברשימה: בעמוד תחום, התחום של העמוד. */
+  exclude?: string;
+  className?: string;
 }) {
   // רק תחומים בלי תחומי משנה, כדי שקורס לא ייספר פעמיים ברשימה.
   const rows = categories
-    .filter((c) => c.isLeaf && c.courseCount > 0)
+    .filter((c) => c.isLeaf && c.courseCount > 0 && c.slug !== exclude)
     .sort((a, b) => b.courseCount - a.courseCount || a.name.localeCompare(b.name, 'he'));
   if (rows.length === 0) return null;
   return (
-    <section id="subjects" aria-labelledby="subjects-title" className="mt-9 ms-[70px] scroll-mt-4 ps-3">
-      <h2 id="subjects-title" className="inline-block border-b-2 border-ink pb-0.5 text-[21px] leading-snug font-bold">
+    <section
+      id="subjects"
+      aria-labelledby="subjects-title"
+      className={cn('mt-10 ms-(--margin) scroll-mt-4 ps-3 lg:mt-16 lg:scroll-mt-8', className)}
+    >
+      <h2 id="subjects-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
         {heading}
       </h2>
-      <div aria-hidden="true" className="mt-2.5 flex justify-end font-sans text-xs leading-tight text-ink-soft">
+      <div aria-hidden="true" className="mt-2.5 flex justify-end font-sans text-xs leading-tight text-ink-soft lg:text-[13px]">
         <span className="w-11 text-end">קורסים</span>
         <span className="w-[52px] text-end">בוגרים</span>
       </div>
@@ -31,7 +41,7 @@ export function SubjectsToc({
           <li key={c.slug}>
             <Link
               href={`/categories/${c.slug}`}
-              className="flex min-h-11 items-baseline pt-1.5 text-ink hover:text-link-hover"
+              className="flex min-h-11 items-baseline pt-1.5 text-ink hover:text-link-hover lg:text-lg"
             >
               <span>{c.name}</span>
               <span aria-hidden="true" className="mx-2 flex-1 border-b-2 border-dotted border-leader" />

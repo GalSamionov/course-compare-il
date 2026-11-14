@@ -18,7 +18,8 @@ export function TickMark({ className, strokeWidth = 2.4 }: { className?: string;
 
 /**
  * הווי בסוף כל שורה. מסומן: השורה מסננת. הורדת הווי משאירה את התשובה, אבל השורה לא מסננת.
- * בשורה בלי תשובה הווי לא פעיל, ומוצג חלש, כמו באב-טיפוס.
+ * בשורה בלי תשובה אין מה לסמן: מוצג רק מקום מנוקד ודהוי, בלי מסגרת של כפתור,
+ * כדי שלא ייראה כמו משהו שאפשר ללחוץ עליו.
  */
 export function Tick({
   checked,
@@ -39,11 +40,16 @@ export function Tick({
       aria-disabled={disabled}
       aria-label={label}
       onClick={disabled ? undefined : onToggle}
-      className={cn('relative size-11 justify-self-center', disabled ? 'cursor-default opacity-45' : 'cursor-pointer')}
+      className={cn('group relative size-11 justify-self-center', disabled ? 'cursor-default' : 'cursor-pointer')}
     >
       <span
         aria-hidden="true"
-        className="absolute top-[11px] left-[11px] size-[22px] rounded-[2px] border-[1.5px] border-ink"
+        className={cn(
+          'absolute rounded-[2px]',
+          disabled
+            ? 'top-[15px] left-[15px] size-[14px] border border-dashed border-line'
+            : 'top-[11px] left-[11px] size-[22px] border-[1.5px] border-ink transition-colors group-hover:border-pen',
+        )}
       />
       {checked && <TickMark className="absolute top-0.5 left-2.5 size-8" />}
     </button>

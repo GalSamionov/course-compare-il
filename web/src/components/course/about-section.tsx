@@ -34,8 +34,8 @@ export function AboutSection({ course }: { course: CoursePageData }) {
         ? `מהן ${course.handsOnHours} שעות עשייה`
         : `${course.handsOnHours} שעות עשייה`;
   return (
-    <section id="about" className="mt-7">
-      <h2 className="inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">על הקורס</h2>
+    <section id="about" className="mt-10 scroll-mt-6 lg:mt-14">
+      <h2 className="pen-rule text-[21px] font-bold lg:text-[28px]">על הקורס</h2>
 
       {course.syllabus.length > 0 && (
         <>
@@ -79,7 +79,7 @@ export function AboutSection({ course }: { course: CoursePageData }) {
       </dl>
 
       {course.outcome && (
-        <StickyNote tone="grad" tilt={1} className="mt-4 ml-8 px-3 py-2.5 text-sm">
+        <StickyNote tone="grad" tilt={1} className="mt-6 ml-8 px-3 pt-4 pb-2.5 text-sm lg:max-w-[460px] lg:text-[15px]">
           <strong>מה קרה בפועל:</strong> {course.outcome.n} בוגרים ענו 3 חודשים אחרי הסיום. ציון התוצאה:{' '}
           {course.outcome.mean.toFixed(1)} מתוך 5.
         </StickyNote>

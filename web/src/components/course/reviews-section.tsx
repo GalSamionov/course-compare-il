@@ -8,9 +8,9 @@ const cohortLabel = (iso: string) =>
 export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews: ReviewView[]; total: number }) {
   if (reviews.length === 0) return null;
   return (
-    <section id="reviews" className="mt-7">
-      <h2 className="mb-3.5 inline-block border-b-2 border-ink pb-0.5 text-[21px] font-bold">ביקורות</h2>
-      <div className="flex flex-col gap-6">
+    <section id="reviews" className="mt-10 scroll-mt-6 lg:mt-14">
+      <h2 className="pen-rule mb-4 text-[21px] font-bold lg:mb-6 lg:text-[28px]">ביקורות</h2>
+      <div className="flex flex-col gap-7 lg:gap-9">
         {reviews.map((r, i) => (
           // הביקורת כולה, כולל הפתק של שאלת ההמשך ותגובת המוסד, היא article אחד.
           // פתק ההמשך תלוי מתחת לפתק, ולכן בלי תגובת מוסד מפנים לו מקום לפני הביקורת הבאה.
@@ -18,7 +18,7 @@ export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews
             <StickyNote
               tone="grad"
               tilt={i % 2 === 0 ? 0.6 : -0.8}
-              className={`relative px-4 pt-3.5 ${r.followUp ? 'pb-8' : 'pb-3.5'}`}
+              className={`px-4 pt-5 lg:px-5 ${r.followUp ? 'pb-8' : 'pb-3.5'}`}
             >
               <p className="text-[13px]">
                 {/* כל פתק אומר שהביקורת מאומתת: זו ההבטחה של האתר. אנחנו לא יודעים את המין הדקדוקי של הכותב, ולכן "ביקורת מאומתת" ולא "בוגר" או "בוגרת". */}
@@ -31,15 +31,15 @@ export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews
                 )}
                 , מחזור {cohortLabel(r.cohortMonth)}
               </p>
-              <p className="mt-1.5 font-serif text-[15px] leading-relaxed">{r.body}</p>
+              <p className="mt-1.5 font-serif text-[15px] leading-relaxed lg:text-base">{r.body}</p>
               {r.followUp && (
-                <StickyNote tone="grad-light" tilt={-4} className="absolute -bottom-6 left-2.5 w-[164px] px-2.5 py-1.5">
+                <StickyNote tone="grad-light" tilt={-4} tape={false} className="absolute -bottom-6 left-2.5 w-[164px] px-2.5 py-1.5">
                   <strong>אחרי 3 חודשים:</strong> {r.followUp}
                 </StickyNote>
               )}
             </StickyNote>
             {r.vendorResponse && (
-              <StickyNote tone="institution" tilt={-1.5} className="mt-8 mr-14 px-3 py-2">
+              <StickyNote tone="institution" tilt={-1.5} className="mt-9 mr-14 px-3 pt-4 pb-2 lg:max-w-[420px]">
                 <strong>תגובת המוסד:</strong> {r.vendorResponse}
               </StickyNote>
             )}
