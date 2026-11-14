@@ -23,7 +23,35 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "categories": {
+            "admins": {
+                  Row: {
+                    "added_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "added_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"audit_log": {
+                  Row: {
+                    "action": string,"actor_id": string | null,"created_at": string,"details": NonNullable<Json>,"id": number,"review_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"review_id": string
+                  }
+                  Update: {
+                    "action"?: string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"review_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"categories": {
                   Row: {
                     "course_type": Database["public"]['Enums']["course_type"],"created_at": string,"id": string,"name": string,"parent_id": string | null,"slug": string
                   }
@@ -171,6 +199,40 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"proof_check_usage": {
+                  Row: {
+                    "author_id": string,"created_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"created_at"?: string
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"proofs": {
+                  Row: {
+                    "author_id": string | null,"check_result": Json | null,"check_status": string,"claimed_kind": Database["public"]['Enums']["proof_kind"],"created_at": string,"decided_at": string | null,"file_deleted_at": string | null,"flags": (string)[],"id": string,"mime_type": string,"review_id": string | null,"sha256": string,"size_bytes": number,"status": Database["public"]['Enums']["proof_status"],"storage_path": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string | null,"check_result"?: Json | null,"check_status": string,"claimed_kind": Database["public"]['Enums']["proof_kind"],"created_at"?: string,"decided_at"?: string | null,"file_deleted_at"?: string | null,"flags"?: (string)[],"id"?: string,"mime_type": string,"review_id"?: string | null,"sha256": string,"size_bytes": number,"status"?: Database["public"]['Enums']["proof_status"],"storage_path"?: string | null
+                  }
+                  Update: {
+                    "author_id"?: string | null,"check_result"?: Json | null,"check_status"?: string,"claimed_kind"?: Database["public"]['Enums']["proof_kind"],"created_at"?: string,"decided_at"?: string | null,"file_deleted_at"?: string | null,"flags"?: (string)[],"id"?: string,"mime_type"?: string,"review_id"?: string | null,"sha256"?: string,"size_bytes"?: number,"status"?: Database["public"]['Enums']["proof_status"],"storage_path"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proofs_review_id_fkey"
+      columns: ["review_id"]
+isOneToOne: false
+      referencedRelation: "reviews"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"review_answers": {
                   Row: {
                     "answered_at": string,"metric_key": string,"review_id": string,"value": number
@@ -197,16 +259,36 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"reviews": {
+                },"review_helpful": {
                   Row: {
-                    "author_id": string | null,"body": string,"cohort_month": string,"course_id": string,"created_at": string,"display_mode": Database["public"]['Enums']["display_name_mode"],"display_name": string,"excluded_reason": string | null,"follow_up_text": string | null,"id": string,"paid_bucket_ils": number | null,"proof_kind": Database["public"]['Enums']["proof_kind"] | null,"published_at": string | null,"status": Database["public"]['Enums']["review_status"],"verified_at": string | null
+                    "browser_hash": string,"created_at": string,"review_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "author_id"?: string | null,"body": string,"cohort_month": string,"course_id": string,"created_at"?: string,"display_mode"?: Database["public"]['Enums']["display_name_mode"],"display_name": string,"excluded_reason"?: string | null,"follow_up_text"?: string | null,"id"?: string,"paid_bucket_ils"?: number | null,"proof_kind"?: Database["public"]['Enums']["proof_kind"] | null,"published_at"?: string | null,"status"?: Database["public"]['Enums']["review_status"],"verified_at"?: string | null
+                    "browser_hash": string,"created_at"?: string,"review_id": string
                   }
                   Update: {
-                    "author_id"?: string | null,"body"?: string,"cohort_month"?: string,"course_id"?: string,"created_at"?: string,"display_mode"?: Database["public"]['Enums']["display_name_mode"],"display_name"?: string,"excluded_reason"?: string | null,"follow_up_text"?: string | null,"id"?: string,"paid_bucket_ils"?: number | null,"proof_kind"?: Database["public"]['Enums']["proof_kind"] | null,"published_at"?: string | null,"status"?: Database["public"]['Enums']["review_status"],"verified_at"?: string | null
+                    "browser_hash"?: string,"created_at"?: string,"review_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "review_helpful_review_id_fkey"
+      columns: ["review_id"]
+isOneToOne: false
+      referencedRelation: "reviews"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"reviews": {
+                  Row: {
+                    "author_id": string | null,"author_title": Database["public"]['Enums']["author_title"],"body": string,"cohort_month": string,"course_id": string,"created_at": string,"decision_note": string | null,"display_mode": Database["public"]['Enums']["display_name_mode"],"display_name": string,"disputed_at": string | null,"excluded_reason": string | null,"finished_month": string | null,"follow_up_text": string | null,"helpful_count": number,"id": string,"paid_bucket_ils": number | null,"proof_kind": Database["public"]['Enums']["proof_kind"] | null,"published_at": string | null,"read_count": number,"status": Database["public"]['Enums']["review_status"],"submitted_at": string | null,"updated_at": string,"verified_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string | null,"author_title"?: Database["public"]['Enums']["author_title"],"body"?: string,"cohort_month": string,"course_id": string,"created_at"?: string,"decision_note"?: string | null,"display_mode"?: Database["public"]['Enums']["display_name_mode"],"display_name"?: string,"disputed_at"?: string | null,"excluded_reason"?: string | null,"finished_month"?: string | null,"follow_up_text"?: string | null,"helpful_count"?: number,"id"?: string,"paid_bucket_ils"?: number | null,"proof_kind"?: Database["public"]['Enums']["proof_kind"] | null,"published_at"?: string | null,"read_count"?: number,"status"?: Database["public"]['Enums']["review_status"],"submitted_at"?: string | null,"updated_at"?: string,"verified_at"?: string | null
+                  }
+                  Update: {
+                    "author_id"?: string | null,"author_title"?: Database["public"]['Enums']["author_title"],"body"?: string,"cohort_month"?: string,"course_id"?: string,"created_at"?: string,"decision_note"?: string | null,"display_mode"?: Database["public"]['Enums']["display_name_mode"],"display_name"?: string,"disputed_at"?: string | null,"excluded_reason"?: string | null,"finished_month"?: string | null,"follow_up_text"?: string | null,"helpful_count"?: number,"id"?: string,"paid_bucket_ils"?: number | null,"proof_kind"?: Database["public"]['Enums']["proof_kind"] | null,"published_at"?: string | null,"read_count"?: number,"status"?: Database["public"]['Enums']["review_status"],"submitted_at"?: string | null,"updated_at"?: string,"verified_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -279,14 +361,14 @@ isOneToOne: false
                   ]
                 },"vendor_responses": {
                   Row: {
-                    "body": string,"id": string,"posted_at": string,"review_id": string
+                    "body": string,"id": string,"posted_at": string,"review_id": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "body": string,"id"?: string,"posted_at"?: string,"review_id": string
+                    "body": string,"id"?: string,"posted_at"?: string,"review_id": string,"updated_at"?: string
                   }
                   Update: {
-                    "body"?: string,"id"?: string,"posted_at"?: string,"review_id"?: string
+                    "body"?: string,"id"?: string,"posted_at"?: string,"review_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -303,17 +385,53 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "course_paid_range":
+            "count_review_read":
+{ Args: { "p_review_id": string }; Returns: undefined
+                           },
+"course_paid_range":
 { Args: { "p_course_id": string }; Returns: {
               "invoice_count": number,"max_ils": number,"min_ils": number
             }[]
                            },
+"delete_review":
+{ Args: { "p_action": string,"p_actor_id"?: string,"p_review_id": string }; Returns: {
+              "course_slug": string,"was_published": boolean
+            }[]
+                           },
 "forget_auth_log":
 { Args: { "p_user_id": string }; Returns: undefined
+                           },
+"is_admin":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"my_reviews":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "answers": Json,"author_title": Database["public"]['Enums']["author_title"],"body": string,"cohort_month": string,"course_id": string,"decision_note": string,"display_mode": Database["public"]['Enums']["display_name_mode"],"display_name": string,"finished_month": string,"helpful_count": number,"id": string,"published_at": string,"read_count": number,"status": Database["public"]['Enums']["review_status"],"submitted_at": string,"updated_at": string
+            }[]
+                           },
+"proof_orphans":
+{ Args: { "p_age_hours": number }; Returns: string[]
+                           },
+"publish_review":
+{ Args: { "p_admin_id": string,"p_paid_bucket"?: number,"p_proof_kind": Database["public"]['Enums']["proof_kind"],"p_review_id": string }; Returns: string
+                           },
+"return_review":
+{ Args: { "p_action": string,"p_admin_id": string,"p_note": string,"p_reason": string,"p_review_id": string }; Returns: undefined
+                           },
+"submit_review":
+{ Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string,"p_validated": Json }; Returns: undefined
+                           },
+"take_proof_checks":
+{ Args: { "p_author_id": string,"p_per_day": number,"p_want": number }; Returns: number
+                           },
+"toggle_helpful":
+{ Args: { "p_browser_id": string,"p_review_id": string }; Returns: {
+              "is_helpful": boolean,"total": number
+            }[]
                            }
           }
           Enums: {
-            "check_tier": "full"|"partial"|"listed","course_status": "draft"|"active"|"maybe_inactive"|"removed","course_type": "career"|"hobby"|"exam","display_name_mode": "full"|"first_initial"|"anonymous","metric_scale": "likert5"|"yes_no","proof_kind": "invoice"|"graduate_list"|"certificate"|"enrollment_email"|"employer_letter"|"screenshot"|"project","review_status": "draft"|"pending"|"published"|"disputed"|"removed","score_kind": "graduate"|"full"
+            "author_title": "graduate_m"|"graduate_f"|"none","check_tier": "full"|"partial"|"listed","course_status": "draft"|"active"|"maybe_inactive"|"removed","course_type": "career"|"hobby"|"exam","display_name_mode": "full"|"first_initial"|"anonymous","metric_scale": "likert5"|"yes_no","proof_kind": "invoice"|"graduate_list"|"certificate"|"enrollment_email"|"employer_letter"|"screenshot"|"project","proof_status": "pending"|"approved"|"rejected"|"more_requested","review_status": "draft"|"pending"|"published"|"disputed"|"removed","score_kind": "graduate"|"full"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -433,7 +551,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "check_tier": ["full", "partial", "listed"],"course_status": ["draft", "active", "maybe_inactive", "removed"],"course_type": ["career", "hobby", "exam"],"display_name_mode": ["full", "first_initial", "anonymous"],"metric_scale": ["likert5", "yes_no"],"proof_kind": ["invoice", "graduate_list", "certificate", "enrollment_email", "employer_letter", "screenshot", "project"],"review_status": ["draft", "pending", "published", "disputed", "removed"],"score_kind": ["graduate", "full"]
+            "author_title": ["graduate_m", "graduate_f", "none"],"check_tier": ["full", "partial", "listed"],"course_status": ["draft", "active", "maybe_inactive", "removed"],"course_type": ["career", "hobby", "exam"],"display_name_mode": ["full", "first_initial", "anonymous"],"metric_scale": ["likert5", "yes_no"],"proof_kind": ["invoice", "graduate_list", "certificate", "enrollment_email", "employer_letter", "screenshot", "project"],"proof_status": ["pending", "approved", "rejected", "more_requested"],"review_status": ["draft", "pending", "published", "disputed", "removed"],"score_kind": ["graduate", "full"]
           }
         }
 } as const

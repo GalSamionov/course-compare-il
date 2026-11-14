@@ -6,10 +6,10 @@ describe('courseShareDescription', () => {
     expect(
       courseShareDescription({
         score: { status: 'scored', value: 7.9, reviewCount: 23, recommendPct: 91, stale: false },
-        paid: { min: 12500, max: 15000, count: 6 },
+        paid: { min: 12000, max: 16000, count: 5 },
       }),
     ).toBe(
-      'ציון בוגרים 7.9 מתוך 10, לפי 23 בוגרים מאומתים. שילמו בפועל 12,500–15,000 ₪, לפי 6 חשבוניות. אף מוכר לא משלם לנו. נתוני דוגמה.',
+      'ציון בוגרים 7.9 מתוך 10, לפי 23 בוגרים מאומתים. חצי מהבוגרים שילמו בין 12,000 ל-16,000 ₪, לפי 5 חשבוניות ומעלה. אף מוכר לא משלם לנו. נתוני דוגמה.',
     );
   });
 

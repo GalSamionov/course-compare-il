@@ -10,14 +10,14 @@ import type { Catalog } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
 import { AccountSection } from './account-section';
 import { CompareTray } from './compare-tray';
-import { MeSection } from './me-section';
 import { MyAnswers } from './my-answers';
+import { MyReviews } from './my-reviews';
 import { SavedCourses } from './saved-courses';
 
 const navLink = 'inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover';
 
 /**
- * האזור האישי, לפי הציור (Me.dc.html): התשובות, השמורים, ההשוואה, "הביקורות שלי" (בקרוב) והחשבון.
+ * האזור האישי, לפי הציור (Me.dc.html): התשובות, השמורים, ההשוואה, "הביקורות שלי", "הקורסים שלי" והחשבון.
  * הכול נטען בדפדפן. מי שלא מחובר עובר להתחברות, וחוזר לכאן אחריה.
  * קורס שכבר לא בקטלוג (הוסר מהאתר) לא מוצג. ראו notes-for-plan-2.md.
  */
@@ -83,6 +83,9 @@ export function MeArea({ catalog }: { catalog: Catalog }) {
         <a href="#reviews" className={navLink}>
           הביקורות שלי
         </a>
+        <a href="#courses" className={navLink}>
+          הקורסים שלי
+        </a>
         <a href="#account" className={cn(navLink, 'min-w-11')}>
           החשבון
         </a>
@@ -99,14 +102,7 @@ export function MeArea({ catalog }: { catalog: Catalog }) {
         <div className="lg:border-s lg:border-rule lg:ps-10 lg:[background:linear-gradient(to_left,rgb(0_0_0/0.06),transparent_36px)_right/36px_100%_no-repeat]">
           <div className="margin-rule flow-root lg:[--bleed:2.5rem]">
           <CompareTray slots={slots} />
-          <MeSection id="reviews" title="הביקורות שלי" className="mt-8">
-            <p className="ms-(--margin) mt-2.5 ps-3 text-base leading-[1.7]">
-              <strong className="font-sans">בקרוב.</strong> כאן יופיעו הביקורות שתכתבו על קורסים שסיימתם, ואם כל
-              אחת כבר אומתה.
-            </p>
-            <div aria-hidden="true" className="ruled-row h-[30px]" />
-            <div aria-hidden="true" className="ruled-row h-[38px]" />
-          </MeSection>
+          <MyReviews catalog={catalog} userId={account.userId} />
           <AccountSection email={account.email} onLeave={setLeft} />
           </div>
         </div>

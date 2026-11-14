@@ -1,5 +1,5 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatIls, formatPaidRange } from '@/lib/format';
+import { PAID_RANGE_LEAD, PAID_RANGE_NOTE, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
 import { Mark, PenNote } from './marks';
 
 export function PriceSection({ course }: { course: CoursePageData }) {
@@ -10,8 +10,13 @@ export function PriceSection({ course }: { course: CoursePageData }) {
         {course.sitePrice !== null ? (
           <>
             <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi> באתר המוסד
-            {/* בלי טווח ששולם, העלות לשעה ממשיכה את אותו משפט: "באתר המוסד, כלומר כ-181 ₪ לשעת עשייה". */}
-            {course.paid || course.costPerHandsOnHour === null ? '.' : ''}
+            {/* העלות לשעה מחושבת מהמחיר באתר, ולכן באותו משפט שלו, ולא אחרי הטווח ששולם. */}
+            {course.costPerHandsOnHour !== null && (
+              <>
+                , כלומר כ-<bdi dir="rtl">{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה
+              </>
+            )}
+            .
           </>
         ) : (
           'המוסד לא מפרסם מחיר.'
@@ -20,16 +25,15 @@ export function PriceSection({ course }: { course: CoursePageData }) {
           <>
             {' '}
             <Mark source="verified">
-              לפי {course.paid.count} חשבוניות, בוגרים שילמו בפועל <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
+              {PAID_RANGE_LEAD} <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
             </Mark>
-          </>
-        )}
-        {course.costPerHandsOnHour !== null && (
-          <>
-            , כלומר כ-<bdi dir="rtl">{formatIls(course.costPerHandsOnHour)}</bdi> לשעת עשייה.
+            , {invoiceCountText(course.paid)}.
           </>
         )}
       </p>
+      {course.paid && (
+        <p className="mt-1 font-sans text-[13px] leading-snug text-ink-soft lg:text-sm">{PAID_RANGE_NOTE}</p>
+      )}
       {course.paid && <PenNote arrow className="mt-1">שווה לשאול על הנחה לפני שנרשמים</PenNote>}
     </section>
   );

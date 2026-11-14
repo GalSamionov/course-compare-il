@@ -3,7 +3,8 @@ import { SourceLegend } from '@/components/course/source-legend';
 import { Claim, Mark, PenNote, StickyNote, Tape } from '@/components/course/marks';
 import { Stamp } from '@/components/course/stamp';
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatIls, formatPaidRange } from '@/lib/format';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
+import { verifiedLabel } from '@/lib/reviews/types';
 import type { CourseSummary } from '@/lib/search/types';
 
 /** המשפט הראשון של ביקורת, לציטוט קצר על הפתק. */
@@ -67,7 +68,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           {page?.paid ? (
             <p>
               <Mark source="verified" swipe={350}>
-                לפי {page.paid.count} חשבוניות, שילמו בפועל <bdi dir="rtl">{formatPaidRange(page.paid)}</bdi>
+                {PAID_RANGE_LEAD} <bdi dir="rtl">{formatPaidRange(page.paid)}</bdi>, {invoiceCountText(page.paid)}
               </Mark>
             </p>
           ) : null}
@@ -106,8 +107,8 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           >
             <p className="font-serif text-[15px] leading-snug">״{firstSentence(review.body)}״</p>
             <p className="mt-1.5">
-              <strong>{review.displayName ?? 'ביקורת מאומתת'}</strong>
-              {review.displayName && ', ביקורת מאומתת'}, מחזור {cohort(review.cohortMonth)}
+              <strong>{review.displayName ?? verifiedLabel(review.authorTitle)}</strong>
+              {review.displayName && `, ${verifiedLabel(review.authorTitle)}`}, מחזור {cohort(review.cohortMonth)}
             </p>
           </StickyNote>
         )}

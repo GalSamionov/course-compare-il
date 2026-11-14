@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(26);
 
 -- נתוני בדיקה. נכתבים כ-postgres, שעוקף את ההרשאות.
 insert into categories (id, slug, name, course_type)
@@ -13,7 +13,9 @@ insert into courses (id, slug, institution_id, category_id, title, status) value
   ('aaaaaaaa-0000-0000-0000-000000000004', 'test-draft', 'aaaaaaaa-0000-0000-0000-000000000002',
    'aaaaaaaa-0000-0000-0000-000000000001', 'קורס טיוטה', 'draft'),
   ('aaaaaaaa-0000-0000-0000-000000000009', 'test-two', 'aaaaaaaa-0000-0000-0000-000000000002',
-   'aaaaaaaa-0000-0000-0000-000000000001', 'שתי חשבוניות', 'active');
+   'aaaaaaaa-0000-0000-0000-000000000001', 'שתי חשבוניות', 'active'),
+  ('aaaaaaaa-0000-0000-0000-000000000020', 'range-seven', 'aaaaaaaa-0000-0000-0000-000000000002',
+   'aaaaaaaa-0000-0000-0000-000000000001', 'שבע חשבוניות', 'active');
 insert into reviews (
   id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
 ) values
@@ -33,9 +35,25 @@ insert into reviews (
    repeat('ו', 80), 'בודק', 'published', 'invoice', 5000, now(), now()),
   ('aaaaaaaa-0000-0000-0000-000000000011', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
    repeat('ז', 80), 'בודק', 'published', 'invoice', 6000, now(), now()),
+  -- סבב 3: הטווח מופיע רק מ-5 חשבוניות. לקורס הפעיל עוד שתיים (סך הכול 5), ולקורס השני עוד שתיים (סך הכול 4).
+  ('aaaaaaaa-0000-0000-0000-000000000016', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('י', 80), 'בודק', 'published', 'invoice', 15500, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000017', 'aaaaaaaa-0000-0000-0000-000000000003', '2026-03-01',
+   repeat('כ', 80), 'בודק', 'published', 'invoice', 16000, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000018', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('ל', 80), 'בודק', 'published', 'invoice', 5500, now(), now()),
+  ('aaaaaaaa-0000-0000-0000-000000000019', 'aaaaaaaa-0000-0000-0000-000000000009', '2026-03-01',
+   repeat('מ', 80), 'בודק', 'published', 'invoice', 6500, now(), now()),
   -- ביקורת שפורסמה בקורס טיוטה: לא ציבורית.
   ('aaaaaaaa-0000-0000-0000-000000000014', 'aaaaaaaa-0000-0000-0000-000000000004', '2026-03-01',
    repeat('ט', 80), 'בודק', 'published', 'invoice', 1000, now(), now());
+-- שבע חשבוניות, עם שני קצוות רחוקים: 1,000 ו-60,000.
+insert into reviews (
+  id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
+)
+select ('aaaaaaaa-0000-0000-0000-0000000000' || (20 + n))::uuid, 'aaaaaaaa-0000-0000-0000-000000000020', '2026-03-01',
+       repeat('ס', 80), 'בודק', 'published', 'invoice', amount, now(), now()
+from unnest(array[1000, 9000, 9500, 10000, 10500, 11000, 60000]) with ordinality as t(amount, n);
 insert into method_changes (version, summary, reason) values ('test', 'בדיקה', 'בדיקה');
 insert into scores (course_id, kind, status, value, review_count, method_version) values
   ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 8.2, 23, 'test'),
@@ -80,13 +98,19 @@ select results_eq(
 
 select results_eq(
   $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
-  $$values (12500, 14500, 3)$$,
-  'טווח מחירים משלוש חשבוניות שפורסמו, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
+  $$values (12000, 16000, 5)$$,
+  'טווח מ-5 חשבוניות שפורסמו, מעוגל החוצה ל-2,000, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
+);
+
+select results_eq(
+  $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000020')$$,
+  $$values (8000, 12000, 5)$$,
+  'הטווח הוא החצי האמצעי, בלי הקצוות, ומספר החשבוניות בקפיצות של 5 (שבע הן "5")'
 );
 
 select is_empty(
   $$select * from course_paid_range('aaaaaaaa-0000-0000-0000-000000000009')$$,
-  'אין טווח מחירים משתי חשבוניות'
+  'אין טווח מארבע חשבוניות'
 );
 
 select throws_ok(
@@ -159,7 +183,8 @@ reset role;
 select is_empty(
   $$select r, c
     from unnest(array['anon', 'authenticated']) r,
-         unnest(array['author_id', 'proof_kind', 'paid_bucket_ils', 'verified_at', 'excluded_reason', 'created_at']) c
+         unnest(array['author_id', 'proof_kind', 'paid_bucket_ils', 'verified_at', 'excluded_reason', 'created_at',
+                      'finished_month', 'decision_note', 'read_count', 'submitted_at', 'disputed_at', 'updated_at']) c
     where has_column_privilege(r, 'public.reviews', c, 'select')$$,
   'עמודות פרטיות של ביקורות חסומות לכל משתמש ציבורי'
 );
@@ -175,16 +200,24 @@ select is_empty(
   $$select c.relname, r.rolname, p.priv
     from pg_class c join pg_namespace n on n.oid = c.relnamespace
     cross join (values ('anon'), ('authenticated')) r(rolname)
-    cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
+    cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER'), ('MAINTAIN')) p(priv)
     where n.nspname = 'public' and c.relkind in ('r', 'p')
-      and has_table_privilege(r.rolname, c.oid, p.priv)
+      and (
+        has_table_privilege(r.rolname, c.oid, p.priv)
+        -- הרשאה לעמודות בודדות (מסבב 3) לא נראית ב-has_table_privilege.
+        or (p.priv in ('INSERT', 'UPDATE', 'REFERENCES') and has_any_column_privilege(r.rolname, c.oid, p.priv))
+      )
       -- תוכנית 2ב: משתמש מחובר כותב ברשימות האישיות שלו, ורק בהרשאות האלה. ההגבלה לשורות שלו ב-RLS.
+      -- סבב 3: כותב שומר טיוטה ועונה בה. אילו עמודות בדיוק: reviews.test.sql.
       and (r.rolname, c.relname, p.priv) not in (
         ('authenticated', 'saved_courses', 'INSERT'), ('authenticated', 'saved_courses', 'DELETE'),
         ('authenticated', 'compare_items', 'INSERT'), ('authenticated', 'compare_items', 'DELETE'),
-        ('authenticated', 'user_answers', 'INSERT'), ('authenticated', 'user_answers', 'UPDATE')
+        ('authenticated', 'user_answers', 'INSERT'), ('authenticated', 'user_answers', 'UPDATE'),
+        ('authenticated', 'reviews', 'INSERT'), ('authenticated', 'reviews', 'UPDATE'),
+        ('authenticated', 'review_answers', 'INSERT'), ('authenticated', 'review_answers', 'UPDATE'),
+        ('authenticated', 'review_answers', 'DELETE')
       )$$,
-  'אין הרשאת כתיבה ציבורית, חוץ מהרשימות האישיות של משתמש מחובר'
+  'אין הרשאת כתיבה ציבורית, חוץ מהרשימות האישיות ומהטיוטה של משתמש מחובר'
 );
 
 -- ===== השרת, שכותב עם המפתח הסודי =====

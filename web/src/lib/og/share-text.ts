@@ -1,5 +1,5 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatPaidRange } from '@/lib/format';
+import { invoiceCountText, paidRangeSentence } from '@/lib/format';
 import { SAMPLE_DATA } from '@/lib/site';
 
 /**
@@ -27,7 +27,7 @@ export function courseShareDescription(course: Pick<CoursePageData, 'score' | 'p
   } else {
     parts.push('עוד אין ביקורות מאומתות על הקורס.');
   }
-  if (course.paid) parts.push(`שילמו בפועל ${formatPaidRange(course.paid)}, לפי ${course.paid.count} חשבוניות.`);
+  if (course.paid) parts.push(`${paidRangeSentence(course.paid)}, ${invoiceCountText(course.paid)}.`);
   parts.push('אף מוכר לא משלם לנו.');
   if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
   return parts.join(' ');

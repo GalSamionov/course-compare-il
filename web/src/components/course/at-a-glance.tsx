@@ -1,5 +1,5 @@
 import type { CoursePageData, OutcomeView } from '@/lib/data/course-page';
-import { formatIls, formatPaidRange } from '@/lib/format';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
 import { Mark } from './marks';
 
 /** מה קרה לבוגרים, במילים של אנשים. אותו ניסוח ב"בקצרה" ובפתק של "על הקורס". */
@@ -40,10 +40,10 @@ export function AtAGlance({ course }: { course: CoursePageData }) {
           {course.paid ? (
             <>
               <Mark source="verified">
-                שילמו בפועל <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
+                {PAID_RANGE_LEAD} <bdi dir="rtl">{formatPaidRange(course.paid)}</bdi>
               </Mark>
               <span className={sub}>
-                לפי {course.paid.count} חשבוניות
+                {invoiceCountText(course.paid)}
                 {course.sitePrice !== null && (
                   <>
                     . באתר המוסד: <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi>

@@ -72,7 +72,7 @@ enabled = true
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
 # db push --include-seed זוכר קבצים לפי hash, ולא מריץ שוב קובץ שהשתנה. לכן נתונים חדשים נכנסים בקובץ seed חדש,
 # ותיקון של נתונים שכבר בענן (כמו טקסט של ביקורת) עולה בקובץ SQL נפרד ב-supabase/fixes/, שרץ פעם אחת.
-sql_paths = ["./seed.sql", "./seed-2a.sql"]
+sql_paths = ["./seed.sql", "./seed-2a.sql", "./seed-3.sql"]
 
 [db.network_restrictions]
 # Enable management of network restrictions.

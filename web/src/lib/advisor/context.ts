@@ -1,5 +1,5 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatHebrewDate, formatIls, formatPaidRange } from '@/lib/format';
+import { formatHebrewDate, formatIls, invoiceCountText, paidRangeSentence } from '@/lib/format';
 import type { AdviceSource } from './types';
 
 const FORMAT_WORDS: Record<string, string> = {
@@ -44,10 +44,11 @@ function factLines(course: CoursePageData): string[] {
       course.totalHours !== null ? `${course.totalHours} שעות` : null,
     ]),
   );
+  // החצי האמצעי של החשבוניות, ולא המינימום והמקסימום. המשפט אומר את זה, כדי שהיועץ לא יציג אותו כטווח מלא.
   add(
     'verified',
     'שילמו בפועל',
-    course.paid ? `${formatPaidRange(course.paid)}, לפי ${course.paid.count} חשבוניות` : null,
+    course.paid ? `${paidRangeSentence(course.paid)}, ${invoiceCountText(course.paid)}` : null,
   );
   for (const lecturer of course.lecturers) {
     for (const fact of lecturer.verifiedFacts) add('verified', `על המרצה ${lecturer.name}`, fact.text);
