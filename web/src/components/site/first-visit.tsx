@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Claim, Tape } from '@/components/course/marks';
 import { PEN_LOOPS, PenArrow } from '@/components/site/pen';
@@ -17,7 +17,8 @@ const STEPS = 3;
  * החוזה: .impeccable/surfaces/web-src-app-page-tsx.md, "תוספת: היכרות למבקר ראשון".
  */
 export function FirstVisit() {
-  const pathname = usePathname();
+  // בלי usePathname: הרכיב יושב ב-layout, וקריאה של הכתובת בזמן הרינדור חוסמת את הבנייה הסטטית של כל העמודים.
+  // הכתובת נקראת מ-window, רק בדפדפן, ברגע שצריך אותה.
   const router = useRouter();
   const titleId = useId();
   const [open, setOpen] = useState(false);
@@ -68,7 +69,7 @@ export function FirstVisit() {
 
   function ask() {
     close();
-    if (pathname !== '/') {
+    if (window.location.pathname !== '/') {
       router.push('/#notebook-title');
       return;
     }
