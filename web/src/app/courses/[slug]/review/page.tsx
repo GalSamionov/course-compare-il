@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ComingSoon } from '@/components/site/coming-soon';
 import { getCourseSlugs } from '@/lib/data/course-page';
+import { SITE_NAME } from '@/lib/site';
 
 /**
  * תמונת השיתוף של הקורס (../opengraph-image.tsx) חלה גם על העמוד הזה, והכתובת שלה תלויה בקורס.
@@ -13,7 +14,7 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export const metadata: Metadata = { title: 'כתיבת ביקורת | [שם האתר]' };
+export const metadata: Metadata = { title: `כתיבת ביקורת | ${SITE_NAME}` };
 
 export default function CourseReviewPage() {
   return (

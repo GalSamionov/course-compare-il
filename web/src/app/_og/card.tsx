@@ -148,11 +148,14 @@ function Marked({ text, size, color, style }: { text: string; size: number; colo
   );
 }
 
-/** שם האתר בתווית, כמו בראש כל עמוד. */
+/**
+ * שם האתר בתווית, כמו בראש כל עמוד (components/site/wordmark.tsx): התווית מודפסת בדיו, והשם כתוב בה בעט כחול.
+ * באתר העט של השם במשקל 600. כאן יש רק עותק של 500, ולכן קו מתאר דק באותו צבע מעבה אותו לאותו משקל.
+ */
 function Wordmark() {
-  const size = 34;
-  const w = Math.round(Array.from(SITE_NAME).length * size * 0.6) + 56;
-  const h = 70;
+  const size = 46;
+  const w = Math.round(Array.from(SITE_NAME).length * size * 0.62) + 64;
+  const h = 76;
   return (
     <div
       style={{
@@ -163,12 +166,16 @@ function Wordmark() {
         height: h,
         backgroundImage: `url(${labelFrame(w, h)})`,
         backgroundSize: '100% 100%',
-        fontFamily: 'Noto Serif Hebrew',
-        fontWeight: 700,
-        color: INK,
+        fontFamily: 'Playpen Sans Hebrew',
+        fontWeight: 500,
+        color: PEN,
       }}
     >
-      <Rtl text={SITE_NAME} size={size} style={{ marginTop: -4 }} />
+      <Rtl
+        text={SITE_NAME}
+        size={size}
+        style={{ marginTop: -2, transform: 'rotate(-1deg)', WebkitTextStroke: `0.9px ${PEN}` }}
+      />
     </div>
   );
 }

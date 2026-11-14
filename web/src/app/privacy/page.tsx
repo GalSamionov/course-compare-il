@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { TextPage } from '@/components/site/text-page';
+import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'מדיניות פרטיות (טיוטה) | [שם האתר]',
+  title: `מדיניות פרטיות (טיוטה) | ${SITE_NAME}`,
   description: 'מה האתר שומר כשמתחברים, ומה לא. טיוטה, לפני בדיקה של עורך דין.',
 };
 

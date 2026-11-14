@@ -4,6 +4,7 @@ import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
 import { getCatalog } from '@/lib/data/catalog';
 import { EMPTY_QUERY } from '@/lib/search/types';
+import { SITE_NAME } from '@/lib/site';
 
 export const ensureStatic = 'navigation';
 
@@ -15,7 +16,7 @@ function scoredText(n: number): string {
 }
 
 export const metadata: Metadata = {
-  title: 'כל הקורסים | [שם האתר]',
+  title: `כל הקורסים | ${SITE_NAME}`,
   description: 'כל הקורסים באתר, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.',
 };
 

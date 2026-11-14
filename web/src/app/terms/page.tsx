@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { TextPage } from '@/components/site/text-page';
+import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'תנאי שימוש (טיוטה) | [שם האתר]',
+  title: `תנאי שימוש (טיוטה) | ${SITE_NAME}`,
   description: 'מה האתר אומר ומה לא, וכללי השימוש. טיוטה, לפני בדיקה של עורך דין.',
 };
 

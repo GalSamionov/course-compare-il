@@ -8,6 +8,7 @@ import { TickMark } from '@/components/notebook/tick';
 import { buttonVariants } from '@/components/ui/button';
 import { CALLBACK_PATH, NEXT_COOKIE, safeNextPath } from '@/lib/account/next-path';
 import { useAccount } from '@/lib/account/store';
+import { SITE_NAME } from '@/lib/site';
 import { createBrowserSupabase } from '@/lib/supabase/browser-client';
 import { cn } from '@/lib/utils';
 
@@ -151,7 +152,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
               </p>
               <div className="ps-3 font-sans text-[15px] leading-normal">
                 <p className="font-bold">לא מוצאים אותו?</p>
-                <p className="mt-1">חפשו בתיבה ״[שם האתר]״, ובדקו גם בספאם.</p>
+                <p className="mt-1">חפשו בתיבה ״{SITE_NAME}״, ובדקו גם בספאם.</p>
                 <p className="mt-1.5">פותחים את הקישור באותו טלפון ובאותו דפדפן שבהם ביקשתם אותו.</p>
                 <p className="mt-1.5">הקישור תקף לשעה, ועובד פעם אחת.</p>
               </div>

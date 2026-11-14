@@ -6,6 +6,7 @@ import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
 import { getCatalog } from '@/lib/data/catalog';
 import { EMPTY_QUERY } from '@/lib/search/types';
+import { SITE_NAME } from '@/lib/site';
 
 /**
  * כמו עמוד הקורס: העמוד כולו סטטי, ותחום שלא נבנה מראש נבנה בבקשה הראשונה.
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = (await getCatalog()).categories.find((c) => c.slug === slug);
   if (!category) return {};
   return {
-    title: `${category.name}: כל הקורסים | [שם האתר]`,
+    title: `${category.name}: כל הקורסים | ${SITE_NAME}`,
     description: `קורסים ב${category.name}, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
   };
 }

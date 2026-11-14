@@ -1,22 +1,23 @@
 import Link from 'next/link';
+import { SITE_NAME } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
 /**
- * שם האתר כתווית על כריכה של מחברת: מסגרת כפולה בדיו עם פינות קעורות (globals.css, .label-frame).
- * המסגרת נמתחת לפי אורך השם, ולכן מתאימה גם ל-[שם האתר] וגם לשם עברי קצר בעתיד.
- * בדיו שחורה בלבד: צבעי המקורות לא משמשים למותג.
+ * שם האתר על תווית של כריכת מחברת. התווית מודפסת בדיו: מסגרת כפולה עם פינות קעורות (globals.css, .label-frame).
+ * השם כתוב בה ביד, בעט הכחול של האתר, כמו שתלמיד כותב את שמו על המחברת. "למדתי" הוא מה שאומר מי שכבר למד.
+ * העט כאן בולט מעט יותר משאר הערות העט (600 ולא 500), כדי שהשם יחזיק מול המסגרת השחורה גם בגודל של נייד.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <Link
       href="/"
       className={cn(
-        'label-frame inline-flex min-h-11 items-center bg-white px-2 font-serif text-[19px] leading-none font-extrabold tracking-[-0.01em] text-ink',
-        'hover:text-link-hover lg:px-3 lg:text-[23px]',
+        'label-frame inline-flex min-h-11 items-center bg-white px-2.5 font-pen text-[24px] leading-none font-semibold text-pen',
+        'hover:text-link-hover lg:px-3.5 lg:text-[30px]',
         className,
       )}
     >
-      [שם האתר]
+      <span className="-rotate-1">{SITE_NAME}</span>
     </Link>
   );
 }

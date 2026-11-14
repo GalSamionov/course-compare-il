@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { ComingSoon } from '@/components/site/coming-soon';
+import { SITE_NAME } from '@/lib/site';
 
-export const metadata: Metadata = { title: 'הוספת קורס | [שם האתר]' };
+export const metadata: Metadata = { title: `הוספת קורס | ${SITE_NAME}` };
 
 /** המסלול "אני מוסד או מרצה, רוצה להוסיף קורס" מדף הבית. */
 export default function InstitutionJoinPage() {

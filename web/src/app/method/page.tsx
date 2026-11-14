@@ -14,11 +14,12 @@ import {
 } from '@/lib/score/constants';
 import type { CourseType } from '@/lib/score/types';
 import { COURSE_TYPE_LABEL } from '@/lib/search/why';
+import { SITE_NAME } from '@/lib/site';
 
 export const ensureStatic = 'navigation';
 
 export const metadata: Metadata = {
-  title: 'איך אנחנו מדרגים | [שם האתר]',
+  title: `איך אנחנו מדרגים | ${SITE_NAME}`,
   description: 'איך מחושב ציון הבוגרים: מי נספר, המשקלות לפי סוג קורס, ויומן השינויים בשיטה.',
 };
 

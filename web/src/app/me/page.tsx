@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { MeArea } from '@/components/account/me-area';
 import { Sheet } from '@/components/site/sheet';
 import { getCatalog } from '@/lib/data/catalog';
+import { SITE_NAME } from '@/lib/site';
 
 /**
  * העמוד סטטי, עם הקטלוג מהמטמון. מה ששמרתם נטען בדפדפן, עם ההרשאות שלכם במסד,
@@ -9,7 +10,7 @@ import { getCatalog } from '@/lib/data/catalog';
  */
 export const ensureStatic = 'navigation';
 
-export const metadata: Metadata = { title: 'האזור שלי | [שם האתר]' };
+export const metadata: Metadata = { title: `האזור שלי | ${SITE_NAME}` };
 
 export default async function MePage() {
   const catalog = await getCatalog();

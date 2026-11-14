@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { TextPage } from '@/components/site/text-page';
+import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: 'מי משלם לנו | [שם האתר]',
+  title: `מי משלם לנו | ${SITE_NAME}`,
   description: 'כל מקור הכנסה של האתר, והכללים שמונעים ממוכר קורסים לשלם על תוצאה.',
 };
 
