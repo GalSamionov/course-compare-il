@@ -9,6 +9,13 @@ export const PROOF_MODEL = 'claude-haiku-5-5';
 const TIMEOUT_MS = 25_000;
 /** גבול התמונה ב-API הוא 5MB אחרי base64, שמגדיל פי 4/3. תמונה גדולה מזה לא נבדקת. */
 export const MAX_IMAGE_BYTES_FOR_CHECK = 3_750_000;
+/** PDF גדול מזה לא נשלח למודל: הרבה עמודים, והרבה טוקנים, בשביל חשבונית או תעודה. מסומן "לא נבדק אוטומטית". */
+export const MAX_PDF_BYTES_FOR_CHECK = 2_000_000;
+
+/** האם הקובץ נשלח למודל בכלל. רק קבצים שנשלחים נספרים במכסה (take_proof_checks). */
+export function fitsForCheck(file: { mime: ProofMime; size: number }): boolean {
+  return file.size <= (file.mime === 'application/pdf' ? MAX_PDF_BYTES_FOR_CHECK : MAX_IMAGE_BYTES_FOR_CHECK);
+}
 
 const SYSTEM = [
   'You read one document that a person uploaded to an Israeli course-review site as proof that they took a course: an invoice or receipt, a completion certificate, an enrollment email, a letter from an employer or a training fund, a screenshot of a course system, or a project.',

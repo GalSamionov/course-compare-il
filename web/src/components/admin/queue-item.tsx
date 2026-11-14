@@ -14,7 +14,7 @@ const FLAG_LABEL: Record<string, string> = {
 
 const SKIPPED_LABEL: Record<string, string> = {
   no_key: 'לא נבדק אוטומטית: אין מפתח Anthropic.',
-  too_large: 'לא נבדק אוטומטית: התמונה גדולה מדי לבדיקה.',
+  too_large: 'לא נבדק אוטומטית: הקובץ גדול מדי לבדיקה.',
   quota: 'לא נבדק אוטומטית: הכותב עבר את מכסת הבדיקות היומית.',
   error: 'הבדיקה האוטומטית נכשלה. לבדוק ידנית.',
 };
@@ -40,7 +40,10 @@ function Waiting({ hours }: { hours: number }) {
   return <strong className="font-bold text-ink">{text}, מעבר ליעד של {TARGET_HOURS}</strong>;
 }
 
-/** מה המודל מצא: אי-ההתאמות קודם, ואחריהן מה שהוא קרא. אי-התאמה מודגשת בדיו, בלי צבע (מסמך העיצוב של התור). */
+/**
+ * מה המודל מצא: אי-ההתאמות קודם, ואחריהן מה שהוא קרא. אי-התאמה מודגשת בדיו, בלי צבע (מסמך העיצוב של התור).
+ * רמז בלבד: טקסט מוסתר במסמך יכול לגרום למודל לקרוא מוסד, שם או סכום אחרים. ההחלטה רק מול המסמך עצמו.
+ */
 function CheckView({ proof }: { proof: QueueProof }) {
   const check = proof.check;
   if (!check) return <p className="text-ink-soft">לא נבדק אוטומטית.</p>;
@@ -49,7 +52,7 @@ function CheckView({ proof }: { proof: QueueProof }) {
   return (
     <>
       {check.mismatches.length === 0 ? (
-        <p className="font-semibold">המודל לא מצא אי-התאמות.</p>
+        <p className="font-semibold">הקריאה האוטומטית לא מצאה אי-התאמות. זה לא אימות: לפתוח את המסמך.</p>
       ) : (
         <ul aria-label="אי-התאמות" className="space-y-0.5 font-bold">
           {check.mismatches.map((m) => (
@@ -58,7 +61,7 @@ function CheckView({ proof }: { proof: QueueProof }) {
         </ul>
       )}
       <p className="mt-1 text-ink-soft">
-        במסמך: {found.institutionName || 'בלי מוסד'}
+        המודל קרא (רמז בלבד, המסמך קובע): {found.institutionName || 'בלי מוסד'}
         {found.businessNumber && `, עוסק ${found.businessNumber}`}, {found.documentDate || 'בלי תאריך'}
         {found.amountIls > 0 && `, ${formatIls(found.amountIls)}`}, {found.nameOnDocument || 'בלי שם'}.
       </p>
@@ -108,7 +111,7 @@ function ProofView({ proof }: { proof: QueueProof }) {
 
 export function QueueItemView({ item }: { item: QueueItem }) {
   const defaultKind = item.proofs.find((p) => SUFFICIENT_KINDS.includes(p.claimedKind))?.claimedKind ?? 'invoice';
-  const suggestedAmount =
+  const modelAmount =
     item.proofs.flatMap((p) =>
       p.check && 'found' in p.check && p.check.found.amountIls > 0 ? [p.check.found.amountIls] : [],
     )[0] ?? null;
@@ -176,7 +179,7 @@ export function QueueItemView({ item }: { item: QueueItem }) {
               courseSlug={item.courseSlug}
               courseTitle={item.courseTitle}
               defaultKind={defaultKind}
-              suggestedAmount={suggestedAmount}
+              modelAmount={modelAmount}
               sitePrice={item.sitePrice}
             />
           </div>

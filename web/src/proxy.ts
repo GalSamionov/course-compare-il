@@ -3,14 +3,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/lib/database.types';
 
 /**
- * רק /admin. כל עמוד אחר נשאר בלי proxy (תוכנית 2ב, החלטה 2): proxy שרץ בכל צפייה היה עולה בכל עמוד, בשביל כלום.
+ * רק /admin, וכל מה שיהיה מתחתיו (/admin/...). כל עמוד אחר נשאר בלי proxy (תוכנית 2ב, החלטה 2): proxy שרץ בכל צפייה היה עולה בכל עמוד, בשביל כלום.
  * למה כאן כן: עם Cache Components, notFound() שרץ בבקשה בתוך העמוד משאיר סטטוס 200
  * (loading.md, "Status codes"). מי שאינו מנהל צריך לקבל 404 אמיתי, בלי לדעת שיש כאן משהו.
  * ה-proxy גם מרענן את ההתחברות וכותב את העוגיות (proxy.md, "Using Cookies"), כדי שהעמוד, שמוצג בשרת, לא יצטרך.
  * הוא לא ההגנה היחידה: העמוד וכל Server Action בודקים שוב (server-actions.md, Security).
  * Server Actions של התור הן POST ל-/admin, ולכן גם הן עוברות כאן (proxy.md, "Execution order").
  */
-export const config = { matcher: ['/admin'] };
+export const config = { matcher: ['/admin', '/admin/:path*'] };
 
 /**
  * כתובת שאין לה עמוד: Next מחזיר את עמוד ה-404 שלו, כמו לכל כתובת שלא קיימת.

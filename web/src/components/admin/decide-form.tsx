@@ -33,14 +33,15 @@ export function DecideForm({
   courseSlug,
   courseTitle,
   defaultKind,
-  suggestedAmount,
+  modelAmount,
   sitePrice,
 }: {
   reviewId: string;
   courseSlug: string;
   courseTitle: string;
   defaultKind: ProofKind;
-  suggestedAmount: number | null;
+  /** הסכום שהמודל קרא. רק רמז ליד השדה: טקסט מוסתר במסמך יכול לגרום לו לקרוא סכום אחר (prompt injection). */
+  modelAmount: number | null;
   sitePrice: number | null;
 }) {
   const logDecision = useLogDecision();
@@ -60,6 +61,7 @@ export function DecideForm({
   const [action, setAction] = useState<'reject' | 'request_more'>('request_more');
   const busy = approving || returning;
   const amountHint = useId();
+  const modelHint = useId();
 
   return (
     <div className="space-y-6 font-sans text-[15px] leading-normal">
@@ -82,11 +84,17 @@ export function DecideForm({
               name="amount"
               inputMode="numeric"
               autoComplete="off"
-              defaultValue={suggestedAmount ?? ''}
-              aria-describedby={amountHint}
+              // ריק תמיד: גל מקליד את הסכום מהמסמך. מה שהמודל קרא לא נכנס לשדה, כדי שלחיצה אחת לא תשמור אותו.
+              defaultValue=""
+              aria-describedby={modelAmount !== null ? `${modelHint} ${amountHint}` : amountHint}
               className={cn(control, 'max-w-[180px] tabular-nums')}
               dir="ltr"
             />
+            {modelAmount !== null && (
+              <span id={modelHint} className="mt-1 block text-[13px]">
+                הקריאה האוטומטית: &lrm;{formatIls(modelAmount)}. לא מאומת, להקליד מהמסמך.
+              </span>
+            )}
             <span id={amountHint} className="mt-1 block text-[13px] text-ink-soft">
               נשמר רק במדרגות של 500. ריק: בלי סכום.
               {sitePrice !== null && ` המחיר באתר: ${formatIls(sitePrice)}.`}

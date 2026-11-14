@@ -199,6 +199,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"proof_check_usage": {
+                  Row: {
+                    "author_id": string,"created_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"created_at"?: string
+                  }
+                  Update: {
+                    "author_id"?: string,"created_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"proofs": {
                   Row: {
                     "author_id": string | null,"check_result": Json | null,"check_status": string,"claimed_kind": Database["public"]['Enums']["proof_kind"],"created_at": string,"decided_at": string | null,"file_deleted_at": string | null,"flags": (string)[],"id": string,"mime_type": string,"review_id": string | null,"sha256": string,"size_bytes": number,"status": Database["public"]['Enums']["proof_status"],"storage_path": string | null
@@ -406,6 +420,9 @@ isOneToOne: false
                            },
 "submit_review":
 { Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string,"p_validated": Json }; Returns: undefined
+                           },
+"take_proof_checks":
+{ Args: { "p_author_id": string,"p_per_day": number,"p_want": number }; Returns: number
                            },
 "toggle_helpful":
 { Args: { "p_browser_id": string,"p_review_id": string }; Returns: {

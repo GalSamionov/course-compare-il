@@ -59,10 +59,20 @@ export type CheckResult =
   | { found: ExtractedProof; mismatches: Mismatch[] }
   | { skipped: 'no_key' | 'too_large' | 'quota' | 'error' };
 
-/** גם עם פלט מובנה, מה שחוזר מהמודל נבדק שוב: רק ערכים נקיים, בגבולות אורך. */
+/**
+ * תווי בקרה (\p{Cc}) ותווי עיצוב בלתי נראים (\p{Cf}: סימני כיוון, היפוך RLO, רוחב אפס).
+ * טקסט מוסתר במסמך יכול להגיע דרכם לתור, ולהיראות שם אחרת ממה שהוא.
+ * תו בקרה (גם שורה חדשה) הופך לרווח, כדי ששתי מילים לא יתחברו. תו עיצוב פשוט יורד.
+ */
+function stripInvisible(value: string): string {
+  return value.replace(/\p{Cc}/gu, ' ').replace(/\p{Cf}/gu, '');
+}
+
+/** גם עם פלט מובנה, מה שחוזר מהמודל נבדק שוב: רק ערכים נקיים, בלי תווים נסתרים, בגבולות אורך. */
 export function sanitizeExtracted(raw: unknown): ExtractedProof {
   const o = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>;
-  const text = (value: unknown, max: number) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
+  const text = (value: unknown, max: number) =>
+    typeof value === 'string' ? stripInvisible(value).trim().slice(0, max) : '';
   const date = text(o.document_date, 10);
   const amount = o.amount_ils;
   return {

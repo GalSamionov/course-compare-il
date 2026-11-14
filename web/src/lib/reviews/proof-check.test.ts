@@ -67,6 +67,30 @@ describe('sanitizeExtracted', () => {
       documentType: 'other',
     });
   });
+
+  it('strips hidden control and format characters from every text field before trimming and cutting', () => {
+    const found = sanitizeExtracted({
+      // היפוך כיוון (RLO), סימן כיוון וסוף היפוך: נראה אחרת ממה שהוא.
+      institution_name: '‮מכללה‬‏ לדוגמה\u0000',
+      business_number: '‎512345678',
+      document_date: '‏2026-02-20‏',
+      amount_ils: 9000,
+      // רוחב אפס בין האותיות, ושורה חדשה בין המילים.
+      name_on_document: '​נו‍עה\nרוזן⁦',
+      document_type: 'invoice_or_receipt',
+    });
+    expect(found).toEqual({
+      institutionName: 'מכללה לדוגמה',
+      businessNumber: '512345678',
+      documentDate: '2026-02-20',
+      amountIls: 9000,
+      nameOnDocument: 'נועה רוזן',
+      documentType: 'invoice_or_receipt',
+    });
+    // תווים נסתרים לא תופסים את מגבלת האורך, ושם שכולו נסתר הוא ריק.
+    expect(sanitizeExtracted({ name_on_document: '​'.repeat(150) + 'נועה' }).nameOnDocument).toBe('נועה');
+    expect(sanitizeExtracted({ institution_name: '‮‏\u0007' }).institutionName).toBe('');
+  });
 });
 
 describe('paidBucket', () => {

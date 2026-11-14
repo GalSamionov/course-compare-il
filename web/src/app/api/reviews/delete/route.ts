@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { listReviewFiles, removeProofFiles } from '@/lib/reviews/files';
 import { isUuid } from '@/lib/reviews/types';
 import { recomputeAllScores } from '@/lib/score/recompute';
+import { readCapped } from '@/lib/server/read-capped';
 import { fromThisSite } from '@/lib/server/same-origin';
 import { createAdminClient } from '@/lib/supabase/admin-client';
 import { createServerSupabase } from '@/lib/supabase/server-client';
@@ -30,10 +31,11 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'not_configured' }, { status: 503 });
   }
 
-  const raw = await request.text();
+  // { reviewId } בלבד. נקרא עד 200 בתים ולא יותר.
+  const raw = await readCapped(request, 200);
   let reviewId: unknown;
   try {
-    reviewId = raw.length <= 200 ? (JSON.parse(raw) as { reviewId?: unknown } | null)?.reviewId : null;
+    reviewId = raw !== null ? (JSON.parse(raw) as { reviewId?: unknown } | null)?.reviewId : null;
   } catch {
     reviewId = null;
   }

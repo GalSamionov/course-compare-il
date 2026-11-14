@@ -48,14 +48,22 @@ export async function removeProofFiles(db: SupabaseClient<Database>, paths: read
   return removed;
 }
 
-/** כל הקבצים בתיקייה של ביקורת אחת, גם כאלה שהועלו ולא נשלחו. */
+const LIST_PAGE = 100;
+
+/** כל הקבצים בתיקייה של ביקורת אחת, גם כאלה שהועלו ולא נשלחו. בדפים של 100, עד דף שאינו מלא. */
 export async function listReviewFiles(
   db: SupabaseClient<Database>,
   userId: string,
   reviewId: string,
 ): Promise<string[]> {
   const folder = `${userId}/${reviewId}`;
-  const { data, error } = await db.storage.from(PROOF_BUCKET).list(folder, { limit: 100 });
-  if (error) throw error;
-  return data.map((file) => `${folder}/${file.name}`);
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += LIST_PAGE) {
+    const { data, error } = await db.storage
+      .from(PROOF_BUCKET)
+      .list(folder, { limit: LIST_PAGE, offset, sortBy: { column: 'name', order: 'asc' } });
+    if (error) throw error;
+    for (const file of data) paths.push(`${folder}/${file.name}`);
+    if (data.length < LIST_PAGE) return paths;
+  }
 }

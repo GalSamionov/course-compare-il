@@ -3,9 +3,10 @@ import { one } from '@/lib/data/shared';
 import type { Json } from '@/lib/database.types';
 import { PROOF_BUCKET, isProofPathOf, mimeOfPath, sha256Hex, sniffMime } from '@/lib/reviews/files';
 import { compareProof, type CheckResult, type ProofExpectations } from '@/lib/reviews/proof-check';
-import { MAX_IMAGE_BYTES_FOR_CHECK, readProof } from '@/lib/reviews/proof-llm';
+import { fitsForCheck, readProof } from '@/lib/reviews/proof-llm';
 import { proofErrors, questionsFor, stepErrors, thisMonthOf, type DraftFields, type MetricDef } from '@/lib/reviews/steps';
 import { MAX_PROOF_BYTES, MAX_PROOF_FILES, isUploadKind, isUuid, type CourseType, type ProofKind, type ProofMime } from '@/lib/reviews/types';
+import { readCapped } from '@/lib/server/read-capped';
 import { fromThisSite } from '@/lib/server/same-origin';
 import { createAdminClient } from '@/lib/supabase/admin-client';
 import { createServerSupabase } from '@/lib/supabase/server-client';
@@ -13,10 +14,13 @@ import { createServerSupabase } from '@/lib/supabase/server-client';
 /** שני קבצים, כל אחד עם עד 25 שניות של בדיקה, במקביל. */
 export const maxDuration = 60;
 
-/** כמה הוכחות של כותב אחד נבדקות במודל ב-24 שעות. מעבר לזה הן נכנסות לתור בלי בדיקה מוקדמת. */
+/**
+ * כמה הוכחות של כותב אחד נבדקות במודל ב-24 שעות, לפי ההזמנות ב-proof_check_usage.
+ * מעבר לזה הן נכנסות לתור בלי בדיקה מוקדמת.
+ */
 const CHECKS_PER_AUTHOR_PER_DAY = 6;
-/** כל גוף הבקשה: מזהה ושני נתיבים, עם מרווח. */
-const MAX_BODY_CHARS = 2_000;
+/** כל גוף הבקשה, בבתים: מזהה ושני נתיבים, עם מרווח. */
+const MAX_BODY_BYTES = 2_000;
 
 type SubmitError =
   | 'forbidden'
@@ -78,7 +82,30 @@ function parseBody(raw: string): { reviewId: string; files: FileRequest[] } | nu
 }
 
 /**
- * בדיקה של מודל השפה: פעם אחת לכל שליחה, לכל קובץ במקביל. בלי מפתח, מעל המכסה, לתמונה גדולה,
+ * כמה בדיקות מותרות עכשיו. ההזמנה נרשמת במסד לפני הקריאה למודל (take_proof_checks, בנעילה לכל כותב),
+ * ולכן שליחות במקביל, או שליחה שנכשלת אחר כך (למשל 40001), לא עוקפות את המכסה.
+ * כשההזמנה נכשלת: אפס (נכשל סגור), ושום קובץ לא נשלח למודל.
+ */
+async function takeChecks(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  want: number,
+): Promise<number | 'error'> {
+  if (want === 0) return 0;
+  const { data, error } = await admin.rpc('take_proof_checks', {
+    p_author_id: userId,
+    p_want: want,
+    p_per_day: CHECKS_PER_AUTHOR_PER_DAY,
+  });
+  if (error || typeof data !== 'number') {
+    console.error('proof check quota:', error?.message ?? 'no number returned');
+    return 'error';
+  }
+  return Math.max(0, Math.min(want, data));
+}
+
+/**
+ * בדיקה של מודל השפה: פעם אחת לכל שליחה, לכל קובץ במקביל. בלי מפתח, מעל המכסה, לקובץ גדול,
  * או כשהמודל נכשל: "לא נבדק אוטומטית", והביקורת נכנסת לתור בכל זאת (מסמך העיצוב, סעיף 4).
  */
 async function checkProofs(
@@ -90,23 +117,24 @@ async function checkProofs(
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) return files.map(() => ({ status: 'not_checked', result: { skipped: 'no_key' } }));
 
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { count, error } = await admin
-    .from('proofs')
-    .select('id', { count: 'exact', head: true })
-    .eq('author_id', userId)
-    .eq('check_status', 'checked')
-    .gte('created_at', since);
-  if (error) console.error('proof check quota:', error.message);
-  let left = CHECKS_PER_AUTHOR_PER_DAY - (count ?? 0);
+  // רק קבצים שנכנסים בגבולות נשלחים, ורק הם נספרים במכסה.
+  const fits = files.map(fitsForCheck);
+  const granted = await takeChecks(admin, userId, fits.filter(Boolean).length);
+  // מי נבדק נקבע מראש, לפי הסדר, לפני שאף קריאה יוצאת.
+  let left = granted === 'error' ? 0 : granted;
+  const plan = fits.map((fit): 'check' | 'too_large' | 'quota' | 'error' => {
+    if (!fit) return 'too_large';
+    if (granted === 'error') return 'error';
+    if (left <= 0) return 'quota';
+    left -= 1;
+    return 'check';
+  });
 
   return Promise.all(
-    files.map(async (file): Promise<Check> => {
-      if (file.mime !== 'application/pdf' && file.size > MAX_IMAGE_BYTES_FOR_CHECK) {
-        return { status: 'not_checked', result: { skipped: 'too_large' } };
-      }
-      if (left <= 0) return { status: 'not_checked', result: { skipped: 'quota' } };
-      left -= 1;
+    files.map(async (file, i): Promise<Check> => {
+      const step = plan[i];
+      if (step === 'too_large' || step === 'quota') return { status: 'not_checked', result: { skipped: step } };
+      if (step === 'error') return { status: 'failed', result: { skipped: 'error' } };
       try {
         const found = await readProof(apiKey, file);
         return { status: 'checked', result: { found, mismatches: compareProof(found, { ...expected, claimedKind: file.kind }) } };
@@ -141,8 +169,9 @@ export async function POST(request: NextRequest) {
     return fail('not_configured', 503);
   }
 
-  const raw = await request.text();
-  if (raw.length > MAX_BODY_CHARS) return fail('bad_request', 400);
+  // נקרא עד הגבול ולא יותר: גוף גדול נעצר לפני שהוא כולו בזיכרון.
+  const raw = await readCapped(request, MAX_BODY_BYTES);
+  if (raw === null) return fail('bad_request', 400);
   const input = parseBody(raw);
   if (
     !input ||

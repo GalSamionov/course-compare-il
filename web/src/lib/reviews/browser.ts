@@ -170,7 +170,8 @@ export async function uploadProof(userId: string, reviewId: string, file: File, 
   const path = `${userId}/${reviewId}/${crypto.randomUUID()}.${PROOF_EXTENSION[mime]}`;
   const { error } = await createBrowserSupabase()
     .storage.from('proofs')
-    .upload(path, file, { contentType: mime, upsert: false });
+    // cacheControl '0': הקישור הזמני של גל לא משאיר את ההוכחה במטמון של הדפדפן שלו (ברירת המחדל: שעה).
+    .upload(path, file, { contentType: mime, upsert: false, cacheControl: '0' });
   if (error) return { ok: false, message: FILE_REJECTED };
   return { ok: true, proof: { path, kind, name: file.name.slice(0, 120), size: file.size, mime } };
 }
