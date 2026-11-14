@@ -1,5 +1,13 @@
 import type { Metadata } from 'next';
-import { Assistant, Noto_Serif_Hebrew, Playpen_Sans_Hebrew } from 'next/font/google';
+import {
+  Assistant,
+  IBM_Plex_Sans_Hebrew,
+  Noto_Serif_Hebrew,
+  Playpen_Sans_Hebrew,
+  Rubik,
+  Secular_One,
+} from 'next/font/google';
+import { MotionObserver } from '@/components/site/motion-observer';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -16,6 +24,28 @@ const pen = Playpen_Sans_Hebrew({
   variable: '--font-playpen',
 });
 
+// תצוגה מקדימה זמנית: שלושה כיווני גופן לבחירה של גל (?type=a|b|c). אחרי הבחירה נשאר אחד.
+const plex = IBM_Plex_Sans_Hebrew({
+  subsets: ['hebrew', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex',
+});
+const rubik = Rubik({
+  subsets: ['hebrew', 'latin'],
+  variable: '--font-rubik',
+});
+const secular = Secular_One({
+  subsets: ['hebrew', 'latin'],
+  weight: '400',
+  variable: '--font-secular',
+});
+
+const PREVIEW_SCRIPT = `(function(){try{var q=new URLSearchParams(location.search),d=document.documentElement;['type','frame'].forEach(function(k){var v=q.get(k);if(v){sessionStorage.setItem('vr-'+k,v)}else{v=sessionStorage.getItem('vr-'+k)}if(v)d.setAttribute('data-'+k,v)})}catch(e){}})();`;
+
+// תנועה: רק אם המבקר לא ביקש פחות תנועה. בלי הסימון הזה (או בלי JavaScript) הכול גלוי ועומד.
+// אם MotionObserver לא עלה תוך 3 שניות (טלפון איטי, שגיאה), מורידים את הסימון והכול נשאר גלוי.
+const MOTION_SCRIPT = `(function(){try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){d.setAttribute('data-motion','');setTimeout(function(){if(!d.hasAttribute('data-motion-ready'))d.removeAttribute('data-motion')},3000)}}catch(e){}})();`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_NAME,
@@ -31,8 +61,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl" className={`${serif.variable} ${sans.variable} ${pen.variable}`}>
-      <body className="antialiased">{children}</body>
+    <html
+      lang="he"
+      dir="rtl"
+      suppressHydrationWarning
+      className={`${serif.variable} ${sans.variable} ${pen.variable} ${plex.variable} ${rubik.variable} ${secular.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: PREVIEW_SCRIPT + MOTION_SCRIPT }} />
+      </head>
+      <body className="antialiased">
+        {children}
+        <MotionObserver />
+      </body>
     </html>
   );
 }

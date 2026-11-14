@@ -1,31 +1,32 @@
 import Link from 'next/link';
 import { PenNote } from '@/components/course/marks';
+import { TickMark } from '@/components/notebook/tick';
+import { PenBox } from '@/components/site/pen';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { closestToScore } from '@/lib/search/match';
 import type { CourseSummary } from '@/lib/search/types';
+import { cn } from '@/lib/utils';
 
 const missingText = (n: number) => (n === 1 ? 'עוד ביקורת אחת' : `עוד ${n} ביקורות`);
 
 /**
- * קו בעט שנמתח מהשם של הקורס אל מה שחסר לו, כמו קו מנקד בתוכן עניינים, אבל ביד.
- * הקו נמתח לרוחב שנשאר בשורה, והראש של החץ נשאר באותו גודל.
+ * כמה ביקורות כבר יש וכמה חסרות עד לציון: חמש תיבות בעט, וי בכל ביקורת שיש.
+ * מאותו צד של שם הקורס, ולא מספר בקצה השני של השורה, כדי שהרשימה לא תיקרא כמו תפריט.
+ * הווי נמשך כשהשורה נכנסת למסך, אחד אחרי השני.
  */
-function PenLeader() {
+function ReviewBoxes({ have }: { have: number }) {
   return (
-    <span aria-hidden="true" className="mx-2 flex min-w-7 flex-1 items-center text-pen">
-      <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="h-2 w-full overflow-visible">
-        <path
-          d="M99 4.8C74 3.4 52 5.6 30 4.4 18 3.8 8 4.2 1.5 4.6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      <svg viewBox="0 0 8 10" className="-ms-1.5 h-2.5 w-2 flex-none overflow-visible">
-        <path d="M6.8 1 1 5 6.6 9" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+    <span aria-hidden="true" className="flex items-center gap-[3px]">
+      {Array.from({ length: MIN_REVIEWS }, (_, i) => (
+        <span key={i} className="relative size-[18px] flex-none">
+          <PenBox className={cn('absolute inset-0 size-full', i % 2 ? 'rotate-2' : '-rotate-2', i >= have && 'opacity-55')} />
+          {i < have && (
+            <span className="absolute -top-[5px] -left-[1px] size-[22px]" style={{ '--d': `${i * 140}ms` } as React.CSSProperties}>
+              <TickMark className="size-full" strokeWidth={2.2} />
+            </span>
+          )}
+        </span>
+      ))}
     </span>
   );
 }
@@ -33,7 +34,7 @@ function PenLeader() {
 /**
  * "סיימתם קורס?" (מסמך העיצוב, 3א.5): שלושת הקורסים שהכי קרובים לציון.
  * כתיבת ביקורת נפתחת בסבב 3, וההערה בעט אומרת את זה. עד אז כל קישור מוביל לעמוד הקורס עצמו,
- * שעובד היום ומראה כמה ביקורות חסרות. חץ בעט קושר כל קורס למה שחסר לו.
+ * שעובד היום ומראה כמה ביקורות חסרות. מתחת לכל קורס: חמש תיבות בעט, עם וי לכל ביקורת שיש.
  */
 export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
   const closest = closestToScore(courses, 3);
@@ -49,18 +50,23 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
       <PenNote arrow className="mt-1.5 lg:text-base">
         כתיבת ביקורת נפתחת בקרוב. בינתיים, אלה הקורסים שהכי קרובים לציון:
       </PenNote>
-      <ul className="mt-1 font-sans text-[15px] leading-snug lg:mt-2 lg:text-base">
+      <ul className="mt-2 space-y-1 font-sans text-[15px] leading-snug lg:mt-3 lg:text-base">
         {closest.map((course) => {
           const needed = course.score.status === 'not_enough_reviews' ? course.score.reviewsNeeded : 0;
           return (
             <li key={course.slug}>
-              <Link href={`/courses/${course.slug}`} className="group flex min-h-11 items-center py-0.5 hover:text-link-hover">
+              <Link
+                href={`/courses/${course.slug}`}
+                className="group flex min-h-11 flex-col justify-center gap-1 py-1.5 transition-colors duration-150 hover:text-link-hover"
+              >
                 <span className="min-w-0 underline underline-offset-[3px]">{course.title}</span>
-                <PenLeader />
-                <span className="inline-block flex-none -rotate-1 font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
-                  {missingText(needed)}
+                <span className="flex items-center gap-2.5">
+                  <ReviewBoxes have={Math.max(0, MIN_REVIEWS - needed)} />
+                  <span className="inline-block -rotate-1 font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
+                    {missingText(needed)}
+                  </span>
+                  <span className="sr-only"> עד לציון</span>
                 </span>
-                <span className="sr-only"> עד לציון</span>
               </Link>
             </li>
           );

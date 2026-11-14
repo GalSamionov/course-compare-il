@@ -14,7 +14,7 @@ export function AccountLink({ className }: { className: string }) {
   if (account.status === 'signed-in') {
     return (
       <Link href="/me" className={className}>
-        האזור שלי
+        <span className="pen-under">האזור שלי</span>
       </Link>
     );
   }
@@ -28,7 +28,7 @@ export function AccountLink({ className }: { className: string }) {
         router.push(loginHref());
       }}
     >
-      התחברות
+      <span className="pen-under">התחברות</span>
     </Link>
   );
 }

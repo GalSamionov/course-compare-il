@@ -13,12 +13,14 @@ const STEPS = [
 function StepArrow() {
   return (
     <svg
+      data-anim="draw"
+      data-delay={420}
       aria-hidden="true"
       viewBox="0 0 34 16"
       className="absolute top-2 -left-9 hidden h-4 w-[34px] overflow-visible text-pen lg:block"
     >
-      <path d="M32 6.4C24 3.6 13 4.6 4 9.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M9.4 4.6 3.4 9.8 10.4 12.4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M32 6.4C24 3.6 13 4.6 4 9.6" pathLength={1} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M9.4 4.6 3.4 9.8 10.4 12.4" pathLength={1} style={{ '--d': '300ms' } as React.CSSProperties} fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

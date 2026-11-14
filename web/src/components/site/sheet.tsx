@@ -11,7 +11,7 @@ function BinderClip() {
     <svg
       aria-hidden="true"
       viewBox="0 0 120 76"
-      className="pointer-events-none absolute -top-[46px] left-1/2 z-10 hidden w-[104px] -translate-x-1/2 drop-shadow-[0_6px_5px_rgb(0_0_0/0.35)] lg:block"
+      className="binder-clip pointer-events-none absolute -top-[46px] left-1/2 z-10 hidden w-[104px] -translate-x-1/2 drop-shadow-[0_6px_5px_rgb(0_0_0/0.35)] lg:block"
     >
       {/* הידיות: חוט מתכת מקופל */}
       <path d="M36 44 30 8C29.6 5.4 31.4 4 34 4H86C88.6 4 90.4 5.4 90 8L84 44" fill="none" stroke="#b9bec4" strokeWidth="3.4" strokeLinejoin="round" />
