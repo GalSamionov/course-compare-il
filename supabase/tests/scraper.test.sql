@@ -2,7 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(22);
 
--- נתוני בדיקה, כ-postgres. מנהל אחד, מוסד, תחום וקורס פעיל.
+-- נתוני בדיקה, כ-postgres. כל שאילתה מוגבלת לנתונים האלה: במסד המקומי יכולים להיות נתונים של הדגמת האוסף. מנהל אחד, מוסד, תחום וקורס פעיל.
 insert into auth.users (id, email) values ('55555555-0000-0000-0000-00000000000c', 'scraper-admin@example.test');
 insert into admins (user_id) values ('55555555-0000-0000-0000-00000000000c');
 insert into categories (id, slug, name, course_type)
@@ -76,7 +76,7 @@ select is(
 );
 select is((select site_price_ils from courses where slug = 'scr-active'), 11000, 'המחיר עודכן');
 select is(
-  (select reasons from course_change_queue where field = 'total_hours' and status = 'pending'),
+  (select reasons from course_change_queue where course_id = '55555555-0000-0000-0000-000000000003' and field = 'total_hours' and status = 'pending'),
   array['changed_since_read'],
   'הסיבה בתור: הערך השתנה מאז שהאוסף קרא אותו'
 );
@@ -101,7 +101,8 @@ select scraper_apply_page((select v from t where k = 'run'), jsonb_build_object(
   'institution_id', '55555555-0000-0000-0000-000000000002', 'url', 'https://scr.example/courses/broken', 'outcome', 'failed', 'error', 'timeout'))
 from generate_series(1, 3);
 select is(
-  (select count(*)::integer from course_change_queue where kind = 'fetch_failed' and status = 'pending'),
+  (select count(*)::integer from course_change_queue q join scrape_pages p on p.id = q.page_id
+   where p.url = 'https://scr.example/courses/broken' and q.kind = 'fetch_failed' and q.status = 'pending'),
   1, 'דף שלא נטען שלוש פעמים נכנס לתור, פעם אחת'
 );
 select is(scraper_mark_missing((select v from t where k = 'run'), '55555555-0000-0000-0000-000000000002', array['https://scr.example/courses/new', 'https://scr.example/courses/broken']), 0, 'פעם ראשונה שהדף חסר: עוד לא מסמנים');
@@ -111,16 +112,16 @@ select is((select status::text from courses where slug = 'scr-active'), 'maybe_i
 -- ===== ההחלטות של גל =====
 
 select lives_ok(
-  $$select approve_course_change((select id from course_change_queue where kind = 'new_course' and status = 'pending'), '55555555-0000-0000-0000-00000000000c')$$,
+  $$select approve_course_change((select q.id from course_change_queue q join courses c on c.id = q.course_id where c.slug = 'scr-inst-new-abc123' and q.kind = 'new_course' and q.status = 'pending'), '55555555-0000-0000-0000-00000000000c')$$,
   'אישור של קורס חדש'
 );
 select is((select status::text from courses where slug = 'scr-inst-new-abc123'), 'active', 'הקורס החדש עלה לאוויר');
 select lives_ok(
-  $$select reject_course_change((select id from course_change_queue where kind = 'maybe_inactive' and status = 'pending'), '55555555-0000-0000-0000-00000000000c')$$,
+  $$select reject_course_change((select id from course_change_queue where course_id = '55555555-0000-0000-0000-000000000003' and kind = 'maybe_inactive' and status = 'pending'), '55555555-0000-0000-0000-00000000000c')$$,
   'דחייה של "ייתכן שאינו פעיל"'
 );
 select lives_ok(
-  $$select undo_course_change((select id from course_changes where field = 'site_price_ils' and source = 'auto'), '55555555-0000-0000-0000-00000000000c')$$,
+  $$select undo_course_change((select id from course_changes where course_id = '55555555-0000-0000-0000-000000000003' and field = 'site_price_ils' and source = 'auto'), '55555555-0000-0000-0000-00000000000c')$$,
   'ביטול של שינוי שעלה לבד'
 );
 select results_eq(
