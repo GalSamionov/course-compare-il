@@ -10,15 +10,16 @@ export type WalkthroughProps = { layout: Layout; url: string };
 
 /**
  * הסצנות ואורך כל אחת בפריימים (30 בשנייה). המעבר בין סצנות חופף 15 פריימים.
- * בסך הכול כ-30 שניות: הליבה (שואלים, רשימה, ציון) נגמרת בערך בשנייה 18.
+ * בסך הכול כ-32 שניות: הליבה (שואלים, רשימה, ציון) נגמרת בערך בשנייה 18.
  */
 export const SCENES = [
-  { id: 'intro', frames: 105, C: Intro },
+  { id: 'intro', frames: 120, C: Intro },
   { id: 'ask', frames: 270, C: Ask },
   { id: 'results', frames: 180, C: Results },
   { id: 'legend', frames: 195, C: Legend },
   { id: 'compare', frames: 135, C: Compare },
-  { id: 'outro', frames: 105, C: Outro },
+  // הסוף נשאר יותר זמן: בו הכתובת.
+  { id: 'outro', frames: 150, C: Outro },
 ] as const;
 export const TRANSITION = 15;
 export const TOTAL = SCENES.reduce((sum, s) => sum + s.frames, 0) - TRANSITION * (SCENES.length - 1);
