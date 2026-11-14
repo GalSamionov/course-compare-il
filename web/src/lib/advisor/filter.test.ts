@@ -40,6 +40,17 @@ describe('filterAdvice', () => {
     expect(advice).toEqual({ sentences: [], notEnoughInfo: true, missing: 'אין לנו מספיק ביקורות על העומס.' });
   });
 
+  it('drops a note on what is missing that carries a number or a price, and still counts it as not enough information', () => {
+    const verified = [{ text: 'נמשך חודשיים.', source: 'verified', courseSlug: 'baking-sample' }];
+    for (const missing of ['רק 2 בוגרים כתבו על העומס.', 'אין לנו את המחיר, שהמוסד אומר שהוא ₪ אלפיים.']) {
+      expect(filterAdvice({ sentences: verified, notEnoughInfo: false, missing }, SLUGS)).toEqual({
+        sentences: [{ text: 'נמשך חודשיים.', source: 'verified', courseSlug: 'baking-sample' }],
+        notEnoughInfo: true,
+        missing: null,
+      });
+    }
+  });
+
   it('shows at most 8 sentences', () => {
     const many = Array.from({ length: 12 }, (_, i) => ({ text: `משפט ${i}.`, source: 'verified', courseSlug: '' }));
     expect(filterAdvice({ sentences: many, notEnoughInfo: false, missing: '' }, SLUGS).sentences).toHaveLength(8);

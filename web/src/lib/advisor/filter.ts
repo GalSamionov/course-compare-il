@@ -9,11 +9,16 @@ const isSource = (value: unknown): value is AdviceSource =>
 
 const clean = (value: unknown): string => (typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '');
 
+/** מספר או מחיר. ל"חסר לנו" אין סימון של מקור, ולכן אסור שיהיו בו נתונים. */
+const HAS_FIGURE = /[0-9₪]/;
+
 /**
  * מה שמוצג מתשובת היועץ. רץ בשרת על הפלט של המודל, ושוב בדפדפן על מה שהגיע מהשרת.
  * - משפט בלי מקור מוכר לא מוצג (מסמך העיצוב של סבב 2, סעיף 6).
  * - גם משפט על קורס שלא ברשימה לא מוצג: זה מידע מבחוץ.
  * - courseSlug ריק ("") הוא "לא קורס מסוים".
+ * - "חסר לנו" עם מספר או ₪ לא מוצג: זה נתון בלי מקור. במקומו מופיע המשפט הקבוע של הממשק,
+ *   ולכן notEnoughInfo נשאר true.
  */
 export function filterAdvice(raw: unknown, courseSlugs: readonly string[]): Advice {
   const obj = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
@@ -28,6 +33,7 @@ export function filterAdvice(raw: unknown, courseSlugs: readonly string[]): Advi
     sentences.push({ text, source: s.source, courseSlug: slug });
   }
   const missingText = clean(obj.missing);
-  const missing = missingText !== '' && missingText.length <= MAX_MISSING_CHARS ? missingText : null;
-  return { sentences, notEnoughInfo: obj.notEnoughInfo === true || missing !== null, missing };
+  const missing =
+    missingText !== '' && missingText.length <= MAX_MISSING_CHARS && !HAS_FIGURE.test(missingText) ? missingText : null;
+  return { sentences, notEnoughInfo: obj.notEnoughInfo === true || missingText !== '', missing };
 }

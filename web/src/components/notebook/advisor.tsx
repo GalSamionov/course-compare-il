@@ -20,10 +20,12 @@ import type { CourseSummary } from '@/lib/search/types';
 import { createBrowserSupabase } from '@/lib/supabase/browser-client';
 import { cn } from '@/lib/utils';
 
-type AskError = AdviseError | 'network';
+/** 'empty': לחצו "לשאול" בלי לכתוב שאלה. הבדיקה בדפדפן, והשאלה לא נשלחת. */
+type AskError = AdviseError | 'network' | 'empty';
 
 /** שגיאות בדיו מודגשת, בלי צבע חדש. כל אחת אומרת מה קרה ומה אפשר לעשות. */
 const ERROR_TEXT: Record<AskError, string> = {
+  empty: 'כתבו שאלה, ואז לשאול.',
   not_configured: 'היועץ לא זמין כרגע.',
   bad_json: 'לא הצלחנו לשלוח את השאלה. אפשר לנסות שוב.',
   bad_question: `אפשר לשאול עד ${MAX_QUESTION_LENGTH} תווים.`,
@@ -57,6 +59,12 @@ async function accessToken(): Promise<string | null> {
   }
 }
 
+/**
+ * שם קורס עד האורך הזה נשאר בשורה אחת, כמו בציור. ארוך ממנו כבר לא נכנס ב-390 לצד השוליים,
+ * ולכן הוא נשבר כמו שאר הטקסט במקום לחרוג מהדף.
+ */
+const MAX_UNBROKEN_TITLE = 28;
+
 /** משפט אחד בתשובה, בסימון של המקור שלו. שם הקורס לפניו, כשהוא עובר לקורס אחר. */
 function Sentence({ sentence, title }: { sentence: AdviceSentence; title: string | null }) {
   const text =
@@ -71,7 +79,10 @@ function Sentence({ sentence, title }: { sentence: AdviceSentence; title: string
       {/* שם הקורס בגופן המודפס, מודגש וכקישור, כמו בציור. יעד מגע של 44 פיקסלים בתוך השורה: הריפוד לא מזיז את הטקסט. */}
       <Link
         href={`/courses/${sentence.courseSlug}`}
-        className="py-3 font-sans font-bold underline decoration-1 underline-offset-[3px] hover:text-link-hover"
+        className={cn(
+          'py-3 font-sans font-bold underline decoration-1 underline-offset-[3px] hover:text-link-hover',
+          title.length <= MAX_UNBROKEN_TITLE && 'whitespace-nowrap',
+        )}
       >
         {title}
       </Link>
@@ -81,13 +92,18 @@ function Sentence({ sentence, title }: { sentence: AdviceSentence; title: string
   );
 }
 
-/** התשובה, כמו עוד שורות בסיכום (Advisor.dc.html): המשפטים, מה חסר, המקרא, ועל מה התשובה מבוססת. */
+/**
+ * התשובה, כמו עוד שורות בסיכום (Advisor.dc.html): המשפטים, מה חסר, המקרא, ועל מה התשובה מבוססת.
+ * busy: שאלה חדשה בדרך. התשובה הקודמת מתעמעמת, כדי שלא תיקרא כתשובה לשאלה החדשה.
+ */
 function AnswerSheet({
   advice,
+  busy,
   titleOf,
   sheetRef,
 }: {
   advice: Advice;
+  busy: boolean;
   titleOf: (slug: string) => string | null;
   sheetRef: React.RefObject<HTMLElement | null>;
 }) {
@@ -104,7 +120,11 @@ function AnswerSheet({
       ref={sheetRef}
       tabIndex={-1}
       aria-labelledby="advice-title"
-      className="ruled-top mt-6 scroll-mt-4 outline-none lg:mt-8"
+      aria-busy={busy || undefined}
+      className={cn(
+        'ruled-top mt-6 scroll-mt-4 outline-none transition-opacity duration-200 ease-out motion-reduce:transition-none lg:mt-8',
+        busy && 'opacity-40',
+      )}
     >
       <div className="grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3">
         <h3 id="advice-title" className="pt-1 font-sans text-[13px] leading-tight font-normal text-ink-soft lg:text-[15px]">
@@ -198,13 +218,18 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
         ? `במילים שלכם, על ${MAX_COURSES} הקורסים הראשונים ברשימה. עונים רק ממה שיש עליהם באתר.`
         : `במילים שלכם, על ${asked.length} הקורסים ברשימה. עונים רק ממה שיש עליהם באתר.`;
   const perDay = account.status === 'signed-in' ? ADVISOR_LIMITS.userPerDay : ADVISOR_LIMITS.visitorPerDay;
+  // עד שידוע אם המבקר מחובר, השורה ריקה (ובאותו גובה), כדי שלא תכתוב 10 ותתחלף ל-30.
+  // 'error' נשאר 10: בלי חשבון טעון לא נשלח טוקן, והשרת סופר אותו כמבקר.
   const status = asking
     ? 'כותבים תשובה מהנתונים של הקורסים…'
     : error
       ? ERROR_TEXT[error]
       : remaining !== null
         ? leftText(remaining)
-        : `עד ${perDay} שאלות ביום`;
+        : account.status === 'loading'
+          ? ''
+          : `עד ${perDay} שאלות ביום`;
+  const noneLeft = remaining === 0;
 
   // תשובה חדשה: הפוקוס עובר אליה, כדי שקורא מסך יקרא אותה, והיא נגללת לתצוגה.
   useEffect(() => {
@@ -214,8 +239,9 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = question.trim();
-    if (asking) return;
+    if (asking || noneLeft) return;
     if (text === '') {
+      setError('empty');
       field.current?.focus();
       return;
     }
@@ -237,12 +263,15 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
       } | null;
       if (typeof body?.remaining === 'number') setRemaining(body.remaining);
       if (!response.ok || !body?.advice) {
+        // התשובה הקודמת יורדת, כדי שלא תיראה כתשובה לשאלה שלא נענתה.
+        setAdvice(null);
         setError(body?.error && body.error in ERROR_TEXT ? body.error : 'failed');
         return;
       }
       // גם כאן: משפט בלי מקור מוכר, או על קורס שלא ברשימה, לא מוצג.
       setAdvice(filterAdvice(body.advice, slugs));
     } catch {
+      setAdvice(null);
       setError('network');
     } finally {
       setAsking(false);
@@ -272,14 +301,18 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
             maxLength={MAX_QUESTION_LENGTH}
             placeholder={EXAMPLE}
             aria-describedby={statusId}
-            onChange={(event) => setQuestion(event.currentTarget.value)}
+            aria-invalid={error === 'empty' || undefined}
+            onChange={(event) => {
+              setQuestion(event.currentTarget.value);
+              if (error === 'empty') setError(null);
+            }}
             className="field-sizing-content min-h-[132px] w-full min-w-0 resize-none bg-transparent ps-3 pe-1 font-pen text-[19px] leading-[44px] font-medium text-pen caret-pen outline-none placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft lg:max-w-[720px] lg:text-[21px] lg:placeholder:text-[17px]"
           />
         </div>
         <div className="ms-(--margin) ps-3">
           <button
             type="submit"
-            disabled={asking}
+            disabled={asking || noneLeft}
             className={cn(
               buttonVariants(),
               'mt-3.5 h-[50px] w-full font-sans text-base font-bold lg:h-[54px] lg:max-w-[400px] lg:text-[17px]',
@@ -290,11 +323,14 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
           <p
             id={statusId}
             role="status"
-            className={cn('mt-2 font-sans text-sm leading-snug tabular-nums', asking ? 'text-ink-soft' : 'font-bold')}
+            className={cn(
+              'mt-2 min-h-[1lh] font-sans text-sm leading-snug tabular-nums',
+              asking ? 'text-ink-soft' : 'font-bold',
+            )}
           >
             {status}
           </p>
-          {error === 'limit' && account.status === 'signed-out' && (
+          {(error === 'limit' || noneLeft) && account.status === 'signed-out' && (
             <p className="font-sans text-sm">
               <Link
                 href="/login"
@@ -312,7 +348,7 @@ export function Advisor({ courses }: { courses: readonly CourseSummary[] }) {
         </div>
       </form>
 
-      {advice && <AnswerSheet advice={advice} titleOf={titleOf} sheetRef={sheet} />}
+      {advice && <AnswerSheet advice={advice} busy={asking} titleOf={titleOf} sheetRef={sheet} />}
     </section>
   );
 }
