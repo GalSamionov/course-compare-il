@@ -113,7 +113,7 @@ export default async function CoursePage({ params }: Props) {
             {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
             <nav
               aria-label="בעמוד הזה"
-              className="mt-1.5 flex flex-wrap items-center gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:gap-x-6 lg:text-base"
+              className="mt-1.5 flex flex-wrap items-center gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:text-base"
             >
               <span className="inline-flex min-h-11 -rotate-1 items-center font-pen text-[15px] font-medium text-pen lg:text-base">
                 {sections.length} פרקים בעמוד
