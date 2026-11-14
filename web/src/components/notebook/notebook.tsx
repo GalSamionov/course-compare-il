@@ -52,6 +52,8 @@ export interface NotebookProps {
   afterForm?: React.ReactNode;
   /** "לשמור את התשובות באזור שלי". רק בדף הבית: "התשובות שלי" הן המשפט מהבית (מסמך העיצוב, סעיף 5). */
   saveAnswers?: boolean;
+  /** "לשאול על הקורסים האלה" אחרי הרשימה. רק בדף הבית, ורק כשהיה מפתח Anthropic בזמן הבנייה. */
+  advisor?: boolean;
 }
 
 /**
@@ -151,6 +153,7 @@ export function Notebook({
   alwaysShowResults,
   afterForm,
   saveAnswers = false,
+  advisor = false,
   query,
   update,
 }: NotebookProps & { query: SearchQuery; update?: Update }) {
@@ -617,6 +620,7 @@ export function Notebook({
           heading={active.length > 0 ? coursesTitle(results.length) : allCoursesTitle(results.length)}
           results={results}
           typeFirst={typeFirst}
+          advisor={advisor}
         />
       )}
     </>

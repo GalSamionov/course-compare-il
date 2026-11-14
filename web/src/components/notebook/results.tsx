@@ -3,11 +3,13 @@ import { SaveButton } from '@/components/account/save-button';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
 import { Soon } from '@/components/site/soon';
+import { MAX_COURSES } from '@/lib/advisor/types';
 import { formatIls } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
 import { PRODUCT_TYPE_LABEL } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
+import { Advisor } from './advisor';
 
 /** כותרת הרשימה כשלפחות שורה אחת מסננת. */
 export function coursesTitle(n: number): string {
@@ -161,66 +163,81 @@ function LedgerHead() {
  * רשימת התוצאות. כל השורות מוצגות: בנתוני הדוגמה יש 15 קורסים. עימוד יגיע כשיהיו מאות.
  * typeFirst: שם הסוג שהשורה "למה" מעלה לראש, כדי שההסבר יגיד את זה.
  * הערה שנכונה לכל הקורסים המתאימים נכתבת פעם אחת מעל הרשימה (marginNotes).
+ * advisor: "לשאול על הקורסים האלה" אחרי הרשימה, מחוץ ל-#results. רק בדף הבית, ורק כשיש מפתח בשרת.
  */
 export function Results({
   heading,
   results,
   typeFirst = null,
+  advisor = false,
 }: {
   heading: string;
   results: MatchResult[];
   typeFirst?: string | null;
+  advisor?: boolean;
 }) {
   const partial = results.some((r) => !r.full);
   const { shared, sharedCount, notes } = marginNotes(results);
   return (
-    <section id="results" aria-labelledby="results-title" className="mt-[30px] scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
-      <div className="ms-(--margin) ps-3">
-        <h2 id="results-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[30px]">
-          {heading}
-        </h2>
-        <p className="mt-2 max-w-[70ch] font-sans text-[13px] leading-normal text-ink-soft lg:text-[15px]">
-          מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.
-          {typeFirst && ` קורסים מסוג ${typeFirst} מופיעים קודם.`}
-          {partial && ' קורס שמתאים חוץ מדבר אחד מופיע בסוף, וההערה בשוליים אומרת מה לא מתאים.'}
-        </p>
-        {shared && (
-          <PenNote arrow className="mt-2 text-base font-medium lg:text-lg">
-            {sharedCount === results.length
-              ? `כל הקורסים ברשימה: ${shared}`
-              : `${sharedCount} הקורסים הראשונים: ${shared}`}
-          </PenNote>
+    <>
+      <section id="results" aria-labelledby="results-title" className="mt-[30px] scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
+        <div className="ms-(--margin) ps-3">
+          <h2 id="results-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[30px]">
+            {heading}
+          </h2>
+          <p className="mt-2 max-w-[70ch] font-sans text-[13px] leading-normal text-ink-soft lg:text-[15px]">
+            מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.
+            {typeFirst && ` קורסים מסוג ${typeFirst} מופיעים קודם.`}
+            {partial && ' קורס שמתאים חוץ מדבר אחד מופיע בסוף, וההערה בשוליים אומרת מה לא מתאים.'}
+          </p>
+          {shared && (
+            <PenNote arrow className="mt-2 text-base font-medium lg:text-lg">
+              {sharedCount === results.length
+                ? `כל הקורסים ברשימה: ${shared}`
+                : `${sharedCount} הקורסים הראשונים: ${shared}`}
+            </PenNote>
+          )}
+        </div>
+        {results.length === 0 ? (
+          <p className="ms-(--margin) mt-4 ps-3 font-sans text-[15px]">
+            אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והיא לא תסנן.
+          </p>
+        ) : (
+          <>
+            <LedgerHead />
+            <div className="ruled-top">
+              {results.map((result, i) => (
+                <ResultRow
+                  key={result.course.slug}
+                  result={result}
+                  note={notes[i]}
+                  actions={<SaveButton courseId={result.course.id} title={result.course.title} />}
+                />
+              ))}
+            </div>
+          </>
         )}
-      </div>
-      {results.length === 0 ? (
-        <p className="ms-(--margin) mt-4 ps-3 font-sans text-[15px]">
-          אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והיא לא תסנן.
+        {/* למי שלא מצא (מסמך העיצוב, 3א.6). הבקשה עוד לא נבנתה, וההערה בעט אומרת את זה לפני הלחיצה. */}
+        <p className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-semibold">
+          <Link
+            href="/request-course"
+            className="inline-flex min-h-11 flex-wrap items-center gap-x-2.5 hover:text-link-hover"
+          >
+            <span className="underline underline-offset-[3px]">לא מצאתם? בקשו שנבדוק קורס</span>
+            <Soon />
+          </Link>
         </p>
-      ) : (
-        <>
-          <LedgerHead />
-          <div className="ruled-top">
-            {results.map((result, i) => (
-              <ResultRow
-                key={result.course.slug}
-                result={result}
-                note={notes[i]}
-                actions={<SaveButton courseId={result.course.id} title={result.course.title} />}
-              />
-            ))}
-          </div>
-        </>
+      </section>
+      {advisor && results.length > 0 && (
+        // רשימה אחרת מתחילה שאלה חדשה: תשובה על הרשימה הקודמת כבר לא נכונה לזו.
+        <Advisor
+          key={results
+            .slice(0, MAX_COURSES)
+            .map((r) => r.course.slug)
+            .join(',')}
+          courses={results.map((r) => r.course)}
+        />
       )}
-      {/* למי שלא מצא (מסמך העיצוב, 3א.6). הבקשה עוד לא נבנתה, וההערה בעט אומרת את זה לפני הלחיצה. */}
-      <p className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-semibold">
-        <Link
-          href="/request-course"
-          className="inline-flex min-h-11 flex-wrap items-center gap-x-2.5 hover:text-link-hover"
-        >
-          <span className="underline underline-offset-[3px]">לא מצאתם? בקשו שנבדוק קורס</span>
-          <Soon />
-        </Link>
-      </p>
-    </section>
+    </>
   );
 }

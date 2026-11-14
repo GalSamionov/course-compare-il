@@ -3,6 +3,7 @@ import { NotebookPage } from '@/components/notebook/notebook-page';
 import { GraduatesCall } from '@/components/site/graduates-call';
 import { SecondaryPaths } from '@/components/site/secondary-paths';
 import { SubjectsToc } from '@/components/site/subjects-toc';
+import { advisorEnabled } from '@/lib/advisor/enabled';
 import { getCatalog } from '@/lib/data/catalog';
 import { getCoursePage } from '@/lib/data/course-page';
 import { compareCourses } from '@/lib/search/match';
@@ -27,6 +28,7 @@ export default async function HomePage() {
       fixedWhat={false}
       alwaysShowResults={false}
       saveAnswers
+      advisor={advisorEnabled()}
       hero={<HomeHero example={example} />}
       heading="מה אתם רוצים ללמוד, ולמה?"
       headingLevel={2}
