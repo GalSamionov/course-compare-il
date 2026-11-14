@@ -49,9 +49,9 @@
 
 1. **איפה:** בדף הבית בלבד, אחרי הרשימה ואחרי "לא מצאתם?", לפני "סיימתם קורס?" והתחומים. השורה מחוץ ל-`<section id="results">`, כדי שהכותרות שלה לא ייספרו עם הקורסים (בדיקת הקצה של דף הבית סופרת `#results h3`). רשימה אחרת מתחילה שאלה חדשה: `Results` נותן ל-`Advisor` מפתח לפי הרשימה, ותשובה על הרשימה הקודמת נעלמת.
 2. **מה נשלח לשרת:** רק `question` (עד 300 תווים) ו-`courseSlugs` (1 עד 10, בתבנית של העמודה במסד). הדפדפן שולח את 10 הקורסים הראשונים ברשימה, שכבר מסודרת לפי התאמה וציון. השרת לא מאמין לשום נתון מהדפדפן: הוא טוען כל קורס עם `getCoursePage`, ומדלג על קורס שלא קיים או שהוסר.
-3. **מה היועץ יודע:** כל מה ש-`getCoursePage` מחזיר, כל עובדה בשורה עם המקור שלה (`web/src/lib/advisor/context.ts`):
-   - `[verified]`: פרטי הקורס מאתר המוסד ומהסילבוס (משך, מתי, איך, המחזור הבא, מחיר באתר, תנאי קבלה, תעודה, הפרקים), הטווח ששולם לפי חשבוניות, ועובדות שבדקנו על מרצים. זו ההגדרה של מרקר ירוק במסמך העיצוב של חלק 1, סעיף 9: "עובדה שנבדקה מול מסמך: חשבוניות, הסילבוס, אתר המוסד".
-   - `[institution]`: הבטחות המוסד, הערות על המרצים ועל גודל הכיתה, מה שהמוסד אומר על מרצה, ותגובות המוסד לביקורות.
+3. **מה היועץ יודע:** כל מה ש-`getCoursePage` מחזיר, כל עובדה בשורה עם המקור שלה (`web/src/lib/advisor/context.ts`). המקור הוא הסימון של אותה עובדה בעמוד הקורס (ראו "איפה המקורות לא מסכימים", סעיף 8):
+   - `[verified]`: רק מה שירוק בעמוד הקורס. המשך והשעות (`about-section.tsx`), הטווח ששולם לפי חשבוניות (`price-section.tsx`, `at-a-glance.tsx`), ועובדות שבדקנו על מרצים (`lecturers-section.tsx`).
+   - `[institution]`: כל השאר שמגיע מהמוסד, גם מה שבעמוד הקורס בלי סימון. שעות העשייה, מתי, איך ואיפה, המחזור הבא, המחיר באתר, תנאי קבלה, תעודה, הפרקים, הבטחות המוסד, הערות על המרצים ועל גודל הכיתה, מה שהמוסד אומר על מרצה, ותגובות המוסד לביקורות.
    - `[graduates]`: הציון (או כמה ביקורות חסרות), הציונים לפי שאלה, מה קרה אחרי הקורס, "מה טוב" ו"מה חלש", מה הבוגרים אומרים על המרצים, מספר הביקורות, ו-3 הביקורות האחרונות עם עדכון 3 החודשים.
    - **לא נכנס:** סימון "פרק חלש" בסילבוס. לא ברור מאיזה מקור הוא, וליועץ אין ורוד.
    - טקסט מהמסד עובר דרך `asData`: בלי `<` ו-`>`, ובלי ירידות שורה. כך ביקורת לא יכולה לסגור את `<course>` או לפתוח `<visitor_question>`.
@@ -92,7 +92,7 @@
 5. **שורת "נתוני דוגמה".** בציור היא אפורה, בגופן המודפס. ההחלטה של גל ו-`DESIGN.md` ("הערה בעט 'כאן הכול נתוני דמה'", ו"האתר מדבר רק בעט") אומרים עט. לכן "נתוני דוגמה" היא הערה בעט, ו"התשובה נכתבה רק ממה שיש באתר..." נשארת שורת הבהרה אפורה, כמו בציור.
 6. **הקו מתחת לכותרת.** בציור קו דיו ישר. `DESIGN.md` דורש קו עט מתחת לכל כותרת פרק, ולכן `pen-rule`, כמו "3 קורסים מתאימים".
 7. **צבע הקווים בשדה.** בציור `#BDBDBD` (`line`). שורות המחברת שמעל בצבע `ruled`, ולכן גם השדה, כדי שזה ייראה כמו אותה מחברת.
-8. **מה ירוק.** בעמוד הקורס רק המשך והשעות, והטווח ששולם, מסומנים בירוק. מסמך העיצוב של חלק 1 מגדיר ירוק כ"נבדק מול מסמך: חשבוניות, הסילבוס, אתר המוסד", והציור מסמן בירוק גם את הימים בשבוע. לכן כל פרטי הקורס מאתר המוסד הם `verified`, ורק מה שהמוסד טוען ולא בדקנו (הבטחות, הערות) הוא `institution`.
+8. **מה ירוק.** מסמך העיצוב של חלק 1 מגדיר ירוק כ"נבדק מול מסמך: חשבוניות, הסילבוס, אתר המוסד", והציור מסמן בירוק גם את הימים בשבוע. אבל בעמוד הקורס ירוקים רק שלושה דברים: המשך והשעות (`about-section.tsx`), הטווח ששולם לפי חשבוניות (`price-section.tsx`, `at-a-glance.tsx`), ועובדות שבדקנו על מרצים (`lecturers-section.tsx`). ההחלטה של גל: היועץ מסמן בדיוק כמו עמוד הקורס. אותה עובדה אף פעם לא ירוקה אצל היועץ ורגילה בעמוד הקורס. לכן רק השלושה האלה `verified`, וכל השאר שמגיע מהמוסד הוא `institution`: מתי, איך ואיפה, המחזור הבא, המחיר באתר, תנאי קבלה, תעודה, הפרקים, ההבטחות, הערות על המרצים ועל גודל הכיתה, מה שהמוסד אומר על מרצה, ותגובות לביקורות. גם שעות העשייה `institution`: בעמוד הקורס הן מחוץ למרקר של המשך. סימון ירוק שנוסף לעמוד הקורס, או שירד ממנו, משתנה גם ב-`context.ts`.
 9. **"ביקורות מאומתות שפורסמו".** הטוען הקיים מחזיר את 3 האחרונות לכל קורס, ואת המספר הכולל. ההחלטה היא להשתמש בטוענים הקיימים, ולכן היועץ רואה 3 ביקורות לקורס, ויודע כמה יש בסך הכול. כתוב בהערות לסבבים הבאים.
 10. **"ההגבלה האמיתית תגיע עם היועץ".** כך כתוב היום ב-`web/src/lib/understand/rate-limit.ts` וב-`notes-for-plan-2.md` (מתוכנית 2א). ההחלטה של גל לסבב הזה היא הגבלה בזיכרון, ובמסד רק בסבב ההשקה. משימה 3 מתקנת את ההערה בקוד, ומשימה 7 מוסיפה הערה מעודכנת.
 
@@ -396,12 +396,35 @@ import { buildContext, buildCourseContext } from './context';
 import { sampleCourse } from './sample-course';
 
 describe('buildCourseContext', () => {
-  it('puts each fact on its own line, with the source the site marks it with', () => {
-    const lines = buildCourseContext(sampleCourse()).split('\n');
+  it('puts each fact on its own line, with the mark the course page gives it', () => {
+    const lines = buildCourseContext(
+      sampleCourse({
+        lecturers: [
+          {
+            slug: 'lecturer-sample',
+            name: 'דנה לדוגמה',
+            role: 'מרצה',
+            institutionBio: 'אופה כבר 20 שנה',
+            verifiedFacts: [{ text: 'בעלת מאפייה רשומה', sourceUrl: 'https://example.com/bakery' }],
+            otherCoursesCount: 0,
+          },
+        ],
+      }),
+    ).split('\n');
     expect(lines[0]).toBe('<course slug="baking-sample">');
-    expect(lines).toContain('[verified] משך: 2 חודשים, 24 שעות, 18 שעות עשייה');
-    expect(lines).toContain('[verified] שילמו בפועל: 1,100–1,200 ₪, לפי 4 חשבוניות');
+    // ירוק רק מה שירוק בעמוד הקורס: המשך והשעות, הטווח מחשבוניות, ועובדות שבדקנו על מרצים.
+    expect(lines.filter((line) => line.startsWith('[verified]'))).toEqual([
+      '[verified] משך: 2 חודשים, 24 שעות',
+      '[verified] שילמו בפועל: 1,100–1,200 ₪, לפי 4 חשבוניות',
+      '[verified] על המרצה דנה לדוגמה: בעלת מאפייה רשומה',
+    ]);
+    // כל השאר מהמוסד הוא קו כחול, גם מה שבעמוד הקורס בלי סימון.
+    expect(lines).toContain('[institution] שעות עשייה: 18');
+    expect(lines).toContain('[institution] מתי: שישי 9:00–13:00');
+    expect(lines).toContain('[institution] המחיר באתר המוסד: 1,200 ₪');
+    expect(lines).toContain('[institution] מה לומדים: בצק שמרים; מחמצת');
     expect(lines).toContain('[institution] המוסד מבטיח: כל משתתף יוצא עם מחמצת משלו');
+    expect(lines).toContain('[institution] על המרצה דנה לדוגמה: אופה כבר 20 שנה');
     expect(lines).toContain('[graduates] ציון בוגרים: 8.4 מתוך 10, לפי 6 ביקורות מאומתות. 83% ממליצים');
     expect(lines).toContain('[graduates] ביקורת, מחזור 2026-03: למדתי לאפות לחם כל שבוע.');
     expect(lines.at(-1)).toBe('</course>');
@@ -481,12 +504,16 @@ export function asData(text: string): string {
 }
 
 /**
- * העובדות על קורס אחד, כל אחת בשורה עם המקור שלה. המקורות כמו בסימונים של האתר
- * (מסמך העיצוב של חלק 1, סעיף 9):
- * - verified: נבדק מול מסמך. פרטי הקורס מאתר המוסד ומהסילבוס, הטווח מחשבוניות, ועובדות שבדקנו על מרצים.
- * - institution: מה שהמוסד אומר ולא בדקנו. הבטחות, הערות על מרצים ועל גודל הכיתה, ותגובות לביקורות.
- * - graduates: בוגרים מאומתים. הציון, הציונים לפי שאלה, מה קרה אחרי הקורס, הסיכומים והביקורות.
- * "פרק חלש" בסילבוס לא נכנס: לא ברור מאיזה מקור הוא, ולכן היועץ לא יכול לסמן אותו נכון.
+ * העובדות על קורס אחד, כל אחת בשורה עם המקור שלה. המקור הוא הסימון של אותה עובדה בעמוד הקורס,
+ * כדי שאותה עובדה לא תהיה ירוקה אצל היועץ ורגילה בעמוד הקורס:
+ * - verified (מרקר ירוק): רק מה שירוק בעמוד הקורס. המשך והשעות (about-section), הטווח ששולם לפי
+ *   חשבוניות (price-section, at-a-glance), ועובדות שבדקנו על מרצים (lecturers-section).
+ * - institution (קו כחול): כל השאר שמגיע מהמוסד, גם מה שבעמוד הקורס בלי סימון. שעות העשייה, מתי, איך
+ *   ואיפה, המחזור הבא, המחיר באתר, תנאי קבלה, תעודה, הפרקים, ההבטחות, הערות על המרצים ועל גודל הכיתה,
+ *   מה שהמוסד אומר על מרצה, ותגובות המוסד לביקורות.
+ * - graduates (מרקר צהוב): בוגרים מאומתים. הציון, הציונים לפי שאלה, מה קרה אחרי הקורס, הסיכומים והביקורות.
+ * "פרק חלש" בסילבוס לא נכנס: לא ברור מאיזה מקור הוא, וליועץ אין ורוד.
+ * סימון ירוק שנוסף לעמוד הקורס, או שירד ממנו, משתנה גם כאן.
  */
 function factLines(course: CoursePageData): string[] {
   const lines: string[] = [];
@@ -501,16 +528,8 @@ function factLines(course: CoursePageData): string[] {
     join([
       course.durationMonths === null ? null : course.durationMonths === 1 ? 'חודש אחד' : `${course.durationMonths} חודשים`,
       course.totalHours !== null ? `${course.totalHours} שעות` : null,
-      course.handsOnHours !== null ? `${course.handsOnHours} שעות עשייה` : null,
     ]),
   );
-  add('verified', 'מתי', course.schedule);
-  add('verified', 'איך', join([join(course.formats.map((f) => FORMAT_WORDS[f] ?? f), ' או '), course.region]));
-  add('verified', 'המחזור הבא', course.nextCohortDate ? formatHebrewDate(course.nextCohortDate) : null);
-  add('verified', 'המחיר באתר המוסד', course.sitePrice !== null ? formatIls(course.sitePrice) : null);
-  add('verified', 'תנאי קבלה', course.admission);
-  add('verified', 'תעודה', course.certificate);
-  add('verified', 'מה לומדים', join(course.syllabus.map((item) => item.title), '; '));
   add(
     'verified',
     'שילמו בפועל',
@@ -520,6 +539,14 @@ function factLines(course: CoursePageData): string[] {
     for (const fact of lecturer.verifiedFacts) add('verified', `על המרצה ${lecturer.name}`, fact.text);
   }
 
+  add('institution', 'שעות עשייה', course.handsOnHours !== null ? String(course.handsOnHours) : null);
+  add('institution', 'מתי', course.schedule);
+  add('institution', 'איך', join([join(course.formats.map((f) => FORMAT_WORDS[f] ?? f), ' או '), course.region]));
+  add('institution', 'המחזור הבא', course.nextCohortDate ? formatHebrewDate(course.nextCohortDate) : null);
+  add('institution', 'המחיר באתר המוסד', course.sitePrice !== null ? formatIls(course.sitePrice) : null);
+  add('institution', 'תנאי קבלה', course.admission);
+  add('institution', 'תעודה', course.certificate);
+  add('institution', 'מה לומדים', join(course.syllabus.map((item) => item.title), '; '));
   add('institution', 'המוסד מבטיח', course.institutionPromises);
   add('institution', 'על המרצים', course.lecturersNote);
   add('institution', 'על גודל הכיתה', course.classSizeNote);
