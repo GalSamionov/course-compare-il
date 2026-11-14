@@ -1,0 +1,55 @@
+name: Nightly scores
+
+# חישוב ציונים לילי (מסמך העיצוב, סעיף 7, "מתי מחושב"): כל הציונים מחדש, כשורות חדשות ב-scores.
+# אותה פונקציה שרצה אחרי כל אישור בתור (web/src/lib/score/recompute.ts).
+# schedule רץ רק מהענף הראשי של המאגר (main). בלי SUPABASE_SECRET_KEY ב-GitHub Secrets: הודעה ודילוג, בלי כישלון.
+on:
+  schedule:
+    - cron: '15 0 * * *' # 02:15 או 03:15 בישראל
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scores
+  cancel-in-progress: false
+
+jobs:
+  recompute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # הכתובת של הפרויקט בענן אינה סוד. המפתח הסודי רק ב-GitHub Secrets, ו-GitHub מסתיר אותו ביומן.
+      NEXT_PUBLIC_SUPABASE_URL: https://bndxpogjvzhouoljiwrc.supabase.co
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+    steps:
+      - name: Skip without the secret key
+        id: gate
+        run: |
+          if [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::notice::SUPABASE_SECRET_KEY is not in GitHub Secrets yet. Skipping the score recompute."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.run == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install web
+        if: steps.gate.outputs.run == 'true'
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Recompute scores
+        if: steps.gate.outputs.run == 'true'
+        run: pnpm --dir web score:recompute
