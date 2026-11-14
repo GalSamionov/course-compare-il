@@ -25,7 +25,9 @@
 - **מסד:**
   - מקומי ב-Docker: `pnpm db:start` ו-`pnpm db:reset`.
   - בענן: Supabase, הפרויקט `course-compare-il` (`bndxpogjvzhouoljiwrc`), חינם, בפרנקפורט.
-- **פריסה:** ידנית, `vercel deploy --prod` מתוך `web/`. הפרויקט ב-Vercel לא מחובר ל-GitHub.
+- **פריסה:** ידנית, `vercel deploy --prod --force` מתוך `web/`. הפרויקט ב-Vercel לא מחובר ל-GitHub.
+  - **למה `--force`:** בלעדיו Vercel משתמש במטמון הבנייה של הפריסה הקודמת. ב-14.11.2026 זה העלה CSS ישן, בלי הריווח של הדף, והאתר נשבר בנייד.
+  - **בדיקה אחרי כל פריסה:** בנייד, לטקסט יש ריווח מהקצוות.
 - **CI:** GitHub Actions על ה-PR, עם תיקון אוטומטי פעיל.
 
 ## מסמכים
