@@ -125,15 +125,15 @@ export function Intro({ layout }: SceneProps) {
           מה אומרים בוגרים שהוכיחו שלמדו בו
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: wide ? 36 : 56 }}>
-          <PenWrite from={36} dur={20} size={wide ? 44 : 50}>
+          <PenWrite from={36} dur={20} size={44}>
             <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <SmallArrow size={wide ? 44 : 50} />
+              <SmallArrow size={44} />
               ככה משתמשים בזה, בחמישה צעדים
             </span>
           </PenWrite>
         </div>
       </div>
-      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot }}>
+      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot, textWrap: 'pretty' }}>
         עד ההשקה, כל הקורסים, המוסדות, הציונים והביקורות באתר הם לדוגמה.
       </p>
     </CenterSheet>
@@ -477,7 +477,7 @@ export function Outro({ layout, url }: SceneProps) {
           </svg>
         </div>
       </div>
-      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot }}>
+      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot, textWrap: 'pretty' }}>
         כל הנתונים בסרטון לדוגמה, עד ההשקה.
       </p>
       <Tape
