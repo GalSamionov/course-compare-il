@@ -120,6 +120,26 @@ body {
   line-height: 1.8;
 }
 
+@layer base {
+  /* בלי שורה אחרונה של מילה אחת: פסקאות ורשימות נשברות "יפה", וכותרות מתאזנות.
+     רכיב שמגדיר text-wrap משלו (text-balance, text-pretty) עדיין גובר, כי השכבה הזאת נמוכה יותר. */
+  p,
+  li,
+  dt,
+  dd,
+  figcaption,
+  caption,
+  th,
+  td {
+    text-wrap: pretty;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
 ::selection {
   background: rgb(47 95 224 / 0.25);
   color: inherit;

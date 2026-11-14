@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
+import { AtAGlance } from '@/components/course/at-a-glance';
 import { CourseActions } from '@/components/course/course-actions';
 import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
-import { PaidLine } from '@/components/course/paid-line';
 import { ReviewsSection } from '@/components/course/reviews-section';
 import { ScoreBox } from '@/components/course/score-box';
 import { SourceLegend } from '@/components/course/source-legend';
@@ -15,6 +15,8 @@ import { VideoSection } from '@/components/course/video-section';
 import { Sheet } from '@/components/site/sheet';
 import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
+import { courseShareDescription, courseShareTitle } from '@/lib/og/share-text';
+import { SITE_NAME } from '@/lib/site';
 
 /**
  * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
@@ -35,14 +37,21 @@ const textLink = 'underline decoration-1 underline-offset-[3px] hover:text-link-
 /** קישור בניווט: יעד מגע של 44 פיקסלים. */
 const navLink = `inline-flex min-h-11 items-center ${textLink}`;
 
+/**
+ * הקישור הוא נקודת המגע הראשונה (PRODUCT.md): כותרת, תיאור עם הציון ומספר המאומתים, ותמונה
+ * מ-opengraph-image.tsx שבאותה תיקייה. openGraph מחליף את זה של הפריסה, ולכן siteName ו-locale חוזרים כאן.
+ */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const course = await getCoursePage(slug);
   if (!course) return {};
-  const scoreText = course.score.status === 'scored' ? ` ציון בוגרים ${course.score.value.toFixed(1)} מתוך 10.` : '';
+  const title = courseShareTitle(course);
+  const description = courseShareDescription(course);
   return {
-    title: `${course.title}, ${course.institutionName} | [שם האתר]`,
-    description: `מה באמת לומדים, כמה שילמו בפועל ומה אומרים בוגרים מאומתים.${scoreText}`,
+    title: `${title} | ${SITE_NAME}`,
+    description,
+    openGraph: { type: 'article', locale: 'he_IL', siteName: SITE_NAME, url: `/courses/${course.slug}`, title, description },
+    twitter: { card: 'summary_large_image', title, description },
   };
 }
 
@@ -73,8 +82,10 @@ export default async function CoursePage({ params }: Props) {
           )}
         </nav>
         {/*
-          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל שנשארת במקום בגלילה: הציון, מה ששולם בפועל,
-          מקרא הצבעים כפתק מודבק, ושתי הפעולות. בנייד אותה עמודה מופיעה אחרי הכותרת, והפעולות בסוף העמוד.
+          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל שנשארת במקום בגלילה: הציון, "בקצרה" (מה ששולם בפועל,
+          מה קרה לבוגרים והחולשה הבולטת) ושתי הפעולות. היא נכנסת גם במסך של מחשב נייד.
+          מקרא הצבעים בעמודת הסיכום, מעל "על הקורס". בנייד: הציון, "בקצרה" והמקרא מיד אחרי הכותרת, והפעולות בסוף העמוד.
+          הסרטון של המוסד קטן, ובא אחרי "על הקורס": הוא שיווק, ולא אמור להיות כבד מהציון.
         */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-20">
           <header className="lg:col-start-1 lg:row-start-1">
@@ -94,14 +105,14 @@ export default async function CoursePage({ params }: Props) {
               aria-label="בעמוד הזה"
               className="mt-1.5 flex flex-wrap gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:gap-x-6 lg:text-base"
             >
+              <a href="#about" className={navLink}>
+                על הקורס
+              </a>
               {course.videoUrl && (
                 <a href="#video" className={navLink}>
                   סרטון
                 </a>
               )}
-              <a href="#about" className={navLink}>
-                על הקורס
-              </a>
               {course.lecturers.length > 0 && (
                 <a href="#lecturers" className={navLink}>
                   מרצים
@@ -124,13 +135,12 @@ export default async function CoursePage({ params }: Props) {
           </header>
 
           <aside
-            aria-label="בקצרה"
-            className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-3"
+            aria-label="הציון ובקצרה"
+            className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:pt-3"
           >
             <div className="lg:sticky lg:top-8 lg:pb-10">
               <ScoreBox score={course.score} />
-              <PaidLine course={course} />
-              <SourceLegend />
+              <AtAGlance course={course} />
               {/* במחשב הפעולות כאן, תמיד בהישג יד. בנייד הן בסוף העמוד (החוזה של עמוד הקורס). */}
               <div className="hidden lg:block">
                 <CourseActions courseId={course.id} slug={course.slug} title={course.title} stacked />
@@ -138,9 +148,13 @@ export default async function CoursePage({ params }: Props) {
             </div>
           </aside>
 
-          <div className="lg:col-start-1 lg:row-start-2 lg:max-w-[68ch] lg:text-[17px]">
-            {course.videoUrl && <VideoSection url={course.videoUrl} />}
+          <div className="lg:col-start-1 lg:row-start-2 lg:max-w-[560px]">
+            <SourceLegend />
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-3 lg:max-w-[68ch] lg:text-[17px]">
             <AboutSection course={course} />
+            {course.videoUrl && <VideoSection url={course.videoUrl} />}
             <LecturersSection course={course} />
             <PriceSection course={course} />
             {hasGrads && <GradsSection course={course} />}

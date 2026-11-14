@@ -15,7 +15,7 @@ const smallLink = 'underline underline-offset-[3px] hover:text-link-hover';
 
 /**
  * "ההשוואה שלי": שלושה מקומות בדיוק, זה לצד זה, כמו בציור (Me.dc.html).
- * מקום שהתפנה נשאר ריק במקום שלו. עמוד ההשוואה עצמו נבנה בסבב 4.
+ * מקום שהתפנה נשאר ריק במקום שלו. עמוד ההשוואה עצמו נבנה בסבב 4, ולכן ליד הקישור אליו כתוב בעט "נפתח בקרוב".
  */
 export function CompareTray({ slots }: { slots: { position: number; course: CourseSummary }[] }) {
   const [busy, setBusy] = useState<string | null>(null);
@@ -105,7 +105,7 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
       )}
       <div className="mt-2.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
         <p className={marginNote}>
-          <PenArrow />עוד בבנייה
+          <PenArrow />נפתח בקרוב
         </p>
         <div className="ps-3 font-sans text-[15px] font-semibold">
           <Link href="/compare" className={cn('inline-flex min-h-11 items-center', smallLink)}>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Soon } from '@/components/site/soon';
 import type { ReviewView } from '@/lib/data/course-page';
 import { StickyNote } from './marks';
 
@@ -48,8 +49,10 @@ export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews
       </div>
       {total > reviews.length && (
         <p className="mt-3.5 font-sans text-[15px] font-semibold">
-          <Link href={`/courses/${slug}/reviews`} className="underline underline-offset-4">
-            לכל {total} הביקורות
+          {/* העמוד של כל הביקורות עוד לא נבנה. ההערה בעט אומרת את זה לפני הלחיצה. */}
+          <Link href={`/courses/${slug}/reviews`} className="inline-flex min-h-11 flex-wrap items-center gap-x-2.5 hover:text-link-hover">
+            <span className="underline underline-offset-4">לכל {total} הביקורות</span>
+            <Soon />
           </Link>
         </p>
       )}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { METHOD_VERSION, WEIGHTS } from './constants';
-import { computeGraduateScore, monthsBefore } from './compute';
+import { computeGraduateScore, metricResults, monthsBefore, yesCount } from './compute';
 import type { MetricKey, MetricMeans, ReviewForScore, ScoreInput } from './types';
 
 const now = new Date('2026-11-13T00:00:00Z');
@@ -184,5 +184,14 @@ describe('computeGraduateScore', () => {
     expect(
       scored(input(times(5, () => review(perfectCareer, { at: new Date(edge.getTime() - DAY) })))),
     ).toMatchObject({ stale: true });
+  });
+});
+
+describe('yesCount', () => {
+  it('recovers how many answered yes from the stored mean of a yes/no question', () => {
+    const answers = [5, 5, 1, 5, 5, 5, 1, 5, 5]; // 7 כן מתוך 9
+    const { mean, n } = metricResults(answers.map((v) => review({ passed_exam: v })))['passed_exam']!;
+    expect(yesCount(mean, n)).toBe(7);
+    expect(yesCount(5, 8)).toBe(8);
   });
 });

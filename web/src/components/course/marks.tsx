@@ -156,7 +156,7 @@ export function StickyNote({
   return (
     <div
       className={cn(
-        'relative font-sans text-[13px] leading-snug',
+        'relative font-sans text-[13px] leading-snug text-pretty',
         // נייר של פתק: כהה מעט בתחתית, וצל של פינה שמתרוממת.
         'bg-[linear-gradient(to_bottom,transparent_70%,rgb(0_0_0/0.035))]',
         'shadow-[0_1px_1px_rgb(0_0_0/0.08),0_10px_14px_-9px_rgb(40_40_20/0.45)]',

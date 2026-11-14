@@ -55,6 +55,14 @@ export function metricMeans(reviews: ReviewForScore[]): MetricMeans {
   return means;
 }
 
+/**
+ * בשאלת כן או לא נשמר רק הממוצע ומספר העונים (כן = 5, לא = 1). מהם יוצא בדיוק כמה ענו "כן":
+ * הממוצע הוא 1 + 4 × (כן / עונים). כך העמוד יכול לכתוב "7 מתוך 9 עברו", בלי לשמור תשובות בודדות.
+ */
+export function yesCount(mean: number, n: number): number {
+  return Math.round(((mean - 1) / 4) * n);
+}
+
 const toTen = (mean: number) => ((mean - 1) / 4) * 10;
 /** עיגול לספרה אחת. האפסילון מונע מ-5.95, שמחושב כ-5.9499999, להתעגל ל-5.9. */
 const round1 = (x: number) => Math.round(x * 10 + 1e-9) / 10;

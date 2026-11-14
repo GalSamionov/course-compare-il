@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { SaveButton } from '@/components/account/save-button';
 import { PenNote } from '@/components/course/marks';
 import { TickMark } from '@/components/notebook/tick';
+import { Soon } from '@/components/site/soon';
 import { buttonVariants } from '@/components/ui/button';
 import { toggleCompare, useAccount } from '@/lib/account/store';
 import { cn } from '@/lib/utils';
@@ -13,8 +14,9 @@ type Note = 'added-local' | 'added' | 'full' | 'error' | null;
 
 /**
  * שני הכפתורים מהציור (Chosen.dc.html), ומתחתם "לשמור".
- * כתיבת ביקורת נבנית בסבב 3, ועד אז מובילה לעמוד "בקרוב".
- * "להשוואה" מכניס את הקורס להשוואה או מוציא אותו. מבקר לא מחובר: ההשוואה נשמרת בדפדפן.
+ * "להשוואה" הוא הכפתור הראשי, כי הוא עובד היום: מכניס את הקורס להשוואה או מוציא אותו.
+ * מבקר לא מחובר: ההשוואה נשמרת בדפדפן.
+ * כתיבת ביקורת נבנית בסבב 3. עד אז היא כפתור משני עם הערה בעט "נפתח בקרוב", ומובילה לעמוד שמסביר מה יהיה שם.
  * ה-Button של shadcn בנוי על Base UI ואין לו asChild, ולכן הקישור מקבל את המחלקות של הכפתור.
  */
 export function CourseActions({
@@ -49,10 +51,8 @@ export function CourseActions({
 
   return (
     <div className={cn('mt-6 font-sans', stacked && 'mt-9')}>
-      <div className={cn('flex gap-2.5', stacked && 'flex-col')}>
-        <Link href={`/courses/${slug}/review`} className={cn(buttonVariants(), 'h-[50px] flex-1 text-base font-bold', stacked && 'flex-none')}>
-          כתיבת ביקורת
-        </Link>
+      <div className={cn('flex gap-2.5', stacked && 'flex-col gap-3')}>
+        {/* הפעולה הראשית היא מה שעובד היום: להוסיף להשוואה. הריבוע מסמן שהקורס כבר בפנים. */}
         <button
           type="button"
           role="checkbox"
@@ -60,19 +60,29 @@ export function CourseActions({
           disabled={busy}
           onClick={() => void onCompare()}
           className={cn(
-            buttonVariants({ variant: 'outline' }),
-            'h-[50px] flex-1 gap-2 border-[1.5px] border-ink text-base font-bold',
+            buttonVariants(),
+            'h-[50px] flex-1 gap-2.5 text-base font-bold',
             stacked && 'flex-none',
             busy && 'cursor-wait',
           )}
         >
-          {inCompare && (
-            <span aria-hidden="true" className="relative size-4 flex-none rounded-[2px] border-[1.5px] border-ink">
-              <TickMark strokeWidth={2.6} className="absolute -top-[9px] -left-0.5 size-[23px]" />
-            </span>
-          )}
+          <span aria-hidden="true" className="relative size-4 flex-none rounded-[2px] border-[1.5px] border-white/90">
+            {inCompare && <TickMark strokeWidth={2.6} className="absolute -top-[9px] -left-0.5 size-[23px] text-white" />}
+          </span>
           להשוואה (עד 3)
         </button>
+        {/* כתיבת ביקורת נבנית בסבב 3. הקישור נשאר, וההערה בעט אומרת את זה לפני הלחיצה. */}
+        <Link
+          href={`/courses/${slug}/review`}
+          className={cn(
+            buttonVariants({ variant: 'outline' }),
+            'relative h-[50px] flex-1 border-[1.5px] border-ink text-base font-bold',
+            stacked && 'flex-none',
+          )}
+        >
+          כתיבת ביקורת
+          <Soon className="absolute -top-2.5 left-2 bg-white px-1 lg:left-3" />
+        </Link>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2">
         <SaveButton courseId={courseId} title={title} />

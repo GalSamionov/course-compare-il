@@ -8,7 +8,7 @@ function Swatch({ source, children }: { source: 'verified' | 'grads' | 'weak'; c
 
 /**
  * מקרא ארבעת הסימונים.
- * card: כרטיס לבן מודבק בסלוטייפ, בעמוד הקורס (בנייד מתחת לציון, ובמחשב בעמודה הצדדית).
+ * card: כרטיס לבן מודבק בסלוטייפ, בעמוד הקורס (בנייד מתחת ל"בקצרה", ובמחשב בעמודת הסיכום, מעל "על הקורס").
  * inline: שורה קצרה מתחת לסיכום לדוגמה בדף הבית.
  */
 export function SourceLegend({ variant = 'card' }: { variant?: 'card' | 'inline' }) {
@@ -41,11 +41,11 @@ export function SourceLegend({ variant = 'card' }: { variant?: 'card' | 'inline'
   return (
     <section
       aria-label="מקרא הסימונים"
-      className="relative mt-8 rotate-[0.6deg] bg-white px-4 pt-5 pb-3.5 font-sans text-[13px] leading-normal shadow-[0_1px_2px_rgb(0_0_0/0.16),0_10px_18px_-12px_rgb(0_0_0/0.4)] ring-1 ring-black/[0.05] lg:mt-9 lg:text-sm"
+      className="relative mt-8 rotate-[0.6deg] bg-white px-4 pt-5 pb-3.5 lg:mt-10 lg:px-5 font-sans text-[13px] leading-normal shadow-[0_1px_2px_rgb(0_0_0/0.16),0_10px_18px_-12px_rgb(0_0_0/0.4)] ring-1 ring-black/[0.05] lg:text-sm"
     >
       <Tape width={70} tilt={-3} />
       <p className="mb-2 font-bold">מה אומר כל צבע</p>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 lg:grid-cols-1">{items}</div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 lg:gap-x-6">{items}</div>
       <p className="mt-2 text-ink-soft">פתקים באותם צבעים: פתק צהוב הוא בוגר, פתק כחול הוא המוסד.</p>
     </section>
   );

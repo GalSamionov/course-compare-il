@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from 'next/cache';
 import { createPublicClient } from '@/lib/supabase/public-client';
 import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
+import { yesCount } from '@/lib/score/compute';
 import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
 import { safeHttpUrl } from '@/lib/safe-url';
 import type { Database } from '@/lib/database.types';
@@ -17,6 +18,15 @@ export interface MetricRow {
   mean: number;
   n: number;
 }
+
+/**
+ * מה קרה לבוגרים, במספרים של אנשים כשהנתונים מאפשרים.
+ * after_3m: שאלת ההמשך של קורס קריירה, בסולם 1 עד 5. נשמרים רק הממוצע ומספר העונים, ולכן אין כאן "כמה עובדים בתחום".
+ * skill_gained, passed_exam: שאלת כן או לא של תחביב או מבחן. מהממוצע יוצא בדיוק כמה ענו "כן".
+ */
+export type OutcomeView =
+  | { kind: 'after_3m'; n: number; mean: number }
+  | { kind: 'skill_gained' | 'passed_exam'; yes: number; n: number };
 
 export interface ReviewView {
   id: string;
@@ -74,8 +84,9 @@ export interface CoursePageData {
   lecturersSummary: string | null;
   lastCheckedAt: string | null;
   score: ScoreView;
+  /** ציונים לפי שאלה בסולם 1 עד 5. שאלות כן או לא לא כאן: הן ב-outcome, כמספר אנשים. */
   metrics: MetricRow[];
-  outcome: { n: number; mean: number } | null;
+  outcome: OutcomeView | null;
   paid: PaidRange | null;
   costPerHandsOnHour: number | null;
   /** הביקורות הראשונות שמוצגות בעמוד. */
@@ -129,7 +140,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
       .order('id', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    db.from('metrics').select('key, label, sort_order').order('sort_order'),
+    db.from('metrics').select('key, label, scale, sort_order').order('sort_order'),
     // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
     db
       .from('reviews')
@@ -219,12 +230,22 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const metrics: MetricRow[] = (metricDefs ?? [])
     .filter((m) => {
       const entry = valid(m.key);
-      if (m.key === 'recommend' || !entry) return false;
+      // שאלת כן או לא ("רכשתי את המיומנות") לא מוצגת כממוצע מתוך 5, אלא כמספר אנשים (outcome).
+      if (m.key === 'recommend' || m.scale === 'yes_no' || !entry) return false;
       // תוצאה אחרי שלושה חודשים מוצגת רק מ-MIN_OUTCOME_ANSWERS תשובות.
       return m.key !== 'outcome_3m' || entry.n >= MIN_OUTCOME_ANSWERS;
     })
     .map((m) => ({ key: m.key, label: m.label, mean: perMetric[m.key].mean, n: perMetric[m.key].n }));
-  const outcomeResult = valid('outcome_3m');
+
+  const after3m = valid('outcome_3m');
+  const yesNo = (['passed_exam', 'skill_gained'] as const).find((key) => valid(key));
+  let outcome: OutcomeView | null = null;
+  if (after3m && after3m.n >= MIN_OUTCOME_ANSWERS) {
+    outcome = { kind: 'after_3m', n: after3m.n, mean: after3m.mean };
+  } else if (yesNo) {
+    const entry = valid(yesNo)!;
+    if (entry.n >= MIN_OUTCOME_ANSWERS) outcome = { kind: yesNo, yes: yesCount(entry.mean, entry.n), n: entry.n };
+  }
 
   const paidRow = paidRows?.[0];
   const paid: PaidRange | null = paidRow
@@ -263,7 +284,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     lastCheckedAt: course.last_checked_at,
     score,
     metrics,
-    outcome: outcomeResult && outcomeResult.n >= MIN_OUTCOME_ANSWERS ? outcomeResult : null,
+    outcome,
     paid,
     costPerHandsOnHour: costPerHandsOnHour(course.site_price_ils, course.hands_on_hours),
     reviewTotal: reviewsRes.count ?? 0,
