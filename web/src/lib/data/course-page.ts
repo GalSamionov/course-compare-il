@@ -158,7 +158,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
       .eq('course_id', course.id)
       .order('sort_order')
       .order('lecturer_id'),
-    // הסכום של כל בוגר לא חשוף. המסד מחזיר רק טווח, ורק משלוש חשבוניות.
+    // הסכום של כל בוגר לא חשוף. המסד מחזיר רק את החצי האמצעי, רק מ-5 חשבוניות, ואת מספרן בקפיצות של 5.
     db.rpc('course_paid_range', { p_course_id: course.id }),
   ]);
 

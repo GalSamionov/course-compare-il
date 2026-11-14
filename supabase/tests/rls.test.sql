@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(25);
+select plan(26);
 
 -- נתוני בדיקה. נכתבים כ-postgres, שעוקף את ההרשאות.
 insert into categories (id, slug, name, course_type)
@@ -13,7 +13,9 @@ insert into courses (id, slug, institution_id, category_id, title, status) value
   ('aaaaaaaa-0000-0000-0000-000000000004', 'test-draft', 'aaaaaaaa-0000-0000-0000-000000000002',
    'aaaaaaaa-0000-0000-0000-000000000001', 'קורס טיוטה', 'draft'),
   ('aaaaaaaa-0000-0000-0000-000000000009', 'test-two', 'aaaaaaaa-0000-0000-0000-000000000002',
-   'aaaaaaaa-0000-0000-0000-000000000001', 'שתי חשבוניות', 'active');
+   'aaaaaaaa-0000-0000-0000-000000000001', 'שתי חשבוניות', 'active'),
+  ('aaaaaaaa-0000-0000-0000-000000000020', 'range-seven', 'aaaaaaaa-0000-0000-0000-000000000002',
+   'aaaaaaaa-0000-0000-0000-000000000001', 'שבע חשבוניות', 'active');
 insert into reviews (
   id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
 ) values
@@ -45,6 +47,13 @@ insert into reviews (
   -- ביקורת שפורסמה בקורס טיוטה: לא ציבורית.
   ('aaaaaaaa-0000-0000-0000-000000000014', 'aaaaaaaa-0000-0000-0000-000000000004', '2026-03-01',
    repeat('ט', 80), 'בודק', 'published', 'invoice', 1000, now(), now());
+-- שבע חשבוניות, עם שני קצוות רחוקים: 1,000 ו-60,000.
+insert into reviews (
+  id, course_id, cohort_month, body, display_name, status, proof_kind, paid_bucket_ils, verified_at, published_at
+)
+select ('aaaaaaaa-0000-0000-0000-0000000000' || (20 + n))::uuid, 'aaaaaaaa-0000-0000-0000-000000000020', '2026-03-01',
+       repeat('ס', 80), 'בודק', 'published', 'invoice', amount, now(), now()
+from unnest(array[1000, 9000, 9500, 10000, 10500, 11000, 60000]) with ordinality as t(amount, n);
 insert into method_changes (version, summary, reason) values ('test', 'בדיקה', 'בדיקה');
 insert into scores (course_id, kind, status, value, review_count, method_version) values
   ('aaaaaaaa-0000-0000-0000-000000000003', 'graduate', 'scored', 8.2, 23, 'test'),
@@ -89,8 +98,14 @@ select results_eq(
 
 select results_eq(
   $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000003')$$,
-  $$values (12000, 18000, 5)$$,
+  $$values (12000, 16000, 5)$$,
   'טווח מ-5 חשבוניות שפורסמו, מעוגל החוצה ל-2,000, בלי ביקורת שלא פורסמה ובלי הוכחה שאינה חשבונית'
+);
+
+select results_eq(
+  $$select min_ils, max_ils, invoice_count from course_paid_range('aaaaaaaa-0000-0000-0000-000000000020')$$,
+  $$values (8000, 12000, 5)$$,
+  'הטווח הוא החצי האמצעי, בלי הקצוות, ומספר החשבוניות בקפיצות של 5 (שבע הן "5")'
 );
 
 select is_empty(
@@ -185,7 +200,7 @@ select is_empty(
   $$select c.relname, r.rolname, p.priv
     from pg_class c join pg_namespace n on n.oid = c.relnamespace
     cross join (values ('anon'), ('authenticated')) r(rolname)
-    cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) p(priv)
+    cross join (values ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER'), ('MAINTAIN')) p(priv)
     where n.nspname = 'public' and c.relkind in ('r', 'p')
       and (
         has_table_privilege(r.rolname, c.oid, p.priv)

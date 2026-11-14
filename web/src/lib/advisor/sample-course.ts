@@ -39,7 +39,7 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
     score: { status: 'scored', value: 8.4, reviewCount: 6, recommendPct: 83, stale: false },
     metrics: [{ key: 'hands_on', label: 'עבודה מעשית', mean: 4.5, n: 6 }],
     outcome: null,
-    paid: { min: 1100, max: 1200, count: 4 },
+    paid: { min: 2000, max: 4000, count: 5 },
     costPerHandsOnHour: 67,
     reviews: [
       {

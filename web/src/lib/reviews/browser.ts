@@ -183,9 +183,18 @@ export type SubmitResult =
   | 'incomplete'
   | 'signed_out'
   | 'not_draft'
+  | 'changed'
   | 'error';
 
-const KNOWN: readonly SubmitResult[] = ['not_configured', 'file_missing', 'bad_file', 'incomplete', 'signed_out', 'not_draft'];
+const KNOWN: readonly SubmitResult[] = [
+  'not_configured',
+  'file_missing',
+  'bad_file',
+  'incomplete',
+  'signed_out',
+  'not_draft',
+  'changed',
+];
 
 /** מה הכותב רואה כשהשליחה נכשלה. בכל מקרה הטיוטה נשארת שמורה. */
 export const SUBMIT_MESSAGE: Record<Exclude<SubmitResult, 'ok'>, string> = {
@@ -195,6 +204,7 @@ export const SUBMIT_MESSAGE: Record<Exclude<SubmitResult, 'ok'>, string> = {
   incomplete: 'חסר משהו באחד הצעדים. חזרנו אליו.',
   signed_out: 'ההתחברות פגה. התחברו שוב, והטיוטה תחכה.',
   not_draft: 'הביקורת כבר נשלחה לבדיקה.',
+  changed: 'הטיוטה השתנתה בזמן השליחה. נסו לשלוח שוב.',
   error: 'לא הצלחנו לשלוח. הטיוטה שמורה. נסו שוב בעוד דקה.',
 };
 

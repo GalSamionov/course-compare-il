@@ -24,6 +24,7 @@ type SubmitError =
   | 'not_configured'
   | 'bad_request'
   | 'not_draft'
+  | 'changed'
   | 'incomplete'
   | 'file_missing'
   | 'bad_file'
@@ -226,10 +227,22 @@ export async function POST(request: NextRequest) {
       check_status: checks[i].status,
       check_result: checks[i].result,
     })) as unknown as Json,
+    // בדיוק מה שנבדק בצעדים ונשלח למודל. המסד משווה לטיוטה אחרי שנעל אותה.
+    p_validated: {
+      cohort_month: draft.cohortMonth,
+      finished_month: draft.finishedMonth,
+      body: draft.body,
+      display_name: draft.displayName,
+      display_mode: draft.displayMode,
+      author_title: draft.authorTitle,
+      answers: draft.answers,
+    },
   });
   if (submitError) {
     // P0002: הביקורת כבר לא טיוטה, למשל שליחה כפולה מאותו דף.
     if (submitError.code === 'P0002') return fail('not_draft', 409);
+    // 40001: הכותב שינה את הטיוטה בזמן הבדיקה (למשל בלשונית אחרת). שום דבר לא נשלח.
+    if (submitError.code === '40001') return fail('changed', 409);
     console.error('submit_review failed', submitError.message);
     return fail('failed', 500);
   }

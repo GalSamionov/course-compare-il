@@ -101,7 +101,7 @@ describe('POST /api/advise', () => {
     expect(params).not.toHaveProperty('betas');
     expect(params).not.toHaveProperty('fallbacks');
     const prompt = params.messages[0].content;
-    expect(prompt).toContain('[verified] שילמו בפועל: 1,100–1,200 ₪, לפי 4 חשבוניות');
+    expect(prompt).toContain('[verified] שילמו בפועל: חצי מהבוגרים שילמו בין 2,000 ל-4,000 ₪, לפי 5 חשבוניות ומעלה');
     expect(prompt).toContain('[institution] מתי: שישי 9:00–13:00');
     expect(prompt).not.toContain('gone-sample');
     expect(prompt.endsWith('<visitor_question>\nכמה זמן זה לוקח?\n</visitor_question>')).toBe(true);

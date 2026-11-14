@@ -81,6 +81,20 @@ as $$
 $$;
 grant execute on function private.is_own_draft(uuid) to authenticated;
 
+-- כמה טיוטות פתוחות יש למשתמש המחובר. עד 20, כדי שאי אפשר יהיה למלא את המסד בטיוטות.
+-- volatile (ברירת המחדל) בכוונה: כך היא רואה גם את השורות שכבר נכנסו באותה פקודה,
+-- ובקשה אחת עם הרבה שורות לא עוקפת את התקרה.
+create function private.open_drafts_of_caller()
+returns integer
+language sql security definer
+set search_path = ''
+as $$
+  select count(*)::integer from public.reviews r
+  where r.author_id = (select auth.uid()) and r.status = 'draft';
+$$;
+revoke execute on function private.open_drafts_of_caller() from public;
+grant execute on function private.open_drafts_of_caller() to authenticated;
+
 drop policy "responses to published reviews are public" on vendor_responses;
 create policy "responses to published reviews are public" on vendor_responses
   for select using (private.is_review_public(review_id));
@@ -97,6 +111,7 @@ create policy "authors start drafts" on reviews
     author_id = (select auth.uid())
     and status = 'draft'
     and exists (select 1 from courses c where c.id = course_id and c.status <> 'draft')
+    and private.open_drafts_of_caller() < 20
   );
 create policy "authors change their own drafts" on reviews
   for update to authenticated
@@ -290,24 +305,29 @@ begin
 end $$;
 grant execute on function toggle_helpful(uuid, text) to anon, authenticated;
 
--- קריאה של ביקורת שפורסמה. "פעם אחת לדפדפן" נשמר בדפדפן (localStorage). המספר גלוי רק לכותב.
+-- קריאה של ביקורת ציבורית (שפורסמה, בקורס שאינו טיוטה). "פעם אחת לדפדפן" נשמר בדפדפן (localStorage).
+-- המספר גלוי רק לכותב.
 create function count_review_read(p_review_id uuid)
 returns void
 language sql security definer
 set search_path = ''
 as $$
   update public.reviews set read_count = read_count + 1
-  where id = p_review_id and status = 'published';
+  where id = p_review_id and private.is_review_public(p_review_id);
 $$;
 grant execute on function count_review_read(uuid) to anon, authenticated;
 
 -- ===== 8. מעברי מצב: רק השרת (service_role) =====
 -- security invoker: רצות בהרשאות של מי שקורא להן, ורק service_role רשאי. ברירות המחדל מתוכנית 1
--- חוסמות הרצה לכל השאר.
+-- חוסמות הרצה לכל השאר. ובכל זאת כל אחת בודקת בעצמה את מי שהשרת מעביר (מנהל, כותב, נתיבים),
+-- כדי שבאג בשרת לא יספיק כדי לפרסם, למחוק או לצרף הוכחה של מישהו אחר.
 
 -- שליחה לבדיקה. השרת כבר בדק את הצעדים, הוריד את הקבצים, חישב טביעות והריץ את מודל השפה.
 -- p_proofs: [{ "path", "sha256", "kind", "mime", "size", "check_status", "check_result" }]
-create function submit_review(p_review_id uuid, p_author_id uuid, p_proofs jsonb)
+-- p_validated: מה שהשרת בדק בצעדים ושלח למודל, { cohort_month, finished_month, body, display_name,
+-- display_mode, author_title, answers }. הבדיקה לוקחת שניות. אם הכותב שינה את הטיוטה בינתיים, השליחה נכשלת
+-- (40001), ולא נכנס לתור תוכן שאף אחד לא בדק.
+create function submit_review(p_review_id uuid, p_author_id uuid, p_proofs jsonb, p_validated jsonb)
 returns void
 language plpgsql
 set search_path = ''
@@ -316,12 +336,43 @@ declare
   v_course uuid;
   v_busy boolean;
 begin
+  -- ההוכחות: מערך לא ריק, וכל נתיב בדיוק בצורה שהדפדפן מעלה, בתיקייה של הכותב ושל הביקורת הזאת
+  -- (כמו private.can_upload_proof ו-isProofPathOf ב-reviews/files.ts).
+  if p_proofs is null or jsonb_typeof(p_proofs) <> 'array' then
+    raise exception 'bad proofs' using errcode = '22023';
+  end if;
+  if jsonb_array_length(p_proofs) = 0 or exists (
+    select 1 from jsonb_array_elements(p_proofs) e
+    where jsonb_typeof(e) <> 'object'
+       or not coalesce(
+         (e->>'path') ~ ('^' || p_author_id::text || '/' || p_review_id::text
+                         || '/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\.(pdf|jpg|png)$'),
+         false)
+  ) then
+    raise exception 'bad proofs' using errcode = '22023';
+  end if;
+
   select r.course_id into v_course
   from public.reviews r
   where r.id = p_review_id and r.author_id = p_author_id and r.status = 'draft'
   for update;
   if v_course is null then
     raise exception 'review % is not a draft of this author', p_review_id using errcode = 'P0002';
+  end if;
+
+  -- השורה נעולה: מכאן הכותב כבר לא משנה אותה. משווים למה שהשרת בדק.
+  if exists (select 1 from public.reviews r where r.id = p_review_id and (
+       r.cohort_month is distinct from (p_validated->>'cohort_month')::date
+    or r.finished_month is distinct from (p_validated->>'finished_month')::date
+    or r.body is distinct from p_validated->>'body'
+    or r.display_name is distinct from p_validated->>'display_name'
+    or r.display_mode::text is distinct from p_validated->>'display_mode'
+    or r.author_title::text is distinct from p_validated->>'author_title'
+    or coalesce(
+         (select jsonb_object_agg(a.metric_key, a.value) from public.review_answers a where a.review_id = r.id),
+         '{}'::jsonb
+       ) is distinct from coalesce(p_validated->'answers', '{}'::jsonb))) then
+    raise exception 'draft changed during submission' using errcode = '40001';
   end if;
 
   update public.reviews
@@ -354,10 +405,11 @@ begin
     path text, sha256 text, kind text, mime text, size integer, check_status text, check_result jsonb
   );
 end $$;
-grant execute on function submit_review(uuid, uuid, jsonb) to service_role;
+grant execute on function submit_review(uuid, uuid, jsonb, jsonb) to service_role;
 
 -- אישור: הקבצים כבר נמחקו מהאחסון (דרך ה-API). מפרסם, ומשאיר בהוכחה רק טביעה, סוג והחלטה.
--- p_paid_bucket: רק לחשבונית, במדרגות של 500. null כשאין סכום.
+-- p_paid_bucket: רק לחשבונית, במדרגות של 500. null כשאין סכום. נשמר רק בביקורת: ביומן רק "יש סכום".
+-- ביקורת בלי כותב (החשבון נמחק) לא מתפרסמת: אף אחד לא יוכל למחוק אותה.
 create function publish_review(
   p_review_id uuid, p_admin_id uuid, p_proof_kind public.proof_kind, p_paid_bucket integer default null
 )
@@ -368,6 +420,10 @@ as $$
 declare
   v_slug text;
 begin
+  if not exists (select 1 from public.admins where user_id = p_admin_id) then
+    raise exception 'not an admin' using errcode = '42501';
+  end if;
+
   update public.proofs
   set status = 'approved', decided_at = now(), storage_path = null, check_result = null,
       file_deleted_at = coalesce(file_deleted_at, now())
@@ -377,15 +433,16 @@ begin
   set status = 'published', verified_at = now(), published_at = now(), proof_kind = p_proof_kind,
       paid_bucket_ils = p_paid_bucket, decision_note = null
   from public.courses c
-  where r.id = p_review_id and r.status = 'pending' and c.id = r.course_id
+  where r.id = p_review_id and r.status = 'pending' and r.author_id is not null and c.id = r.course_id
   returning c.slug into v_slug;
   if v_slug is null then
-    raise exception 'review % is not pending', p_review_id using errcode = 'P0002';
+    raise exception 'review % is not pending, or has no author', p_review_id using errcode = 'P0002';
   end if;
 
+  -- היומן נשמר לתמיד, ולכן בלי הסכום עצמו.
   insert into public.audit_log (actor_id, action, review_id, details)
   values (p_admin_id, 'approve', p_review_id,
-          jsonb_build_object('proof_kind', p_proof_kind, 'paid_bucket_ils', p_paid_bucket));
+          jsonb_build_object('proof_kind', p_proof_kind, 'has_amount', p_paid_bucket is not null));
   return v_slug;
 end $$;
 grant execute on function publish_review(uuid, uuid, public.proof_kind, integer) to service_role;
@@ -397,6 +454,9 @@ language plpgsql
 set search_path = ''
 as $$
 begin
+  if not exists (select 1 from public.admins where user_id = p_admin_id) then
+    raise exception 'not an admin' using errcode = '42501';
+  end if;
   if p_action not in ('reject', 'request_more') then
     raise exception 'unknown action %', p_action using errcode = '22023';
   end if;
@@ -430,6 +490,12 @@ declare
 begin
   if p_action not in ('author_delete', 'cleanup_delete') then
     raise exception 'unknown action %', p_action using errcode = '22023';
+  end if;
+  -- הכותב מוחק רק ביקורת שלו. author_id לא ניתן לשינוי בידי משתמש, ולכן אין צורך לנעול לפני הבדיקה.
+  if p_action = 'author_delete' and not exists (
+    select 1 from public.reviews where id = p_review_id and author_id = p_actor_id
+  ) then
+    raise exception 'not the author' using errcode = '42501';
   end if;
   select r.status, c.slug into v_status, course_slug
   from public.reviews r join public.courses c on c.id = r.course_id
@@ -467,8 +533,10 @@ as $$
 $$;
 grant execute on function proof_orphans(integer) to service_role;
 
--- ===== 9. טווח "כמה שילמו באמת": רק מ-5 חשבוניות, ומעוגל החוצה ל-2,000 ש"ח =====
+-- ===== 9. טווח "כמה שילמו באמת": החצי האמצעי של החשבוניות, רק מ-5, ומעוגל החוצה ל-2,000 ש"ח =====
 -- מסמך העיצוב של סבב 3, סעיף 2: כך המוסד לא יכול לזהות בוגר לפי הסכום שהוא שילם.
+-- בלי הקצוות, ומספר החשבוניות בקפיצות של 5: עם המינימום, המקסימום והמספר המדויק, ביקורת אחת שמתפרסמת
+-- מזיזה קצה ומוסיפה 1, ומוסד שמשווה לפני ואחרי מוצא את הסכום שלה ברישומי התשלום שלו.
 -- paid_bucket_ils הוא תחילת מדרגה של 500, ולכן הקצה העליון של המדרגה הגבוהה הוא +500.
 
 create or replace function course_paid_range(p_course_id uuid)
@@ -476,9 +544,9 @@ returns table (min_ils integer, max_ils integer, invoice_count integer)
 language sql stable security definer
 set search_path = ''
 as $$
-  select (floor(min(r.paid_bucket_ils) / 2000.0) * 2000)::integer,
-         (ceil((max(r.paid_bucket_ils) + 500) / 2000.0) * 2000)::integer,
-         count(*)::integer
+  select (floor(percentile_disc(0.25) within group (order by r.paid_bucket_ils) / 2000.0) * 2000)::integer,
+         (ceil((percentile_disc(0.75) within group (order by r.paid_bucket_ils) + 500) / 2000.0) * 2000)::integer,
+         (count(*)::integer / 5) * 5
   from public.reviews r
   join public.courses c on c.id = r.course_id and c.status <> 'draft'
   where r.course_id = p_course_id
@@ -488,7 +556,7 @@ as $$
   having count(*) >= 5;
 $$;
 
--- ===== 10. האחסון: תיקייה פרטית, ומשתמש מחובר רק מעלה לתיקייה שלו =====
+-- ===== 10. האחסון: תיקייה פרטית, ומשתמש מחובר רק מעלה לטיוטה שלו =====
 -- הגודל והסוג נאכפים ב-Storage עצמו. בלי מדיניות קריאה, החלפה או מחיקה: את כל אלה עושה השרת.
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -496,6 +564,36 @@ values ('proofs', 'proofs', false, 10485760, array['image/jpeg', 'image/png', 'a
 on conflict (id) do update
 set public = false, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
-create policy "authors upload proofs to their own folder" on storage.objects
+-- רק '<uid>/<טיוטה של המשתמש>/<uuid>.<pdf|jpg|png>', בדיוק מה שהדפדפן מעלה (reviews/browser.ts, uploadProof)
+-- ומה שהשרת מקבל (isProofPathOf ב-reviews/files.ts). ועד 30 קבצים ליממה למשתמש.
+create function private.can_upload_proof(p_name text)
+returns boolean
+language plpgsql stable security definer
+set search_path = ''
+as $$
+declare
+  v_parts text[] := string_to_array(p_name, '/');
+begin
+  if p_name !~ '^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\.(pdf|jpg|png)$'
+     or v_parts[1] is distinct from (select auth.uid())::text then
+    return false;
+  end if;
+  return private.is_own_draft(v_parts[2]::uuid)
+     and (select count(*) from storage.objects o
+          where o.bucket_id = 'proofs'
+            and o.owner_id = (select auth.uid())::text
+            and o.created_at > now() - interval '1 day') < 30;
+end $$;
+revoke execute on function private.can_upload_proof(text) from public;
+grant execute on function private.can_upload_proof(text) to authenticated;
+
+create policy "authors upload proofs to their own drafts" on storage.objects
   for insert to authenticated
-  with check (bucket_id = 'proofs' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  with check (bucket_id = 'proofs' and private.can_upload_proof(name));
+
+-- ===== 11. הרשאות שנשארו פתוחות מברירות המחדל של Supabase =====
+-- MAINTAIN (מ-PostgreSQL 17: VACUUM, ANALYZE, REINDEX, CLUSTER, LOCK TABLE) ניתן לטבלאות שנוצרו לפני
+-- ברירות המחדל של תוכנית 1. לטבלאות חדשות הוא כבר לא ניתן (alter default privileges ... revoke all).
+revoke maintain on all tables in schema public from anon, authenticated;
+-- היומן: השרת רק מוסיף וקורא. עדכון ומחיקה כבר חסומים בטריגרים.
+revoke trigger, truncate, references on public.audit_log from service_role;

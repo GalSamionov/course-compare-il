@@ -10,8 +10,9 @@ export function formatIls(amount: number): string {
 }
 
 /**
- * טווח מה ששולם בפועל. המסד מחשב אותו בפונקציה course_paid_range,
- * ומחזיר אותו רק כשיש לפחות 3 חשבוניות, כדי שאי אפשר יהיה לזהות אף אחד.
+ * מה ששולם בפועל, מהמסד (course_paid_range): החצי האמצעי של החשבוניות, מעוגל החוצה ל-2,000 ₪, ורק מ-5 חשבוניות.
+ * זה לא המינימום והמקסימום. count מעוגל למטה ל-5 (5, 10, 15...), ולכן אף פעם לא המספר המדויק.
+ * בלי הקצוות ובלי מספר מדויק: ביקורת אחת שמתפרסמת לא מזיזה מספר שממנו המוסד יזהה את הבוגר.
  */
 export interface PaidRange {
   min: number;
@@ -19,10 +20,25 @@ export interface PaidRange {
   count: number;
 }
 
+/** "בין 12,000 ל-16,000 ₪". הקצה העליון תמיד גבוה מהתחתון (המסד מעגל אותם לכיוונים הפוכים). */
 export function formatPaidRange(range: PaidRange): string {
-  if (range.min === range.max) return formatIls(range.min);
-  return `${ilsNumber.format(range.min)}–${ilsNumber.format(range.max)} ₪`;
+  return `בין ${ilsNumber.format(range.min)} ל-${ilsNumber.format(range.max)} ₪`;
 }
+
+/** תחילת המשפט, לפני הטווח: "חצי מהבוגרים שילמו בין 12,000 ל-16,000 ₪". אותו ניסוח בכל מקום שמציג אותו. */
+export const PAID_RANGE_LEAD = 'חצי מהבוגרים שילמו';
+
+export function paidRangeSentence(range: PaidRange): string {
+  return `${PAID_RANGE_LEAD} ${formatPaidRange(range)}`;
+}
+
+/** "לפי 5 חשבוניות ומעלה": המספר מהמסד כבר מעוגל למטה ל-5. */
+export function invoiceCountText(range: PaidRange): string {
+  return `לפי ${range.count} חשבוניות ומעלה`;
+}
+
+/** למה רק חצי: ליד הטווח בחלק המחיר. */
+export const PAID_RANGE_NOTE = 'את הקצוות לא מראים, כדי שאף אחד לא יזוהה לפי הסכום ששילם.';
 
 // מחיר 0 או null אומר "לא מציגים" (לקורס חינם אין עלות לשעה), ולכן מחזירים null.
 export function costPerHandsOnHour(price: number | null, handsOnHours: number | null): number | null {

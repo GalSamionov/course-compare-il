@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import type { CSSProperties, ReactNode } from 'react';
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatIls, formatPaidRange } from '@/lib/format';
+import { formatIls, invoiceCountText, paidRangeSentence } from '@/lib/format';
 import { rtlTokens } from '@/lib/og/bidi';
 import { neededText, reviewsText, verifiedText } from '@/lib/og/share-text';
 import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
@@ -349,12 +349,12 @@ function PriceLine({ course }: { course: CoursePageData }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
         <Marked
-          text={`שילמו בפועל ${formatPaidRange(course.paid)}`}
+          text={paidRangeSentence(course.paid)}
           size={36}
           color={MARK_VERIFIED}
           style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700 }}
         />
-        <Rtl text={`לפי ${course.paid.count} חשבוניות של בוגרים${site}`} size={24} style={{ color: INK_SOFT, marginTop: 4, marginRight: 12 }} />
+        <Rtl text={`${invoiceCountText(course.paid)}${site}`} size={24} style={{ color: INK_SOFT, marginTop: 4, marginRight: 12 }} />
       </div>
     );
   }

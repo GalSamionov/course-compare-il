@@ -405,7 +405,7 @@ isOneToOne: false
 { Args: { "p_action": string,"p_admin_id": string,"p_note": string,"p_reason": string,"p_review_id": string }; Returns: undefined
                            },
 "submit_review":
-{ Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string }; Returns: undefined
+{ Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string,"p_validated": Json }; Returns: undefined
                            },
 "toggle_helpful":
 { Args: { "p_browser_id": string,"p_review_id": string }; Returns: {

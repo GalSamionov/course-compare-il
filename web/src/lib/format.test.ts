@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { costPerHandsOnHour, formatHebrewDate, formatIls, formatPaidRange } from './format';
+import { costPerHandsOnHour, formatHebrewDate, formatIls, invoiceCountText, paidRangeSentence } from './format';
 
 describe('formatIls', () => {
   it('adds thousands separators and the shekel sign', () => {
@@ -8,12 +8,13 @@ describe('formatIls', () => {
   });
 });
 
-describe('formatPaidRange', () => {
-  it('writes the range with an en dash', () => {
-    expect(formatPaidRange({ min: 12500, max: 15000, count: 6 })).toBe('12,500–15,000 ₪');
+describe('the paid range', () => {
+  // המסד מחזיר את החצי האמצעי, ומספר חשבוניות מעוגל ל-5. הניסוח לא מציג אותו כמינימום ומקסימום, ולא כמספר מדויק.
+  it('says it is the middle half, between two amounts', () => {
+    expect(paidRangeSentence({ min: 12000, max: 16000, count: 5 })).toBe('חצי מהבוגרים שילמו בין 12,000 ל-16,000 ₪');
   });
-  it('shows one amount when min equals max', () => {
-    expect(formatPaidRange({ min: 14900, max: 14900, count: 3 })).toBe('14,900 ₪');
+  it('gives the invoice count as a floor', () => {
+    expect(invoiceCountText({ min: 12000, max: 16000, count: 10 })).toBe('לפי 10 חשבוניות ומעלה');
   });
 });
 
