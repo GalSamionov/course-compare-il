@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SaveAnswers } from '@/components/account/save-answers';
+import { PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
+import { isQuestion } from '@/lib/advisor/question';
 import { formatAmount, formatIls } from '@/lib/format';
 import { matchKeywords, matchNames, type KeywordCategory } from '@/lib/search/keywords';
 import { matchCourses, similarTo } from '@/lib/search/match';
@@ -33,6 +35,7 @@ import {
 } from '@/lib/search/types';
 import { COURSE_TYPE_LABEL, WHY_OPTIONS, courseTypeForWhy, whyOption } from '@/lib/search/why';
 import { cn } from '@/lib/utils';
+import { FIRST_ANSWER_ID, useAdvisor } from './advisor';
 import { AnswerLine, PenAnswer } from './answer-line';
 import { ChoiceChip } from './choice-chip';
 import { Results, allCoursesTitle, coursesTitle } from './results';
@@ -52,7 +55,10 @@ export interface NotebookProps {
   afterForm?: React.ReactNode;
   /** "לשמור את התשובות באזור שלי". רק בדף הבית: "התשובות שלי" הן המשפט מהבית (מסמך העיצוב, סעיף 5). */
   saveAnswers?: boolean;
-  /** "לשאול על הקורסים האלה" אחרי הרשימה. רק בדף הבית, ורק כשהיה מפתח Anthropic בזמן הבנייה. */
+  /**
+   * היועץ. רק בדף הבית, ורק כשהיה מפתח Anthropic בזמן הבנייה: "לשאול על הקורסים האלה" אחרי הרשימה,
+   * הערה בעט ליד השורה הראשונה, ותשובה מעל הרשימה כשבשורה הראשונה נכתבה שאלה.
+   */
   advisor?: boolean;
 }
 
@@ -111,6 +117,8 @@ const inputExample =
 const growCopy =
   'after:invisible after:col-start-1 after:row-start-1 after:whitespace-pre-wrap after:break-words after:content-[attr(data-copy)] after:font-pen after:text-[21px] after:font-medium after:leading-normal lg:after:text-[23px] data-empty:after:font-sans data-empty:after:text-[15px] data-empty:after:font-normal lg:data-empty:after:text-[17px]';
 const WHAT_EXAMPLE = 'למשל: לבנות אתרים, אקסל לעבודה, עוגות';
+/** ההערה בעט מתחת לשורה הראשונה, כשהיועץ פועל. */
+const WHAT_NOTE_ID = 'what-advisor-note';
 /** הדוגמה לשורה 4 מוצגת ליד הקו הריק ולא בתוכו, כדי שלא תיראה כמו תקציב שכבר נקבע. */
 const BUDGET_EXAMPLE = 'למשל 10,000';
 
@@ -168,6 +176,7 @@ export function Notebook({
   // גלילה לרשימה שמחכה לרינדור שבו התשובות מהכתובת כבר מוצגות (ראו scrollToResults).
   const pendingScroll = useRef(false);
   const [scrollRequest, setScrollRequest] = useState(0);
+  const adviser = useAdvisor();
 
   const change: Update = update ?? (() => {});
   // מה שה-AI והתאמת המילים יכולים להחזיר: כל תחום עם קורסים, כולל תחומי אב.
@@ -228,6 +237,7 @@ export function Notebook({
     if (byName) {
       const cats = [...new Set(byName.courses.map((c) => c.categorySlug))];
       answer('what', (c) => ({ ...c, q: text, cats }));
+      askIfQuestion(text);
       return;
     }
     change((c) => ({ ...c, q: text, cats: [] }));
@@ -235,6 +245,24 @@ export function Notebook({
     const found = await understandText(text, understandOptions);
     setWorking(false);
     change((c) => applyUnderstanding(c, text, found));
+    askIfQuestion(text);
+  }
+
+  /**
+   * שאלה בשורה הראשונה: היועץ עונה עליה מעל הרשימה, פעם אחת לכל שאלה, על הקורסים שהיא מצאה.
+   * רק כשהמבקר כתב אותה עכשיו, ובאותו רגע שבו הרשימה מתעדכנת, לא בכל הקשה.
+   * שאלה שהגיעה בכתובת (קישור ששלחו למישהו) לא עוברת כאן, כי היא כבר מה שמוצג בשורה:
+   * קישור לא מבזבז את השאלות של מי שקיבל אותו, ולא עולה לנו כסף.
+   */
+  function askIfQuestion(text: string) {
+    if (!advisor || fixedWhat || !isQuestion(text)) return;
+    // התשובות כמו שהן עכשיו בכתובת, אחרי מה שהבנו מהשורה. הרשימה עוד לא צוירה מחדש.
+    const now = parseQuery(new URLSearchParams(window.location.search), base);
+    // בזמן שחיכינו להבנה, המבקר כתב בשורה משהו אחר.
+    if (now.q !== text) return;
+    if (!alwaysShowResults && activeLines(now).length === 0) return;
+    const found = matchCourses(catalog.courses, now);
+    if (found.length > 0) adviser.askFirst(text, found.map((r) => r.course));
   }
 
   function commitBudget(raw: string) {
@@ -270,7 +298,8 @@ export function Notebook({
   useEffect(() => {
     if (!pendingScroll.current) return;
     const fromUrl = serializeQuery(parseQuery(new URLSearchParams(window.location.search), base), base);
-    const target = document.getElementById('results');
+    // כשהיועץ עונה על השאלה מהשורה הראשונה, התשובה שלו מעל הרשימה, ולשם גוללים.
+    const target = document.getElementById(FIRST_ANSWER_ID) ?? document.getElementById('results');
     // עוד לא: רינדור נוסף (כשהכתובת מגיעה ל-useSearchParams) יריץ את זה שוב.
     if (fromUrl !== serializeQuery(query, base) || !target) return;
     pendingScroll.current = false;
@@ -332,6 +361,7 @@ export function Notebook({
                       autoComplete="off"
                       enterKeyHint="search"
                       aria-label="מה ללמוד"
+                      aria-describedby={advisor ? WHAT_NOTE_ID : undefined}
                       placeholder={WHAT_EXAMPLE}
                       onFocus={() => setOpen('what')}
                       onInput={(event) => syncCopy(event.currentTarget, WHAT_EXAMPLE)}
@@ -347,6 +377,14 @@ export function Notebook({
                   </div>
                 )}
               </AnswerLine>
+              {advisor && !fixedWhat && (
+                // הערה של האתר בעט, על השורה שמתחת לשורה הראשונה, עם חץ שעולה אליה: גם שאלה נכתבת שם.
+                <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-2.5 pb-2 lg:pt-3 lg:pb-2.5">
+                  <PenNote arrow="up" className="col-start-2 ms-3 font-medium text-pretty lg:text-base">
+                    <span id={WHAT_NOTE_ID}>אפשר לכתוב כאן גם שאלה. היועץ יענה מתוך מה שיש באתר.</span>
+                  </PenNote>
+                </div>
+              )}
               {!fixedWhat && open === 'what' && (
                 <div role="group" aria-label="מה ללמוד: אפשר לבחור תחום" className={panel}>
                   <span className={panelLabel}>או לבחור</span>
@@ -620,7 +658,8 @@ export function Notebook({
           heading={active.length > 0 ? coursesTitle(results.length) : allCoursesTitle(results.length)}
           results={results}
           typeFirst={typeFirst}
-          advisor={advisor}
+          advisor={advisor ? adviser : null}
+          question={query.q}
         />
       )}
     </>

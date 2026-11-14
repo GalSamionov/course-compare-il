@@ -46,6 +46,27 @@ export function PenArrowUp({ className }: { className?: string }) {
   );
 }
 
+/** חץ קטן בעט שיורד למטה: מקישור אל מה שמחכה בהמשך הדף. אותו קו כמו PenArrow, עומד. */
+export function PenArrowDown({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 14 28"
+      className={cn('inline-block h-[1.1em] w-[0.55em] flex-none overflow-visible text-pen', className)}
+    >
+      <path d="M8.6 1.4C6.6 8.6 6.2 16.4 7.2 25.6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M2.6 19.4 7.3 26.2 12.6 20.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** שלוש צורות של עיגול ביד, כדי שהמספרים לא ייראו מוחתמים. */
 const LOOPS = [
   'M25.2 5.6C15.4 2.6 5.4 8.8 4.8 19.2 4.2 29.2 11.6 35.8 21 35.4 30.2 35 36 28.2 35.4 19 34.8 10.6 28 4.8 18.4 5.8',

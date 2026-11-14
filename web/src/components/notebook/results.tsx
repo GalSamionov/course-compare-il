@@ -3,13 +3,12 @@ import { SaveButton } from '@/components/account/save-button';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
 import { Soon } from '@/components/site/soon';
-import { MAX_COURSES } from '@/lib/advisor/types';
 import { formatIls } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
 import { PRODUCT_TYPE_LABEL } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
-import { Advisor } from './advisor';
+import { Advisor, AskLink, FirstAnswerSheet, askKey, type AdvisorApi } from './advisor';
 
 /** כותרת הרשימה כשלפחות שורה אחת מסננת. */
 export function coursesTitle(n: number): string {
@@ -163,23 +162,35 @@ function LedgerHead() {
  * רשימת התוצאות. כל השורות מוצגות: בנתוני הדוגמה יש 15 קורסים. עימוד יגיע כשיהיו מאות.
  * typeFirst: שם הסוג שהשורה "למה" מעלה לראש, כדי שההסבר יגיד את זה.
  * הערה שנכונה לכל הקורסים המתאימים נכתבת פעם אחת מעל הרשימה (marginNotes).
- * advisor: "לשאול על הקורסים האלה" אחרי הרשימה, מחוץ ל-#results. רק בדף הבית, ורק כשיש מפתח בשרת.
+ * advisor: היועץ, רק בדף הבית ורק כשיש מפתח בשרת. "לשאול על הקורסים האלה" אחרי הרשימה, מחוץ ל-#results,
+ * וקישור אליו בראש הרשימה. question: מה שכתוב בשורה הראשונה. כשהיועץ כבר נשאל עליו על הרשימה הזו,
+ * התשובה מוצגת מעל הרשימה.
  */
 export function Results({
   heading,
   results,
   typeFirst = null,
-  advisor = false,
+  advisor = null,
+  question = '',
 }: {
   heading: string;
   results: MatchResult[];
   typeFirst?: string | null;
-  advisor?: boolean;
+  advisor?: AdvisorApi | null;
+  question?: string;
 }) {
   const partial = results.some((r) => !r.full);
   const { shared, sharedCount, notes } = marginNotes(results);
+  const courses = results.map((r) => r.course);
+  const canAsk = advisor !== null && results.length > 0;
+  const listKey = askKey(courses);
+  // התשובה לשאלה מהשורה הראשונה, רק כשהשאלה עדיין כתובה שם והרשימה היא זו שעליה נשאלה.
+  const first = canAsk && question ? advisor.first[question] : undefined;
   return (
     <>
+      {advisor && first && first.key === listKey && (
+        <FirstAnswerSheet answer={first} courses={courses} onRetry={() => advisor.retryFirst(question)} />
+      )}
       <section id="results" aria-labelledby="results-title" className="mt-[30px] scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
         <div className="ms-(--margin) ps-3">
           <h2 id="results-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[30px]">
@@ -197,6 +208,7 @@ export function Results({
                 : `${sharedCount} הקורסים הראשונים: ${shared}`}
             </PenNote>
           )}
+          {canAsk && <AskLink />}
         </div>
         {results.length === 0 ? (
           <p className="ms-(--margin) mt-4 ps-3 font-sans text-[15px]">
@@ -228,15 +240,9 @@ export function Results({
           </Link>
         </p>
       </section>
-      {advisor && results.length > 0 && (
+      {canAsk && (
         // רשימה אחרת מתחילה שאלה חדשה: תשובה על הרשימה הקודמת כבר לא נכונה לזו.
-        <Advisor
-          key={results
-            .slice(0, MAX_COURSES)
-            .map((r) => r.course.slug)
-            .join(',')}
-          courses={results.map((r) => r.course)}
-        />
+        <Advisor key={listKey} courses={courses} api={advisor} />
       )}
     </>
   );
