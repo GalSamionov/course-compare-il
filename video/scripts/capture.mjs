@@ -10,6 +10,9 @@ const BASE = process.env.LAMADTI_URL ?? 'https://course-compare-il.vercel.app';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'shots');
 const QUESTION = 'לבנות אתרים';
 const WHY = 'להחליף מקצוע';
+const WHEN = 'ערבים';
+const HOW = 'אונליין';
+const BUDGET = '15000';
 
 const DEVICES = {
   // 16:9, כדי שצילום של המסך ימלא פריים של 1920x1080 בלי חיתוך.
@@ -64,50 +67,77 @@ async function capture(name) {
     },
   };
 
-  // ---- כותבים את השאלה, אות אחר אות ----
-  await formHeading.evaluate((el) => {
-    el.scrollIntoView({ block: 'start' });
-    window.scrollBy(0, -24);
-  });
+  // ---- המחברת: ארבע השורות, מצב אחרי מצב ----
+  // כל פריים הוא אותו חלון קבוע בעמוד (clip), כך שהמיקומים לא זזים בין הפריימים, גם כשנפתח לוח בחירה.
+  const top = Math.max(0, Math.round((await pageBox(formHeading)).y - 40));
+  const clip = { x: 0, y: top, width: DEVICES[name].viewport.width, height: name === 'desk' ? 1150 : 1500 };
+  const rel = async (locator) => {
+    const b = await pageBox(locator);
+    return { x: b.x, y: b.y - top, w: b.w, h: b.h };
+  };
+  const frames = [];
+  const frame = async (file, phase) => {
+    await settle(page);
+    await page.screenshot({ path: join(dir, file), fullPage: true, clip });
+    frames.push({ file, phase });
+    console.log(name, file);
+  };
+  const boxes = {};
   const textarea = page.locator('textarea[name="what"]');
-  await shot('type-00.png');
+  const whyLine = page.getByRole('button', { name: /למה/ }).first();
+  const whenLine = page.getByRole('button', { name: /מתי ואיך/ }).first();
+  const budget = page.locator('input[name="budget"]');
+  const submit = form.locator('button[type=submit]');
+
+  // שורה 1: מה. אות אחר אות.
+  await frame('ask-00.png', 'idle');
   await textarea.click();
-  await shot('type-01.png');
-  const typed = [];
+  await frame('ask-01.png', 'what');
   for (let i = 0; i < QUESTION.length; i++) {
     await page.keyboard.type(QUESTION[i]);
-    await shot(`type-${String(i + 2).padStart(2, '0')}.png`);
+    await frame(`ask-what-${String(i + 1).padStart(2, '0')}.png`, 'what');
   }
-  typed.push(...Array.from({ length: QUESTION.length + 2 }, (_, i) => `type-${String(i).padStart(2, '0')}.png`));
-  meta.typing = {
-    frames: typed,
-    scrollY: await page.evaluate(() => window.scrollY),
-    boxes: {
-      line1: await viewBox(textarea),
-      submit: await viewBox(form.locator('button[type=submit]')),
-    },
-  };
+  boxes.line1 = await rel(textarea);
 
-  // ---- שורה 2: למה ----
-  const whyLine = page.getByRole('button', { name: /למה/ }).first();
+  // שורה 2: למה. תשובה אחת.
   await whyLine.click();
-  await page.waitForTimeout(400);
-  await shot('why-open.png');
-  const openBoxes = {
-    options: await viewBox(page.locator('#why-options')),
-    choice: await viewBox(page.locator('#why-options button', { hasText: WHY })),
-  };
+  await page.waitForTimeout(1500);
+  await frame('ask-why-open.png', 'why');
+  boxes.whyChoice = await rel(page.locator('#why-options button', { hasText: WHY }));
   await page.locator('#why-options button', { hasText: WHY }).click();
+  await page.waitForTimeout(700);
+  await frame('ask-why-picked.png', 'why');
+
+  // שורה 3: מתי ואיך. אפשר כמה.
+  await whenLine.click();
+  await page.waitForTimeout(500);
+  await frame('ask-when-open.png', 'when');
+  boxes.whenChoice = await rel(page.locator('#whenhow-options button', { hasText: WHEN }));
+  boxes.howChoice = await rel(page.locator('#whenhow-options button', { hasText: HOW }));
+  await page.locator('#whenhow-options button', { hasText: WHEN }).click();
   await page.waitForTimeout(600);
-  await shot('why-picked.png');
-  meta.why = {
-    boxes: {
-      ...openBoxes,
-      line2: await viewBox(whyLine),
-      submit: await viewBox(form.locator('button[type=submit]')),
-    },
-    button: await form.locator('button[type=submit]').innerText(),
-  };
+  await frame('ask-when-1.png', 'when');
+  await page.locator('#whenhow-options button', { hasText: HOW }).click();
+  await page.waitForTimeout(600);
+  await frame('ask-when-2.png', 'when');
+
+  // שורה 4: כמה. ספרה אחרי ספרה.
+  await budget.focus();
+  await page.waitForTimeout(500);
+  await frame('ask-budget-0.png', 'budget');
+  for (let i = 0; i < BUDGET.length; i++) {
+    await page.keyboard.type(BUDGET[i]);
+    await frame(`ask-budget-${i + 1}.png`, 'budget');
+  }
+  // יוצאים מהשדה: הסכום נשמר, והכפתור אומר כמה קורסים מתאימים.
+  await formHeading.click();
+  await page.waitForTimeout(900);
+  await frame('ask-ready.png', 'ready');
+  boxes.line2 = await rel(whyLine);
+  boxes.line3 = await rel(whenLine);
+  boxes.line4 = await rel(budget.locator('xpath=ancestor::label[1]'));
+  boxes.submit = await rel(submit);
+  meta.ask = { top, clip: { w: clip.width, h: clip.height }, frames, boxes, button: await submit.innerText() };
 
   // ---- התוצאות ----
   await form.locator('button[type=submit]').click();

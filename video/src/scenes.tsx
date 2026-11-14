@@ -3,55 +3,34 @@ import { AbsoluteFill, OffthreadVideo, Sequence, spring, staticFile, useCurrentF
 import { PageWindow, Shot, center, useCrossfade, type Key } from './camera';
 import { DIR, META, sheetBounds } from './shots';
 import { C, SHADOW, STAGE, sans, serif, type Layout, type SceneProps } from './theme';
-import {
-  BinderClip,
-  Card,
-  PenLoopAround,
-  PenNumber,
-  PenUnderline,
-  PenWrite,
-  SmallArrow,
-  Tape,
-  Wordmark,
-  useProgress,
-} from './world';
+import { BinderClip, Card, PenLoopAround, PenNumber, PenUnderline, PenWrite, Tape, Wordmark, useProgress } from './world';
 
-/* ===== כרטיס ההסבר: מספר מוקף, כותרת בעט ושורה מודפסת ===== */
+/*
+ * הסרטון קצר בכוונה (כ-30 שניות): אנשים מוותרים אחרי 20 שניות, ולכן הליבה (שואלים, רשימה, ציון) נגמרת לפני כן.
+ * כל סצנה מקבלת כיתוב אחד קצר, שנשאר על המסך כל הסצנה, כדי שיהיה זמן לקרוא אותו.
+ */
 
-function Caption({ layout, n, title, sub, from = 6 }: { layout: Layout; n?: number; title: string; sub: string; from?: number }) {
+/* ===== כרטיס ההסבר: מספר מוקף וכותרת בעט ===== */
+
+function Caption({ layout, n, title, from = 4 }: { layout: Layout; n: number; title: string; from?: number }) {
   const st = STAGE[layout].card;
   const wide = layout === 'wide';
-  const subIn = useProgress(from + 20, 10);
   return (
-    <div
-      style={{ position: 'absolute', left: st.x, top: st.y, width: st.w, height: st.h, display: 'flex', alignItems: 'center' }}
-    >
-      <Card tilt={wide ? -1.4 : -0.8} style={{ width: '100%', padding: wide ? '46px 42px 40px' : '40px 46px 36px' }}>
+    <div style={{ position: 'absolute', left: st.x, top: st.y, width: st.w, height: st.h, display: 'flex', alignItems: 'center' }}>
+      <Card tilt={wide ? -1.4 : -0.8} style={{ width: '100%', padding: wide ? '48px 42px 44px' : '44px 46px 40px' }}>
         <div
           style={{
             display: 'flex',
             flexDirection: wide ? 'column' : 'row',
             alignItems: wide ? 'flex-start' : 'center',
-            gap: wide ? 14 : 22,
+            gap: wide ? 16 : 24,
           }}
         >
-          {n ? <PenNumber n={n} size={wide ? 76 : 80} from={from} /> : null}
-          <PenWrite from={from + 6} size={wide ? 54 : 60} weight={600}>
+          <PenNumber n={n} size={wide ? 80 : 88} from={from} />
+          <PenWrite from={from + 6} size={60} weight={600}>
             {title}
           </PenWrite>
         </div>
-        <p
-          style={{
-            fontFamily: sans,
-            fontSize: wide ? 31 : 35,
-            lineHeight: 1.45,
-            color: C.ink,
-            marginTop: wide ? 20 : 18,
-            opacity: subIn,
-          }}
-        >
-          {sub}
-        </p>
       </Card>
     </div>
   );
@@ -64,10 +43,10 @@ function CenterSheet({ layout, children }: { layout: Layout; children: React.Rea
   const wide = layout === 'wide';
   const w = wide ? 1240 : 952;
   const h = wide ? 760 : 1340;
-  const enter = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 22 });
+  const enter = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 18 });
   return (
     <AbsoluteFill style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ position: 'relative', width: w, height: h, transform: `translateY(${(1 - enter) * 60}px)`, opacity: enter }}>
+      <div style={{ position: 'relative', width: w, height: h, transform: `translateY(${(1 - enter) * 50}px)`, opacity: enter }}>
         <div
           style={{
             position: 'absolute',
@@ -96,26 +75,35 @@ function CenterSheet({ layout, children }: { layout: Layout; children: React.Rea
   );
 }
 
-/* ===== 0. פתיחה ===== */
+const footnote = (wide: boolean, opacity: number): React.CSSProperties => ({
+  fontFamily: sans,
+  fontSize: wide ? 28 : 32,
+  lineHeight: 1.45,
+  color: C.inkSoft,
+  opacity,
+  textWrap: 'pretty',
+});
+
+/* ===== פתיחה: ההבטחה של האתר ===== */
 
 export function Intro({ layout }: SceneProps) {
   const wide = layout === 'wide';
-  const h1 = useProgress(18, 14);
-  const foot = useProgress(58, 12);
+  const h1 = useProgress(12, 12);
+  const foot = useProgress(30, 10);
   return (
     <CenterSheet layout={layout}>
       <div style={{ marginBlock: 'auto' }}>
         <div>
-          <Wordmark size={wide ? 62 : 72} from={4} />
+          <Wordmark size={wide ? 66 : 76} from={2} />
         </div>
         <h1
           style={{
             fontFamily: serif,
             fontWeight: 800,
-            fontSize: wide ? 64 : 76,
+            fontSize: wide ? 68 : 80,
             lineHeight: 1.14,
             letterSpacing: '-0.01em',
-            marginTop: wide ? 44 : 64,
+            marginTop: wide ? 48 : 72,
             opacity: h1,
             transform: `translateY(${(1 - h1) * 14}px)`,
           }}
@@ -124,69 +112,78 @@ export function Intro({ layout }: SceneProps) {
           <br />
           מה אומרים בוגרים שהוכיחו שלמדו בו
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: wide ? 36 : 56 }}>
-          <PenWrite from={36} dur={20} size={44}>
-            <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-              <SmallArrow size={44} />
-              ככה משתמשים בזה, בחמישה צעדים
-            </span>
-          </PenWrite>
-        </div>
       </div>
-      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot, textWrap: 'pretty' }}>
-        עד ההשקה, כל הקורסים, המוסדות, הציונים והביקורות באתר הם לדוגמה.
-      </p>
+      <p style={footnote(wide, foot)}>עד ההשקה, כל הקורסים, הציונים והביקורות באתר הם לדוגמה.</p>
     </CenterSheet>
   );
 }
 
-/* ===== 1. שואלים ===== */
+/* ===== 1. שואלים: ארבע השורות במחברת ===== */
+
+/** מתי מתחלף כל פריים בסצנת השאלה. אות או ספרה: 4 פריימים, כמו מישהו שמקליד בטלפון. */
+function askTimeline(frames: { file: string; phase: string }[]) {
+  const holds: Record<string, number> = {
+    'ask-00.png': 8,
+    'ask-01.png': 6,
+    'ask-why-open.png': 24,
+    'ask-why-picked.png': 16,
+    'ask-when-open.png': 18,
+    'ask-when-1.png': 14,
+    'ask-when-2.png': 14,
+    'ask-budget-0.png': 8,
+  };
+  let at = 0;
+  return frames.map((f) => {
+    const start = at;
+    at += holds[f.file] ?? (f.file === 'ask-what-11.png' ? 10 : f.phase === 'ready' ? 999 : 4);
+    return { ...f, start };
+  });
+}
 
 export function Ask({ layout }: SceneProps) {
   const frame = useCurrentFrame();
   const m = META[layout];
   const dir = DIR[layout];
   const wide = layout === 'wide';
-  const { width: vw, height: vh } = m.viewport;
-  const b = sheetBounds(layout);
-  const tf = m.typing.frames;
+  const a = m.ask;
+  const b = a.boxes;
+  const timeline = askTimeline(a.frames);
+  const current = [...timeline].reverse().find((f) => frame >= f.start) ?? timeline[0];
+  const at = (file: string) => timeline.find((f) => f.file === file)?.start ?? 0;
+  const tWhy = at('ask-why-open.png');
+  const tWhen = at('ask-when-open.png');
+  const tBudget = at('ask-budget-0.png');
+  const tReady = at('ask-ready.png');
 
-  // אות אחרי אות: 4 פריימים לכל לחיצה, כמו מישהו שמקליד בטלפון.
-  const T0 = 28;
-  const typingIdx = frame < 18 ? 0 : frame < T0 ? 1 : Math.min(tf.length - 1, 2 + Math.floor((frame - T0) / 4));
-  const OPEN = 100;
-  const PICK = 150;
-  const src = frame < OPEN ? `${dir}/${tf[typingIdx]}` : frame < PICK ? `${dir}/why-open.png` : `${dir}/why-picked.png`;
-
-  const why = m.why.boxes;
-  const line1 = m.typing.boxes.line1;
-  // במחשב: זום שבו הקצה השמאלי של החלון נופל ברווח שבין הטופס לעמודת "או", כדי שלא ייחתך טקסט.
+  // המצלמה כמעט קבועה, ויורדת קצת עם כל שורה, כדי שהשורה הפעילה והכפתור יישארו בתמונה.
   const s = wide ? 1.6 : 952 / 390;
-  const typingY = wide ? line1.y + 240 : line1.y + 210;
-  const openY = wide ? (why.options.y + why.submit.y + why.submit.h) / 2 : why.options.y + why.options.h / 2 + 30;
-  const pickY = wide ? (why.line2.y + why.submit.y + why.submit.h) / 2 : why.submit.y - 150;
+  const y0 = wide ? 472 : 360;
   const keys: Key[] = [
-    { f: 0, x: 900, y: typingY, s },
-    { f: OPEN, x: 900, y: typingY, s },
-    { f: OPEN + 18, x: 900, y: openY, s },
-    { f: PICK + 10, x: 900, y: openY, s },
-    { f: PICK + 34, x: 900, y: pickY, s },
+    { f: 0, x: 900, y: y0, s },
+    { f: tWhy, x: 900, y: y0, s },
+    { f: tWhy + 12, x: 900, y: y0 + (wide ? 0 : 40), s },
+    { f: tWhen, x: 900, y: y0 + (wide ? 0 : 40), s },
+    { f: tWhen + 12, x: 900, y: y0 + (wide ? 28 : 70), s },
+    { f: tBudget, x: 900, y: y0 + (wide ? 28 : 70), s },
+    { f: tBudget + 12, x: 900, y: y0 + (wide ? 48 : 110), s },
   ];
-
+  const file = current.file;
   return (
     <AbsoluteFill>
       <PageWindow layout={layout}>
-        <Shot src={src} w={vw} h={vh} keys={keys} bounds={b}>
-          {frame >= OPEN && frame < PICK ? <PenLoopAround box={why.choice} from={OPEN + 20} pad={8} /> : null}
-          {frame >= PICK ? <PenLoopAround box={why.submit} from={PICK + 40} pad={8} /> : null}
+        <Shot src={`${dir}/${file}`} w={a.clip.w} h={a.clip.h} keys={keys} bounds={sheetBounds(layout)}>
+          {file === 'ask-why-open.png' ? <PenLoopAround box={b.whyChoice} from={tWhy + 6} dur={12} pad={8} /> : null}
+          {file === 'ask-when-open.png' ? <PenLoopAround box={b.whenChoice} from={tWhen + 4} dur={10} pad={8} /> : null}
+          {file === 'ask-when-1.png' ? <PenLoopAround box={b.howChoice} from={tWhen + 18} dur={10} pad={8} /> : null}
+          {current.phase === 'ready' ? <PenLoopAround box={b.submit} from={tReady + 6} pad={8} /> : null}
         </Shot>
       </PageWindow>
-      <Caption layout={layout} n={1} title="שואלים במילים שלכם" sub="מה רוצים ללמוד, ולמה. ארבע שורות, בלי הרשמה." />
+      <Caption layout={layout} n={1} title="שואלים במילים שלכם" />
     </AbsoluteFill>
   );
 }
 
-/* ===== 2. התוצאות ===== */
+/* ===== 2. הרשימה, ואז עמוד הקורס: ציון מבוגרים ===== */
 
 export function Results({ layout }: SceneProps) {
   const m = META[layout];
@@ -194,81 +191,40 @@ export function Results({ layout }: SceneProps) {
   const wide = layout === 'wide';
   const { width: vw, height: vh } = m.viewport;
   const r = m.results.boxes;
-  const base = wide ? 1.06 : 952 / 390;
-  const keys: Key[] = wide
-    ? [{ f: 0, x: 720, y: vh / 2, s: base }, { f: 50, x: 720, y: vh / 2, s: base }, center(r.firstRow, 1.62, 82, 60, 0)]
-    : [
-        { f: 0, x: 195, y: r.first.y + 130, s: base },
-        { f: 50, x: 195, y: r.first.y + 130, s: base },
-        { f: 82, x: 195, y: r.first.y + 110, s: base * 1.12 },
-      ];
-  return (
-    <AbsoluteFill>
-      <PageWindow layout={layout}>
-        <Shot src={`${dir}/results.png`} w={vw} h={vh} keys={keys} bounds={sheetBounds(layout)}>
-          <PenLoopAround box={r.firstScore} from={92} pad={wide ? 10 : 8} />
-          <PenUnderline box={r.firstGrads} from={116} />
-        </Shot>
-      </PageWindow>
-      <Caption layout={layout} n={2} title="רואים רק מה שמתאים" sub="ממוין לפי ציון בוגרים. נספרים רק בוגרים שהעלו הוכחה." />
-    </AbsoluteFill>
-  );
-}
-
-/* ===== 3. עמוד הקורס ===== */
-
-export function Course({ layout }: SceneProps) {
-  const m = META[layout];
-  const dir = DIR[layout];
-  const wide = layout === 'wide';
   const c = m.course.boxes;
   const H = m.course.height;
-  const vw = m.viewport.width;
-  const base = wide ? 1.08 : 952 / 390;
-  const sc = c.scoreFrame;
-  const nc = c.notChecked;
-  const scoreMid = { x: (sc.x + sc.x + sc.w) / 2, y: (sc.y + nc.y + nc.h) / 2 };
-  // במחשב הכותרת והציון באותו גובה, ולכן אין זום על הציון: כל הדף העליון, ואז דחיפה קלה אל "בקצרה" וכרטיס המקרא.
-  const keys: Key[] = wide
-    ? [
-        { f: 0, x: 720, y: 433, s: base },
-        { f: 120, x: 720, y: 433, s: base },
-        // החלון מתחיל מתחת לשורת הכותרת של האתר, כדי שלא ייחתך באמצע.
-        { f: 160, x: 720, y: 170 + 952 / 1.2 / 2, s: 1.2 },
-      ]
-    : [
-        { f: 0, x: 195, y: c.h1.y + 230, s: base },
-        { f: 36, x: 195, y: c.h1.y + 230, s: base },
-        { f: 58, x: 195, y: scoreMid.y, s: base * 1.08 },
-        { f: 130, x: 195, y: scoreMid.y, s: base * 1.08 },
-        { f: 165, x: 195, y: (c.glance.y + c.legend.y + c.legend.h) / 2, s: base },
-      ];
+  const COURSE = 92;
+  const fade = useCrossfade(COURSE, 10);
+  const base = wide ? 1.06 : 952 / 390;
+  const listKeys: Key[] = wide
+    ? [{ f: 0, x: 720, y: vh / 2, s: base }, { f: 22, x: 720, y: vh / 2, s: base }, center(r.firstRow, 1.5, 46, 60, 0)]
+    : [{ f: 0, x: 195, y: r.first.y + 130, s: base }];
+  const courseKeys: Key[] = wide ? [{ f: 0, x: 720, y: 433, s: 1.08 }] : [{ f: 0, x: 195, y: c.h1.y + 230, s: base }];
   return (
     <AbsoluteFill>
       <PageWindow layout={layout}>
+        <Shot src={`${dir}/results.png`} w={vw} h={vh} keys={listKeys} bounds={sheetBounds(layout)} opacity={1 - fade}>
+          <PenLoopAround box={r.firstScore} from={wide ? 50 : 30} pad={wide ? 10 : 8} />
+        </Shot>
         <Shot
           src={`${dir}/course-full.png`}
           w={vw}
           h={H}
-          keys={keys}
+          keys={courseKeys}
           bounds={sheetBounds(layout)}
           vbounds={wide ? [80, H] : undefined}
+          opacity={fade}
         >
-          <PenLoopAround box={sc} from={wide ? 44 : 62} pad={wide ? 12 : 10} />
-          <PenUnderline box={nc} from={wide ? 70 : 90} />
+          <PenLoopAround box={c.scoreFrame} from={COURSE + 16} pad={wide ? 12 : 10} />
+          <PenUnderline box={c.notChecked} from={COURSE + 38} />
         </Shot>
       </PageWindow>
-      <Caption
-        layout={layout}
-        n={3}
-        title="נכנסים לעמוד הקורס"
-        sub="ציון מתוך 10, רק מבוגרים מאומתים. ובכל עמוד כתוב גם מה עוד לא בדקנו."
-      />
+      <Caption layout={layout} n={2} title="ציון רק מבוגרים מאומתים" />
     </AbsoluteFill>
   );
 }
 
-/* ===== 4. מקרא הצבעים: הסצנה שרונדרה ב-HyperFrames ===== */
+/* ===== 3. מקרא הצבעים: הסצנה שרונדרה ב-HyperFrames ===== */
 
 export function Legend({ layout }: SceneProps) {
   const wide = layout === 'wide';
@@ -280,135 +236,49 @@ export function Legend({ layout }: SceneProps) {
   return (
     <AbsoluteFill>
       <PageWindow layout={layout} box={box}>
-        <Sequence from={4} layout="none">
+        <Sequence from={2} layout="none">
           <OffthreadVideo src={staticFile('legend/legend.mp4')} muted style={{ width: side, height: side, display: 'block' }} />
         </Sequence>
       </PageWindow>
-      <Caption
-        layout={layout}
-        n={4}
-        title="כל צבע אומר מאיפה המידע"
-        sub="כך רואים מה נבדק מול מסמך, מה אמרו בוגרים, ומה רק המוסד טוען."
-      />
+      <Caption layout={layout} n={3} title="הצבע אומר מה המקור" />
     </AbsoluteFill>
   );
 }
 
-/* ===== 5. שומרים ומשווים ===== */
+/* ===== 4. משווים: "ההשוואה שלי" ===== */
 
 export function Compare({ layout }: SceneProps) {
-  const frame = useCurrentFrame();
   const m = META[layout];
   const dir = DIR[layout];
   const wide = layout === 'wide';
-  const { width: vw, height: vh } = m.viewport;
-  const cb = m.compare.boxes;
   const tray = m.tray.boxes.section;
-  const CLICK = 56;
-  const TRAY = 140;
-  const fade = useCrossfade(TRAY, 10);
-  const before = (
-    <>
-      {frame < CLICK + 30 ? <PenLoopAround box={cb.button} from={30} pad={wide ? 10 : 8} /> : null}
-      {frame >= CLICK ? <PenUnderline box={cb.note} from={CLICK + 26} /> : null}
-    </>
-  );
-  const buttonShot = `${dir}/${frame < CLICK ? 'compare-before' : 'compare-after'}.png`;
-
   if (wide) {
-    // במחשב: חלון צר על העמודה הצדדית בלבד (הכפתורים), ואז "ההשוואה שלי" בחלון רחב.
-    const narrow = { x: 600 + (1256 - 760) / 2, y: 64, w: 760, h: 952 };
-    const sideBounds: [number, number] = [128, 600];
-    const s = 760 / (sideBounds[1] - sideBounds[0]);
-    // "ההשוואה שלי" רחבה במחשב: חלון נמוך, זום שבו הטקסט קריא, ותנועה מהקורס הראשון (מימין) לשלישי.
-    const trayS = 1.6;
-    const trayBox = {
-      x: 600,
-      y: Math.round((1080 - Math.min(952, tray.h * trayS + 120)) / 2),
-      w: 1256,
-      h: Math.min(952, Math.round(tray.h * trayS + 120)),
-    };
-    const half = 1256 / trayS / 2;
-    const trayKeys: Key[] = [
-      { f: TRAY, x: tray.w - half, y: tray.h / 2, s: trayS },
-      { f: TRAY + 22, x: tray.w - half, y: tray.h / 2, s: trayS },
-      { f: TRAY + 80, x: half, y: tray.h / 2, s: trayS },
+    // במחשב "ההשוואה שלי" רחבה: חלון נמוך, זום שבו הטקסט קריא, ותנועה מהקורס הראשון (מימין) לשלישי.
+    const s = 1.6;
+    const h = Math.min(952, Math.round(tray.h * s + 120));
+    const box = { x: 600, y: Math.round((1080 - h) / 2), w: 1256, h };
+    const half = 1256 / s / 2;
+    const keys: Key[] = [
+      { f: 0, x: tray.w - half, y: tray.h / 2, s },
+      { f: 14, x: tray.w - half, y: tray.h / 2, s },
+      { f: 96, x: half, y: tray.h / 2, s },
     ];
     return (
       <AbsoluteFill>
-        <AbsoluteFill style={{ opacity: 1 - fade }}>
-          <PageWindow layout={layout} box={narrow}>
-            <Shot src={buttonShot} w={vw} h={vh} keys={[center(cb.button, s, 0, 0, 70)]} bounds={sideBounds}>
-              {before}
-            </Shot>
-          </PageWindow>
-        </AbsoluteFill>
-        <AbsoluteFill style={{ opacity: fade }}>
-          <PageWindow layout={layout} box={trayBox}>
-            <Shot src={`${dir}/tray-only.png`} w={tray.w} h={tray.h} keys={trayKeys} />
-          </PageWindow>
-        </AbsoluteFill>
-        <Caption layout={layout} n={5} title="שומרים ומשווים" sub="עד 3 קורסים, זה לצד זה. בלי התחברות, ההשוואה נשמרת בדפדפן." />
+        <PageWindow layout={layout} box={box}>
+          <Shot src={`${dir}/tray-only.png`} w={tray.w} h={tray.h} keys={keys} />
+        </PageWindow>
+        <Caption layout={layout} n={4} title="משווים עד 3 קורסים" />
       </AbsoluteFill>
     );
   }
-
-  const base = 952 / 390;
+  const { width: vw, height: vh } = m.viewport;
   return (
     <AbsoluteFill>
       <PageWindow layout={layout}>
-        <Shot
-          src={buttonShot}
-          w={vw}
-          h={vh}
-          keys={[{ f: 0, x: 195, y: cb.button.y + cb.button.h / 2 + 70, s: base }]}
-          bounds={sheetBounds(layout)}
-          opacity={1 - fade}
-        >
-          {before}
-        </Shot>
-        <Shot
-          src={`${dir}/tray.png`}
-          w={vw}
-          h={vh}
-          keys={[center(tray, base, 0, 0, -20)]}
-          bounds={sheetBounds(layout)}
-          opacity={fade}
-        />
+        <Shot src={`${dir}/tray.png`} w={vw} h={vh} keys={[center(tray, 952 / 390, 0, 0, -20)]} bounds={sheetBounds(layout)} />
       </PageWindow>
-      <Caption layout={layout} n={5} title="שומרים ומשווים" sub="עד 3 קורסים, זה לצד זה. בלי התחברות, ההשוואה נשמרת בדפדפן." />
-    </AbsoluteFill>
-  );
-}
-
-/* ===== בקרוב: כתיבת ביקורת (סבב 3, עוד לא באוויר) ===== */
-
-export function Soon({ layout }: SceneProps) {
-  const m = META[layout];
-  const dir = DIR[layout];
-  const wide = layout === 'wide';
-  const { width: vw, height: vh } = m.viewport;
-  // במחשב העמוד קצר: חלון נמוך שמראה רק את הנייר, בלי השולחן שמתחתיו ובלי התפס של האתר.
-  const s = 1256 / 960;
-  const box = wide ? { x: 600, y: Math.round((1080 - 355 * s) / 2), w: 1256, h: Math.round(355 * s) } : undefined;
-  const keys: Key[] = wide ? [{ f: 0, x: 720, y: 342, s }] : [{ f: 0, x: 195, y: 330, s: 952 / 390 }];
-  return (
-    <AbsoluteFill>
-      <PageWindow layout={layout} box={box}>
-        <Shot
-          src={`${dir}/review-soon.png`}
-          w={vw}
-          h={vh}
-          keys={keys}
-          bounds={sheetBounds(layout, true)}
-          vbounds={wide ? [165, 520] : undefined}
-        />
-      </PageWindow>
-      <Caption
-        layout={layout}
-        title="בקרוב: ביקורת עם הוכחה"
-        sub="סיימתם קורס? מעלים חשבונית, קבלה או תעודת סיום. רק אנחנו רואים אותה, והיא נמחקת אחרי הבדיקה."
-      />
+      <Caption layout={layout} n={4} title="משווים עד 3 קורסים" />
     </AbsoluteFill>
   );
 }
@@ -417,11 +287,11 @@ export function Soon({ layout }: SceneProps) {
 
 export function Outro({ layout, url }: SceneProps) {
   const wide = layout === 'wide';
-  const h = useProgress(16, 14);
-  const line = useProgress(30, 12);
-  const u = useProgress(44, 10);
-  const foot = useProgress(70, 12);
-  const rule = useProgress(52, 14);
+  const h = useProgress(10, 12);
+  const line = useProgress(22, 10);
+  const u = useProgress(32, 10);
+  const rule = useProgress(38, 14);
+  const foot = useProgress(48, 10);
   return (
     <CenterSheet layout={layout}>
       <div style={{ marginBlock: 'auto' }}>
@@ -432,11 +302,9 @@ export function Outro({ layout, url }: SceneProps) {
           style={{
             fontFamily: serif,
             fontWeight: 800,
-            fontSize: wide ? 72 : 74,
+            fontSize: wide ? 72 : 70,
             lineHeight: 1.14,
             marginTop: wide ? 40 : 60,
-            maxWidth: wide ? 1000 : 800,
-            textWrap: 'balance',
             opacity: h,
             transform: `translateY(${(1 - h) * 14}px)`,
           }}
@@ -445,23 +313,11 @@ export function Outro({ layout, url }: SceneProps) {
           <br />
           בודקים בלמדתי.
         </h1>
-        <p
-          style={{
-            fontFamily: sans,
-            fontWeight: 700,
-            fontSize: wide ? 34 : 38,
-            lineHeight: 1.4,
-            marginTop: wide ? 26 : 40,
-            opacity: line,
-          }}
-        >
-          אף מוכר לא משלם לנו. לא על מקום, לא על ציון ולא על הסרת ביקורת.
+        <p style={{ fontFamily: sans, fontWeight: 700, fontSize: wide ? 36 : 42, lineHeight: 1.4, marginTop: wide ? 26 : 40, opacity: line }}>
+          אף מוכר קורסים לא משלם לנו.
         </p>
         <div style={{ marginTop: wide ? 40 : 64, opacity: u, position: 'relative', display: 'inline-block' }}>
-          <bdi
-            dir="ltr"
-            style={{ fontFamily: sans, fontWeight: 700, fontSize: wide ? 46 : 46, color: C.ink, letterSpacing: '0.01em' }}
-          >
+          <bdi dir="ltr" style={{ fontFamily: sans, fontWeight: 700, fontSize: 46, color: C.ink, letterSpacing: '0.01em' }}>
             {url}
           </bdi>
           <svg
@@ -477,15 +333,8 @@ export function Outro({ layout, url }: SceneProps) {
           </svg>
         </div>
       </div>
-      <p style={{ fontFamily: sans, fontSize: wide ? 28 : 32, lineHeight: 1.45, color: C.inkSoft, opacity: foot, textWrap: 'pretty' }}>
-        כל הנתונים בסרטון לדוגמה, עד ההשקה.
-      </p>
-      <Tape
-        width={wide ? 150 : 170}
-        height={wide ? 40 : 46}
-        tilt={-8}
-        style={{ top: 22, left: -26, fontSize: wide ? 22 : 26, opacity: foot }}
-      >
+      <p style={footnote(wide, foot)}>כל הנתונים בסרטון לדוגמה, עד ההשקה.</p>
+      <Tape width={wide ? 150 : 170} height={wide ? 40 : 46} tilt={-8} style={{ top: 22, left: -26, fontSize: wide ? 22 : 26, opacity: foot }}>
         לדוגמה
       </Tape>
     </CenterSheet>

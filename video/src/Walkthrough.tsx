@@ -2,24 +2,25 @@ import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { TransitionSeries, springTiming } from '@remotion/transitions';
 import { slide } from '@remotion/transitions/slide';
-import { Ask, Compare, Course, Intro, Legend, Outro, Results, Soon } from './scenes';
+import { Ask, Compare, Intro, Legend, Outro, Results } from './scenes';
 import type { Layout } from './theme';
 import { Desk } from './world';
 
 export type WalkthroughProps = { layout: Layout; url: string };
 
-/** הסצנות ואורך כל אחת בפריימים (30 בשנייה). המעבר בין סצנות חופף 18 פריימים. */
+/**
+ * הסצנות ואורך כל אחת בפריימים (30 בשנייה). המעבר בין סצנות חופף 15 פריימים.
+ * בסך הכול כ-30 שניות: הליבה (שואלים, רשימה, ציון) נגמרת בערך בשנייה 18.
+ */
 export const SCENES = [
   { id: 'intro', frames: 105, C: Intro },
   { id: 'ask', frames: 270, C: Ask },
-  { id: 'results', frames: 165, C: Results },
-  { id: 'course', frames: 230, C: Course },
-  { id: 'legend', frames: 250, C: Legend },
-  { id: 'compare', frames: 240, C: Compare },
-  { id: 'soon', frames: 140, C: Soon },
-  { id: 'outro', frames: 150, C: Outro },
+  { id: 'results', frames: 180, C: Results },
+  { id: 'legend', frames: 195, C: Legend },
+  { id: 'compare', frames: 135, C: Compare },
+  { id: 'outro', frames: 105, C: Outro },
 ] as const;
-export const TRANSITION = 18;
+export const TRANSITION = 15;
 export const TOTAL = SCENES.reduce((sum, s) => sum + s.frames, 0) - TRANSITION * (SCENES.length - 1);
 
 /**

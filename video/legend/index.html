@@ -24,7 +24,7 @@
         --sans: 'Assistant', sans-serif;
         --pen-font: 'Playpen Sans Hebrew', cursive;
         --margin: 168px;
-        --row: 174px;
+        --row: 180px;
       }
       * {
         margin: 0;
@@ -58,7 +58,7 @@
       }
       .rows {
         position: absolute;
-        top: 226px;
+        top: 236px;
         inset-inline: 0;
       }
       .row {
@@ -92,7 +92,7 @@
       /* מספר מוקף בעט בשוליים. */
       .num {
         position: absolute;
-        top: 52px;
+        top: 56px;
         right: 52px;
         width: 68px;
         height: 68px;
@@ -118,15 +118,23 @@
 
       .content {
         position: absolute;
-        top: 28px;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
         right: calc(var(--margin) + 34px);
         left: 56px;
       }
       .label {
         font-family: var(--sans);
-        font-size: 42px;
-        font-weight: 700;
+        font-size: 58px;
+        font-weight: 800;
         line-height: 1.3;
+        white-space: nowrap;
+      }
+      .meaning {
+        font-weight: 600;
+        margin-inline-start: 10px;
       }
       .example {
         margin-top: 14px;
@@ -216,11 +224,11 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="legend" data-start="0" data-duration="7.5" data-width="1080" data-height="1080">
+    <div id="root" data-composition-id="legend" data-start="0" data-duration="6.5" data-width="1080" data-height="1080">
       <div class="margin-rule"></div>
 
-      <h1 id="title" class="clip" data-start="0" data-duration="7.5">מה אומר כל צבע</h1>
-      <svg id="rule" class="pen-rule clip" data-start="0" data-duration="7.5" viewBox="0 0 200 12" preserveAspectRatio="none">
+      <h1 id="title" class="clip" data-start="0" data-duration="6.5">מה אומר כל צבע</h1>
+      <svg id="rule" class="pen-rule clip" data-start="0" data-duration="6.5" viewBox="0 0 200 12" preserveAspectRatio="none">
         <path fill="#1F3FBF" d="M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z" />
       </svg>
 
@@ -228,36 +236,28 @@
         <div class="row" id="r1">
           <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M25.2 5.6C15.4 2.6 5.4 8.8 4.8 19.2 4.2 29.2 11.6 35.8 21 35.4 30.2 35 36 28.2 35.4 19 34.8 10.6 28 4.8 18.4 5.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>1</span></div>
           <div class="content">
-            <p class="label">ירוק: נבדק מול מסמך</p>
-            <p class="example"><span class="mark verified"><span class="ink"></span><span class="txt">שילמו בפועל 12,500–15,000 ₪</span></span><span class="from">לפי 6 חשבוניות</span></p>
+            <p class="label"><span class="mark verified"><span class="ink"></span><span class="txt">ירוק</span></span> <span class="meaning">נבדק מול מסמך</span></p>
           </div>
         </div>
         <div class="row" id="r2">
           <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M14.4 6.2C23.6 2.8 34.8 8 35.4 18.6 36 28.8 29 35.6 19.4 35.6 9.8 35.6 4.2 28.4 4.8 19.4 5.4 11.6 11 6.6 21.2 5.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>2</span></div>
           <div class="content">
-            <p class="label">צהוב: מה שבוגרים אמרו</p>
-            <p class="example"><span class="mark grads"><span class="ink"></span><span class="txt">14 בוגרים ענו 3 חודשים אחרי הסיום</span></span></p>
+            <p class="label"><span class="mark grads"><span class="ink"></span><span class="txt">צהוב</span></span> <span class="meaning">מה שבוגרים אמרו</span></p>
           </div>
         </div>
         <div class="row" id="r3">
           <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M28.4 8.4C22.6 3.8 11.8 4.2 7.2 11.4 2.8 18.4 5 29.6 13.4 33.8 22 38 32.6 33.4 35 24.6 37 17.2 33.4 9.6 23.8 6.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>3</span></div>
           <div class="content">
-            <p class="label">ורוד: נקודת חולשה</p>
-            <p class="example"><span class="mark weak"><span class="ink"></span><span class="txt">הקצב בחודש השני מהיר מדי</span></span></p>
+            <p class="label"><span class="mark weak"><span class="ink"></span><span class="txt">ורוד</span></span> <span class="meaning">נקודת חולשה</span></p>
           </div>
         </div>
         <div class="row" id="r4">
           <div class="num"><svg viewBox="0 0 40 40"><path pathLength="1" d="M25.2 5.6C15.4 2.6 5.4 8.8 4.8 19.2 4.2 29.2 11.6 35.8 21 35.4 30.2 35 36 28.2 35.4 19 34.8 10.6 28 4.8 18.4 5.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1 1.2" stroke-dashoffset="1.1" /></svg><span>4</span></div>
           <div class="content">
-            <p class="label">קו כחול: המוסד אומר, לא נבדק</p>
-            <p class="example"><span class="claim"><span class="txt">ליווי השמה במשך 6 חודשים</span><span class="line"></span></span></p>
+            <p class="label"><span class="claim"><span class="txt">קו כחול</span><span class="line"></span></span> <span class="meaning">המוסד אומר, לא נבדק</span></p>
           </div>
         </div>
       </div>
-
-      <p id="note" class="pen-note reveal clip" data-start="0" data-duration="7.5">
-        <svg viewBox="0 0 28 14"><path d="M26.6 5.4C19.4 3.6 11.6 4.4 3.4 8.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /><path d="M8.6 3.4 2.8 8.5 9.6 11.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>הצבע אומר מאיפה המידע הגיע
-      </p>
     </div>
 
     <script>
@@ -270,25 +270,23 @@
 
       const rows = ['#r1', '#r2', '#r3', '#r4'];
       rows.forEach((row, i) => {
-        const at = 0.85 + i * 1.25;
+        const at = 0.6 + i * 0.8;
         tl.fromTo(`${row} .num path`, { strokeDashoffset: 1.1 }, { strokeDashoffset: 0, duration: 0.45, ease: 'power1.inOut' }, at);
         tl.fromTo(`${row} .num span`, { opacity: 0 }, { opacity: 1, duration: 0.2 }, at + 0.15);
         tl.fromTo(`${row} .label`, { opacity: 0, x: 18 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power2.out' }, at + 0.1);
-        tl.fromTo(`${row} .example`, { opacity: 0 }, { opacity: 1, duration: 0.25 }, at + 0.3);
         if (row === '#r4') {
-          tl.fromTo(`${row} .line`, { scaleX: 0 }, { scaleX: 1, duration: 0.62, ease: smear }, at + 0.5);
+          tl.fromTo(`${row} .line`, { scaleX: 0 }, { scaleX: 1, duration: 0.62, ease: smear }, at + 0.22);
         } else {
           tl.fromTo(
             `${row} .ink`,
             { clipPath: 'inset(0% 0% 0% 100%)' },
             { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.62, ease: smear },
-            at + 0.5,
+            at + 0.22,
           );
         }
       });
 
-      tl.fromTo('#note', { clipPath: 'inset(0% 0% 0% 100%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, ease: 'power1.inOut' }, 6.0);
-      tl.to({}, { duration: 0.01 }, 7.49);
+      tl.to({}, { duration: 0.01 }, 6.49);
 
       window.__timelines = window.__timelines || {};
       window.__timelines['legend'] = tl;

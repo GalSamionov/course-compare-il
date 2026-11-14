@@ -7,8 +7,8 @@ type Boxes = Record<string, Box>;
 export type Meta = {
   viewport: { width: number; height: number };
   home: { height: number; boxes: Boxes };
-  typing: { frames: string[]; scrollY: number; boxes: Boxes };
-  why: { boxes: Boxes; button: string };
+  /** ארבע השורות במחברת: כל פריים הוא אותו חלון בעמוד, והמיקומים יחסיים אליו. */
+  ask: { top: number; clip: { w: number; h: number }; frames: { file: string; phase: string }[]; boxes: Boxes; button: string };
   results: { titles: string[]; boxes: Boxes };
   course: { height: number; boxes: Boxes };
   compare: { boxes: Boxes };
