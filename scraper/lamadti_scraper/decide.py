@@ -180,7 +180,8 @@ def decide_changed(
             if fv.found and issues.get(f.name):
                 plan.queue.append({"kind": "field", "field": f.name, "old": old, "new": None, "quote": fv.quote, "confidence": fv.confidence, "reasons": issues[f.name]})
             elif not is_empty(old):
-                plan.queue.append({"kind": "field", "field": f.name, "old": old, "new": None, "quote": None, "confidence": None, "reasons": ["not_on_page"]})
+                # אישור בתור ימחק את הערך. ברשימות זה [] ולא null, כי העמודה לא מקבלת null.
+                plan.queue.append({"kind": "field", "field": f.name, "old": old, "new": to_db(f, None), "quote": None, "confidence": None, "reasons": ["not_on_page"]})
             continue
         new = to_db(f, fv.value, old)
         if same_value(f, old, new):
