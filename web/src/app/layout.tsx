@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Assistant, Noto_Serif_Hebrew, Playpen_Sans_Hebrew } from 'next/font/google';
+import { FirstVisit } from '@/components/site/first-visit';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -32,7 +33,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl" className={`${serif.variable} ${sans.variable} ${pen.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        {/* ההיכרות למבקר ראשון: בכל עמוד ציבורי, כי רוב המבקרים נכנסים ישר לעמוד קורס מקישור. */}
+        <FirstVisit />
+      </body>
     </html>
   );
 }

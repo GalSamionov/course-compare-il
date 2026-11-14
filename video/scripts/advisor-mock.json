@@ -1,0 +1,25 @@
+{
+  "_": "תשובה מדומה של היועץ לסרטון (Playwright מיירט את /api/advise). רק עובדות לדוגמה שמופיעות בעמוד של פיתוח Full Stack, כל אחת עם המקור שלה שם. שם הקורס לא במשפט: היועץ כותב אותו לפני המשפטים.",
+  "advice": {
+    "sentences": [
+      {
+        "text": "נמשך 8 חודשים, ו-260 מתוך 420 השעות הן עשייה.",
+        "source": "verified",
+        "courseSlug": "full-stack-sample"
+      },
+      {
+        "text": "14 מהבוגרים ענו 3 חודשים אחרי הסיום, ובממוצע נתנו לתוצאה 3.7 מתוך 5.",
+        "source": "graduates",
+        "courseSlug": "full-stack-sample"
+      },
+      {
+        "text": "המוסד מבטיח ליווי השמה במשך 6 חודשים.",
+        "source": "institution",
+        "courseSlug": "full-stack-sample"
+      }
+    ],
+    "notEnoughInfo": true,
+    "missing": "על שני הקורסים האחרים עוד אין מספיק ביקורות כדי להשוות."
+  },
+  "remaining": 9
+}

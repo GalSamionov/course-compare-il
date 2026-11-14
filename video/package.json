@@ -1,0 +1,30 @@
+{
+  "name": "lamadti-video",
+  "private": true,
+  "description": "סרטון ההדרכה של למדתי: Remotion להרכבה, HyperFrames לסצנת מקרא הצבעים.",
+  "scripts": {
+    "studio": "remotion studio",
+    "shots": "node scripts/capture.mjs",
+    "legend": "node scripts/render-legend.mjs",
+    "render:wide": "remotion render Walkthrough-16x9 out/lamadti-walkthrough-16x9.mp4",
+    "render:tall": "remotion render Walkthrough-9x16 out/lamadti-walkthrough-9x16.mp4",
+    "render": "pnpm render:wide && pnpm render:tall"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.543",
+    "@remotion/google-fonts": "4.0.543",
+    "@remotion/transitions": "4.0.543",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.543"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "4.0.543",
+    "@remotion/renderer": "4.0.543",
+    "@types/react": "^19",
+    "hyperframes": "0.9.46",
+    "playwright": "1.65.0",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.17.1"
+}
