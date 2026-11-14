@@ -13,9 +13,9 @@ const sizeLabel = (bytes: number) =>
 
 /**
  * מהדק משרדי: ההוכחה מוצמדת לדף. ציור SVG משלנו, חוט מתכת באפור ובהבהרה, כמו הידיות של התפס (sheet.tsx).
- * החלק העליון בולט מעל הקצה של המסמך.
+ * החלק העליון בולט מעל הקצה של המסמך. גם בתור של גל (components/admin/queue-item.tsx): אותו מסמך, מוצמד.
  */
-function PaperClip() {
+export function PaperClip() {
   const wire = 'M8 30V10a5 5 0 0 1 10 0v24a8 8 0 0 1-16 0V14';
   return (
     <svg
