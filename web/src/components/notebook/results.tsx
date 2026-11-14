@@ -55,7 +55,9 @@ export function ResultRow({
   const product = PRODUCT_TYPE_LABEL[course.productType];
   return (
     <div className="@container">
+      {/* השורה נכתבת אל המחברת כשהיא נכנסת למסך, מימין לשמאל, אחת אחרי השנייה (globals.css, ink). */}
       <article
+        data-anim="ink"
         className={cn(
           'ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-4',
           actions ? 'pb-3' : 'pb-[18px]',

@@ -171,8 +171,11 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   }, [userId, form.courseId]);
 
   // צעד חדש: הפוקוס עובר לכותרת שלו, כדי שקורא מסך יקרא איפה הוא.
+  // ונשמר איזה צעד מוצג, כדי שהדף הבא יידע אם מדפדפים קדימה או אחורה.
+  const shownIndex = useRef(-1);
   useEffect(() => {
     if (phase.kind === 'step' || phase.kind === 'sent') heading.current?.focus();
+    if (phase.kind === 'step') shownIndex.current = STEPS.indexOf(phase.step);
   }, [phase]);
 
   const ctx = { questions: form.questions, thisMonth };
@@ -361,6 +364,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   if (phase.kind !== 'step') return null;
   const step = phase.step;
   const index = STEPS.indexOf(step);
+  // קדימה הדף החדש נכנס משמאל, אחורה מימין: כמו לדפדף במחברת בעברית.
+  const turn = index >= shownIndex.current ? 'next' : 'back';
   const body =
     step === 'when' ? (
       <WhenStep cohortMonth={draft.cohortMonth} finishedMonth={draft.finishedMonth} thisMonth={thisMonth} onChange={update} />
@@ -402,7 +407,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
       <p className={cn(marginNote, 'pt-1.5')}>
         צעד {index + 1} מתוך {STEPS.length}
       </p>
-      <div className="min-w-0 ps-3">
+      {/* key: כל צעד הוא דף חדש, והוא נכנס בדפדוף (globals.css, page-turn). */}
+      <div key={step} data-turn={turn} className="page-turn min-w-0 ps-3">
         <h2 id="step-h" ref={heading} tabIndex={-1} className={sectionTitle}>
           {STEP_TITLE[step]}
         </h2>

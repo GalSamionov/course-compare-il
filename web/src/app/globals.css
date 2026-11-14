@@ -474,6 +474,48 @@ body {
   }
 }
 
+/* ===== שורה ברשימה נכתבת אל המחברת (results.tsx) =====
+   אנימציה עם backwards בלבד: בסוף אין clip-path, כי קו המחברת של השורה נמשך עד קצה הנייר. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion] [data-anim~='ink']:not([data-inview]) {
+    opacity: 0;
+  }
+  html[data-motion] [data-anim~='ink'][data-inview] {
+    animation: ink-in 720ms cubic-bezier(0.4, 0, 0.3, 1) var(--enter-delay, 0ms) backwards;
+  }
+}
+@keyframes ink-in {
+  from {
+    clip-path: inset(-200px -200px -200px 100%);
+  }
+  to {
+    clip-path: inset(-200px -200px -200px -200px);
+  }
+}
+
+/* ===== דפדוף בין צעדים בכתיבת ביקורת (review-flow.tsx) =====
+   קדימה הדף נכנס משמאל, אחורה מימין. קצר, כדי שלא יעכב את מי שממלא. */
+@media (prefers-reduced-motion: no-preference) {
+  .page-turn {
+    animation: page-next 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .page-turn[data-turn='back'] {
+    animation-name: page-back;
+  }
+}
+@keyframes page-next {
+  from {
+    opacity: 0;
+    translate: -28px 0;
+  }
+}
+@keyframes page-back {
+  from {
+    opacity: 0;
+    translate: 28px 0;
+  }
+}
+
 /* ===== תגובות לריחוף וללחיצה ===== */
 /* טקסט של קישור שהעט מותח תחתיו קו כשמרחפים או מגיעים אליו במקלדת, מימין לשמאל.
    .pen-under יושב על הטקסט שבתוך הקישור, כדי שהקו יהיה צמוד למילים ולא לתחתית של יעד המגע. */
