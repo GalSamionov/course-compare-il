@@ -80,7 +80,7 @@ export function ResultRow({
           </p>
           {course.score.status === 'scored' ? (
             <p className="mt-2 flex items-baseline gap-1.5 font-sans text-sm leading-tight @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-0 @3xl:flex-col @3xl:items-start @3xl:gap-1">
-              <span aria-hidden="true" className="font-serif text-[26px] leading-none font-bold @3xl:text-[34px]">
+              <span aria-hidden="true" className="text-[26px] leading-none font-bold @3xl:text-[34px]">
                 {course.score.value.toFixed(1)}
               </span>
               <span aria-hidden="true" className="@3xl:text-[13px] @3xl:text-ink-soft">

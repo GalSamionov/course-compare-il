@@ -258,7 +258,7 @@ export function NotePreview({
         )}
         {cohortMonth && <>, מחזור {monthLabel(cohortMonth)}</>}
       </p>
-      <p className="mt-1.5 line-clamp-6 font-serif text-[15px] leading-relaxed lg:text-base">{body.trim()}</p>
+      <p className="mt-1.5 line-clamp-6 text-[15px] leading-relaxed lg:text-base">{body.trim()}</p>
     </StickyNote>
   );
 }

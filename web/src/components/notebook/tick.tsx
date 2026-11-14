@@ -48,7 +48,7 @@ export function Tick({
       aria-disabled={disabled}
       aria-label={label}
       onClick={disabled ? undefined : onToggle}
-      className={cn('group relative size-11 justify-self-center', disabled ? 'cursor-default' : 'cursor-pointer')}
+      className={cn('group relative mt-3 size-11 flex-none', disabled ? 'cursor-default' : 'cursor-pointer')}
     >
       {disabled ? (
         <PenBox className="absolute top-[12px] left-[12px] size-5 -rotate-3 opacity-55" />

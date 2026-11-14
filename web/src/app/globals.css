@@ -22,16 +22,17 @@
   --color-line: #bdbdbd;
   --color-leader: #9a9a9a;
   --color-link-hover: #132a85;
-  /* העולם: דף מודפס על משטח לבד אפור. הקווים של המחברת אפורים קרים, לא בצבע של אף מקור. */
-  --color-desk: #474b50;
-  --color-desk-deep: #3a3e42;
+  /* העולם: דף מודפס על שולחן בהיר. הקווים של המחברת אפורים קרים, לא בצבע של אף מקור.
+     desk-deep: מסילת פס הגלילה על השולחן. */
+  --color-desk: #e9ebee;
+  --color-desk-deep: #a3a9b0;
   --color-paper: #ffffff;
-  --color-paper-under: #eef0f2;
+  --color-paper-under: #f6f7f9;
   --color-ruled: #c3cad3;
   --color-margin-rule: #9ca5b0;
-  --font-serif: var(--font-noto-serif-hebrew), serif;
-  --font-sans: var(--font-assistant), sans-serif;
-  --font-heading: var(--font-assistant), sans-serif;
+  /* שתי ידיים: IBM Plex Sans Hebrew היא הדיו המודפסת (כותרות, גוף, תוויות, נתונים), ו-Playpen הוא העט של האתר. */
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+  --font-heading: var(--font-plex), system-ui, sans-serif;
   --font-pen: var(--font-playpen), cursive;
   --color-ring: var(--ring);
   --color-input: var(--input);
@@ -86,12 +87,10 @@
 
   --pen-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%231F3FBF' d='M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z'/%3E%3C/svg%3E");
   --tape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E6E9ED' fill-opacity='.74' d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3Cpath fill='%23fff' fill-opacity='.35' d='M4 3.4L76 2.9 76 7.2 4 7.6Z'/%3E%3C/svg%3E");
-  /* תווית השם: קו דיו אחד עם פינות קעורות. הגרסה הקודמת (old) הייתה כפולה, וקראו אותה כשלט של מסעדה. */
+  /* תווית השם: קו דיו אחד עם פינות קעורות. המסגרת הכפולה הקודמת נקראה כשלט של ביסטרו. */
   /* צורת הסלוטייפ עם הקצוות הקרועים, כמסכה: לסלוטייפ צבעוני (מסקינג טייפ) על פתק לבן. */
   --tape-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3C/svg%3E");
   --label-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='1.8' d='M9 1.5H27A7.5 7.5 0 0 0 34.5 9V27A7.5 7.5 0 0 0 27 34.5H9A7.5 7.5 0 0 0 1.5 27V9A7.5 7.5 0 0 0 9 1.5Z'/%3E%3C/svg%3E");
-  --label-frame-old: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='1.6' d='M9 1.5H27A7.5 7.5 0 0 0 34.5 9V27A7.5 7.5 0 0 0 27 34.5H9A7.5 7.5 0 0 0 1.5 27V9A7.5 7.5 0 0 0 9 1.5Z'/%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='.8' d='M10.2 4.5H25.8A6.5 6.5 0 0 0 31.5 10.2V25.8A6.5 6.5 0 0 0 25.8 31.5H10.2A6.5 6.5 0 0 0 4.5 25.8V10.2A6.5 6.5 0 0 0 10.2 4.5Z'/%3E%3C/svg%3E");
-  --felt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 -.33'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
   --stamp-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
@@ -120,8 +119,12 @@
   }
 }
 body {
-  font-family: var(--font-serif);
-  line-height: 1.8;
+  font-family: var(--font-plex), system-ui, sans-serif;
+  line-height: 1.75;
+}
+/* כותרות מודפסות: מעט צפופות, כמו כותרת שהודפסה ולא נכתבה. */
+:where(h1, h2) {
+  letter-spacing: -0.012em;
 }
 
 @layer base {
@@ -161,27 +164,15 @@ body {
 /* ===== השולחן והדף =====
    במחשב: דף מודפס לבן מונח על שולחן בהיר, ומתחתיו עוד דף מהערימה.
    בנייד הדף ממלא את המסך, והשולחן לא נראה.
-   תצוגה מקדימה זמנית: ?frame=old מחזיר את השולחן הכהה, התפס והתווית הכפולה, להשוואה. */
+   שולחן בהיר ושטוח, בלי תפס: דף לבן על משטח כהה עם תפס נקרא כמו תפריט על קליפבורד (משוב מ-14.11.2026). */
 @media (min-width: 1024px) {
   html {
-    background-color: #e9ebee;
-    scrollbar-color: #a3a9b0 #e9ebee;
-  }
-  html[data-frame='old'] {
     background-color: var(--color-desk);
-    background-image: var(--felt);
-    background-size: 220px 220px;
-    scrollbar-color: #8b9198 var(--color-desk-deep);
+    scrollbar-color: var(--color-desk-deep) var(--color-desk);
   }
   body {
     background: transparent;
   }
-}
-html:not([data-frame='old']) .binder-clip {
-  display: none;
-}
-html[data-frame='old'] .label-frame {
-  border-image-source: var(--label-frame-old);
 }
 
 @layer components {
@@ -206,21 +197,11 @@ html[data-frame='old'] .label-frame {
       position: absolute;
       inset: 10px -6px -8px 8px;
       z-index: -1;
-      background: #f6f7f9;
+      background: var(--color-paper-under);
       transform: rotate(0.7deg);
       box-shadow:
         0 1px 1px rgb(30 36 44 / 0.08),
         0 16px 30px -18px rgb(30 36 44 / 0.25);
-    }
-    html[data-frame='old'] .sheet {
-      box-shadow:
-        0 1px 1px rgb(0 0 0 / 0.18),
-        0 3px 6px -2px rgb(0 0 0 / 0.22),
-        0 28px 48px -18px rgb(0 0 0 / 0.55);
-    }
-    html[data-frame='old'] .sheet::before {
-      background: var(--color-paper-under);
-      box-shadow: 0 18px 36px -16px rgb(0 0 0 / 0.5);
     }
   }
 
@@ -463,6 +444,36 @@ html[data-frame='old'] .label-frame {
   }
 }
 
+/* ===== הדוגמה בשורה הראשונה של המחברת (pen-example.tsx) =====
+   גלויה רק כשהשורה ריקה ולא בפוקוס. כל דוגמה נכתבת מימין לשמאל, נשארת רגע ונעלמת. */
+.pen-example {
+  visibility: hidden;
+}
+[data-empty]:not(:focus-within) > .pen-example {
+  visibility: visible;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pen-example-word {
+    animation: pen-example 3000ms cubic-bezier(0.4, 0, 0.3, 1) both;
+  }
+}
+@keyframes pen-example {
+  0% {
+    clip-path: inset(-12px -12px -12px 100%);
+  }
+  34% {
+    clip-path: inset(-12px -12px -12px -12px);
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(-12px -12px -12px -12px);
+    opacity: 0;
+  }
+}
+
 /* ===== תגובות לריחוף וללחיצה ===== */
 /* טקסט של קישור שהעט מותח תחתיו קו כשמרחפים או מגיעים אליו במקלדת, מימין לשמאל.
    .pen-under יושב על הטקסט שבתוך הקישור, כדי שהקו יהיה צמוד למילים ולא לתחתית של יעד המגע. */
@@ -478,72 +489,17 @@ html[data-frame='old'] .label-frame {
   a[aria-current='page'] .pen-under {
     background-size: calc(100% + 0.15em) 0.32em;
   }
+  /* קו עט שנמצא שם תמיד, בהיר, ומתכהה בריחוף: לדוגמאות שלוחצים עליהן במחברת. */
+  .pen-under-shown {
+    background-size: calc(100% + 0.15em) 0.32em;
+    background-image: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)), var(--pen-rule);
+  }
+  :is(a, button):is(:hover, :focus-visible) .pen-under-shown {
+    background-image: var(--pen-rule);
+  }
   @media (prefers-reduced-motion: no-preference) {
     .pen-under {
       transition: background-size 360ms cubic-bezier(0.16, 1, 0.3, 1);
     }
-  }
-}
-
-/* ===== תצוגה מקדימה זמנית של כיווני הגופן (?type=a|b|c) =====
-   a: IBM Plex Sans Hebrew לכל הטקסט המודפס, גם לתוויות.
-   b: Rubik לתוכן ולכותרות, Assistant לתוויות.
-   c: Secular One לכותרות, Assistant לתוכן ולתוויות.
-   העט נשאר Playpen Sans Hebrew בכל הכיוונים. אחרי שגל בוחר, נשאר כיוון אחד והשאר נמחק. */
-html[data-type='a'] {
-  --font-noto-serif-hebrew: var(--font-plex);
-  --font-assistant: var(--font-plex);
-}
-html[data-type='a'] body {
-  line-height: 1.75;
-}
-html[data-type='a'] :is(h1, h2) {
-  letter-spacing: -0.012em;
-}
-html[data-type='b'] {
-  --font-noto-serif-hebrew: var(--font-rubik);
-}
-html[data-type='b'] body {
-  line-height: 1.7;
-}
-html[data-type='b'] h1 {
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-html[data-type='b'] :is(h2, h3) {
-  font-weight: 600;
-}
-html[data-type='c'] {
-  --font-noto-serif-hebrew: var(--font-assistant);
-}
-html[data-type='c'] body {
-  line-height: 1.7;
-}
-html[data-type='c'] :is(h1, h2.pen-rule, .text-page h2) {
-  font-family: var(--font-secular), sans-serif;
-  font-weight: 400;
-  font-synthesis: none;
-  letter-spacing: -0.005em;
-}
-
-@layer components {
-  /* עמודי טקסט: כותרת משנה עם קו עט מתחתיה, כמו בשאר האתר. */
-  .text-page h2 {
-    @apply pen-rule mt-9 text-[21px] leading-snug font-bold lg:text-[26px];
-  }
-  .text-page p,
-  .text-page ul,
-  .text-page ol,
-  .text-page table {
-    @apply mt-3;
-  }
-  .text-page ul {
-    @apply list-disc ps-5;
-  }
-  .text-page li + li {
-    @apply mt-1;
-  }
-  .text-page a {
-    @apply underline underline-offset-[3px] hover:text-link-hover;
   }
 }

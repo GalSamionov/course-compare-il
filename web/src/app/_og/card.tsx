@@ -15,7 +15,7 @@ import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
  * Satori (next/og) מצייר משמאל לימין ובלי אלגוריתם הכיווניות. לכן כל טקסט עובר דרך <Rtl>:
  * היחידות מ-rtlTokens מונחות בשורה מימין לשמאל (row-reverse), וכל שורה בעיצוב בנויה ככה.
  *
- * הגופנים: Noto Serif Hebrew, Assistant ו-Playpen Sans Hebrew, אותם גופנים של האתר מ-Google Fonts
+ * הגופנים: IBM Plex Sans Hebrew ו-Playpen Sans Hebrew, אותם גופנים של האתר מ-Google Fonts
  * (רישיון OFL). Satori לא קורא woff2 ולא גופנים משתנים, ולכן בתיקייה fonts יש עותקים סטטיים ב-TTF,
  * במשקלים שהתמונה צריכה, רק עם עברית ולטינית.
  */
@@ -26,7 +26,7 @@ const INK = '#1c1c1c';
 const INK_SOFT = '#555555';
 const RULE = '#dadada';
 const PEN = '#1f3fbf';
-const DESK = '#474b50';
+const DESK = '#e9ebee';
 const MARK_VERIFIED = '#9bea8a';
 const MARK_GRADS = '#ffea3d';
 const MARK_WEAK = '#ffb0d3';
@@ -37,32 +37,18 @@ type OgFonts = NonNullable<NonNullable<ConstructorParameters<typeof ImageRespons
 let fontsPromise: Promise<OgFonts> | null = null;
 function loadFonts() {
   fontsPromise ??= Promise.all([
-    readFile(join(process.cwd(), 'src/app/_og/fonts/noto-serif-hebrew-700.ttf')),
-    readFile(join(process.cwd(), 'src/app/_og/fonts/assistant-400.ttf')),
-    readFile(join(process.cwd(), 'src/app/_og/fonts/assistant-700.ttf')),
-    readFile(join(process.cwd(), 'src/app/_og/fonts/assistant-800.ttf')),
+    readFile(join(process.cwd(), 'src/app/_og/fonts/ibm-plex-sans-hebrew-400.ttf')),
+    readFile(join(process.cwd(), 'src/app/_og/fonts/ibm-plex-sans-hebrew-700.ttf')),
     readFile(join(process.cwd(), 'src/app/_og/fonts/playpen-sans-hebrew-500.ttf')),
-  ]).then(([serif700, sans400, sans700, sans800, pen500]): OgFonts => [
-    { name: 'Noto Serif Hebrew', data: serif700, weight: 700, style: 'normal' },
-    { name: 'Assistant', data: sans400, weight: 400, style: 'normal' },
-    { name: 'Assistant', data: sans700, weight: 700, style: 'normal' },
-    { name: 'Assistant', data: sans800, weight: 800, style: 'normal' },
+  ]).then(([print400, print700, pen500]): OgFonts => [
+    { name: 'IBM Plex Sans Hebrew', data: print400, weight: 400, style: 'normal' },
+    { name: 'IBM Plex Sans Hebrew', data: print700, weight: 700, style: 'normal' },
     { name: 'Playpen Sans Hebrew', data: pen500, weight: 500, style: 'normal' },
   ]);
   return fontsPromise;
 }
 
 const svgUri = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-
-/** משטח הלבד: אותו רעש כמו ברקע של האתר במחשב (globals.css, --felt). */
-const FELT = svgUri(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 -.33"/></filter><rect width="100%" height="100%" filter="url(#f)"/></svg>`,
-);
-
-/** התפס השחור מהאתר (components/site/sheet.tsx), באותם קווים. */
-const CLIP = svgUri(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 76"><path d="M36 44 30 8C29.6 5.4 31.4 4 34 4H86C88.6 4 90.4 5.4 90 8L84 44" fill="none" stroke="#b9bec4" stroke-width="3.4" stroke-linejoin="round"/><path d="M36 44 30 8C29.6 5.4 31.4 4 34 4H86C88.6 4 90.4 5.4 90 8L84 44" fill="none" stroke="#e9ecef" stroke-width="1.2" stroke-linejoin="round"/><path d="M14 38C14 34 17 31.6 21 31.4L99 31.4C103 31.6 106 34 106 38L104 70C104 72.6 102 74 99.4 74H20.6C18 74 16 72.6 16 70Z" fill="#1d1f22"/><path d="M18 36.6C18 35 19.4 34 21.4 34H98.6C100.6 34 102 35 102 36.6L101.6 42H18.4Z" fill="#3a3e43"/><path d="M22 70.4H98" stroke="#000" stroke-opacity=".5" stroke-width="1.4"/></svg>`,
-);
 
 /** סלוטייפ עם קצוות קרועים (globals.css, --tape). */
 const TAPE = svgUri(
@@ -80,7 +66,7 @@ const PEN_RULE = svgUri(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 12" preserveAspectRatio="none"><path fill="${PEN}" d="M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z"/></svg>`,
 );
 
-/** מסגרת כפולה עם פינות קעורות, כמו תווית שם האתר (globals.css, --label-frame). */
+/** מסגרת בקו אחד עם פינות קעורות, כמו תווית שם האתר (globals.css, --label-frame). */
 function labelFrame(w: number, h: number): string {
   const frame = (inset: number, r: number, stroke: number) => {
     const a = inset;
@@ -89,7 +75,7 @@ function labelFrame(w: number, h: number): string {
     return `<path fill="none" stroke="${INK}" stroke-width="${stroke}" d="M${a + r} ${a}H${b - r}A${r} ${r} 0 0 0 ${b} ${a + r}V${c - r}A${r} ${r} 0 0 0 ${b - r} ${c}H${a + r}A${r} ${r} 0 0 0 ${a} ${c - r}V${a + r}A${r} ${r} 0 0 0 ${a + r} ${a}Z"/>`;
   };
   return svgUri(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${frame(2, 11, 2.6)}${frame(7, 9, 1.3)}</svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${frame(2, 11, 2.8)}</svg>`,
   );
 }
 
@@ -194,7 +180,7 @@ function SheetHeader() {
       }}
     >
       <Wordmark />
-      <Rtl text="אף מוכר לא משלם לנו" size={30} style={{ fontWeight: 800, color: INK }} />
+      <Rtl text="אף מוכר לא משלם לנו" size={30} style={{ fontWeight: 700, color: INK }} />
     </div>
   );
 }
@@ -232,13 +218,10 @@ function Desk({ children, sample }: { children: ReactNode; sample: boolean }) {
         width: OG_SIZE.width,
         height: OG_SIZE.height,
         backgroundColor: DESK,
-        backgroundImage: 'radial-gradient(circle at 50% 40%, #50555a 0%, #474b50 55%, #3c4045 100%)',
-        fontFamily: 'Assistant',
+        fontFamily: 'IBM Plex Sans Hebrew',
         color: INK,
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-      <img src={FELT} width={OG_SIZE.width} height={OG_SIZE.height} style={{ position: 'absolute', left: 0, top: 0 }} />
       {/* הדף שמתחת, מהערימה */}
       <div
         style={{
@@ -247,9 +230,9 @@ function Desk({ children, sample }: { children: ReactNode; sample: boolean }) {
           top: 50,
           width: 1100,
           height: 552,
-          backgroundColor: '#eef0f2',
+          backgroundColor: '#f6f7f9',
           transform: 'rotate(0.9deg)',
-          boxShadow: '0 18px 36px -16px rgba(0,0,0,0.5)',
+          boxShadow: '0 1px 1px rgba(30,36,44,0.08), 0 16px 30px -18px rgba(30,36,44,0.25)',
         }}
       />
       <div
@@ -263,16 +246,14 @@ function Desk({ children, sample }: { children: ReactNode; sample: boolean }) {
           flexDirection: 'column',
           backgroundColor: '#ffffff',
           padding: '40px 60px 34px',
-          boxShadow: '0 1px 1px rgba(0,0,0,0.18), 0 3px 6px -2px rgba(0,0,0,0.22), 0 28px 48px -18px rgba(0,0,0,0.55)',
+          boxShadow: '0 1px 1px rgba(30,36,44,0.1), 0 3px 8px -3px rgba(30,36,44,0.12), 0 24px 44px -20px rgba(30,36,44,0.28)',
         }}
       >
         {children}
       </div>
-      {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-      <img src={CLIP} width={132} height={84} style={{ position: 'absolute', left: 534, top: -6 }} />
       {sample && (
         <Tape width={230} height={46} rotate={-14} style={{ left: 18, top: 548 }}>
-          <Rtl text="נתוני דוגמה" size={26} style={{ fontWeight: 800, color: INK, letterSpacing: 0.5 }} />
+          <Rtl text="נתוני דוגמה" size={26} style={{ fontWeight: 700, color: INK, letterSpacing: 0.5 }} />
         </Tape>
       )}
     </div>
@@ -284,7 +265,7 @@ function Stamp({ text }: { text: string }) {
   return (
     <div style={{ display: 'flex', transform: 'rotate(-2deg)', border: `3px solid rgba(28,28,28,0.86)`, padding: 3, borderRadius: 4 }}>
       <div style={{ display: 'flex', border: `1.5px solid rgba(28,28,28,0.86)`, padding: '4px 14px 6px', borderRadius: 2 }}>
-        <Rtl text={text} size={28} style={{ fontWeight: 800, color: 'rgba(28,28,28,0.86)' }} />
+        <Rtl text={text} size={28} style={{ fontWeight: 700, color: 'rgba(28,28,28,0.86)' }} />
       </div>
     </div>
   );
@@ -314,19 +295,19 @@ function ScoreBox({ score }: { score: CoursePageData['score'] }) {
     alignItems: 'center',
     border: `3px solid ${INK}`,
     backgroundColor: '#ffffff',
-    padding: '16px 28px 16px 30px',
+    padding: '16px 24px 16px 26px',
     minWidth: 380,
   };
   if (score.status === 'scored') {
     return (
       <div style={box}>
-        <div style={{ display: 'flex', fontFamily: 'Noto Serif Hebrew', fontWeight: 700, fontSize: 104, lineHeight: 1, marginTop: -6 }}>
+        <div style={{ display: 'flex', fontFamily: 'IBM Plex Sans Hebrew', fontWeight: 700, fontSize: 92, lineHeight: 1, marginTop: -4, letterSpacing: -2 }}>
           {score.value.toFixed(1)}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: 22, lineHeight: 1.3 }}>
-          <Rtl text="ציון בוגרים מתוך 10" size={26} style={{ fontWeight: 800 }} />
-          <Rtl text={verifiedText(score.reviewCount)} size={26} />
-          {score.recommendPct !== null && <Rtl text={`${Math.round(score.recommendPct)}% ממליצים`} size={26} />}
+          <Rtl text="ציון בוגרים מתוך 10" size={24} style={{ fontWeight: 700 }} />
+          <Rtl text={verifiedText(score.reviewCount)} size={24} />
+          {score.recommendPct !== null && <Rtl text={`${Math.round(score.recommendPct)}% ממליצים`} size={24} />}
         </div>
       </div>
     );
@@ -335,7 +316,7 @@ function ScoreBox({ score }: { score: CoursePageData['score'] }) {
   const needed = score.status === 'not_enough_reviews' ? score.reviewsNeeded : 0;
   return (
     <div style={{ ...box, flexDirection: 'column', alignItems: 'flex-end', padding: '22px 26px', lineHeight: 1.3 }}>
-      <Rtl text="עוד אין ציון בוגרים" size={36} style={{ fontWeight: 800 }} />
+      <Rtl text="עוד אין ציון בוגרים" size={36} style={{ fontWeight: 700 }} />
       <Rtl text={count > 0 ? reviewsText(count) : 'עוד אין ביקורות מאומתות'} size={26} style={{ marginTop: 6 }} />
       {needed > 0 && <Rtl text={neededText(needed)} size={26} />}
     </div>
@@ -352,7 +333,7 @@ function PriceLine({ course }: { course: CoursePageData }) {
           text={paidRangeSentence(course.paid)}
           size={36}
           color={MARK_VERIFIED}
-          style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700 }}
+          style={{ fontFamily: 'IBM Plex Sans Hebrew', fontWeight: 700 }}
         />
         <Rtl text={`${invoiceCountText(course.paid)}${site}`} size={24} style={{ color: INK_SOFT, marginTop: 4, marginRight: 12 }} />
       </div>
@@ -382,7 +363,7 @@ export async function renderCourseCard(course: CoursePageData): Promise<ImageRes
             <Rtl
               text={title}
               size={titleSize(title)}
-              style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700, lineHeight: 1.06, maxWidth: 560 }}
+              style={{ fontFamily: 'IBM Plex Sans Hebrew', fontWeight: 700, lineHeight: 1.06, maxWidth: 560 }}
             />
             {/* מתחת לכותרת: חותמת המוסד, ולידה התחום והעיר. כמו בראש עמוד הקורס, ובלי שורה מעל הכותרת. */}
             {(course.institutionName || meta) && (
@@ -413,7 +394,7 @@ function LegendRow({ swatch, text }: { swatch: ReactNode; text: string }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 12 }}>
       {swatch}
-      <Rtl text={text} size={26} style={{ marginRight: 12 }} />
+      <Rtl text={text} size={24} style={{ marginRight: 12 }} />
     </div>
   );
 }
@@ -431,7 +412,7 @@ export async function renderSiteCard(): Promise<ImageResponse> {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexGrow: 1, flexBasis: 0 }}>
             {/* השורות שבורות ביד, כדי שאף שורה לא תישאר עם מילה אחת. */}
             {['לפני שמשלמים על קורס:', 'מה אומרים בוגרים', 'שהוכיחו שלמדו בו'].map((line) => (
-              <Rtl key={line} text={line} size={56} style={{ fontFamily: 'Noto Serif Hebrew', fontWeight: 700, lineHeight: 1.16, flexWrap: 'nowrap' }} />
+              <Rtl key={line} text={line} size={56} style={{ fontFamily: 'IBM Plex Sans Hebrew', fontWeight: 700, lineHeight: 1.16, flexWrap: 'nowrap' }} />
             ))}
             {['השוואת קורסים בכל התחומים. ביקורת מתפרסמת', 'רק מבוגר שהעלה הוכחה: חשבונית, קבלה או תעודת סיום.'].map(
               (line, i) => (
@@ -446,10 +427,10 @@ export async function renderSiteCard(): Promise<ImageResponse> {
               flexDirection: 'column',
               alignItems: 'flex-end',
               width: 360,
-              marginRight: 48,
+              marginRight: 44,
               marginTop: 10,
               alignSelf: 'flex-start',
-              padding: '30px 30px 26px',
+              padding: '30px 24px 26px',
               backgroundColor: '#ffffff',
               transform: 'rotate(1.2deg)',
               boxShadow: '0 1px 2px rgba(0,0,0,0.16), 0 14px 22px -12px rgba(0,0,0,0.42)',
@@ -458,7 +439,7 @@ export async function renderSiteCard(): Promise<ImageResponse> {
           >
             <Tape width={108} rotate={-3} style={{ left: 126, top: -16 }} />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <Rtl text="מה אומר כל צבע" size={30} style={{ fontWeight: 800 }} />
+              <Rtl text="מה אומר כל צבע" size={30} style={{ fontWeight: 700 }} />
               {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
               <img src={PEN_RULE} width={196} height={12} style={{ marginTop: 2 }} />
             </div>

@@ -156,7 +156,7 @@ export function QueueItemView({ item }: { item: QueueItem }) {
                 <strong>{verifiedLabel(item.authorTitle)}</strong>
               )}
             </p>
-            <p className="mt-1.5 font-serif text-[15px] leading-relaxed whitespace-pre-line lg:text-base">{item.body}</p>
+            <p className="mt-1.5 text-[15px] leading-relaxed whitespace-pre-line lg:text-base">{item.body}</p>
           </StickyNote>
           <dl className="mt-5 grid grid-cols-[auto_auto] justify-start gap-x-6 gap-y-1 font-sans text-[13px] leading-normal">
             {item.answers.map((a) => (

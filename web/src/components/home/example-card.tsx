@@ -40,7 +40,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           כך שכותרת ארוכה נשברת לשורה שנייה במקום להיעלם מתחת לפתק.
         */}
         {review && <span aria-hidden="true" className="hidden lg:float-left lg:block lg:h-9 lg:w-[150px]" />}
-        <p className="font-serif text-[22px] leading-tight font-bold lg:text-[30px]">{course.title}</p>
+        <p className="text-[22px] leading-tight font-bold lg:text-[30px]">{course.title}</p>
         <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 font-sans text-[13px] leading-tight text-ink-soft lg:mt-2.5 lg:text-sm">
           <Stamp className="px-2 py-0.5 text-[13px] lg:px-2.5 lg:py-1 lg:text-[15px]">{course.institutionName}</Stamp>
           {course.categoryName && <span>{course.categoryName}</span>}
@@ -48,7 +48,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
 
         {value !== null && (
           <div className="mt-3.5 flex items-center gap-3.5 border-[1.5px] border-ink px-3.5 py-2.5 lg:mt-5 lg:gap-5 lg:px-5 lg:py-3.5">
-            <span aria-hidden="true" className="font-serif text-[40px] leading-none font-bold lg:text-[56px]">
+            <span aria-hidden="true" className="text-[40px] leading-none font-bold lg:text-[56px]">
               {value.toFixed(1)}
             </span>
             <span className="sr-only">ציון בוגרים {value.toFixed(1)} מתוך 10.</span>
@@ -105,7 +105,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
             tilt={3}
             className="mt-5 ms-6 -me-2.5 px-3.5 pt-5 pb-3 lg:absolute lg:-top-10 lg:-left-14 lg:m-0 lg:w-[236px]"
           >
-            <p className="font-serif text-[15px] leading-snug">״{firstSentence(review.body)}״</p>
+            <p className="text-[15px] leading-snug">״{firstSentence(review.body)}״</p>
             <p className="mt-1.5">
               <strong>{review.displayName ?? verifiedLabel(review.authorTitle)}</strong>
               {review.displayName && `, ${verifiedLabel(review.authorTitle)}`}, מחזור {cohort(review.cohortMonth)}

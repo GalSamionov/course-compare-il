@@ -12,7 +12,7 @@ const sizeLabel = (bytes: number) =>
   bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)}MB` : `${Math.max(1, Math.round(bytes / 1024))}KB`;
 
 /**
- * מהדק משרדי: ההוכחה מוצמדת לדף. ציור SVG משלנו, חוט מתכת באפור ובהבהרה, כמו הידיות של התפס (sheet.tsx).
+ * מהדק משרדי: ההוכחה מוצמדת לדף. ציור SVG משלנו, חוט מתכת באפור ובהבהרה.
  * החלק העליון בולט מעל הקצה של המסמך. גם בתור של גל (components/admin/queue-item.tsx): אותו מסמך, מוצמד.
  */
 export function PaperClip() {
