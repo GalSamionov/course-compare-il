@@ -1,0 +1,117 @@
+{
+ "is_course_page": true,
+ "category": "photography",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "צילום מקצועי",
+   "quote": "צילום מקצועי",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 8900,
+   "quote": "מחיר מלא: 8,900 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 120,
+   "quote": "120 שעות לימוד",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": true,
+   "value": "ראשון וחמישי בערב",
+   "quote": "פעמיים בשבוע, בימי ראשון וחמישי בערב",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "בסטודיו בפתח תקווה",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "פתח תקווה",
+   "quote": "בסטודיו בפתח תקווה",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "פעמיים בשבוע, בימי ראשון וחמישי בערב",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "הכרת המצלמה",
+    "תאורה",
+    "פורטרט",
+    "עריכה"
+   ],
+   "quote": "הכרת המצלמה",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": true,
+   "value": "השמה בעבודה כעוזר צלם",
+   "quote": "מבטיחים לכל בוגר השמה כעוזר צלם",
+   "confidence": "high"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

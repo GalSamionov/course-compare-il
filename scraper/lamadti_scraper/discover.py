@@ -28,6 +28,8 @@ class RobotsSource(Protocol):
 @dataclass
 class Discovery:
     urls: list[str] = field(default_factory=list)
+    # כל מה שנמצא, גם מעבר ל-max_pages. דף שנמצא לא נחשב "נעלם", גם אם לא נקרא השבוע.
+    seen: list[str] = field(default_factory=list)
     ok: bool = False
     sources: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
@@ -122,6 +124,7 @@ def discover(institution: InstitutionConfig, fetcher: PageGetter, robots: Robots
         for link in extract_page(response.html, response.final_url).links:
             add(urljoin(response.final_url, link))
 
+    result.seen = list(found)
     result.urls = found[: institution.max_pages]
     if len(found) > institution.max_pages:
         result.errors.append(f"found {len(found)} pages, kept the first {institution.max_pages}")

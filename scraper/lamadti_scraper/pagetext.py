@@ -15,13 +15,18 @@ from urllib.parse import urljoin, urlsplit
 from bs4 import BeautifulSoup, Comment
 
 # פחות טקסט מזה: כנראה הדף נבנה רק בדפדפן (ההחלטה 7).
-MIN_TEXT_CHARS = 400
+MIN_TEXT_CHARS = 200
 
 DROP_TAGS = ("script", "style", "noscript", "svg", "template", "iframe")
 # תפריט, כותרת וכותרת תחתונה של האתר יורדים, אבל לא בתוך <main> או <article>:
 # שם <header> הוא לפעמים הכותרת של הקורס עצמו. <form> ו-<button> נשארים, כי יש אתרים
 # (ASP.NET) שכל הדף בתוך <form>, וסילבוס באקורדיון כתוב על כפתורים.
 SITE_CHROME_TAGS = ("header", "nav", "footer")
+BLOCK_TAGS = (
+    "p", "div", "li", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "section", "article", "main", "aside", "header",
+    "footer", "ul", "ol", "dl", "dt", "dd", "table", "blockquote", "figcaption", "summary", "details", "button",
+    "label", "option", "pre", "address",
+)
 VIDEO_HOSTS = ("youtube.com", "www.youtube.com", "youtu.be", "www.youtube-nocookie.com", "youtube-nocookie.com", "vimeo.com", "player.vimeo.com")
 _SPACES = re.compile(r"[ \t ‏‎‪-‮]+")
 
@@ -109,8 +114,15 @@ def extract_page(html: str, url: str) -> PageContent:
         if not tag.decomposed and tag.find_parent(["main", "article"]) is None:
             tag.decompose()
     body = soup.body or soup
+    # שורה חדשה רק אחרי אלמנט של בלוק. כך "מחיר: <b>12,900</b>" נשאר שורה אחת, ותא בטבלה מופרד ב-|.
+    for tag in body.find_all("br"):
+        tag.replace_with("\n")
+    for tag in body.find_all(BLOCK_TAGS):
+        tag.append("\n")
+    for tag in body.find_all(["td", "th"]):
+        tag.append(" | ")
     lines: list[str] = []
-    for raw in body.get_text("\n").splitlines():
+    for raw in body.get_text("").splitlines():
         line = normalize_line(raw)
         if line and (not lines or lines[-1] != line):
             lines.append(line)

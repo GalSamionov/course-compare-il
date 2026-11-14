@@ -1,0 +1,26 @@
+# המוסדות שהאוסף השבועי קורא מהאתרים שלהם.
+#
+# מוסד נכנס לכאן רק אחרי שגל אישר אותו (docs/institutions/2026-11-14-proposed-institutions.md),
+# והוא חייב כבר להיות בטבלה institutions במסד, עם אותו slug. האוסף לא יוצר מוסדות.
+# כל עוד הרשימה ריקה, הריצה השבועית לא עושה כלום ולא נוגעת במסד.
+#
+# השדות:
+#   slug          חובה. ה-slug של המוסד בטבלה institutions.
+#   website       חובה. האתר של המוסד עצמו. האוסף לא יוצא ממנו.
+#   categories    חובה. התחומים (slug מ-categories) שהקורסים של המוסד יכולים להיכנס אליהם.
+#   sitemap       auto (מ-robots.txt או /sitemap.xml), none, או כתובת של מפת אתר.
+#   listing_urls  עמודים שמקשרים לכל הקורסים, כשאין מפת אתר טובה.
+#   include       ביטוי רגולרי: רק כתובות שמתאימות לו הן דפי קורס. למשל '/courses/'.
+#   exclude       ביטוי רגולרי: כתובות שלא קוראים.
+#   render        auto (דפדפן רק כשהדף ריק בלי JavaScript) או browser (תמיד דפדפן).
+#   max_pages     כמה דפים לכל היותר בכל ריצה. ברירת מחדל 100, תקרה 500.
+#
+# דוגמה (מוסד מומצא):
+#   - slug: sample-college
+#     website: https://www.example.co.il/
+#     categories: [programming, ai]
+#     sitemap: auto
+#     include: '/courses/'
+#     exclude: '/courses/(archive|tag)/'
+
+institutions: []

@@ -1,0 +1,115 @@
+{
+ "is_course_page": true,
+ "category": "programming",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "Python למתחילים",
+   "quote": "Python למתחילים",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 5400,
+   "quote": "10 תשלומים של 540 ש\"ח",
+   "confidence": "medium"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 60,
+   "quote": "60 שעות של שיעורים מוקלטים ותרגילים",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": true,
+   "value": 3,
+   "quote": "מומלץ לסיים תוך שלושה חודשים",
+   "confidence": "high"
+  },
+  "schedule": {
+   "found": true,
+   "value": "לומדים בקצב אישי, הכול מוקלט",
+   "quote": "לומדים מתי שנוח: כל השיעורים מוקלטים",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "online"
+   ],
+   "quote": "לומדים מתי שנוח: כל השיעורים מוקלטים",
+   "confidence": "high"
+  },
+  "region": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "משתנים ותנאים",
+    "לולאות ופונקציות",
+    "עבודה עם קבצים",
+    "פרויקט קטן"
+   ],
+   "quote": "משתנים ותנאים",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": true,
+   "value": "תעודת השתתפות דיגיטלית",
+   "quote": "בסוף הקורס נשלחת תעודת השתתפות דיגיטלית",
+   "confidence": "high"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}
