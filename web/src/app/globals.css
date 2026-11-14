@@ -358,7 +358,7 @@ body {
     opacity: 0;
     translate: 0 -16px;
     scale: 1.05;
-    rotate: 2.5deg;
+    rotate: var(--stick-from, 1.5deg);
   }
   30% {
     opacity: 1;
@@ -384,7 +384,7 @@ body {
    הכול גלוי ועומד כברירת מחדל. data-motion על <html> רק כשהמבקר לא ביקש פחות תנועה (layout.tsx),
    ו-data-inview על רכיב כשהוא נכנס למסך, פעם אחת (motion-observer.tsx). --enter-delay: התור באותה כניסה.
    כל תנועה היא פעולה של יד על הדף: מרקר שנמרח, עט שכותב או מקיף, פתק שנדבק. */
-@media (prefers-reduced-motion: no-preference) {
+@media screen and (prefers-reduced-motion: no-preference) {
   /* המרקר נמרח על העובדה מימין לשמאל. הטקסט גלוי כל הזמן. */
   html[data-motion] .hl:not([data-inview]) {
     background-size: 0 100%, 0 100%, 0 100%;
@@ -435,13 +435,6 @@ body {
     animation: tape-in 320ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-delay, 0ms) + 460ms) backwards;
   }
 
-  /* פס מרקר שאורכו הוא הציון: נמרח מימין לשמאל עד הציון. */
-  html[data-motion] [data-anim~='bar'] {
-    transition: clip-path 900ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay, 0ms);
-  }
-  html[data-motion] [data-anim~='bar']:not([data-inview]) {
-    clip-path: inset(0 0 0 100%);
-  }
 }
 
 /* ===== הדוגמה בשורה הראשונה של המחברת (pen-example.tsx) =====
@@ -476,7 +469,7 @@ body {
 
 /* ===== שורה ברשימה נכתבת אל המחברת (results.tsx) =====
    אנימציה עם backwards בלבד: בסוף אין clip-path, כי קו המחברת של השורה נמשך עד קצה הנייר. */
-@media (prefers-reduced-motion: no-preference) {
+@media screen and (prefers-reduced-motion: no-preference) {
   html[data-motion] [data-anim~='ink']:not([data-inview]) {
     opacity: 0;
   }

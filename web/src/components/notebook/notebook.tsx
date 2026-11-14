@@ -117,7 +117,11 @@ const inputExample =
  */
 const growCopy =
   'after:invisible after:col-start-1 after:row-start-1 after:whitespace-pre-wrap after:break-words after:content-[attr(data-copy)] after:font-pen after:text-[21px] after:font-medium after:leading-normal lg:after:text-[23px] data-empty:after:font-sans data-empty:after:text-[15px] data-empty:after:font-normal lg:data-empty:after:text-[17px]';
-const WHAT_EXAMPLE = 'למשל: לבנות אתרים, אקסל לעבודה, עוגות';
+/**
+ * הדוגמה המודפסת בשורה הראשונה: לקורא מסך ולמי שכבר בשדה. היא גם קובעת את רוחב השורה הריקה,
+ * ולכן היא קצרה, באורך הדוגמה שנכתבת בעט (pen-example.tsx), כדי שהווי יעמוד ממש אחריה.
+ */
+const WHAT_EXAMPLE = 'למשל: אקסל לעבודה, עוגות';
 /** ההערה בעט מתחת לשורה הראשונה, כשהיועץ פועל. */
 const WHAT_NOTE_ID = 'what-advisor-note';
 /** הדוגמה לשורה 4 מוצגת ליד הקו הריק ולא בתוכו, כדי שלא תיראה כמו תקציב שכבר נקבע. */
@@ -559,7 +563,8 @@ export function Notebook({
                     className={cn(
                       growCopy,
                       'relative inline-block min-w-[2ch] after:whitespace-pre',
-                      budgetEmpty && 'min-w-[4.5em] border-b-[1.5px] border-dotted border-leader',
+                      // קו מלא ולא מנוקד: קו מנוקד בין מילה למספר הוא המבנה של תפריט.
+                      budgetEmpty && 'min-w-[4.5em] border-b-[1.5px] border-line',
                     )}
                   >
                     <input

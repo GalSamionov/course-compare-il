@@ -199,9 +199,14 @@ export function StickyNote({
         className,
       )}
       style={
+        // --stick-from: ההדבקה מתחילה מוטה מעט לכיוון האפס, כך שגם פתק של 4 מעלות לא עובר את התקרה.
         tiltLg === undefined
-          ? { transform: `rotate(${angle}deg)` }
-          : ({ '--tilt': `${angle}deg`, '--tilt-lg': `${clamp(tiltLg)}deg` } as React.CSSProperties)
+          ? ({ transform: `rotate(${angle}deg)`, '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg` } as React.CSSProperties)
+          : ({
+              '--tilt': `${angle}deg`,
+              '--tilt-lg': `${clamp(tiltLg)}deg`,
+              '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg`,
+            } as React.CSSProperties)
       }
     >
       {tape && <Tape width={58} tilt={angle > 0 ? -4 : 3} washi={tone === 'paper' ? washi : undefined} />}

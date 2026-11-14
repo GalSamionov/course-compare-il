@@ -165,6 +165,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   /** הודעה שאינה של שדה אחד: שמירה שנכשלה, ביקורת כפולה, שליחה שנכשלה. */
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** לאיזה כיוון מדפדפים לצעד הבא. */
+  const [turn, setTurn] = useState<'next' | 'back'>('next');
   const [uploading, setUploading] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusAfterErrors = useRef<ErrorField | null>(null);
@@ -196,11 +198,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   }, [userId, form.courseId]);
 
   // צעד חדש: הפוקוס עובר לכותרת שלו, כדי שקורא מסך יקרא איפה הוא.
-  // ונשמר איזה צעד מוצג, כדי שהדף הבא יידע אם מדפדפים קדימה או אחורה.
-  const shownIndex = useRef(-1);
   useEffect(() => {
     if (phase.kind === 'step' || phase.kind === 'sent') heading.current?.focus();
-    if (phase.kind === 'step') shownIndex.current = STEPS.indexOf(phase.step);
   }, [phase]);
 
   // הודעות חדשות על שדות: הפוקוס עובר לשדה הראשון, וקורא המסך קורא את ההודעה שמתחתיו (aria-describedby).
@@ -243,6 +242,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   function go(step: StepId) {
     setFieldErrors([]);
     setFormError(null);
+    // קדימה הדף החדש נכנס משמאל, אחורה מימין: כמו לדפדף במחברת בעברית (globals.css, page-turn).
+    setTurn(phase.kind === 'step' && STEPS.indexOf(step) < STEPS.indexOf(phase.step) ? 'back' : 'next');
     setPhase({ kind: 'step', step });
   }
 
@@ -424,8 +425,6 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   if (phase.kind !== 'step') return null;
   const step = phase.step;
   const index = STEPS.indexOf(step);
-  // קדימה הדף החדש נכנס משמאל, אחורה מימין: כמו לדפדף במחברת בעברית.
-  const turn = index >= shownIndex.current ? 'next' : 'back';
   const body =
     step === 'when' ? (
       <WhenStep
