@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { CompareFromUrl } from '@/components/compare/compare-from-url';
-import { SourceLegend } from '@/components/course/source-legend';
 import { Sheet } from '@/components/site/sheet';
 import { getCompareCourses } from '@/lib/data/compare';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
@@ -28,7 +27,6 @@ export default async function ComparePage() {
         <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
           עד שלושה קורסים זה לצד זה, שורה לכל עובדה ולכל שאלה. בכל תא אותו סימון כמו בעמוד הקורס.
         </p>
-        <SourceLegend variant="inline" />
         <Suspense
           fallback={
             <p role="status" className="mt-6 font-sans text-[15px] text-ink-soft">

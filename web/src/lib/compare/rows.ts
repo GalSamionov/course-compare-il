@@ -5,6 +5,7 @@ import {
   formatIls,
   formatPaidRange,
   invoiceCountText,
+  outcomeBasis,
   outcomeHeadline,
   reviewsToScoreText,
   verifiedGraduatesText,
@@ -138,13 +139,11 @@ function scoreCell(score: CompareCourse['score']): CompareCell {
   return { text: 'עוד אין ציון', sub: 'עוד אין ביקורות מאומתות' };
 }
 
+/** בכל עמודה השורה המודגשת היא תוצאה, וכמה ענו (בשאלת ההמשך) בשורה הקטנה מתחת. */
 function outcomeCell(outcome: OutcomeView | null): CompareCell {
   if (!outcome) return { text: null, missing: 'עוד אין מספיק תשובות' };
-  return {
-    text: outcomeHeadline(outcome),
-    source: 'grads',
-    sub: outcome.kind === 'after_3m' ? `בממוצע ${outcome.mean.toFixed(1)} מתוך 5` : undefined,
-  };
+  const basis = outcomeBasis(outcome);
+  return { text: outcomeHeadline(outcome), source: 'grads', ...(basis && { sub: basis }) };
 }
 
 /** כמו "משך" ב"על הקורס": חודשים ושעות במרקר ירוק, ושעות העשייה בלי סימון. */

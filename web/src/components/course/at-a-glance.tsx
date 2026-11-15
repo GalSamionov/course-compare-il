@@ -1,9 +1,6 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText, outcomeHeadline } from '@/lib/format';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText, outcomeBasis, outcomeHeadline } from '@/lib/format';
 import { Mark } from './marks';
-
-/** עבר ל-lib/format.ts, כי גם ההשוואה משתמשת בו. מיוצא מכאן בשביל about-section.tsx. */
-export { outcomeHeadline };
 
 /** החולשה הבולטת: הסיכום של הבוגרים, ואם אין, פרק שסומן כחלש בסילבוס. */
 function topWeakness(course: CoursePageData): { label: string; text: string } | null {
@@ -58,9 +55,7 @@ export function AtAGlance({ course }: { course: CoursePageData }) {
         {course.outcome && (
           <li>
             <Mark source="grads">{outcomeHeadline(course.outcome)}</Mark>
-            {course.outcome.kind === 'after_3m' && (
-              <span className={sub}>בממוצע הם נתנו לתוצאה {course.outcome.mean.toFixed(1)} מתוך 5.</span>
-            )}
+            {outcomeBasis(course.outcome) && <span className={sub}>{outcomeBasis(course.outcome)}.</span>}
           </li>
         )}
         {weak && (

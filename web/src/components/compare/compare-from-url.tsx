@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { PenNote } from '@/components/course/marks';
 import { ShareLinks } from '@/components/course/share-links';
+import { SourceLegend } from '@/components/course/source-legend';
 import { MAX_COMPARE } from '@/lib/account/lists';
 import { toggleCompare, useAccount } from '@/lib/account/store';
 import { COMPARE_PARAM, compareHref, parseCompareParam, pickCompared, slotsLeftText } from '@/lib/compare/param';
@@ -17,6 +18,8 @@ type Props = { courses: readonly CompareCourse[]; siteUrl: string };
 type Note = 'full' | 'error' | null;
 
 const textLink = 'underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover';
+/** קישור בתוך שורה, עם יעד מגע של 44 פיקסלים בלי להגדיל את השורה. */
+const inlineLink = `${textLink} -my-3 inline-flex min-h-11 items-center`;
 
 /**
  * ההשוואה, מהכתובת או מהמגש. חייבת להיות בתוך <Suspense>: בדף שנבנה מראש,
@@ -65,6 +68,7 @@ export function CompareFromUrl({ courses, siteUrl }: Props) {
       chosen={chosen}
       missing={missing}
       savedIds={savedIds}
+      hasTray={trayIds.length > 0}
     />
   );
 }
@@ -76,12 +80,15 @@ function CompareView({
   chosen,
   missing,
   savedIds,
+  hasTray,
 }: Props & {
   fromLink: boolean;
   chosen: CompareCourse[];
   /** slug מהקישור, או מזהה מהמגש, של קורס שכבר לא בקטלוג. */
   missing: string[];
   savedIds: readonly string[];
+  /** למבקר יש השוואה משלו (במגש). רק אז יש טעם לכתוב שהיא לא השתנתה ולקשר אליה. */
+  hasTray: boolean;
 }) {
   /** ה-slug של כל קורס שהוצא בביקור הזה, האחרון ראשון. */
   const [removed, setRemoved] = useState<string[]>([]);
@@ -95,6 +102,8 @@ function CompareView({
     chosenIds.has(id) || removedIds.has(id) ? [] : (courses.find((c) => c.id === id) ?? []),
   );
   const full = chosen.length >= MAX_COMPARE;
+  /** קישור שאף קורס ממנו לא בהשוואה: שורה מודגשת אחת אומרת למה, בלי הערות נוספות מעליה. */
+  const emptyLink = fromLink && chosen.length === 0;
 
   /** במצב קישור: הכתובת היא מקור האמת. replaceState מעדכן את useSearchParams בלי בקשה לשרת. */
   function writeLink(slugs: string[]) {
@@ -147,16 +156,24 @@ function CompareView({
 
   return (
     <>
+      {/* המקרא מסביר את הסימון בתאים, ולכן הוא מופיע רק כשיש טבלה. */}
+      {chosen.length > 0 && <SourceLegend variant="inline" />}
       <div className="mt-5 space-y-2 font-sans text-[15px] lg:mt-6">
-        {fromLink && (
+        {fromLink && !emptyLink && (
           <PenNote arrow className="text-base">
-            זו השוואה מקישור. ההשוואה שלכם לא השתנתה.{' '}
-            <Link href="/compare" className={textLink}>
-              להשוואה שלכם
-            </Link>
+            {hasTray ? (
+              <>
+                זו השוואה מקישור. ההשוואה שלכם לא השתנתה.{' '}
+                <Link href="/compare" className={inlineLink}>
+                  להשוואה שלכם
+                </Link>
+              </>
+            ) : (
+              'השוואה שמישהו שלח לכם'
+            )}
           </PenNote>
         )}
-        {fromLink && missing.length > 0 && (
+        {fromLink && !emptyLink && missing.length > 0 && (
           <p className="text-ink-soft">
             {missing.length === 1 ? 'קורס אחד מהקישור כבר לא באתר.' : `${missing.length} קורסים מהקישור כבר לא באתר.`}
           </p>
@@ -187,14 +204,34 @@ function CompareView({
         )}
       </div>
 
-      {chosen.length === 0 ? (
+      {emptyLink ? (
         <div className="mt-6 font-sans">
           <p className="text-[17px] font-bold">
-            {fromLink ? 'בקישור אין קורסים שאנחנו מכירים.' : 'עוד לא בחרתם קורסים להשוואה.'}
+            {removedCourses.length > 0
+              ? 'הוצאתם את כל הקורסים מההשוואה.'
+              : missing.length === 1
+                ? 'הקורס מהקישור כבר לא באתר.'
+                : missing.length > 1
+                  ? 'הקורסים מהקישור כבר לא באתר.'
+                  : 'בקישור אין קורסים שאנחנו מכירים.'}
           </p>
+          <p className="mt-1 flex flex-wrap gap-x-6 text-[15px]">
+            <Link href="/courses" className={`${textLink} inline-flex min-h-11 items-center`}>
+              לכל הקורסים
+            </Link>
+            {hasTray && (
+              <Link href="/compare" className={`${textLink} inline-flex min-h-11 items-center`}>
+                להשוואה שלכם
+              </Link>
+            )}
+          </p>
+        </div>
+      ) : chosen.length === 0 ? (
+        <div className="mt-6 font-sans">
+          <p className="text-[17px] font-bold">עוד לא בחרתם קורסים להשוואה.</p>
           <p className="mt-1 max-w-[60ch] text-[15px] leading-normal text-ink-soft">
             מוסיפים מעמוד של קורס, בכפתור &quot;להשוואה (עד 3)&quot;.{' '}
-            <Link href="/courses" className={`${textLink} -my-3 inline-flex min-h-11 items-center text-ink`}>
+            <Link href="/courses" className={`${inlineLink} text-ink`}>
               לכל הקורסים
             </Link>
           </p>

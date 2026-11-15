@@ -74,6 +74,17 @@ describe('buildCompareRows', () => {
     expect(keys).toContain('certificate');
   });
 
+  it('puts an outcome in every bold line of "what happened", and how many answered under it', () => {
+    const career = course({ outcome: { kind: 'after_3m', n: 14, mean: 3.7, question: 'אחרי 3 חודשים' } });
+    const hobby = course({ id: 'b', slug: 'b-sample', outcome: { kind: 'skill_gained', yes: 8, n: 8 } });
+    const none = course({ id: 'c', slug: 'c-sample', outcome: null });
+    expect(rowOf(buildCompareRows([career, hobby, none]), 'outcome')?.cells).toEqual([
+      { text: '3.7 מתוך 5 בשאלה ״אחרי 3 חודשים״', source: 'grads', sub: '14 בוגרים ענו 3 חודשים אחרי הסיום' },
+      { text: '8 מתוך 8 אומרים שרכשו את המיומנות', source: 'grads' },
+      { text: null, missing: 'עוד אין מספיק תשובות' },
+    ]);
+  });
+
   it('links each lecturer to their page, with the role', () => {
     const c = course({
       lecturers: [{ slug: 'yael-sample', name: 'יעל', role: 'מרצה', institutionBio: null, verifiedFacts: [], otherCoursesCount: 0 }],

@@ -12,6 +12,10 @@ import { ShareLinks } from './share-links';
 
 type Note = 'added-local' | 'added' | 'full' | 'error' | null;
 
+/** הקישור לעמוד ההשוואה בהערה: בשורה משלו, עם יעד מגע של 44 פיקסלים. */
+const compareLink =
+  'inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover';
+
 /**
  * שני הכפתורים מהציור (Chosen.dc.html), ומתחתם "לשמור".
  * "להשוואה" הוא הכפתור הראשי, כי הוא עובד היום: מכניס את הקורס להשוואה או מוציא אותו.
@@ -92,24 +96,27 @@ export function CourseActions({
       <div role="status">
         {note === 'added-local' && (
           <PenNote arrow className="mt-2.5">
-            נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.{' '}
-            <Link href="/compare" className="underline underline-offset-[3px]">
+            נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.
+            <br />
+            <Link href="/compare" className={compareLink}>
               לעמוד ההשוואה
             </Link>
           </PenNote>
         )}
         {note === 'added' && (
           <PenNote arrow className="mt-2.5">
-            נוסף להשוואה ולשמורים.{' '}
-            <Link href="/compare" className="underline underline-offset-[3px]">
+            נוסף להשוואה ולשמורים.
+            <br />
+            <Link href="/compare" className={compareLink}>
               לעמוד ההשוואה
             </Link>
           </PenNote>
         )}
         {note === 'full' && (
           <PenNote arrow className="mt-2.5">
-            בהשוואה כבר יש 3 קורסים.{' '}
-            <Link href="/compare" className="underline underline-offset-[3px]">
+            בהשוואה כבר יש 3 קורסים.
+            <br />
+            <Link href="/compare" className={compareLink}>
               להוציא אחד בעמוד ההשוואה
             </Link>
           </PenNote>

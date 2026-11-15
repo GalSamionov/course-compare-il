@@ -24,10 +24,11 @@ export interface MetricRow {
 /**
  * מה קרה לבוגרים, במספרים של אנשים כשהנתונים מאפשרים.
  * after_3m: שאלת ההמשך של קורס קריירה, בסולם 1 עד 5. נשמרים רק הממוצע ומספר העונים, ולכן אין כאן "כמה עובדים בתחום".
+ *   question: שם השאלה, כמו בטבלת השאלות (metrics.label), כדי שהשורה תגיד על מה הממוצע.
  * skill_gained, passed_exam: שאלת כן או לא של תחביב או מבחן. מהממוצע יוצא בדיוק כמה ענו "כן".
  */
 export type OutcomeView =
-  | { kind: 'after_3m'; n: number; mean: number }
+  | { kind: 'after_3m'; n: number; mean: number; question: string }
   | { kind: 'skill_gained' | 'passed_exam'; yes: number; n: number };
 
 export interface ReviewView {
@@ -243,7 +244,8 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const yesNo = (['passed_exam', 'skill_gained'] as const).find((key) => valid(key));
   let outcome: OutcomeView | null = null;
   if (after3m && after3m.n >= MIN_OUTCOME_ANSWERS) {
-    outcome = { kind: 'after_3m', n: after3m.n, mean: after3m.mean };
+    const question = (metricDefs ?? []).find((m) => m.key === 'outcome_3m')?.label ?? 'אחרי 3 חודשים';
+    outcome = { kind: 'after_3m', n: after3m.n, mean: after3m.mean, question };
   } else if (yesNo) {
     const entry = valid(yesNo)!;
     if (entry.n >= MIN_OUTCOME_ANSWERS) outcome = { kind: yesNo, yes: yesCount(entry.mean, entry.n), n: entry.n };

@@ -14,8 +14,8 @@ import type { CourseSummary } from '@/lib/search/types';
  * כל פריט מאותו צד (The Not A Menu Rule): מספר מוקף בעט, השם, ומתחתיו הציון ומספר המאומתים.
  * בלי מרקר על הציון: זה האתר שמונה, לא מקור. השורה נכתבת אל הדף כשהיא נכנסת למסך (data-anim="ink"),
  * ובריחוף העט מותח קו מתחת לשם (.pen-under).
- * במחשב הרכיב עומד ליד הכותרת, בעמודה שמיושרת לתחתית (NotebookPage, headSide). לכן במחשב הוא צפוף יותר,
- * כדי שהכותרת לא תידחק הרבה למטה כשיש שלושה מובילים.
+ * במחשב הרכיב עומד ליד הכותרת, בעמודה שמיושרת לראש, מול פירורי הלחם (NotebookPage, headSide). לכן במחשב הוא
+ * צפוף יותר. ההערה על הכלל מתחת לרשימה רק במחשב: בנייד היא עוד שורה בעט בין הכותרת לרשימת הקורסים.
  */
 export function TopByGraduates({ courses, categorySlug }: { courses: readonly CourseSummary[]; categorySlug: string }) {
   const top = topByGraduates(courses, categorySlug);
@@ -50,7 +50,7 @@ export function TopByGraduates({ courses, categorySlug }: { courses: readonly Co
               </li>
             ))}
           </ol>
-          <PenNote arrow className="mt-3 text-sm lg:mt-2">
+          <PenNote arrow className="mt-2 hidden text-sm lg:block">
             רק קורסים עם {MIN_REVIEWS} ביקורות מאומתות ומעלה. לא לפי מספר נרשמים.
           </PenNote>
         </>

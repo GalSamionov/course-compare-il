@@ -54,13 +54,16 @@ export default async function CategoryPage({ params }: Props) {
       alwaysShowResults
       heading={category.name}
       intro="כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4."
+      headSideAlign="start"
       headSide={
-        <>
+        // במחשב העמודה גבוהה מהכותרת, ולכן היא מיושרת לראש ולא לתחתית. 32 פיקסלים מלמעלה:
+        // השורה הראשונה בעט עומדת מול פירורי הלחם (mt-6 ויעד מגע של 44), ולא צמודה לקו של כותרת האתר.
+        <div className="lg:pt-8">
           <PenNote arrow className="text-base font-medium lg:text-lg">
             בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
           </PenNote>
           <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
-        </>
+        </div>
       }
       after={
         <SubjectsToc
