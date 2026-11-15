@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { PenArrow } from '@/components/site/pen';
+import { loadMyBadges, type MyBadge } from '@/lib/badges/browser';
 import { deleteReview, loadMyReviews, writeAttached, type MyReview } from '@/lib/reviews/browser';
 import { verifiedLabel } from '@/lib/reviews/types';
 import type { Catalog, CourseSummary } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
+import { BadgeShare } from './badge-share';
 import { MeSection, textButton } from './me-section';
 
 type Load = { status: 'loading' } | { status: 'error' } | { status: 'ready'; reviews: MyReview[] };
@@ -78,6 +80,10 @@ function ReviewRow({
   onCancel,
   onDelete,
   leaving = false,
+  badge,
+  sharing,
+  onShare,
+  onBadge,
 }: {
   review: MyReview;
   course: CourseSummary | undefined;
@@ -90,6 +96,12 @@ function ReviewRow({
   onDelete: () => void;
   /** נמחקה עכשיו: העט מוחק את השם בקו, והשורה נעלמת (globals.css, data-leaving). */
   leaving?: boolean;
+  /** קישור "בוגר מאומת" של הביקורת, אם כבר נוצר. */
+  badge: MyBadge | undefined;
+  /** החלק "לשתף ב-LinkedIn" פתוח. */
+  sharing: boolean;
+  onShare: (open: boolean) => void;
+  onBadge: (badge: MyBadge | null) => void;
 }) {
   const question = useRef<HTMLParagraphElement>(null);
   const title = course?.title ?? 'קורס שכבר לא באתר';
@@ -144,13 +156,32 @@ function ReviewRow({
               </p>
             )}
           </div>
+        ) : sharing && course && isPublished(review) ? (
+          <BadgeShare
+            review={review}
+            courseTitle={course.title}
+            badge={badge}
+            onChange={onBadge}
+            onClose={() => onShare(false)}
+          />
         ) : (
-          // הצעד הבא והמחיקה בשורה אחת. המחיקה שקטה יותר: אפור, בלי הדגשה.
+          // הצעד הבא, השיתוף והמחיקה בשורה אחת. המחיקה שקטה יותר: אפור, בלי הדגשה.
           <div className="flex flex-wrap items-center gap-x-5">
             {step && (
               <Link href={step.href} className={cn(link, 'font-sans text-[15px]')}>
                 {step.label}
               </Link>
+            )}
+            {/* רק ביקורת שמוצגת באתר. ביקורת שהוסתרה בזמן בירור לא מקבלת קישור (share_review_badge). */}
+            {course && review.status === 'published' && (
+              <button
+                type="button"
+                onClick={() => onShare(true)}
+                className={cn(link, 'cursor-pointer font-sans text-[15px]')}
+              >
+                {badge ? 'השיתוף ב-LinkedIn' : 'לשתף ב-LinkedIn'}
+                <span className="sr-only"> את הביקורת על {title}</span>
+              </button>
             )}
             <button type="button" onClick={onAsk} className={cn(textButton, 'px-0 text-sm font-normal text-ink-soft')}>
               למחוק<span className="sr-only"> את הביקורת על {title}</span>
@@ -175,6 +206,10 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
   const [notice, setNotice] = useState<string | null>(null);
   /** הביקורת שנמחקה עכשיו, בזמן שהעט מוחק אותה מהרשימה. */
   const [leaving, setLeaving] = useState<string | null>(null);
+  /** קישורי "בוגר מאומת", לפי הביקורת. בלי טעינה מוצלחת: אין קישורים, והביקורות עצמן עדיין מוצגות. */
+  const [badges, setBadges] = useState<ReadonlyMap<string, MyBadge>>(new Map());
+  /** הביקורת שהחלק "לשתף ב-LinkedIn" שלה פתוח. */
+  const [sharing, setSharing] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -185,6 +220,13 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
       () => {
         if (alive) setLoad({ status: 'error' });
       },
+    );
+    // מסד שהמיגרציה של הקישורים עוד לא עלתה אליו: אין קישורים, וזה לא שגיאה שהכותב צריך לראות.
+    loadMyBadges().then(
+      (list) => {
+        if (alive) setBadges(new Map(list.map((b) => [b.reviewId, b])));
+      },
+      () => {},
     );
     return () => {
       alive = false;
@@ -206,6 +248,12 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
       return;
     }
     setConfirming(null);
+    // הקישור לשיתוף נמחק במסד יחד עם הביקורת (on delete cascade).
+    setBadges((current) => {
+      const next = new Map(current);
+      next.delete(review.id);
+      return next;
+    });
     // הקבצים שהועלו ולא נשלחו כבר נמחקו בשרת. גם הרשימה שלהם בדפדפן כבר לא צריכה להישמר.
     writeAttached(review.id, []);
     // העט מוחק את השורה בקו לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
@@ -275,6 +323,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 error={confirming === review.id ? error : null}
                 onAsk={() => {
                   setError(null);
+                  setSharing(null);
                   setConfirming(review.id);
                 }}
                 onCancel={() => {
@@ -283,6 +332,20 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 }}
                 onDelete={() => void remove(review)}
                 leaving={leaving === review.id}
+                badge={badges.get(review.id)}
+                sharing={sharing === review.id}
+                onShare={(open) => {
+                  setConfirming(null);
+                  setSharing(open ? review.id : null);
+                }}
+                onBadge={(badge) =>
+                  setBadges((current) => {
+                    const next = new Map(current);
+                    if (badge) next.set(review.id, badge);
+                    else next.delete(review.id);
+                    return next;
+                  })
+                }
               />
             ))}
           </ul>
