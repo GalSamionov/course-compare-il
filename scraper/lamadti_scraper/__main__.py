@@ -2,6 +2,7 @@
 
 run              הריצה השבועית. צריך SUPABASE_SECRET_KEY, ANTHROPIC_API_KEY, ו-SUPABASE_URL (או NEXT_PUBLIC_SUPABASE_URL).
 demo             שלושה שבועות של אתר הדוגמה מול המסד המקומי, עם חילוץ מוקלט. בלי מפתח Anthropic.
+discover         גילוי בלבד, בלי מודל ובלי מסד: כמה דפים נמצאו לכל מוסד ומאיפה. לכיוון ההגדרות.
 check-fixtures   חילוץ אמיתי עם Claude של 20 דפי הדוגמה, מול החילוץ הצפוי. בלי מסד.
 """
 
@@ -32,6 +33,12 @@ def _db_from_env() -> Db:
 
 def cmd_run(args: argparse.Namespace) -> int:
     config = load_config(Path(args.config))
+    if args.only:
+        wanted = set(args.only)
+        unknown = wanted - {i.slug for i in config.institutions}
+        if unknown:
+            sys.exit(f"לא ב-institutions.yaml: {', '.join(sorted(unknown))}")
+        config.institutions = [i for i in config.institutions if i.slug in wanted]
     if not config.institutions:
         print("אין מוסדות מאושרים ב-institutions.yaml. אין מה לאסוף.")
         return 0
@@ -62,6 +69,22 @@ def cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_discover(args: argparse.Namespace) -> int:
+    from .dryrun import discover_all
+
+    config = load_config(Path(args.config))
+    if not config.institutions:
+        print("אין מוסדות ב-institutions.yaml.")
+        return 0
+    text = discover_all(config, workers=args.workers, only=args.only)
+    if args.out:
+        Path(args.out).write_bytes(text.encode("utf-8"))
+        print(f"נכתב: {args.out}")
+    else:
+        print(text)
+    return 0
+
+
 def cmd_check_fixtures(args: argparse.Namespace) -> int:
     from .check import check_fixtures
 
@@ -81,12 +104,19 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--config", default=str(DEFAULT_CONFIG))
     run.add_argument("--trigger", default="manual", choices=["schedule", "manual", "local"])
     run.add_argument("--workers", type=int, default=4)
+    run.add_argument("--only", nargs="*", help="רק המוסדות האלה (slug), למשל לריצת ניסיון")
     run.add_argument("--replay", help="תיקייה עם חילוץ מוקלט, במקום Claude")
     run.add_argument("--variant")
     run.set_defaults(func=cmd_run)
     demo = sub.add_parser("demo")
     demo.add_argument("--keep-visible", action="store_true", help="לא להסתיר את קורסי הדוגמה בסוף")
     demo.set_defaults(func=cmd_demo)
+    dry = sub.add_parser("discover", help="גילוי בלבד: אילו דפים נמצאו לכל מוסד. בלי מודל ובלי מסד")
+    dry.add_argument("--config", default=str(DEFAULT_CONFIG))
+    dry.add_argument("--workers", type=int, default=6)
+    dry.add_argument("--only", nargs="*", help="רק המוסדות האלה (slug)")
+    dry.add_argument("--out", help="קובץ Markdown לדוח")
+    dry.set_defaults(func=cmd_discover)
     check = sub.add_parser("check-fixtures")
     check.set_defaults(func=cmd_check_fixtures)
     args = parser.parse_args(argv)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Protocol
 from urllib.parse import urljoin, urlsplit
@@ -13,7 +14,16 @@ from .fetch import FetchResult
 from .pagetext import extract_page, needs_browser
 
 MAX_SITEMAP_FILES = 50
+# יותר מזה במפות האתר: מפסיקים לקרוא אותן. הגילוי נחשב חלקי, ודפים שלא נמצאו לא נספרים כנעלמים.
+MAX_DISCOVERED = 20_000
 MAX_SITEMAP_DEPTH = 2
+# מפות אתר של בלוג, חדשות, תגיות וכדומה (למשל post-sitemap.xml של וורדפרס). דף קורס כמעט אף פעם לא שם.
+# בגילוי היבש של 15.11.2026 רוב הדפים הגיעו מהן. מפה שנקבעה במפורש בהגדרות נקראת תמיד.
+SKIP_SITEMAP = re.compile(
+    r"(post|blog|news|article|category|categories|tag|author|attachment|press|testimonial|review|member|team|"
+    r"download|landing|elementor|portfolio|gallery|faq|glossary|pdf)[^/]*sitemap|sitemap[^/]*(news|blog|post|pdf|tag|categor)",
+    re.I,
+)
 
 
 class PageGetter(Protocol):
@@ -31,6 +41,8 @@ class Discovery:
     # כל מה שנמצא, גם מעבר ל-max_pages. דף שנמצא לא נחשב "נעלם", גם אם לא נקרא השבוע.
     seen: list[str] = field(default_factory=list)
     ok: bool = False
+    # False כשהקריאה של מפות האתר נעצרה באמצע (MAX_DISCOVERED או MAX_SITEMAP_FILES).
+    complete: bool = True
     sources: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -61,6 +73,19 @@ def parse_sitemap(body: bytes) -> tuple[list[str], list[str]]:
     return pages, nested
 
 
+def _first_segment(url: str) -> str:
+    parts = [p for p in urlsplit(url).path.split("/") if p]
+    return parts[0].lower() if len(parts) > 1 else ""
+
+
+def prioritize(urls: list[str], known: tuple[str, ...]) -> list[str]:
+    """כש-max_pages חותך, קודם הדפים הידועים, אחריהם כתובות באותה תיקייה שלהם (/courses/...), ואז השאר.
+    הסדר בתוך כל קבוצה נשמר."""
+    segments = {_first_segment(u) for u in known} - {""}
+    known_set = set(known)
+    return sorted(urls, key=lambda u: 0 if u in known_set else 1 if _first_segment(u) in segments else 2)
+
+
 def _clean(url: str) -> str:
     return url.split("#", 1)[0].strip()
 
@@ -88,11 +113,23 @@ def discover(institution: InstitutionConfig, fetcher: PageGetter, robots: Robots
             seen.add(url)
             found.append(url)
 
+    for known in institution.course_urls:
+        add(known)
+    if institution.course_urls:
+        result.ok = True
+        result.sources.append("course_urls")
+
     queue: list[tuple[str, int]] = [(u, 0) for u in _sitemap_roots(institution, robots)]
     fetched = 0
-    while queue and fetched < MAX_SITEMAP_FILES:
+    while queue:
+        if fetched >= MAX_SITEMAP_FILES or len(found) >= MAX_DISCOVERED:
+            result.complete = False
+            result.errors.append(f"stopped reading sitemaps at {len(found)} pages and {fetched} files")
+            break
         url, depth = queue.pop(0)
         if not institution.same_site(url):
+            continue
+        if url != institution.sitemap and SKIP_SITEMAP.search(urlsplit(url).path):
             continue
         fetched += 1
         response = fetcher.get(url, kind="xml")
@@ -125,6 +162,7 @@ def discover(institution: InstitutionConfig, fetcher: PageGetter, robots: Robots
             add(urljoin(response.final_url, link))
 
     result.seen = list(found)
+    found = prioritize(found, institution.course_urls)
     result.urls = found[: institution.max_pages]
     if len(found) > institution.max_pages:
         result.errors.append(f"found {len(found)} pages, kept the first {institution.max_pages}")

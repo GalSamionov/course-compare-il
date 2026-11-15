@@ -68,6 +68,11 @@ class Db:
         prefer = "return=representation" + (",resolution=merge-duplicates" if on_conflict else "")
         return self._check(self._client.post(f"/{table}", params=params, json=rows, headers={"Prefer": prefer}))
 
+    def insert_missing(self, table: str, rows: list[dict[str, Any]], on_conflict: str) -> list[dict[str, Any]]:
+        """מוסיף רק שורות שעוד אין. שורה קיימת לא משתנה. מחזיר את מה שנוסף."""
+        prefer = "return=representation,resolution=ignore-duplicates"
+        return self._check(self._client.post(f"/{table}", params={"on_conflict": on_conflict}, json=rows, headers={"Prefer": prefer}))
+
     def update(self, table: str, filters: dict[str, str], values: dict[str, Any]) -> None:
         self._check(self._client.patch(f"/{table}", params=filters, json=values))
 
@@ -81,6 +86,13 @@ class Db:
             return {}
         rows = self.select("institutions", {"select": "id,slug", "slug": f"in.({','.join(slugs)})"})
         return {r["slug"]: r["id"] for r in rows}
+
+    def create_institutions(self, rows: list[dict[str, str]]) -> list[str]:
+        """מוסדות מהרשימה המאושרת שעוד לא בטבלה. מוסד קיים לא משתנה. מחזיר את ה-slug של מי שנוסף."""
+        added: list[str] = []
+        for row in rows:  # שורה אחת לבקשה: PostgREST דורש את אותם מפתחות בכל השורות
+            added += [r["slug"] for r in self.insert_missing("institutions", [row], on_conflict="slug")]
+        return added
 
     def categories(self) -> dict[str, tuple[str, str]]:
         return {r["slug"]: (r["id"], r["name"]) for r in self.select("categories", {"select": "id,slug,name"})}

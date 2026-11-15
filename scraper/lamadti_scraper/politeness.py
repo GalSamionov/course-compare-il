@@ -29,6 +29,20 @@ def host_of(url: str) -> str:
     return (urlsplit(url).hostname or "").lower()
 
 
+SUFFIXES_2 = {"co.il", "org.il", "ac.il", "gov.il", "net.il", "muni.il", "k12.il", "co.uk", "org.uk"}
+
+
+def site_key(host: str) -> str:
+    """האתר שהקצב חל עליו: הדומיין בלי תת-דומיינים. blog.example.co.il ו-www.example.co.il הם אותו אתר,
+    ולכן יחד לא יותר מבקשה לשנייה."""
+    host = host.lower().strip(".")
+    labels = host.split(".")
+    if host in LOCAL_HOSTS or host.replace(".", "").isdigit() or ":" in host or len(labels) <= 2:
+        return host
+    keep = 3 if ".".join(labels[-2:]) in SUFFIXES_2 else 2
+    return ".".join(labels[-keep:])
+
+
 def is_local(url: str) -> bool:
     return host_of(url) in LOCAL_HOSTS
 
@@ -57,10 +71,12 @@ class HostLimiter:
         self._guard = threading.Lock()
 
     def set_crawl_delay(self, host: str, seconds: float) -> None:
+        host = site_key(host)
         with self._guard:
             self._extra[host] = min(max(seconds, 0.0), MAX_CRAWL_DELAY_SECONDS)
 
     def interval_for(self, host: str) -> float:
+        host = site_key(host)
         base = self._local_interval if host in LOCAL_HOSTS else self._min_interval
         return max(base, self._extra.get(host, 0.0))
 
@@ -69,6 +85,7 @@ class HostLimiter:
             return self._locks.setdefault(host, threading.Lock())
 
     def wait(self, host: str) -> None:
+        host = site_key(host)
         with self._lock(host):
             last = self._last.get(host)
             if last is not None:

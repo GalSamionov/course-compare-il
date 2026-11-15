@@ -144,6 +144,11 @@ def decide_changed(
             plan.queue.append({"kind": "maybe_inactive", "field": None, "old": None, "new": None, "quote": None, "confidence": None, "reasons": ["page_not_course"]})
         return plan
 
+    if course is None and extraction.category is None:
+        # קורס בתחום שהמוסד לא אושר בו (המודל ענה "none"): לא יוצרים טיוטה.
+        plan.outcome = "not_course"
+        return plan
+
     plan.outcome = "changed"
     issues = check_extraction(extraction.fields, today, page_text)
     common = dict(

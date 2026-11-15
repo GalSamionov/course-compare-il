@@ -110,3 +110,40 @@ def test_requested_page_is_read_even_when_discovery_misses_it():
             fetcher.close()
     assert [p.url for p in result.plans] == [requested]
     assert requested in result.discovery.seen
+
+
+class CatalogDb(FakeDb):
+    """מוסד אחד בטבלה, ומוסד מאושר שעוד לא בה. תחום אחד באתר."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.created: list[dict] = []
+        self.known = {"inside": "id-inside"}
+
+    def institution_ids(self, slugs):
+        return {s: self.known[s] for s in slugs if s in self.known}
+
+    def create_institutions(self, rows):
+        self.created += rows
+        for row in rows:
+            self.known[row["slug"]] = f"id-{row['slug']}"
+        return [r["slug"] for r in rows]
+
+
+def test_approved_institutions_are_created_and_new_categories_are_dropped():
+    db = CatalogDb()
+    with serve_fixtures() as site:
+        config = Config([
+            InstitutionConfig(slug="inside", website=site.base + "/", categories=("programming", "ux-ui"), max_pages=1),
+            InstitutionConfig(slug="outside", website=site.base + "/", categories=("programming",), name="מוסד", kind="school", max_pages=1),
+            InstitutionConfig(slug="new-only", website=site.base + "/", categories=("ux-ui",), name="מוסד", kind="school"),
+            InstitutionConfig(slug="no-name", website=site.base + "/", categories=("programming",)),
+        ])
+        summary = run_scraper(
+            config=config, db=db, extractor=DownExtractor(), today=date(2026, 11, 14), trigger="local",
+            limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
+        )
+    assert [r["slug"] for r in db.created] == ["outside"]
+    assert db.created[0] == {"slug": "outside", "name": "מוסד", "kind": "school", "website": site.base + "/"}
+    assert summary.report["dropped_categories"] == {"inside": ["ux-ui"]}
+    assert set(summary.report["skipped_institutions"]) == {"new-only", "no-name"}
