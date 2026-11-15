@@ -91,26 +91,27 @@ export function CourseActions({
       </div>
       <div role="status">
         {note === 'added-local' && (
-          <PenNote arrow className="mt-2.5">נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.</PenNote>
+          <PenNote arrow className="mt-2.5">
+            נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.{' '}
+            <Link href="/compare" className="underline underline-offset-[3px]">
+              לעמוד ההשוואה
+            </Link>
+          </PenNote>
         )}
         {note === 'added' && (
           <PenNote arrow className="mt-2.5">
             נוסף להשוואה ולשמורים.{' '}
-            <Link href="/me#compare" className="underline underline-offset-[3px]">
-              לאזור שלי
+            <Link href="/compare" className="underline underline-offset-[3px]">
+              לעמוד ההשוואה
             </Link>
           </PenNote>
         )}
         {note === 'full' && (
           <PenNote arrow className="mt-2.5">
             בהשוואה כבר יש 3 קורסים.{' '}
-            {account.status === 'signed-in' ? (
-              <Link href="/me#compare" className="underline underline-offset-[3px]">
-                להוציא אחד באזור שלי
-              </Link>
-            ) : (
-              'אפשר להוציא קורס מהעמוד שלו.'
-            )}
+            <Link href="/compare" className="underline underline-offset-[3px]">
+              להוציא אחד בעמוד ההשוואה
+            </Link>
           </PenNote>
         )}
         {note === 'error' && <p className="mt-2.5 text-[13px] text-ink-soft">לא הצלחנו לעדכן את ההשוואה. נסו שוב.</p>}

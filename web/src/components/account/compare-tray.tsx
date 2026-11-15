@@ -4,6 +4,7 @@ import { PenArrow } from '@/components/site/pen';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MAX_COMPARE } from '@/lib/account/lists';
+import { slotsLeftText } from '@/lib/compare/param';
 import { toggleCompare } from '@/lib/account/store';
 import { formatIls } from '@/lib/format';
 import type { CourseSummary } from '@/lib/search/types';
@@ -15,7 +16,7 @@ const smallLink = 'underline underline-offset-[3px] hover:text-link-hover';
 
 /**
  * "ההשוואה שלי": שלושה מקומות בדיוק, זה לצד זה, כמו בציור (Me.dc.html).
- * מקום שהתפנה נשאר ריק במקום שלו. עמוד ההשוואה עצמו נבנה בסבב 4, ולכן ליד הקישור אליו כתוב בעט "נפתח בקרוב".
+ * מקום שהתפנה נשאר ריק במקום שלו. ליד הקישור לעמוד ההשוואה כתוב בעט כמה מקומות נשארו.
  */
 export function CompareTray({ slots }: { slots: { position: number; course: CourseSummary }[] }) {
   const [busy, setBusy] = useState<string | null>(null);
@@ -105,7 +106,8 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
       )}
       <div className="mt-2.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
         <p className={marginNote}>
-          <PenArrow />נפתח בקרוב
+          <PenArrow />
+          {slotsLeftText(slots.length)}
         </p>
         <div className="ps-3 font-sans text-[15px] font-semibold">
           <Link href="/compare" className={cn('inline-flex min-h-11 items-center', smallLink)}>

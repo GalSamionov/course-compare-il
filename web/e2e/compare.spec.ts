@@ -1,0 +1,40 @@
+import { expect, test } from '@playwright/test';
+
+test('a shared link shows the courses side by side, with the same marks as the course page', async ({ page }) => {
+  await page.goto('/compare?c=full-stack-sample,baking-sample');
+  await expect(page.getByRole('columnheader', { name: /פיתוח Full Stack/ })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: /אפייה ביתית/ })).toBeVisible();
+  await expect(page.getByText(/זו השוואה מקישור/)).toBeVisible();
+
+  // מה ששולם בפועל בירוק, בשני הקורסים. מה שהמוסד מבטיח בקו כחול.
+  await expect(page.locator('[data-row="paid"] mark[data-source="verified"]')).toHaveCount(2);
+  await expect(page.locator('[data-row="promises"] [data-source="claim"]').first()).toBeVisible();
+
+  // להוציא בקישור משנה רק את הכתובת, והקורס מחכה בתחתית.
+  await page.getByRole('button', { name: 'להוציא את אפייה ביתית: לחמים ועוגות מההשוואה' }).click();
+  await expect(page).toHaveURL(/\/compare\?c=full-stack-sample$/);
+  await page.getByRole('button', { name: 'להחזיר את אפייה ביתית: לחמים ועוגות להשוואה' }).click();
+  await expect(page).toHaveURL(/\/compare\?c=full-stack-sample,baking-sample$/);
+});
+
+test('a visitor who did not log in sees the comparison from this browser, and can take a course out and back', async ({
+  page,
+}) => {
+  await page.goto('/courses/italian-sample');
+  const compareButton = page.getByRole('checkbox', { name: 'להשוואה (עד 3)' });
+  // עד שהדפדפן יודע שהמבקר לא מחובר, הלחיצה לא עושה כלום. מנסים שוב עד שהקורס בפנים.
+  await expect(async () => {
+    await compareButton.click();
+    await expect(compareButton).toBeChecked({ timeout: 1000 });
+  }).toPass();
+  await page.getByRole('link', { name: 'לעמוד ההשוואה' }).click();
+
+  await expect(page).toHaveURL(/\/compare$/);
+  await expect(page.getByRole('columnheader', { name: /בישול איטלקי/ })).toBeVisible();
+  await expect(page.getByText(/נשארו 2 מקומות/)).toBeVisible();
+
+  await page.getByRole('button', { name: 'להוציא את בישול איטלקי מההשוואה' }).click();
+  await expect(page.getByText('עוד לא בחרתם קורסים להשוואה.')).toBeVisible();
+  await page.getByRole('button', { name: 'להחזיר את בישול איטלקי להשוואה' }).click();
+  await expect(page.getByRole('columnheader', { name: /בישול איטלקי/ })).toBeVisible();
+});
