@@ -41,8 +41,10 @@ export const CAREER_QUESTIONS: readonly CareerQuestion[] = [
 export interface ResolvedQuestion {
   text: string;
   href: string;
-  /** שם המדריך, לקישור. */
+  /** שם המדריך. */
   guideTitle: string;
+  /** שם הפרק במדריך, לקישור: הוא אומר על מה הפרק, ושונה משאלה לשאלה. */
+  section: string;
 }
 
 /** הקישור של כל שאלה: המדריך והפרק. מדריך או פרק שלא קיימים זורקים שגיאה, כדי שהבנייה תיכשל ולא תקשר לכלום. */
@@ -52,6 +54,6 @@ export function resolveQuestions(questions: readonly CareerQuestion[] = CAREER_Q
     if (!guide) throw new Error(`career question: no guide "${q.guide}"`);
     const section = guide.sections.find((s) => s.title === q.section);
     if (!section) throw new Error(`career question: no section "${q.section}" in "${q.guide}"`);
-    return { text: q.text, href: `/guides/${guide.slug}#${section.id}`, guideTitle: guide.title };
+    return { text: q.text, href: `/guides/${guide.slug}#${section.id}`, guideTitle: guide.title, section: section.title };
   });
 }

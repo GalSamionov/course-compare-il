@@ -64,7 +64,7 @@ function chapters(page: CareerChangePage, questions: number) {
             ) : (
               <PenLoop delay={420}>{verifiedGraduatesText(page.graduates)}</PenLoop>
             )}
-            {page.withPaid > 0 && `. ${inHowMany(page.withPaid, total)} יש כבר טווח של מה ששולם, לפי חשבוניות`}
+            {page.withPaid > 0 && `. מחיר לפי חשבוניות ${inHowMany(page.withPaid, total)}`}
           </>
         ),
     },
@@ -124,8 +124,9 @@ export default async function CareerChangePage() {
           </Link>
         </nav>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-20">
-          <header className="lg:col-start-1 lg:row-start-1">
+        {/* במחשב: הכותרת ותוכן העניינים מימין, ומשמאל ההערה בעט, השיתוף והמקרא. הפרקים מתחת, ברוחב הדף. */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-x-20">
+          <header>
             <h1 className="mt-0.5 max-w-[20ch] text-[30px] leading-tight font-bold text-balance lg:text-[54px] lg:leading-[1.06]">
               {CAREER_CHANGE_TITLE}
             </h1>
@@ -172,8 +173,8 @@ export default async function CareerChangePage() {
             </nav>
           </header>
 
-          <aside aria-label="לשלוח הלאה" className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-3">
-            <div className="lg:sticky lg:top-8 lg:pb-10">
+          <aside aria-label="לשלוח הלאה" className="lg:pt-3">
+            <div>
               <PenNote arrow className="hidden text-lg font-medium lg:block">
                 אף מוסד לא משלם לנו, ואף אחד לא קונה מקום ברשימה.
               </PenNote>
@@ -189,8 +190,9 @@ export default async function CareerChangePage() {
               <SourceLegend />
             </div>
           </aside>
+        </div>
 
-          <div className="lg:col-start-1 lg:row-start-2 lg:max-w-[760px]">
+        <div>
             {/* ===== 1. הקורסים ===== */}
             <section id="courses" aria-labelledby="courses-title" className="mt-10 scroll-mt-6 lg:mt-14">
               <h2 id="courses-title" className={chapterTitle}>
@@ -320,10 +322,10 @@ export default async function CareerChangePage() {
                         {i + 1}
                       </span>
                       <div className="min-w-0 ps-3 pt-2.5 pb-2 lg:pt-3">
-                        <p className="text-base leading-normal font-semibold text-pretty lg:text-lg">{q.text}</p>
+                        <p className="max-w-[64ch] text-base leading-normal font-semibold text-pretty lg:text-lg">{q.text}</p>
                         <p className="font-sans text-[13px] text-ink-soft lg:text-sm">
                           <Link href={q.href} className={cn(navLink, '-my-2')}>
-                            למה לשאול: {q.guideTitle}
+                            במדריך: {q.section}
                           </Link>
                         </p>
                       </div>
@@ -332,7 +334,7 @@ export default async function CareerChangePage() {
                 </ol>
               </div>
               {/* המדריכים עצמם: פתקים לבנים עם מסקינג טייפ, כי הם מקום באתר (The White Note Rule). */}
-              <ul className="mt-9 grid gap-x-6 gap-y-7 sm:grid-cols-2 lg:mt-10">
+              <ul className="mt-9 grid gap-x-6 gap-y-7 sm:grid-cols-2 lg:mt-10 lg:max-w-[760px]">
                 {guides.map((g, i) => (
                   <li key={g.slug} className="flex">
                     <Link href={`/guides/${g.slug}`} className="group flex w-full text-ink">
@@ -419,14 +421,13 @@ export default async function CareerChangePage() {
               <p className="mt-1 font-sans text-[15px] leading-normal text-pretty lg:text-base">
                 שלחו לו את העמוד הזה: {careerChangeCounts(page)}, ומה לשאול לפני שמשלמים.
               </p>
-              <ShareLinks text={share.text} url={share.url} className="mt-1" />
+              <ShareLinks text={share.text} url={share.url} prominent className="mt-3" />
               <p className="font-sans text-[13px] lg:hidden">
                 <Link href="/who-pays-us" className={navLink}>
                   מי משלם לנו, ועל מה אף אחד לא יכול לשלם
                 </Link>
               </p>
             </section>
-          </div>
         </div>
       </main>
     </Sheet>

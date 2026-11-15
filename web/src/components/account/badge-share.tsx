@@ -91,7 +91,7 @@ export function BadgeShare({
       aria-labelledby={`badge-${review.id}`}
       className="mt-2.5 mb-1 max-w-[56ch] border-t-2 border-ink pt-2.5 font-sans"
     >
-      <p id={`badge-${review.id}`} ref={heading} tabIndex={-1} className="text-[15px] font-bold outline-none">
+      <p id={`badge-${review.id}`} ref={heading} tabIndex={-1} className="text-[15px] leading-snug font-bold outline-none">
         לשתף ב-LinkedIn שאתם בוגרים מאומתים
       </p>
       <p className="mt-1 text-[15px] leading-normal text-pretty">
@@ -149,11 +149,6 @@ export function BadgeShare({
               לסגור
             </button>
           </div>
-          {url && (
-            <p className="text-[13px] text-ink-soft">
-              הקישור: <bdi dir="ltr" className="break-all select-all">{url}</bdi>
-            </p>
-          )}
         </>
       ) : (
         <div className="mt-2 flex flex-wrap items-center gap-x-4">

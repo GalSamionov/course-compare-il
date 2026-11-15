@@ -81,8 +81,8 @@ function BadgeContent({ badge }: { badge: Badge }) {
       </div>
 
       <p className="mt-7 max-w-[58ch] text-base leading-relaxed text-pretty lg:mt-10 lg:text-lg">
-        {badge.shownName ? badge.shownName : 'מי ששיתף את הכרטיס'} כתב/ה ביקורת על הקורס, אחרי שהעלה/תה הוכחה שלמד/ה
-        בו: חשבונית, קבלה או תעודת סיום. ההוכחה נמחקה מיד אחרי הבדיקה.
+        הכרטיס ניתן על ביקורת שפורסמה באתר. ביקורת מתפרסמת רק אחרי הוכחה שלמדו בקורס: חשבונית, קבלה או תעודת סיום.
+        ההוכחה נמחקה מיד אחרי הבדיקה.
       </p>
       <PenNote arrow className="mt-2 text-base font-medium lg:text-lg">
         זו הכרה ולא פרס: על ביקורת לא מקבלים כאן כלום, ואף מוסד לא משלם לנו.

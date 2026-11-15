@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { buttonVariants } from '@/components/ui/button';
 import { whatsappHref } from '@/lib/og/share-text';
 import { cn } from '@/lib/utils';
 
@@ -18,8 +19,19 @@ const linkClass =
  * "לשלוח בוואטסאפ": קישור ל-wa.me עם ההודעה של קישור משותף והכתובת. וואטסאפ הוא ברירת המחדל,
  * כי שם שואלים על קורסים (PRODUCT.md). בטלפון שתומך בשיתוף של המערכת יש גם "שיתוף אחר".
  * false בשרת ובהידרציה, ומיד אחר כך הערך האמיתי: כך ה-HTML והדפדפן מסכימים.
+ * prominent: וואטסאפ ככפתור ראשי בדיו, כשהשיתוף הוא הפעולה של הקטע (בסוף עמוד ההסבה להייטק).
  */
-export function ShareLinks({ text, url, className }: { text: string; url: string; className?: string }) {
+export function ShareLinks({
+  text,
+  url,
+  className,
+  prominent = false,
+}: {
+  text: string;
+  url: string;
+  className?: string;
+  prominent?: boolean;
+}) {
   const native = useSyncExternalStore(noSubscribe, canShareNatively, () => false);
 
   async function share() {
@@ -31,8 +43,13 @@ export function ShareLinks({ text, url, className }: { text: string; url: string
   }
 
   return (
-    <span className={cn('inline-flex flex-wrap items-center gap-x-3.5', className)}>
-      <a href={whatsappHref(text, url)} target="_blank" rel="noopener noreferrer" className={linkClass}>
+    <span className={cn('inline-flex flex-wrap items-center gap-x-3.5', prominent && 'gap-x-5 gap-y-2', className)}>
+      <a
+        href={whatsappHref(text, url)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={prominent ? cn(buttonVariants(), 'h-[50px] px-5 font-sans text-base font-bold') : linkClass}
+      >
         לשלוח בוואטסאפ<span className="sr-only"> (נפתח בחלון חדש)</span>
       </a>
       {native && (
