@@ -3,7 +3,7 @@ import { PROOF_KIND_LABEL, type ProofKind } from '@/lib/reviews/types';
 import { fieldLabel } from './course-fields';
 import { REJECT_REASONS, isRejectReason } from './reasons';
 
-/** כל הפעולות ש-audit_log מקבל (audit_log_action_check ב-20261115230001_reports_and_transparency.sql). */
+/** כל הפעולות ש-audit_log מקבל (audit_log_action_check ב-20261115233001_company_requests.sql). */
 export const AUDIT_ACTIONS = [
   'approve',
   'reject',
@@ -20,6 +20,8 @@ export const AUDIT_ACTIONS = [
   'report_remove',
   'vendor_response',
   'vendor_response_remove',
+  'company_request_contacted',
+  'company_request_closed',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
@@ -41,6 +43,8 @@ const LABEL: Record<AuditAction, string> = {
   report_remove: 'ביקורת הוסרה אחרי דיווח',
   vendor_response: 'תגובת מוסד פורסמה',
   vendor_response_remove: 'תגובת מוסד הוסרה',
+  company_request_contacted: 'חזרנו לחברה שפנתה',
+  company_request_closed: 'פנייה של חברה נסגרה',
 };
 
 /** מה קרה, בעברית. פעולה שעוד אין לה מילים מוצגת כמו שהיא, כדי שלא תיעלם מהיומן. */

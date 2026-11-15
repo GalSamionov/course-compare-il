@@ -20,7 +20,8 @@ async function main() {
   const result = await cleanupProofs(db, new Date());
   console.log(
     `reviews deleted: ${result.reviewsDeleted}, files deleted: ${result.filesDeleted}, check usage rows deleted: ${result.checkUsageDeleted}, ` +
-      `institution request emails deleted: ${result.requestEmailsDeleted ?? 'skipped (no purge_institution_requests yet)'}`,
+      `institution request emails deleted: ${result.requestEmailsDeleted ?? 'skipped (no purge_institution_requests yet)'}, ` +
+      `company requests deleted: ${result.companyRequestsDeleted ?? 'skipped (no purge_company_requests yet)'}`,
   );
   for (const failure of result.failures) console.error(failure);
   if (result.failures.length > 0) process.exit(1);

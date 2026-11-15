@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { CompanyRequestItem } from '@/components/admin/company-request-item';
 import { textLink } from '@/components/admin/controls';
 import { CourseQueueItemView } from '@/components/admin/course-queue-item';
 import { DecisionLog } from '@/components/admin/decision-log';
@@ -11,6 +12,7 @@ import { QueueItemView } from '@/components/admin/queue-item';
 import { ScrapeRunReportView } from '@/components/admin/scrape-run-report';
 import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
+import { COMPANY_REQUESTS_PAGE, loadCompanyRequests } from '@/lib/admin/company-requests';
 import { COURSE_QUEUE_PAGE, loadCourseQueue, loadJoinRequests, loadLatestRun } from '@/lib/admin/course-queue';
 import { adminGate } from '@/lib/admin/gate';
 import { loadQueue } from '@/lib/admin/queue';
@@ -54,6 +56,13 @@ function requestsLine(count: number): string {
   return `${count} בקשות מחכות, הישנה ראשונה.`;
 }
 
+/** הפניות הפתוחות, וכמה מהן עוד מחכות שנחזור אליהן. היעד בעמוד לחברות: תוך 2 ימי עבודה. */
+function companiesLine(open: number, waiting: number, shown: number): string {
+  const wait = waiting === 0 ? 'חזרנו לכולן.' : waiting === 1 ? 'אחת עוד מחכה שנחזור אליה.' : `${waiting} עוד מחכות שנחזור אליהן.`;
+  const head = open === 1 ? 'פנייה אחת פתוחה.' : shown < open ? `${open} פניות פתוחות. כאן ${shown} החדשות.` : `${open} פניות פתוחות, החדשה ראשונה.`;
+  return `${head} ${wait} היעד: תשובה תוך 2 ימי עבודה.`;
+}
+
 const sectionTitle = 'pen-rule text-[21px] leading-snug font-bold lg:text-[28px]';
 const countText = 'mt-2 font-sans text-[15px] leading-normal text-ink-soft';
 
@@ -63,14 +72,21 @@ async function AdminQueues() {
   await connection();
   const gate = await adminGate({ readOnly: true });
   if (gate.kind === 'not-admin') notFound();
-  const [reviews, courses, run, join] =
+  const [reviews, courses, run, join, companies] =
     gate.kind === 'ok'
-      ? await Promise.all([loadQueue(gate.db), loadCourseQueue(gate.db), loadLatestRun(gate.db), loadJoinRequests(gate.db)])
-      : [[], { items: [], total: 0 }, null, { requests: [], institutions: [] }];
+      ? await Promise.all([
+          loadQueue(gate.db),
+          loadCourseQueue(gate.db),
+          loadLatestRun(gate.db),
+          loadJoinRequests(gate.db),
+          loadCompanyRequests(gate.db),
+        ])
+      : [[], { items: [], total: 0 }, null, { requests: [], institutions: [] }, { requests: [], open: 0, waiting: 0 }];
   const queues = [
     { id: 'reviews', label: 'ביקורות לאימות', count: reviews.length },
     { id: 'courses', label: 'קורסים לאישור', count: courses.total },
     { id: 'requests', label: 'בקשות של מוסדות', count: join.requests.length },
+    { id: 'companies', label: 'פניות מחברות', count: companies.open },
   ];
 
   return (
@@ -146,6 +162,30 @@ async function AdminQueues() {
                 <div className="mt-6">
                   {join.requests.map((request) => (
                     <JoinRequestItem key={request.id} request={request} institutions={join.institutions} />
+                  ))}
+                </div>
+              </section>
+
+              <section id="companies" aria-labelledby="companies-title" className="mt-10 scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
+                <h2 id="companies-title" className={sectionTitle}>
+                  פניות מחברות
+                </h2>
+                <p className={countText}>
+                  {companies.open === 0 ? (
+                    <>
+                      אין פניות פתוחות. חברה פונה מ
+                      <Link href="/companies" className={textLink}>
+                        העמוד לחברות
+                      </Link>
+                      .
+                    </>
+                  ) : (
+                    companiesLine(companies.open, companies.waiting, Math.min(companies.requests.length, COMPANY_REQUESTS_PAGE))
+                  )}
+                </p>
+                <div className="mt-6">
+                  {companies.requests.map((request) => (
+                    <CompanyRequestItem key={request.id} request={request} />
                   ))}
                 </div>
               </section>

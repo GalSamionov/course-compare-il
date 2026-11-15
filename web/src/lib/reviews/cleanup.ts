@@ -17,6 +17,8 @@ export interface CleanupResult {
   checkUsageDeleted: number;
   /** מיילים של בקשות ממוסדות שנמחקו (90 יום אחרי ההחלטה). null: הפונקציה עוד לא במסד הזה. */
   requestEmailsDeleted: number | null;
+  /** פניות של חברות שנסגרו לפני יותר מ-12 חודשים, ונמחקו. null: הפונקציה עוד לא במסד הזה. */
+  companyRequestsDeleted: number | null;
   failures: string[];
 }
 
@@ -30,6 +32,8 @@ const hoursAgo = (now: Date, hours: number) => new Date(now.getTime() - hours * 
  * 3. שורות של מכסת הבדיקות בנות יותר מיומיים.
  * 4. בקשות ממוסדות (/institutions/join): המייל 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
  *    (purge_institution_requests, ומדיניות הפרטיות).
+ * 5. פניות של חברות (/companies): פנייה שנסגרה נמחקת כולה 12 חודשים אחרי הסגירה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_company_requests, ומדיניות הפרטיות).
  * המחיקה מהאחסון דרך ה-API של Storage בלבד (protect_delete חוסם מחיקה ב-SQL).
  */
 export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Promise<CleanupResult> {
@@ -69,5 +73,18 @@ export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Pr
   if (purgeError && purgeError.code !== 'PGRST202') failures.push(`institution_requests: ${purgeError.message}`);
   else if (!purgeError) requestEmailsDeleted = purged ?? 0;
 
-  return { reviewsDeleted, filesDeleted, checkUsageDeleted: count ?? 0, requestEmailsDeleted, failures };
+  // אותו דבר למסד שהמיגרציה של הפניות מחברות (20261115233001) עוד לא עלתה אליו.
+  let companyRequestsDeleted: number | null = null;
+  const { data: companies, error: companiesError } = await db.rpc('purge_company_requests');
+  if (companiesError && companiesError.code !== 'PGRST202') failures.push(`company_requests: ${companiesError.message}`);
+  else if (!companiesError) companyRequestsDeleted = companies ?? 0;
+
+  return {
+    reviewsDeleted,
+    filesDeleted,
+    checkUsageDeleted: count ?? 0,
+    requestEmailsDeleted,
+    companyRequestsDeleted,
+    failures,
+  };
 }
