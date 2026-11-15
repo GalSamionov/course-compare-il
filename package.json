@@ -3,12 +3,15 @@
   "private": true,
   "packageManager": "pnpm@10.17.1",
   "scripts": {
-    "db:start": "supabase start",
-    "db:stop": "supabase stop",
-    "db:reset": "supabase db reset",
-    "db:test": "supabase test db",
-    "db:status": "supabase status",
-    "db:types": "supabase gen types typescript --local > web/src/lib/database.types.ts"
+    "db": "node scripts/pi-db.mjs",
+    "db:start": "node scripts/pi-db.mjs start",
+    "db:stop": "node scripts/pi-db.mjs stop",
+    "db:reset": "node scripts/pi-db.mjs db reset",
+    "db:test": "node scripts/pi-db.mjs test db",
+    "db:migrate": "node scripts/pi-db.mjs migration up",
+    "db:status": "node scripts/pi-db.mjs status",
+    "db:tunnel": "node scripts/pi-db.mjs tunnel",
+    "db:types": "node scripts/pi-db.mjs gen types typescript --local > web/src/lib/database.types.ts"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
