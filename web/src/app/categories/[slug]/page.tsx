@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { TopByGraduates } from '@/components/category/top-by-graduates';
 import { PenNote } from '@/components/course/marks';
 import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
@@ -54,9 +55,12 @@ export default async function CategoryPage({ params }: Props) {
       heading={category.name}
       intro="כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4."
       headSide={
-        <PenNote arrow className="text-base font-medium lg:text-lg">
-          בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
-        </PenNote>
+        <>
+          <PenNote arrow className="text-base font-medium lg:text-lg">
+            בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
+          </PenNote>
+          <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
+        </>
       }
       after={
         <SubjectsToc
