@@ -30,7 +30,10 @@
 
 - **תיקייה:** כל הפקודות רצות מ-`C:/Users/galsa/Desktop/קורסים השוואות`, ב-Git Bash. בנתיב יש אותיות עבריות, ולכן תמיד במירכאות. פקודות של האתר: `pnpm --dir web ...`.
 - **ענף:** `plan-1-foundation`. פריסות יוצאות רק ממנו (`docs/STATUS.md`).
-- **התוכנית מתחילה אחרי שהענף של התור (`claude/upbeat-carson-94b71e`) מוזג ל-`plan-1-foundation`.** משימה 1 בודקת את זה, ועוצרת אם לא.
+- **התוכנית מתחילה אחרי שהענף של התור (`claude/upbeat-carson-94b71e`) מוזג ל-`plan-1-foundation`.**
+  - **כבר קרה ב-15.11.2026:** התור מוזג, הכול מוזג ל-`main` (PR מספר 1, `fa62f03`), והמיגרציה של התור כבר בענן.
+  - **משימה 1** רק מוודאת את זה, ועוצרת אם משהו לא כך.
+- **`main`:** התהליכים המתוזמנים (החישוב הלילי, הניקוי והאוסף) רצים ממנו. השינויים של הסבב מגיעים אליו רק ב-PR חדש, באישור של גל (משימה 13).
 - **המסד לפיתוח רץ על הרספברי פיי, דרך מנהרת SSH (`README.md`). אין Docker במחשב.**
   - **הפעלה:** `pnpm db:start`. אחרי אתחול של המחשב: `pnpm db:tunnel`.
   - **שאר הפקודות:** `pnpm db:reset`, `pnpm db:test`, `pnpm db:types` ו-`pnpm db:migrate` מעתיקות את `supabase/` מתיקיית העבודה לפיי, כולל קבצים שעוד לא נשמרו ב-git, ומריצות שם.
@@ -205,7 +208,7 @@ grep -n "updateTag" web/src/app/admin/course-actions.ts
 git status --short
 ```
 
-Expected:
+Expected (כך המצב מאז 15.11.2026, אחרי PR מספר 1):
 - `plan-1-foundation`, ואז `merged`.
 - שלושת הקבצים קיימים.
 - ב-`course-actions.ts` שתי שורות: `updateTag(\`course:${course.slug}\`)` ו-`updateTag('catalog')`. כך החלק של פריט 36 שנוגע לקורס שפורסם או השתנה בתור כבר עובד.
@@ -3786,4 +3789,1041 @@ git commit -m "feat: יומן הפעולות ב-/admin/log"
 
 ---
 
-<!-- המשך: משימות 9 ואילך -->
+### Task 9: הכותב, הפרטיות והניקוי (Impeccable)
+
+**Files:**
+- Modify: `web/src/components/account/my-reviews.tsx` (`isHidden`, `statusWord`, `nextStep`, `Details`)
+- Modify: `web/src/app/privacy/page.tsx` (סעיף חדש, לפני "איפה המידע נמצא")
+- Modify: `web/src/lib/reviews/cleanup.ts`
+- Modify: `web/scripts/cleanup-proofs.ts` (שורת הסיכום)
+
+- [ ] **Step 1: Impeccable לפני כל עריכת ממשק**
+
+1. טוענים את ה-skill `/impeccable`. אם `.claude/skills/impeccable` חסרה: `npx impeccable install` מתיקיית הפרויקט.
+2. Run:
+   ```bash
+   .claude/skills/impeccable/scripts/impeccable context --target web/src/components/account/my-reviews.tsx
+   ```
+   ב-PowerShell או ב-cmd: `.claude\skills\impeccable\scripts\impeccable.cmd context --target web/src/components/account/my-reviews.tsx`. ממלאים את ההוראות שהפקודה מדפיסה, ולא מריצים אותה שוב.
+3. קוראים את `.claude/skills/impeccable/reference/craft-floor.md` ואת `.claude/skills/impeccable/reference/mode-read.md`.
+4. **הכללים:**
+   - **המצב בשוליים:** מילה אחת, בגופן המודפס, כמו "פורסמה" ו"הוחזרה".
+   - **ההסבר:** בדיו, בלי צבע ובלי פתק. זו הודעה של האתר לכותב, לא קול של בוגר.
+   - **עמוד הפרטיות:** רשימה רגילה של `.text-page`, כמו הסעיף של המוסדות.
+
+הקוד בצעדים הבאים הוא נקודת ההתחלה. Impeccable לא משנה את המילים "מוסתרת" ו"הוסרה", ואת `id="reports"` בעמוד הפרטיות (הטופס של הדיווח מקשר אליו).
+
+- [ ] **Step 2: "הביקורות שלי"**
+
+ב-`web/src/components/account/my-reviews.tsx`:
+
+אחרי השורה `const isPublished = ...`:
+
+```tsx
+/** מוסתרת עד בירור, אחרי דיווח (סבב 5). ב"הקורסים שלי" היא עדיין נחשבת: הבוגר עדיין מאומת. */
+const isHidden = (review: MyReview) => review.status === 'disputed';
+```
+
+ב-`statusWord`, לפני `if (isPublished(review)) return 'פורסמה';`:
+
+```tsx
+  if (isHidden(review)) return 'מוסתרת';
+```
+
+ב-`nextStep`, לפני `if (isPublished(review)) return { href: ...`:
+
+```tsx
+  if (isHidden(review)) return null;
+```
+
+ב-`Details`, לפני `if (isPublished(review)) {`:
+
+```tsx
+  if (isHidden(review)) {
+    return (
+      <p className="mt-1 font-sans text-[15px] leading-normal text-pretty">
+        היא מוסתרת מעמוד הקורס עד שנסיים לבדוק דיווח עליה. ההחלטה תופיע כאן.
+      </p>
+    );
+  }
+```
+
+ובסוף `Details`, במקום `return <p className="mt-1 font-sans text-[15px] leading-normal">היא כבר לא מופיעה באתר.</p>;`:
+
+```tsx
+  // הוסרה אחרי דיווח: הנימוק מ-decide_review_reports, ב-decision_note (מסמך העיצוב של סבב 5, סעיף 4).
+  return (
+    <div className="mt-1 font-sans text-[15px] leading-normal">
+      <p>היא כבר לא מופיעה באתר.</p>
+      {review.decisionNote && <p className="mt-0.5 max-w-[52ch] text-pretty">{review.decisionNote}</p>}
+    </div>
+  );
+```
+
+- [ ] **Step 3: מדיניות הפרטיות**
+
+ב-`web/src/app/privacy/page.tsx`, לפני `<h2>איפה המידע נמצא</h2>`:
+
+```tsx
+      <h2 id="reports">כשמדווחים על ביקורת</h2>
+      <ul>
+        <li>לא צריך חשבון, ולא נשמר מי דיווח: לא שם ולא מייל.</li>
+        <li>נשמרים הביקורת שעליה דיווחתם, הסיבה שבחרתם ומה שכתבתם. רק אנחנו רואים אותם, בממשק הניהול.</li>
+        <li>מה שכתבתם נמחק 90 יום אחרי שהחלטנו על הדיווח (הניקוי רץ פעם ביום). הסיבה וההחלטה נשארות.</li>
+        <li>
+          כדי להגביל את מספר הדיווחים, נשמרת טביעה של כתובת ה-IP, שאי אפשר לשחזר ממנה את הכתובת, ונמחקת אחרי יומיים.
+        </li>
+        <li>ההחלטה שלנו נרשמת ביומן פעולות שלא נמחק, בלי מה שכתבתם.</li>
+      </ul>
+
+```
+
+- [ ] **Step 4: הניקוי היומי**
+
+ב-`web/src/lib/reviews/cleanup.ts`:
+
+ב-`CleanupResult`, אחרי `requestEmailsDeleted`:
+
+```ts
+  /** מה שמדווחים כתבו, 90 יום אחרי ההחלטה (purge_reports). null: הפונקציה עוד לא במסד הזה. */
+  reportDetailsDeleted: number | null;
+```
+
+בהערה שמעל `cleanupProofs`, אחרי סעיף 4:
+
+```ts
+ * 5. דיווחים על ביקורות: מה שהמדווח כתב 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_reports, ומדיניות הפרטיות).
+```
+
+אחרי הבלוק של `purge_institution_requests`, לפני ה-`return`:
+
+```ts
+  // מסד שהמיגרציה של תוכנית 5ג עוד לא עלתה אליו: אין מה לנקות, וזה לא כישלון.
+  let reportDetailsDeleted: number | null = null;
+  const { data: purgedReports, error: reportsError } = await db.rpc('purge_reports');
+  if (reportsError && reportsError.code !== 'PGRST202') failures.push(`reports: ${reportsError.message}`);
+  else if (!reportsError) reportDetailsDeleted = purgedReports ?? 0;
+```
+
+וה-`return`:
+
+```ts
+  return {
+    reviewsDeleted,
+    filesDeleted,
+    checkUsageDeleted: count ?? 0,
+    requestEmailsDeleted,
+    reportDetailsDeleted,
+    failures,
+  };
+```
+
+ב-`web/scripts/cleanup-proofs.ts`, בשורת הסיכום, אחרי החלק של `requestEmailsDeleted`:
+
+```ts
+      `institution request emails deleted: ${result.requestEmailsDeleted ?? 'skipped (no purge_institution_requests yet)'}, ` +
+      `report details deleted: ${result.reportDetailsDeleted ?? 'skipped (no purge_reports yet)'}`,
+```
+
+(השורה הקודמת של `institution request emails deleted` מוחלפת בשתי השורות האלה.)
+
+- [ ] **Step 5: ירוק**
+
+```bash
+pnpm --dir web lint && pnpm --dir web exec tsc --noEmit && pnpm --dir web test
+pnpm --dir web proofs:cleanup
+pnpm --dir web build
+```
+
+Expected:
+- הכול עובר.
+- `proofs:cleanup`, מול המסד המקומי, מסתיים ב-`report details deleted: 0` (או מספר), ובלי `failed`.
+
+`pnpm --dir web start`, ופותחים `/privacy#reports` ב-390. לבדוק את "הביקורות שלי" עם ביקורת מוסתרת: מתחברים כבוגר לדוגמה, מסתירים ביקורת שלו מ-`/admin`, ומחזירים אותה בסוף ("להשאיר").
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add web/src/components/account/my-reviews.tsx web/src/app/privacy/page.tsx web/src/lib/reviews/cleanup.ts web/scripts/cleanup-proofs.ts
+git commit -m "feat: הכותב רואה ביקורת מוסתרת או מוסרת, הפרטיות של הדיווחים, והניקוי שלהם"
+```
+
+שורה בקובץ הסשן.
+
+---
+
+### Task 10: מספרי השקיפות בעמוד השיטה וב"מי משלם לנו" (Impeccable)
+
+**Files:**
+- Create: `.impeccable/surfaces/` (חוזה חדש, דרך `impeccable surface-brief write`)
+- Create: `web/src/lib/data/transparency.ts`
+- Create: `web/src/components/transparency/transparency-numbers.tsx`
+- Modify: `web/src/app/method/page.tsx` (ייבוא, ושני סעיפים לפני הפסקה על המדריכים)
+- Modify: `web/src/app/who-pays-us/page.tsx` (ייבוא, `ensureStatic`, וסעיף אחרי "הכללים")
+
+- [ ] **Step 1: חוזה העיצוב**
+
+```bash
+cd "C:/Users/galsa/Desktop/קורסים השוואות"
+cat > web/test-results/transparency-brief.md <<'EOF'
+# האימות במספרים
+
+**היקף:** הסעיף "האימות במספרים" בעמוד השיטה (`/method#numbers`), והמשפט שלו ב"מי משלם לנו" (`/who-pays-us`). קודם לנייד, בעברית מימין לשמאל. המבקר צריך להבין ולהאמין (mode: read).
+**מי מגיע:** מי שקורא איך מדרגים, או מי משלם לנו, ושואל אם האימות באמת קורה.
+**המשימה:** לראות במשפט אחד מה עשינו בחודש שנגמר, ובטבלה קטנה את שלושת החודשים האחרונים.
+**התוכן:** המשפט ("באוקטובר 2026 פרסמנו 12 ביקורות, והחזרנו 37 לכותבים בלי לפרסם."), שבע שורות של ספירות בשלושה חודשים, והערה בעט: רק חודשים שנגמרו, רק סך הכול לכל האתר, ועד ההשקה פעולות על נתוני דוגמה. בלי חודש שנגמר: "המספרים של כל חודש מתפרסמים כאן כשהוא נגמר."
+**מגבלות:** בלי צבע מקור, בלי מרקר ובלי פתק: אלה לא נתונים של בוגרים, של מסמך או של מוסד. בלי גרף ובלי כרטיסי מונה. אף פעם לא לפי קורס, מוסד או תחום.
+
+## Direction contract
+
+THESIS: פנקס החשבונות של האתר, שמונח פתוח בסוף השיטה. משפט אחד שאומר מה קרה, וטבלה קטנה של ספירות בדיו. מוותר על לוח בקרה, על גרפים ועל מספרים ענקיים.
+
+OWN-WORLD: אותו עמוד טקסט (`.text-page`): IBM Plex Sans Hebrew, ספרות ברוחב קבוע, קווי טבלה כמו טבלת המשקלות שבאותו עמוד. העט הכחול רק להערה על מה סופרים ולמה.
+
+STORY: הקורא מגיע לסוף השיטה, קורא שבחודש שעבר פרסמנו כך וכך ביקורות והחזרנו פי שלושה, ומבין שהאימות לא על הנייר. מי שרוצה עוד רואה את שלושת החודשים, ואת ההערה בעט.
+
+FIRST VIEWPORT: הכותרת "האימות במספרים" עם קו העט, המשפט, ומתחתיו הטבלה. ב"מי משלם לנו": המשפט וקישור לטבלה.
+
+FORM: הרחבה של העולם של עמודי הטקסט, במצב Read. טבלת HTML אמיתית (caption, th עם scope). seed:c81c41ae8e27158d
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+EOF
+.claude/skills/impeccable/scripts/impeccable surface-brief write web/src/components/transparency/transparency-numbers.tsx web/test-results/transparency-brief.md web/src/app/method/page.tsx web/src/app/who-pays-us/page.tsx
+.claude/skills/impeccable/scripts/impeccable surface-brief list
+```
+
+Expected: ברשימה חוזה חדש, שה-target הראשי שלו `web/src/components/transparency/transparency-numbers.tsx`.
+
+- [ ] **Step 2: Impeccable לפני כל עריכת ממשק**
+
+1. טוענים את ה-skill `/impeccable`. אם `.claude/skills/impeccable` חסרה: `npx impeccable install` מתיקיית הפרויקט.
+2. Run:
+   ```bash
+   .claude/skills/impeccable/scripts/impeccable context --target web/src/components/transparency/transparency-numbers.tsx
+   ```
+   ב-PowerShell או ב-cmd: `.claude\skills\impeccable\scripts\impeccable.cmd context --target web/src/components/transparency/transparency-numbers.tsx`. ממלאים את ההוראות שהפקודה מדפיסה, ולא מריצים אותה שוב.
+3. קוראים את `.claude/skills/impeccable/reference/craft-floor.md` ואת `.claude/skills/impeccable/reference/mode-read.md`.
+4. **הכללים, מ-`DESIGN.md`:**
+   - **בלי צבע מקור:** בלי מרקר ובלי פתק (The Source Is The Color Rule).
+   - **הספרות:** ברוחב קבוע (The Tabular Figures Rule).
+   - **ההערה:** `PenNote`, בעט. המשפט והטבלה בדיו.
+   - **הטבלה:** כמו טבלת המשקלות שבאותו עמוד. היא טבלה של נתונים, ולא רשימה של שם ומספר בקצה השני (The Not A Menu Rule).
+   - **תנועה:** בלי JavaScript חדש. קו העט מתחת ל-`h2` ושורות הטבלה כבר זזים ב-`.text-page`, וההערה בעט נכתבת.
+   - **הגודל:** קודם לנייד, ברוחב 390: עמודת תוויות ושלוש עמודות של מספרים, בלי גלילה לרוחב.
+
+הקוד בצעדים הבאים הוא נקודת ההתחלה. Impeccable לא משנה את הכותרות "האימות במספרים" ו"כשמדווחים על ביקורת", את `id="numbers"`, ואת המשפט של `transparencyLead`.
+
+- [ ] **Step 3: הנתונים**
+
+Create `web/src/lib/data/transparency.ts`:
+
+```ts
+import { cacheLife, cacheTag } from 'next/cache';
+import { createPublicClient } from '@/lib/supabase/public-client';
+import { toTransparencyMonth, type TransparencyMonth } from '@/lib/transparency/numbers';
+import { queryError } from './shared';
+
+/** כמה חודשים בטבלה בעמוד השיטה. */
+export const TRANSPARENCY_MONTHS = 3;
+
+/**
+ * מספרי השקיפות, מהחודש החדש לישן (transparency_by_month, עם המפתח הציבורי). רק חודשים שנגמרו, ולכן הם
+ * משתנים רק פעם בחודש. נשמר לשעה, ו-revalidateTag('transparency') מרענן לפני הזמן (/api/revalidate).
+ * שאילתה שנכשלה זורקת שגיאה, כדי שהבנייה תיכשל ולא תציג בשקט "אין מספרים".
+ */
+export async function getTransparency(): Promise<TransparencyMonth[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('transparency');
+  const db = createPublicClient();
+  const { data, error } = await db.rpc('transparency_by_month', { p_months: TRANSPARENCY_MONTHS });
+  if (error) throw queryError('transparency', error);
+  return (data ?? []).map(toTransparencyMonth);
+}
+```
+
+- [ ] **Step 4: הרכיב**
+
+Create `web/src/components/transparency/transparency-numbers.tsx`:
+
+```tsx
+import Link from 'next/link';
+import { PenNote } from '@/components/course/marks';
+import { getTransparency } from '@/lib/data/transparency';
+import { TRANSPARENCY_ROWS, formatCount, monthName, transparencyLead } from '@/lib/transparency/numbers';
+
+/**
+ * מספרי השקיפות (סבב 5, פריט 33): ההוכחה שהאימות באמת קורה. רק חודשים שנגמרו, ורק סך הכול לכל האתר
+ * (מסמך העיצוב של סבב 5, סעיף 7). full: המשפט והטבלה של שלושת החודשים (עמוד השיטה). אחרת: רק המשפט,
+ * וקישור לטבלה (עמוד "מי משלם לנו"). בתוך TextPage, ולכן הטבלה והפסקאות מקבלות את העיצוב של .text-page.
+ */
+export async function TransparencyNumbers({ full = false }: { full?: boolean }) {
+  const months = await getTransparency();
+  const latest = months[0];
+  if (!latest) {
+    return (
+      <p>
+        המספרים של כל חודש מתפרסמים כאן כשהוא נגמר: כמה ביקורות פרסמנו, כמה החזרנו לכותבים, וכמה הוכחות מחקנו.
+        החודש הראשון שלנו עוד לא נגמר.
+      </p>
+    );
+  }
+  return (
+    <>
+      <p className="text-lg font-semibold text-pretty">{transparencyLead(latest)}</p>
+      {full ? (
+        <table className="w-full font-sans text-[15px] tabular-nums">
+          <caption className="sr-only">מה עשינו בכל חודש, לכל האתר</caption>
+          <thead>
+            <tr className="border-b border-ink">
+              <th scope="col" className="py-1.5 text-start font-semibold">
+                בכל חודש
+              </th>
+              {months.map((m) => (
+                <th key={m.month} scope="col" className="w-20 py-1.5 text-end font-semibold lg:w-28">
+                  {monthName(m.month)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {TRANSPARENCY_ROWS.map((row) => (
+              <tr key={row.key} className="border-b border-rule">
+                <th scope="row" className="py-1.5 text-start font-normal">
+                  {row.label}
+                </th>
+                {months.map((m) => (
+                  <td key={m.month} className="py-1.5 text-end">
+                    {formatCount(m[row.key])}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>
+          <Link href="/method#numbers">כל המספרים, חודש אחרי חודש</Link>
+        </p>
+      )}
+      <PenNote arrow>
+        רק חודשים שנגמרו, ורק סך הכול לכל האתר, כדי שאי אפשר יהיה לזהות בוגר לפי מספר. עד ההשקה: פעולות על נתוני דוגמה.
+      </PenNote>
+    </>
+  );
+}
+```
+
+- [ ] **Step 5: עמוד השיטה**
+
+ב-`web/src/app/method/page.tsx`, בייבוא, אחרי `import { TextPage } from '@/components/site/text-page';`:
+
+```tsx
+import { TransparencyNumbers } from '@/components/transparency/transparency-numbers';
+```
+
+אחרי סוף הבלוק של "יומן השינויים בשיטה" (`)}`), ולפני הפסקה שמתחילה ב"לפני שמשלמים על קורס אפשר גם לבדוק לבד" (היא מהסשן של המדריכים, ולא זזה):
+
+```tsx
+      <h2>כשמדווחים על ביקורת</h2>
+      <ul>
+        <li>כל אחד יכול לדווח על ביקורת, בלי חשבון, מ״לדווח״ שמתחתיה.</li>
+        <li>בזמן הבדיקה הביקורת נשארת באתר. מסתירים אותה רק אם יש בה פרטים של אדם פרטי או תוכן לא חוקי.</li>
+        <li>עובדה שנכתבה בביקורת נבדקת מול הסילבוס ומול העותקים השמורים של דף הקורס. דעה נשארת.</li>
+        <li>מוסד שרוצה להגיב מדווח עם ״סיבה אחרת״ וכותב את התגובה. היא מופיעה מתחת לביקורת, בפתק כחול.</li>
+        <li>כל החלטה נרשמת ביומן פעולות שלא נמחק.</li>
+      </ul>
+
+      <h2 id="numbers">האימות במספרים</h2>
+      <TransparencyNumbers full />
+
+```
+
+- [ ] **Step 6: "מי משלם לנו"**
+
+ב-`web/src/app/who-pays-us/page.tsx`:
+
+בייבוא, אחרי `import { TextPage } from '@/components/site/text-page';`:
+
+```tsx
+import { TransparencyNumbers } from '@/components/transparency/transparency-numbers';
+```
+
+אחרי ה-`metadata`:
+
+```tsx
+/** סטטי: המספרים מגיעים מ-getTransparency שבמטמון, כמו בעמוד השיטה. */
+export const ensureStatic = 'navigation';
+```
+
+ו-`export default function WhoPaysUsPage()` הופך ל-`export default async function WhoPaysUsPage()`. אחרי הרשימה של "הכללים" (`</ul>`), לפני הפסקה עם הקישור "איך אנחנו מדרגים":
+
+```tsx
+      <h2>האימות במספרים</h2>
+      <TransparencyNumbers />
+
+```
+
+- [ ] **Step 7: מספרים לדוגמה, מקומית בלבד**
+
+אחרי `pnpm db:reset` אין פעולות בחודש שנגמר, והעמוד מראה רק את ההודעה. כדי לראות גם את הטבלה, מוסיפים שורות ליומן המקומי, באמצע החודש הקודם ובאמצע החודש שלפניו. היומן לא נמחק, ולכן הן נשארות עד ה-`pnpm db:reset` הבא. הסקריפט מסרב לרוץ מול מסד שאינו מקומי.
+
+```bash
+cd "C:/Users/galsa/Desktop/קורסים השוואות"
+cat > web/test-results/transparency-demo.mts <<'EOF'
+import { randomUUID } from 'node:crypto';
+import { createClient } from '@supabase/supabase-js';
+import { localEnv } from '../e2e/support/env';
+import { isLocalSupabase } from '../src/lib/admin/local-admin';
+import type { Database } from '../src/lib/database.types';
+
+const url = localEnv('NEXT_PUBLIC_SUPABASE_URL');
+if (!isLocalSupabase(url)) throw new Error('local database only');
+const db = createClient<Database>(url, localEnv('SUPABASE_SECRET_KEY'), { auth: { persistSession: false } });
+
+const mid = (monthsBack: number) => {
+  const d = new Date();
+  d.setUTCDate(15);
+  d.setUTCHours(12, 0, 0, 0);
+  d.setUTCMonth(d.getUTCMonth() - monthsBack);
+  return d.toISOString();
+};
+const plan: [string, number, number][] = [
+  ['approve', 12, 1], ['reject', 25, 1], ['request_more', 12, 1], ['report_keep', 4, 1], ['report_remove', 1, 1],
+  ['approve', 7, 2], ['reject', 21, 2], ['report_keep', 1, 2],
+];
+const rows = plan.flatMap(([action, count, monthsBack]) =>
+  Array.from({ length: count }, () => ({
+    action,
+    actor_id: '00000000-0000-0000-0000-000000000001',
+    review_id: randomUUID(),
+    created_at: mid(monthsBack),
+    details: { demo: true },
+  })),
+);
+const { error } = await db.from('audit_log').insert(rows);
+if (error) throw error;
+console.log(`inserted ${rows.length} demo rows into the local audit log`);
+EOF
+cd web && node --import tsx test-results/transparency-demo.mts; cd ..
+```
+
+Expected: `inserted 83 demo rows into the local audit log`.
+
+- [ ] **Step 8: ירוק ובעין**
+
+```bash
+pnpm --dir web lint && pnpm --dir web exec tsc --noEmit && pnpm --dir web test
+pnpm --dir web build
+```
+
+Expected: הבנייה עוברת, ו-`/method` ו-`/who-pays-us` נשארים סטטיים (○ או ◐ בפלט, לא ƒ).
+
+`pnpm --dir web start`, ובודקים ב-390 וב-1280:
+- `/method#numbers`: "בחודש <הקודם> פרסמנו 12 ביקורות, והחזרנו 37 לכותבים בלי לפרסם." ושלוש עמודות, אם יש שלושה חודשים עם פעולות. בלי גלילה לרוחב.
+- `/who-pays-us`: המשפט, והקישור לטבלה.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add .impeccable/surfaces web/src/lib/data/transparency.ts web/src/components/transparency web/src/app/method/page.tsx web/src/app/who-pays-us/page.tsx
+git commit -m "feat: האימות במספרים בעמוד השיטה וב'מי משלם לנו', וכשמדווחים על ביקורת"
+```
+
+שורה בקובץ הסשן.
+
+---
+
+### Task 11: סקירת אבטחה אחת: הדיווח הציבורי והנתיב של הרענון
+
+**Files:**
+- Modify: לפי הממצאים
+- Modify: `docs/sessions/2026-11-15-round-5.md`
+
+סבב אחד, לפי הבקשה של גל. הסקירה רק קוראת קוד.
+
+- [ ] **Step 1: הסקירה**
+
+שולחים סוכן (`feature-dev:code-reviewer`), בלי היסטוריה של השיחה, עם הבקשה הזו:
+
+> סקירת אבטחה של שני מסלולים חדשים באתר Next.js 16 עם Supabase, בענף `plan-1-foundation`. רק קריאת קוד, בלי לשנות קבצים. דווח רק על ממצאים בביטחון גבוה, עם חומרה (קריטי, גבוה, בינוני, נמוך), קובץ ושורה, ותיקון מוצע.
+>
+> **1. דיווח ציבורי על ביקורת, בלי חשבון:**
+> - **הקבצים:**
+>   - `web/src/app/courses/[slug]/report-actions.ts` (Server Action);
+>   - `web/src/lib/reports/reasons.ts`;
+>   - `web/src/components/course/report-review.tsx`;
+>   - `supabase/migrations/20261115230001_reports_and_transparency.sql`, סעיפים 2, 3 ו-6.
+>   - לדפוס המקורי: `web/src/app/institutions/join/actions.ts` ו-`supabase/migrations/20261115210001_course_queue_admin.sql`.
+> - **מה לבדוק:**
+>   - **עקיפת מגבלת הקצב:** זיוף `x-forwarded-for` ב-Vercel, בקשות במקביל, והנעילה.
+>   - **CSRF:** הבדיקה של Next ל-Origin ב-Server Actions.
+>   - **הקלט:** אורך, סוג, ומזהה ביקורת.
+>   - **זליגת מידע:** האם אפשר לגלות אם ביקורת קיימת, מוסתרת או טיוטה; האם התשובות שונות בכפילות.
+>   - **הטביעה:** HMAC של ה-IP, והמחיקה שלה.
+>   - **הרשאות:** RLS ו-`revoke` על `reports`; שהפונקציות רק ל-service_role; `search_path = ''`.
+>   - **ההחלטות של המנהל:** `web/src/app/admin/report-actions.ts` ו-`decide_review_reports`:
+>     - האם משתמש שאינו מנהל יכול להפעיל אותן;
+>     - האם טקסט חופשי נכנס ל-`audit_log`.
+>
+> **2. `POST /api/revalidate`:**
+> - **הקבצים:**
+>   - `web/src/app/api/revalidate/route.ts`;
+>   - `web/src/lib/cache/revalidate.ts` ו-`revalidate-client.ts`;
+>   - `web/scripts/recompute-scores.ts`;
+>   - `.github/workflows/scores-nightly.yml`.
+> - **מה לבדוק:**
+>   - השוואת הטוקן בזמן קבוע;
+>   - נתיב פתוח כשהטוקן חסר או קצר;
+>   - גוף גדול, ותגיות שלא אמורות להתרענן;
+>   - האם הטוקן יכול להגיע ליומן (שלנו, של Vercel או של GitHub Actions) או לתשובה;
+>   - האם מסד מקומי יכול לרענן את האתר באוויר.
+>
+> **3. `transparency_by_month`:** `security definer`, פתוחה לאורח. האם היא יכולה להחזיר משהו מעבר לספירות לפי חודש שנגמר?
+
+- [ ] **Step 2: תיקונים**
+
+- **קריטי וגבוה:** מתקנים, ומוסיפים בדיקה במקום שמתאים: pgTAP למסד, ובדיקת יחידה ללוגיקה טהורה.
+- **בינוני:** מתקנים, אם התיקון קטן.
+- **נמוך, ומה שלא מתקנים:** נרשמים בקובץ הסשן עם הסיבה, כמו בסשן של התור (החלטה 5 שם).
+
+```bash
+pnpm db:reset && pnpm db:test && pnpm --dir web score:recompute
+pnpm --dir web lint && pnpm --dir web exec tsc --noEmit && pnpm --dir web test
+```
+
+אם התיקון נגע במיגרציה: גם `pnpm db:types`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add -A supabase web/src web/scripts .github docs/sessions/2026-11-15-round-5.md
+git commit -m "fix: תיקוני סקירת האבטחה של הדיווחים ושל נתיב הרענון"
+```
+
+אם לא היה מה לתקן: רק קובץ הסשן, עם הממצאים, ו-`docs: סקירת האבטחה של סבב 5`.
+
+---
+
+### Task 12: סקירת הסיום של Impeccable, ו-`DESIGN.md`
+
+**Files:**
+- Modify: קבצי הממשק של משימות 6–10, לפי הממצאים
+- Modify: `DESIGN.md`, `.impeccable/design.json` (דרך `impeccable-documenter`)
+
+החוזים נגמרים בשורת FINISH: "unreviewed and undocumented is unfinished". לכן הסבב נגמר בסקירת סיום, בתיקונים ובתיעוד. סבב סקירה אחד, לפי הבקשה של גל.
+
+- [ ] **Step 1: צילומים ברוחב טלפון ומחשב**
+
+הצילומים בלי תנועה (`reducedMotion: 'reduce'`): עם תנועה, מה שעוד לא נכנס למסך שקוף בצילום של כל הדף. התיקייה `.impeccable/review/` לא נשמרת ב-git.
+
+הסקריפט:
+- מכין שני דיווחים לדוגמה על ביקורות של `full-stack-sample`, כדי שבתור יהיה מה לראות, ומוחק אותם בסוף.
+- מתחבר כמנהל דרך Mailpit, כמו בבדיקות הקצה.
+
+אם אין מספרים בחודש שנגמר, מריצים קודם את הסקריפט של משימה 10, צעד 7, ובונים מחדש.
+
+```bash
+cd "C:/Users/galsa/Desktop/קורסים השוואות"
+pnpm --dir web build
+mkdir -p .impeccable/review/round5/mobile .impeccable/review/round5/desktop
+cat > web/test-results/shots-round5.mts <<'EOF'
+import { randomBytes } from 'node:crypto';
+import { chromium, type Page } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
+import { localEnv } from '../e2e/support/env';
+import { clearMail, magicLink } from '../e2e/support/mail';
+import { ensureLocalAdmin } from '../src/lib/admin/local-admin';
+import type { Database } from '../src/lib/database.types';
+
+const base = 'http://localhost:3000';
+const ADMIN = 'admin-shots-round5@example.test';
+const MARKER = 'צילומי סבב 5';
+const db = createClient<Database>(localEnv('NEXT_PUBLIC_SUPABASE_URL'), localEnv('SUPABASE_SECRET_KEY'), {
+  auth: { persistSession: false },
+});
+const adminId = await ensureLocalAdmin(db, ADMIN);
+const { data: course } = await db.from('courses').select('id').eq('slug', 'full-stack-sample').single();
+const { data: reviews } = await db
+  .from('reviews')
+  .select('id')
+  .eq('course_id', course!.id)
+  .eq('status', 'published')
+  .order('published_at', { ascending: false })
+  .limit(2);
+const ids = reviews!.map((r) => r.id);
+const hash = () => randomBytes(32).toString('hex');
+await db.rpc('submit_review_report', { p_review_id: ids[0], p_reason: 'privacy', p_client_hash: hash(), p_details: `${MARKER}: יש בביקורת טלפון של מרצה.` });
+await db.rpc('submit_review_report', { p_review_id: ids[1], p_reason: 'false_fact', p_client_hash: hash(), p_details: `${MARKER}: אין בקורס פרק ענן.` });
+
+const sizes = { mobile: { width: 390, height: 844 }, desktop: { width: 1280, height: 900 } };
+const out = (size: string, name: string) => `../.impeccable/review/round5/${size}/${name}.png`;
+let overflow = 0;
+const checkWidth = async (page: Page, size: string, path: string) => {
+  if (await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)) {
+    console.log(`גלילה לרוחב: ${size} ${path}`);
+    overflow++;
+  }
+};
+
+const browser = await chromium.launch();
+try {
+  for (const [size, viewport] of Object.entries(sizes)) {
+    const context = await browser.newContext({ viewport, reducedMotion: 'reduce', storageState: 'e2e/intro-seen.json' });
+    const page = await context.newPage();
+    await page.goto(`${base}/courses/full-stack-sample#reviews`, { waitUntil: 'networkidle' });
+    await checkWidth(page, size, '/courses/full-stack-sample');
+    await page.locator('#reviews').screenshot({ path: out(size, '01-reviews') });
+    const first = page.locator('#reviews article').first();
+    await first.getByRole('button', { name: 'לדווח על הביקורת' }).click();
+    await checkWidth(page, size, '/courses/full-stack-sample (form)');
+    await first.screenshot({ path: out(size, '02-report-form') });
+    for (const [name, path] of [['03-method', '/method'], ['04-who-pays-us', '/who-pays-us'], ['05-privacy', '/privacy']]) {
+      await page.goto(base + path, { waitUntil: 'networkidle' });
+      await checkWidth(page, size, path);
+      await page.screenshot({ path: out(size, name), fullPage: true });
+    }
+    await clearMail(ADMIN);
+    await page.goto(`${base}/login?next=%2Fadmin`);
+    await page.getByLabel('לאן לשלוח?').fill(ADMIN);
+    await page.getByRole('button', { name: 'לשלוח לי קישור' }).click();
+    let link = '';
+    for (let i = 0; i < 30 && !link; i++) {
+      await page.waitForTimeout(500);
+      link = await magicLink(ADMIN);
+    }
+    await page.goto(link);
+    await page.waitForURL(/\/admin$/);
+    await page.goto(`${base}/admin#reports`, { waitUntil: 'networkidle' });
+    await checkWidth(page, size, '/admin');
+    await page.locator('#reports').screenshot({ path: out(size, '06-admin-reports') });
+    await page.goto(`${base}/admin/log`, { waitUntil: 'networkidle' });
+    await checkWidth(page, size, '/admin/log');
+    await page.screenshot({ path: out(size, '07-admin-log'), fullPage: true });
+    await context.close();
+  }
+} finally {
+  await browser.close();
+  await db.from('reports').delete().like('details', `${MARKER}%`);
+  await db.from('reviews').update({ disputed_at: null }).in('id', ids);
+  await db.auth.admin.deleteUser(adminId);
+}
+process.exit(overflow ? 1 : 0);
+EOF
+```
+
+בטרמינל נפרד: `pnpm --dir web start`. ואז:
+
+```bash
+cd web && node --import tsx test-results/shots-round5.mts; cd ..
+ls .impeccable/review/round5/mobile .impeccable/review/round5/desktop
+```
+
+Expected: הסקריפט יוצא בלי "גלילה לרוחב". בכל תיקייה שבעה צילומים, מ-`01-reviews.png` עד `07-admin-log.png`.
+
+- [ ] **Step 2: סקירת הסיום**
+
+שולחים את `impeccable-finish-reviewer`, בלי היסטוריה של השיחה, עם:
+- **הבקשה:** "סבב 5:
+  - 'לדווח' מתחת לכל ביקורת, בלי חשבון;
+  - תור הדיווחים ב-/admin: להשאיר, להסתיר עד בירור או להסיר, ותגובת מוסד;
+  - יומן הפעולות ב-/admin/log;
+  - 'האימות במספרים' בעמוד השיטה וב'מי משלם לנו';
+  - 'מוסתרת' ו'הוסרה' ב'הביקורות שלי'.
+  
+  לפי `docs/superpowers/specs/2026-11-15-round-5-reports-transparency-design.md`, סעיפים 3–7 ו-11. 'לדווח' חייב להיות שקט ולא מבהיל, והמספרים בלי צבע מקור."
+- **החוזים:** "דיווח על ביקורת", "האימות במספרים", חוזה התור (`impeccable surface-brief list` מראה את הנתיבים), ו-`.impeccable/surfaces/course-page.md`.
+- **הקבצים:**
+  - `web/src/components/course/report-review.tsx` ו-`web/src/components/course/reviews-section.tsx`;
+  - `web/src/components/admin/report-queue-item.tsx`, `report-decide-form.tsx`, `vendor-response-form.tsx` ו-`audit-log-list.tsx`;
+  - `web/src/app/admin/page.tsx` ו-`web/src/app/admin/log/page.tsx`;
+  - `web/src/components/transparency/transparency-numbers.tsx`, `web/src/app/method/page.tsx` ו-`web/src/app/who-pays-us/page.tsx`;
+  - `web/src/components/account/my-reviews.tsx` ו-`web/src/app/privacy/page.tsx`.
+- **הצילומים:** `.impeccable/review/round5/mobile/*.png` ו-`.impeccable/review/round5/desktop/*.png`.
+- **שפת העיצוב:** `DESIGN.md` ו-`.claude/skills/impeccable/reference/craft-floor.md`.
+- **הציורים כרפרנס לעולם (אין comp מאושר לסבב הזה):** `design/canvas/Chosen.dc.html`.
+- **התנועה:** `web/src/components/site/motion-observer.tsx` ו-`web/src/app/globals.css` ("תנועה"). לבדוק שהחלקים החדשים זזים כמו השאר, בלי JavaScript חדש.
+
+מבקשים רשימה מסודרת של תיקונים מהותיים.
+
+- [ ] **Step 3: תיקונים, וצילום אחד נוסף**
+
+מתקנים כל ממצא מהותי, לפי הסדר. **לא משנים** את מה שבדיקות הקצה מחפשות:
+- **כפתורים ותוויות:**
+  - "לדווח על הביקורת", "לשלוח את הדיווח" ו"מה עוד חשוב שנדע? (רשות)";
+  - הרדיו "להשאיר", "להסתיר עד בירור" ו"להסיר";
+  - "להשאיר את הביקורת" ו"להסתיר עד בירור".
+- **טקסטים:**
+  - "בחרו מה הבעיה." ו"תודה. נבדוק את הדיווח.";
+  - "מוסתרת עד בירור", "הוסתרה עד בירור." ו"הדיווחים נסגרו. הביקורת באתר.".
+- **מבנה:**
+  - `id="review-<id>"`, `form` עם `aria-label="דיווח על הביקורת"`, `#reports` ו-`article` לכל פריט;
+  - `list` עם השם "מה הוחלט עכשיו".
+
+אחר כך:
+
+```bash
+pnpm --dir web lint && pnpm --dir web exec tsc --noEmit && pnpm --dir web test && pnpm --dir web build
+```
+
+מפעילים מחדש את `pnpm --dir web start` (הבנייה החדשה), ומריצים שוב את הסקריפט של צעד 1. בודקים בצילומים שהתיקונים נכנסו, ושבנייד לטקסט יש ריווח מהקצוות. ממצא שדורש שינוי בשפת העיצוב עצמה נרשם בקובץ הסשן, וגל מחליט. בלי סבב סקירה שני.
+
+- [ ] **Step 4: `DESIGN.md`**
+
+שולחים את `impeccable-documenter`, עם הקבצים, החוזים והצילומים מצעד 3. מבקשים לרשום ב-`DESIGN.md` וב-`.impeccable/design.json` את מה שנבנה בפועל:
+- **"לדווח":** קישור שקט ליד "עזר לי", והטופס שנפתח על הדף. בלי צבע, והתודה בעט.
+- **תור הדיווחים:** הדחוף מודגש בדיו, ותגובת המוסד בפתק כחול גם בתור.
+- **יומן הפעולות:** שורה לכל פעולה, ומתי ומי מתחת.
+- **"האימות במספרים":** משפט, טבלה, והערה בעט. בלי צבע מקור.
+- **תנועה:** רק אבני הבניין הקיימות.
+
+הנגזר מהקוד, לא מהכוונות.
+
+- [ ] **Step 5: הכול ירוק, ו-Commit**
+
+עוצרים את השרת.
+
+```bash
+pnpm --dir web e2e
+git add DESIGN.md .impeccable web/src
+git commit -m "design: סקירת הסיום של סבב 5, והשפה ב-DESIGN.md"
+```
+
+Expected: כל בדיקות הקצה עוברות, חוץ מ-4 של היועץ, שמדלגות בלי מפתח. יש שתיים יותר מלפני הסבב: `report.spec.ts` ו-`report-decision.spec.ts`. אם התיקונים לא נגעו בקוד, ה-commit כולל רק את `DESIGN.md` ואת `.impeccable`.
+
+---
+
+### Task 13: תיעוד ופריסה
+
+**Files:**
+- אין שינוי בקוד.
+- Modify: `docs/STATUS.md`
+- Modify: `docs/ROADMAP.md`
+- Modify: `docs/superpowers/plans/notes-for-plan-2.md`
+- Modify: `docs/sessions/2026-11-15-round-5.md`
+
+**לפני שמתחילים:** כל הבדיקות המקומיות ירוקות (`db:test`, `test`, `tsc`, `lint`, `build`, `e2e`), ו-`git status` נקי.
+
+- [ ] **Step 1: המיגרציה בענן: בדיקה יבשה**
+
+המיגרציה של התור (`20261115210001`) כבר בענן מ-15.11.2026. לכן צפויה רק אחת.
+
+```bash
+cd "C:/Users/galsa/Desktop/קורסים השוואות"
+git diff --name-only fa62f03 -- supabase/
+pnpm exec supabase db push --remote --include-seed --dry-run
+```
+
+Expected:
+- **`git diff`:** רק `supabase/migrations/20261115230001_reports_and_transparency.sql` ושני קבצי הבדיקה. אין קובץ seed חדש.
+- **בדיקת היבש:** רק `20261115230001_reports_and_transparency.sql` ממתינה, ואין seed שממתין.
+
+**אם ממתין עוד משהו:** עוצרים, ומציגים לגל בדיוק מה, לפני שממשיכים.
+
+- [ ] **Step 2: עוצרים: המיגרציה מחכה לאישור של גל**
+
+מציגים לגל:
+- **מה עולה:**
+  - הטבלה `reports`, סגורה לציבור;
+  - ארבע פונקציות לשרת בלבד;
+  - חמש פעולות חדשות ביומן;
+  - אילוץ אורך על `vendor_responses`;
+  - `transparency_by_month`, פתוחה לאורח ומחזירה רק ספירות.
+- **הפלט** של בדיקת היבש.
+- **שאין מחיקה ואין שינוי בנתונים קיימים:** רק אילוץ חדש על `vendor_responses`. בענן יש תגובה אחת לדוגמה, באורך תקין.
+
+ממשיכים רק אחרי "כן" מפורש של גל בצ'אט. אז:
+
+```bash
+pnpm exec supabase db push --remote --include-seed
+pnpm exec supabase db push --remote --include-seed --dry-run
+```
+
+Expected: ה-push מסתיים בלי שגיאה. בדיקת היבש השנייה: שום דבר לא ממתין.
+
+- [ ] **Step 3: הטוקן של הרענון: גל מוסיף**
+
+Claude לא יוצר את הטוקן ולא רואה אותו. מציגים לגל את הפקודה, להריץ בעצמו ב-Git Bash מתוך `web/`. הטוקן לא מודפס, ונמחק מהמשתנה בסוף:
+
+```bash
+TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('hex'))")"
+printf %s "$TOKEN" | vercel env add REVALIDATE_TOKEN production
+printf %s "$TOKEN" | gh secret set REVALIDATE_TOKEN --repo GalSamionov/course-compare-il
+unset TOKEN
+```
+
+אחרי שגל אומר שסיים, בודקים רק שהשמות קיימים. אף פעם לא את הערך:
+
+```bash
+cd web && vercel env ls production | grep -c REVALIDATE_TOKEN; cd ..
+gh secret list --repo GalSamionov/course-compare-il | grep -c REVALIDATE_TOKEN
+```
+
+Expected: `1` בכל אחת.
+
+אם גל מעדיף לחכות: ממשיכים בלי. הנתיב יחזיר 503, והחישוב הלילי ידלג על הרענון.
+
+- [ ] **Step 4: עוצרים: הפריסה מחכה לאישור של גל**
+
+מציגים לגל:
+- **מה עולה:** "לדווח", תור הדיווחים ותגובת מוסד, יומן הפעולות, "האימות במספרים", "מוסתרת" ו"הוסרה" ב"הביקורות שלי", ו-`/api/revalidate`.
+- **שהמיגרציה כבר בענן** (צעד 2). בלעדיה לא פורסים: הבנייה של עמוד השיטה תיכשל.
+- **הצילומים** מ-`.impeccable/review/round5/mobile/`.
+
+ממשיכים רק אחרי "כן" מפורש של גל בצ'אט.
+
+- [ ] **Step 5: פריסה (אחרי "כן" של גל)**
+
+```bash
+git branch --show-current
+cd web
+vercel deploy --prod --yes --force
+cd ..
+```
+
+Expected:
+- **הענף:** `plan-1-foundation`. פורסים רק ממנו (`docs/STATUS.md`).
+- **הבנייה ב-Vercel עוברת.** `--force` חובה: בלעדיו Vercel משתמש במטמון בנייה ישן, ופעם זה כבר העלה CSS ישן.
+
+- [ ] **Step 6: לבדוק את האתר באוויר**
+
+```bash
+SITE=https://course-compare-il.vercel.app
+for p in / /method /who-pays-us /privacy /courses/full-stack-sample /me; do curl -s -o /dev/null -w "%{http_code} $p\n" "$SITE$p"; done
+for p in /admin /admin/log; do curl -s -o /dev/null -w "%{http_code} $p\n" "$SITE$p"; done
+curl -s -o /dev/null -w "%{http_code} revalidate without a token\n" -X POST "$SITE/api/revalidate" -d '{"courses":[]}'
+curl -s -o /dev/null -w "%{http_code} revalidate get\n" "$SITE/api/revalidate"
+curl -s "$SITE/courses/full-stack-sample" | grep -o 'לדווח' | head -1
+curl -s "$SITE/method" | grep -o 'האימות במספרים' | head -1
+curl -s "$SITE/who-pays-us" | grep -o 'האימות במספרים' | head -1
+curl -s "$SITE/privacy" | grep -o 'כשמדווחים על ביקורת' | head -1
+```
+
+Expected:
+- `200` לכל העמודים ברשימה הראשונה, ו-`404` ל-`/admin` ול-`/admin/log`.
+- **הרענון בלי טוקן:** `401` אם גל הוסיף טוקן ב-Vercel, `503` אם לא. בקשת GET: `405`.
+- ארבע השורות של `grep` מחזירות את הטקסט.
+
+- [ ] **Step 7: הרענון מהחישוב הלילי (רק אם גל רוצה עכשיו)**
+
+**התזמון:** החישוב הלילי המתוזמן רץ מ-`main`. עד שהסבב הזה ימוזג ל-`main`, הוא מריץ את הסקריפט הישן, בלי רענון.
+
+**המיזוג ל-`main`:** ב-PR חדש, רק באישור של גל (`docs/STATUS.md`: "ממזגים ל-`main` מדי פעם, ב-PR חדש").
+
+**הרצה ידנית מהענף:** אם גל רוצה לבדוק עכשיו, ו-`SUPABASE_SECRET_KEY` ו-`REVALIDATE_TOKEN` כבר ב-GitHub Secrets:
+
+```bash
+gh workflow run scores-nightly.yml --ref plan-1-foundation --repo GalSamionov/course-compare-il
+gh run list --workflow scores-nightly.yml --limit 1 --repo GalSamionov/course-compare-il
+gh run view --log --repo GalSamionov/course-compare-il "$(gh run list --workflow scores-nightly.yml --limit 1 --json databaseId -q '.[0].databaseId' --repo GalSamionov/course-compare-il)" | grep -E "revalidat|skip revalidate"
+```
+
+Expected: `revalidated the catalog and N course page(s) on course-compare-il.vercel.app, in 1 request(s)`. בלי הטוקן: `skip revalidate: REVALIDATE_TOKEN is not set`, והריצה ירוקה.
+
+- [ ] **Step 8: בנייד, לטקסט יש ריווח מהקצוות**
+
+```bash
+pnpm --dir web exec playwright screenshot --viewport-size "390, 844" --full-page "https://course-compare-il.vercel.app/courses/full-stack-sample" test-results/prod-course-390.png
+pnpm --dir web exec playwright screenshot --viewport-size "390, 844" --full-page "https://course-compare-il.vercel.app/method" test-results/prod-method-390.png
+pnpm --dir web exec playwright screenshot --viewport-size "390, 844" --full-page "https://course-compare-il.vercel.app/who-pays-us" test-results/prod-who-pays-us-390.png
+pnpm --dir web exec playwright screenshot --viewport-size "390, 844" --full-page "https://course-compare-il.vercel.app/privacy" test-results/prod-privacy-390.png
+```
+
+הצילומים נשמרים ב-`web/test-results/`. קוראים אותם:
+- לטקסט יש ריווח מהקצוות, ואין שום דבר שיוצא מהדף (הבדיקה מ-`docs/STATUS.md`, אחרי כל פריסה).
+- בעמוד הקורס: "לדווח" ליד "עזר לי".
+- בעמוד השיטה: "האימות במספרים". בענן עוד אין חודש שנגמר עם פעולות של הסבב, אבל יש פעולות מסבב 3. לכן יש משפט, או ההודעה שהחודש הראשון עוד לא נגמר.
+
+הערה: עם תנועה, חלק ממה שמתחת לקצה המסך שקוף בצילום של כל הדף. מה שחשוב כאן הוא הריווח מהקצוות.
+
+- [ ] **Step 9: גל בנייד**
+
+גל מסמן:
+- [ ] **דיווח:** מדווח על ביקורת בעמוד קורס, ורואה "תודה. נבדוק את הדיווח."
+- [ ] **ההחלטה:** ב-`/admin`, הדיווח בתור "דיווחים". "להשאיר", והוא יורד מהתור.
+- [ ] **היומן:** ב-`/admin/log`, השורה "דיווח נסגר, והביקורת נשארה".
+- [ ] **המספרים:** בעמוד השיטה וב"מי משלם לנו".
+
+**התיעוד:**
+
+- [ ] **Step 10: `docs/STATUS.md`**
+
+- **"עודכן":** "15.11.2026, אחרי פריסת סבב 5."
+- **מוסיפים, אחרי "מוסדות, מרצים והשוואה (סבב 4), באוויר":**
+  - **דיווחים, יומן פעולות, שקיפות ורענון (סבב 5), באוויר:**
+    - **"לדווח"** מתחת לכל ביקורת, בלי חשבון. 5 ביממה לכתובת, 300 בסך הכול. הביקורת נשארת באתר.
+    - **תור "דיווחים" ב-`/admin`:** להשאיר, להסתיר עד בירור (רק פרטים אישיים או תוכן לא חוקי), או להסיר עם נימוק. בכל פריט: תגובת מוסד.
+    - **יומן הפעולות:** `/admin/log`.
+    - **"האימות במספרים":** בעמוד השיטה וב"מי משלם לנו". רק חודשים שנגמרו, ורק לכל האתר.
+    - **רענון:** `POST /api/revalidate`, והחישוב הלילי קורא לו. הטוקן ב-Vercel וב-GitHub Secrets, או "עוד לא, גל יוסיף".
+    - **במסד:** המיגרציה `20261115230001_reports_and_transparency.sql` בענן, מ-<התאריך>.
+- **"הפריסה האחרונה":** השם של הפריסה מצעד 5, הקומיט, ומה נבדק אחריה (צעדים 6 ו-8).
+- **"בדיקות":** המספרים מהריצה האחרונה. צפוי: הבסיס ממשימה 1, ועוד 49 בדיקות מסד, 16 בדיקות יחידה ו-2 בדיקות קצה.
+- **תחת "הצעדים הבאים":** סבב 5 בוצע. מה שנשאר מחכה למיזוג ל-`main`: החישוב הלילי עם הרענון.
+
+- [ ] **Step 11: `docs/ROADMAP.md`**
+
+- **"עודכן":** "15.11.2026, עם סבב 5."
+- **תחת "## סבב 5: ניהול ואוסף",** שורה ראשונה: "**נבנה ב-15.11.2026.** מסמך העיצוב: `docs/superpowers/specs/2026-11-15-round-5-reports-transparency-design.md`."
+- **פריט 32:** מוסיפים "להשאיר, להסתיר עד בירור או להסיר עם נימוק. תגובת מוסד מתוך התור. היומן ב-`/admin/log`."
+- **פריט 33:** מוסיפים "רק חודשים שנגמרו, ורק לכל האתר."
+- **פריט 36:** מוסיפים "`POST /api/revalidate`. שינוי שהאוסף העלה לבד: תוך שעה, ובחישוב הלילי."
+
+- [ ] **Step 12: `notes-for-plan-2.md`: מה חדש**
+
+מוסיפים בסוף הקובץ:
+
+```markdown
+## מתוכנית 5ג
+
+- **תגובת מוסד רק מתוך התור של הדיווחים:** מוסד שרוצה להגיב מדווח עם "סיבה אחרת". אחרי שגל החליט, הפריט יורד מהתור, ואין עוד דרך לערוך את התגובה. אם צריך: חלק ב-`/admin` שמוצא ביקורת לפי העוגן `#review-<id>`.
+- **שינוי שהאוסף העלה לבד לא מרענן את הדף מיד:** הוא מופיע תוך שעה (`cacheLife('hours')`), ובחישוב הלילי. אם זה חסר: בסוף ריצה, האוסף קורא ל-`/api/revalidate` עם הכתובות של הקורסים שהשתנו.
+- **`disputed_at` לא מוצג לציבור:** תווית "בבירור" גלויה הייתה נותנת לכל אחד לסמן כל ביקורת. אם ירצו תווית, רק אחרי שגל פתח בירור.
+- **המגבלה הכוללת של 300 דיווחים ביממה:** מי שיש לו הרבה כתובות IP יכול לסגור את הטופס ליום, כמו בבקשות של מוסדות. אם זה יקרה: להוריד את המגבלה הכוללת, או להוסיף בדיקה נגד בוטים.
+- **יומן הפעולות בלי סינון:** 100 בעמוד, החדש ראשון. כשיהיו אלפים: סינון לפי סוג הפעולה.
+- **המספרים כוללים פעולות על נתוני דוגמה** עד ההשקה. לפני הסרת noindex, להחליט אם מתחילים לספור מחדש מיום ההשקה (פרמטר של תאריך התחלה בפונקציה).
+```
+
+- [ ] **Step 13: קובץ הסשן**
+
+`docs/sessions/2026-11-15-round-5.md`:
+- **"תקציר":** במקום "יעודכן בסוף", משפט אחד על מה שנבנה ומה באוויר.
+- **"קומיטים":** שורה לכל commit של המשימות, עם הסטטוס הכן.
+- **"מה צריך לבדוק בסשן הבא":**
+  - מה שגל לא סימן בצעד 9;
+  - שהחישוב הלילי מרענן באמת, אחרי המיזוג ל-`main` ועם הטוקן;
+  - שהניקוי היומי בענן מדפיס `report details deleted`;
+  - הממצאים מסקירת האבטחה שהוחלט לא לתקן.
+
+- [ ] **Step 14: Commit**
+
+```bash
+git add docs/STATUS.md docs/ROADMAP.md docs/superpowers/plans/notes-for-plan-2.md docs/sessions/2026-11-15-round-5.md
+git commit -m "docs: סבב 5 באוויר: דיווחים, יומן פעולות, מספרי שקיפות ורענון"
+```
+
+לא דוחפים בלי אישור של גל.
+
+---
+
+## מה תוכנית 5ג לא כוללת (בכוונה)
+
+- **תגובת מוסד בלי דיווח:** המוסד מדווח עם "סיבה אחרת" (מסמך העיצוב, סעיף 10).
+- **תווית "בבירור" לציבור:** `disputed_at` פנימי בלבד.
+- **מייל למדווח או לכותב על ההחלטה:** עם שירות המיילים, בסבב 6.
+- **רענון אחרי ריצה של האוסף:** ראו `notes-for-plan-2.md`.
+- **סינון וחיפוש ביומן הפעולות.**
+- **בדיקה של עורך דין לנוסח המסלול:** בסבב 6, פריט 42.
+- **המיזוג ל-`main`:** PR נפרד, באישור של גל.
+
+## בדיקה עצמית
+
+**כיסוי של מסמך העיצוב ושל הבקשה:**
+
+| דרישה | משימה |
+|---|---|
+| §2 טבלת `reports` במיגרציה חדשה, עם RLS, `revoke` ו-pgTAP | 2 |
+| §3 כל אחד מדווח, בלי חשבון, עם סיבה מרשימה קצרה וטקסט רשות | 4 (`parseReportForm`), 6 |
+| §3 מגבלת קצב, וכתיבה רק דרך מסלול שמגביל | 2 (`submit_review_report`), 6 (`reportReview`) |
+| §3 הביקורת נשארת באתר בזמן הבירור, עם `disputed_at` | 2 (בדיקה 8), 6 (בדיקת הקצה) |
+| §4 להשאיר, להסתיר עד בירור (רק פרטיות או תוכן לא חוקי), להסיר עם נימוק | 2 (`decide_review_reports`, LM032), 4 (`removalNote`), 7 |
+| §4 כל החלטה ב-`audit_log`, בלי טקסט חופשי | 2 (בדיקות 29 ו-30) |
+| §4 ביקורת מוסתרת או מוסרת יורדת מהציון, ועמודי הקורסים מתרעננים | 5 (`refreshCourses`), 7 (`decideReports`, בדיקת הקצה) |
+| §4 הכותב רואה "מוסתרת" או "הוסרה" והנימוק | 9 |
+| §5 תגובת מוסד מתוך התור, בפתק הכחול הקיים | 2 (`set_vendor_response`), 7 (`VendorResponseForm`) |
+| §6 יומן הפעולות ב-`/admin`, מתחת לאותה הגנה | 4 (`audit.ts`), 8 |
+| §7 מספרים חודשיים: פורסמו, הוחזרו, הוכחות שנמחקו, שינויים בקורסים, דיווחים | 3 (`transparency_by_month`), 4 (`numbers.ts`), 10 |
+| §7 פונקציה ציבורית, `security definer`, `search_path = ''`, רק ספירות | 3 (בדיקות 5 ו-6) |
+| §7 מספרים קטנים לא מזהים: רק חודשים שנגמרו, רק לכל האתר | 3 (בדיקה 3), החלטה 13 |
+| §7 בעמוד השיטה וב"מי משלם לנו" | 10 |
+| §8 `POST /api/revalidate` עם טוקן מהסביבה, `revalidateTag` ל-`catalog` ול-`course:<slug>` | 5 (צעדים 4, 9 ו-14) |
+| §8 הסקריפט והחישוב הלילי קוראים לו, ומדלגים בלי טוקן | 5 (צעדים 10 ו-11) |
+| §8 החתימה של `revalidateTag` ב-Next 16 מהתיעוד | 5 (לפני צעד 1), החלטה 10 |
+| §9 הניקוי של הפירוט ושל הטביעה, ומדיניות הפרטיות | 2 (`purge_reports`), 9 |
+| §11 Impeccable בכל משימת ממשק, `context --target`, `craft-floor.md`, `DESIGN.md` | 6–10 (הצעד הראשון) |
+| §11 "לדווח" שקט ולא מבהיל | 6 (החוזה והכללים), 12 |
+| סקירת סיום של Impeccable, ואחריה תיקונים | 12 |
+| סקירת אבטחה אחת: הדיווח הציבורי והנתיב | 11 |
+| §13 pgTAP לכל טבלה, פונקציה והרשאה | 2, 3 |
+| §13 בדיקות יחידה ללוגיקה טהורה | 4, 5 |
+| §13 בדיקת קצה לדיווח, ובדיקת קצה להחלטה | 6, 7 |
+| התוכנית מתחילה אחרי המיזוג של התור | 1 |
+| מיגרציה בענן רק אחרי אישור, עם בדיקה יבשה | 13 (צעדים 1 ו-2) |
+| הטוקן ב-Vercel וב-GitHub Secrets בידי גל, לא מודפס ולא ב-git | 13 (צעד 3), "איך עובדים" |
+| פריסה עם `--force` רק אחרי אישור, ובדיקה בנייד שיש ריווח | 13 (צעדים 4, 5 ו-8) |
+| תיעוד: STATUS, ROADMAP, ההערות וקובץ הסשן | 13 |
+
+**מילים אסורות:** אין "TBD", "TODO", "להשלים אחר כך" או "כמו במשימה N". כל צעד שמשנה קוד מציג את הקוד. הצעד הקבוע של Impeccable כתוב מחדש בכל משימת ממשק.
+
+**עקביות שמות בין המשימות:**
+- **מסד (משימות 2 ו-3):**
+  - `reports` (`review_id`, `reason`, `details`, `client_hash`, `status`, `decided_by`, `decided_at`);
+  - `submit_review_report(p_review_id, p_reason, p_client_hash, p_details?)` מחזירה `'created'` או `'duplicate'`;
+  - `decide_review_reports(p_review_id, p_admin_id, p_decision, p_reason?, p_note?)` מחזירה את ה-slug;
+  - `set_vendor_response(p_review_id, p_admin_id, p_body)` מחזירה את ה-slug;
+  - `purge_reports()` מחזירה מספר, ו-`transparency_by_month(p_months?)`.
+  - **קודי השגיאה:** LM030, LM031, LM032, LM033 ו-P0002.
+  - **הפעולות ביומן:** `report_keep`, `report_hide`, `report_remove`, `vendor_response` ו-`vendor_response_remove`.
+- **משימה 4:**
+  - `REPORT_REASONS`, `ReportReason`, `isReportReason`, `REPORT_REASON_LABEL`, `HIDE_REASONS`, `isUrgent`, `REMOVE_NOTE`, `removalNote(reason, extra)`, `DETAILS_MAX`, `ReportField` ו-`parseReportForm(form)`;
+  - `ReportEntry`, `ReportedReview`, `ReportQueueItem` ו-`groupReports(reviews, reports)`;
+  - `AUDIT_ACTIONS`, `actionLabel`, `actorLabel(action, actorId)`, `detailLabel(action, details)` ו-`AuditEntry`;
+  - `TransparencyMonth`, `TransparencyRow`, `toTransparencyMonth`, `TRANSPARENCY_ROWS`, `formatCount`, `monthName` ו-`transparencyLead`.
+- **משימה 5:**
+  - `MAX_COURSES_PER_REQUEST`, `MAX_REVALIDATE_BODY`, `MIN_TOKEN_LENGTH`, `ALWAYS_TAGS`, `tagsFromBody`, `tokenMatches` ו-`bearerToken`;
+  - `RevalidateTarget`, `revalidateTarget(env)` ו-`requestRevalidation(slugs, target, fetchImpl?)`;
+  - `refreshCourses(slugs)`, ו-`RecomputeResult.slugs`.
+- **משימות 6–8:**
+  - `ReportState` ו-`reportReview` (`app/courses/[slug]/report-actions.ts`), ו-`ReportReview({ reviewId })`;
+  - `loadReportQueue(db)`, `decideReports`, `saveVendorResponse`;
+  - `ReportDecideForm({ reviewId, courseSlug, courseTitle, hidden, suggested })`;
+  - `VendorResponseForm({ reviewId, courseSlug, courseTitle, current })` ו-`ReportQueueItemView({ item })`;
+  - `AUDIT_PAGE`, `AuditPage`, `loadAuditLog(db, before)` ו-`AuditLogList({ entries })`.
+- **משימה 10:** `TRANSPARENCY_MONTHS`, `getTransparency()` ו-`TransparencyNumbers({ full? })`.
+- **מה שבדיקות הקצה מחפשות:**
+  - **כפתורים:** "לדווח על הביקורת", "לשלוח את הדיווח", "להסתיר עד בירור" ו"להשאיר את הביקורת".
+  - **רדיו:** הסיבה עם "פרטים של אדם פרטי", "להסתיר עד בירור" ו"להשאיר".
+  - **תוויות:** "דיווח על הביקורת" (טופס) ו"מה עוד חשוב שנדע? (רשות)".
+  - **טקסטים:**
+    - "בחרו מה הבעיה." ו"תודה. נבדוק את הדיווח.";
+    - "מוסתרת עד בירור" ו"הוסתרה עד בירור.";
+    - "הדיווחים נסגרו. הביקורת באתר.".
+  - **מבנה:**
+    - `#reviews article`, `id="review-<id>"`, `#reports` ו-`article` בתוכו;
+    - `list` בשם "מה הוחלט עכשיו".
+
+**אומת בזמן הכתיבה, בלי לשנות את המאגר:**
+- **אין `reports`** ב-`supabase/migrations/` (`grep -n "create table"`).
+- **`audit_log_action_check` ו-`audit_log_one_target`:** מ-`20261115210001_course_queue_admin.sql`. נקראו מהענף של התור, שמוזג (PR מספר 1, `fa62f03`) והמיגרציה שלו כבר בענן.
+- **`/admin` אחרי המיזוג:** זהה לגרסה בענף של התור (`git diff claude/upbeat-carson-94b71e HEAD -- web/src/app/admin/page.tsx` ריק). לכן ההחלפה במשימה 7 בנויה עליו.
+- **`service_role` כותב לטבלה חדשה בלי `grant` מפורש:** כך ב-`course-queue-admin.test.sql`, שמכניסה ל-`institution_requests` כ-service_role.
+- **`pnpm db:*` מעתיק את `supabase/` מתיקיית העבודה לפיי** (`scripts/pi-db.mjs`, `tar`). לכן הבדיקות רצות לפני commit.
+- **Next:**
+  - ב-`revalidateTag.md`: החתימה עם `profile`, `{ expire: 0 }` מ-Route Handler, ושהצורה בלי פרופיל deprecated.
+  - ב-`updateTag.md`: רק ב-Server Actions.
+  - ב-`server-actions.md`: "CSRF check" של Origin מול Host.
+  - ב-`cacheLife.md`: `hours` הוא revalidate של שעה.
+- **עמוד הקורס מציג 3 ביקורות** (`REVIEWS_ON_PAGE`), החדשה ראשונה. לכן הביקורת של בדיקת הקצה של משימה 7 מוצגת.
+- **`web-basics-sample`** לא נבדק באף בדיקת קצה קיימת.
+- **המדריכים עברו ל-`web/content/guides`,** ובעמוד השיטה יש פסקה עליהם. משימה 10 מוסיפה לפניה ולא נוגעת בה.
+
+**לא נבדק:**
+- **ה-SQL לא הורץ**, ובמיוחד:
+  - שהטיפוסים של `generate_series` ו-`greatest` מתיישבים;
+  - הנוסח המדויק של `pg_get_function_result` ושל `proconfig` בבדיקות של משימה 3.
+- **`tsc`, `lint` והבנייה עם הקוד החדש,** ובמיוחד:
+  - הטיפוסים שהשאילתות המקוננות של PostgREST נותנות ב-`queue.ts` וב-`audit-log.ts`;
+  - שה-`submitter` של הכפתור מגיע ל-`FormData` ב-`VendorResponseForm`.
+- **שבנייה עם `/who-pays-us` כ-`ensureStatic`** עוברת, עם רכיב שרת אסינכרוני בתוך `TextPage`.
+- **שהסקריפטים ב-`web/test-results/`** לא נמחקים בין יצירה להרצה: Playwright מנקה את התיקייה בתחילת כל ריצה של `e2e`. לכן כל סקריפט נוצר מיד לפני שמריצים אותו.
+- **הפריסה, והחישוב הלילי עם הרענון.**
+
+## פתוח (לגל)
+
+1. **המגבלות:** 5 דיווחים ביממה לכתובת ו-300 בסך הכול. אם גל רוצה אחרת, אלה שני מספרים ב-`submit_review_report`.
+2. **שלושה חודשים בטבלה:** אם גל רוצה שישה, זה `TRANSPARENCY_MONTHS`. הפונקציה מגבילה ל-12.
+3. **"החזרנו לכותבים" כולל גם בקשה להוכחה נוספת,** ולא רק דחייה. אם גל מעדיף רק דחיות, זו שורה אחת בפונקציה.
+4. **המספרים כוללים פעולות על נתוני דוגמה עד ההשקה.** ההחלטה אם לאפס ביום ההשקה: ראו `notes-for-plan-2.md`.
+5. **הטוקן של הרענון:** גל מוסיף אותו ב-Vercel וב-GitHub Secrets (משימה 13, צעד 3).
+6. **המיזוג ל-`main`:** בלעדיו החישוב הלילי המתוזמן לא מרענן.
