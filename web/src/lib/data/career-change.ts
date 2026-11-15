@@ -112,14 +112,21 @@ export async function loadCareerChangePage(
 
   const slugs = selectCareerChange(
     categoriesRes.data.map((c) => ({ id: c.id, slug: c.slug, parentId: c.parent_id, courseType: c.course_type })),
-    coursesRes.data.map((c) => ({
-      slug: c.slug,
-      categoryId: c.category_id,
-      productType: c.product_type,
-      status: c.status,
-      totalHours: c.total_hours,
-      durationMonths: c.duration_months === null ? null : Number(c.duration_months),
-    })),
+    // רק טיוטה יכולה להיות בלי תחום, וכאן אין טיוטות.
+    coursesRes.data.flatMap((c) =>
+      c.category_id === null
+        ? []
+        : [
+            {
+              slug: c.slug,
+              categoryId: c.category_id,
+              productType: c.product_type,
+              status: c.status,
+              totalHours: c.total_hours,
+              durationMonths: c.duration_months === null ? null : Number(c.duration_months),
+            },
+          ],
+    ),
   );
   const courses = (await Promise.all(slugs.map((slug) => load(slug))))
     .filter((course): course is CoursePageData => course !== null)

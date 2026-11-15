@@ -10,8 +10,8 @@
 -- קישור לרשת חברתית (פייסבוק, אינסטגרם ודומיהן) לא נכנס לאוסף אף פעם.
 --
 -- לאורח ולמשתמש מחובר אין קריאה ואין כתיבה בטבלה. הכתיבה רק דרך השרת, עם המפתח הסודי, אחרי שהשרת בדק מי
--- המשתמש (getUser). חריגים: my_course_links() מחזירה למשתמש רק את השורות שלו, ו-private.is_own_link_draft()
--- בודקת במדיניות של הביקורות.
+-- המשתמש (getUser). חריגים: my_course_links() ו-my_course_link() מחזירות למשתמש רק את השורות שלו,
+-- ו-private.is_own_link_draft() בודקת במדיניות של הביקורות.
 --
 -- קודי שגיאה (web/src/lib/course-links/messages.ts):
 --   LM040  כבר 3 קורסים חדשים מהמשתמש הזה ביממה
@@ -475,26 +475,30 @@ $$;
 revoke execute on function my_course_links() from public, anon;
 grant execute on function my_course_links() to authenticated;
 
--- ===== 10. עמוד הכתיבה של קורס מקישור (/review/new/<course_id>): רק למי שהוסיף אותו =====
--- השרת קורא אחרי getUser. null: הקורס לא שלו, או שלא קיים.
+-- ===== 10. עמוד הכתיבה של קורס מקישור (/review/new?course=<id>): רק למי שהוסיף אותו =====
+-- נטען בדפדפן, כמו הטיוטה של הביקורת, ולכן העמוד נשאר סטטי. null: הקורס לא שלו, או שכבר לא קיים (מוזג).
+-- live_slug: הקורס כבר אושר, והכתיבה ממשיכה בעמוד הרגיל. merged_slug: גל מיזג אותו לקורס שכבר באתר.
 
-create function course_link_draft(p_course_id uuid, p_user_id uuid)
+create function my_course_link(p_course_id uuid)
 returns jsonb
-language sql stable
+language sql stable security definer
 set search_path = ''
 as $$
   select jsonb_build_object(
-    'course_id', c.id, 'slug', c.slug, 'title', c.title, 'course_status', c.status,
-    'institution_name', i.name, 'course_type', private.link_course_type(c.id),
+    'course_id', c.id, 'title', c.title, 'institution_name', i.name,
+    'course_type', private.link_course_type(c.id),
     'status', s.status, 'decision_reason', s.decision_reason,
-    'merged_slug', (select m.slug from public.courses m where m.id = s.merged_into))
+    'live_slug', case when c.status <> 'draft' then c.slug end,
+    'merged_slug', (select m.slug from public.courses m where m.id = s.merged_into and m.status <> 'draft'))
   from public.course_submissions s
   join public.courses c on c.id = s.course_id
   join public.institutions i on i.id = c.institution_id
-  where s.course_id = p_course_id and s.submitted_by = p_user_id and s.source = 'review'
+  where s.course_id = p_course_id and s.submitted_by = (select auth.uid()) and s.source = 'review'
   order by s.created_at desc
   limit 1;
 $$;
+revoke execute on function my_course_link(uuid) from public, anon;
+grant execute on function my_course_link(uuid) to authenticated;
 
 -- סוג השאלון של קורס, גם כשהוא טיוטה בלי תחום. לשליחת הביקורת (api/reviews/submit).
 create function course_link_type(p_course_id uuid)
@@ -848,7 +852,7 @@ begin
   return v_notes;
 end $$;
 
--- ===== 14. הרשאות: הכול ל-service_role, חוץ משתי הפונקציות של המשתמש המחובר למעלה =====
+-- ===== 14. הרשאות: הכול ל-service_role, חוץ מהפונקציות של המשתמש המחובר למעלה =====
 
 revoke execute on function private.is_social_url(text) from public, anon, authenticated;
 revoke execute on function private.ascii_slug(text, text, integer) from public, anon, authenticated;
@@ -860,7 +864,6 @@ revoke execute on function private.link_page(uuid, text, uuid) from public, anon
 revoke execute on function private.drop_unused_draft_institution(uuid) from public, anon, authenticated;
 revoke execute on function submit_course_link(uuid, text, text, text, uuid, public.course_type) from public, anon, authenticated;
 revoke execute on function submit_course_request(text, text, text, text) from public, anon, authenticated;
-revoke execute on function course_link_draft(uuid, uuid) from public, anon, authenticated;
 revoke execute on function course_link_type(uuid) from public, anon, authenticated;
 revoke execute on function course_link_queue(integer) from public, anon, authenticated;
 revoke execute on function approve_course_submission(bigint, uuid, uuid, text, uuid, text, text) from public, anon, authenticated;
@@ -878,7 +881,6 @@ grant execute on function private.link_page(uuid, text, uuid) to service_role;
 grant execute on function private.drop_unused_draft_institution(uuid) to service_role;
 grant execute on function submit_course_link(uuid, text, text, text, uuid, public.course_type) to service_role;
 grant execute on function submit_course_request(text, text, text, text) to service_role;
-grant execute on function course_link_draft(uuid, uuid) to service_role;
 grant execute on function course_link_type(uuid) to service_role;
 grant execute on function course_link_queue(integer) to service_role;
 grant execute on function approve_course_submission(bigint, uuid, uuid, text, uuid, text, text) to service_role;

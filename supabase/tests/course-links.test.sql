@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(65);
+select plan(67);
 
 -- הוספת קורס מקישור (20261116010001_course_links.sql): בוגר ב-/review, ובקשה ב-/request-course.
 -- נתוני בדיקה, כ-postgres. כל שאילתה מוגבלת לנתונים האלה: המסד בפיי משותף, ויכולים להיות בו קישורים אחרים.
@@ -38,7 +38,7 @@ select ok(
   and not has_function_privilege('anon', 'public.submit_course_request(text, text, text, text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.submit_course_request(text, text, text, text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.course_link_queue(integer)', 'EXECUTE')
-  and not has_function_privilege('authenticated', 'public.course_link_draft(uuid, uuid)', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.course_link_type(uuid)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.approve_course_submission(bigint, uuid, uuid, text, uuid, text, text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.merge_course_submission(bigint, uuid, uuid)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.reject_course_submission(bigint, uuid, text)', 'EXECUTE')
@@ -49,7 +49,9 @@ select ok(
 );
 select ok(
   has_function_privilege('authenticated', 'public.my_course_links()', 'EXECUTE')
-  and not has_function_privilege('anon', 'public.my_course_links()', 'EXECUTE'),
+  and not has_function_privilege('anon', 'public.my_course_links()', 'EXECUTE')
+  and has_function_privilege('authenticated', 'public.my_course_link(uuid)', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.my_course_link(uuid)', 'EXECUTE'),
   'רק משתמש מחובר שואל על הקורסים שהוסיף'
 );
 
@@ -179,6 +181,9 @@ select results_eq(
   $$values ('לק ג׳ל למתחילות', 'דנה ציפורניים לדוגמה', 'pending')$$,
   'הבוגר רואה רק את הקורס שהוסיף'
 );
+select is(
+  my_course_link((select id from d1)) ->> 'course_type', 'hobby', 'ובעמוד הכתיבה: הקורס שלו, עם סוג השאלון'
+);
 select set_config('request.jwt.claims', '{"sub": "c1c1c1c1-0000-0000-0000-00000000000e", "role": "authenticated"}', true);
 select throws_ok(
   $$insert into reviews (course_id, author_id, cohort_month)
@@ -186,6 +191,7 @@ select throws_ok(
   '42501', null, 'מי שלא הוסיף את הקורס לא פותח עליו ביקורת'
 );
 select is((select count(*)::integer from my_course_links()), 0, 'ולא רואה אותו ברשימה שלו');
+select is(my_course_link((select id from d1)), null, 'וגם לא בעמוד הכתיבה');
 reset role;
 
 -- ===== בקשה ב-/request-course =====

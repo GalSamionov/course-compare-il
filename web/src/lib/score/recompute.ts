@@ -84,7 +84,8 @@ export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): P
   for (const course of courses) {
     const ref = course.categories as { course_type: CourseType } | { course_type: CourseType }[] | null;
     const category = Array.isArray(ref) ? ref[0] : ref;
-    if (!category) {
+    // רק טיוטה יכולה להיות בלי תחום (courses_category_unless_draft), וטיוטות לא נטענות כאן.
+    if (!category || course.category_id === null) {
       failures.push({ slug: course.slug, error: new Error(`course ${course.slug} has no category`) });
       continue;
     }
@@ -99,7 +100,7 @@ export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): P
   for (const course of courses) {
     try {
       const type = typeOf.get(course.id);
-      if (!type) continue; // כבר נרשם ככשל למעלה
+      if (!type || course.category_id === null) continue; // כבר נרשם ככשל למעלה
       const categoryReviews = byCategory.get(course.category_id) ?? [];
       const result = computeGraduateScore({
         courseType: type,

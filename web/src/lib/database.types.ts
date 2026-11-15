@@ -39,14 +39,14 @@ export type Database = {
                   ]
                 },"audit_log": {
                   Row: {
-                    "action": string,"actor_id": string | null,"company_request_id": number | null,"course_queue_id": number | null,"created_at": string,"details": NonNullable<Json>,"id": number,"institution_request_id": number | null,"review_id": string | null
+                    "action": string,"actor_id": string | null,"company_request_id": number | null,"course_queue_id": number | null,"course_submission_id": number | null,"created_at": string,"details": NonNullable<Json>,"id": number,"institution_request_id": number | null,"review_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "action": string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
+                    "action": string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"course_submission_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Update: {
-                    "action"?: string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
+                    "action"?: string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"course_submission_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Relationships: [
                     
@@ -245,16 +245,54 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"courses": {
+                },"course_submissions": {
                   Row: {
-                    "admission": string | null,"category_id": string,"certificate": string | null,"check_tier": Database["public"]['Enums']["check_tier"],"class_size_note": string | null,"created_at": string,"duration_months": number | null,"formats": (string)[],"hands_on_hours": number | null,"id": string,"institution_id": string,"institution_promises": string | null,"last_checked_at": string | null,"lecture_hours": number | null,"lecturers_note": string | null,"lecturers_summary": string | null,"next_cohort_date": string | null,"page_url": string | null,"product_type": string,"region": string | null,"schedule": string | null,"site_price_ils": number | null,"slug": string,"status": Database["public"]['Enums']["course_status"],"summary_good": string | null,"summary_weak": string | null,"syllabus": NonNullable<Json>,"time_slots": (string)[],"title": string,"total_hours": number | null,"updated_at": string,"video_url": string | null
+                    "category_id": string | null,"client_hash": string | null,"course_id": string | null,"course_title": string | null,"course_type": Database["public"]['Enums']["course_type"] | null,"created_at": string,"decided_at": string | null,"decided_by": string | null,"decision_reason": string | null,"id": number,"institution_name": string | null,"merged_into": string | null,"note": string | null,"page_id": number | null,"source": string,"status": string,"submitted_by": string | null,"url": string,"url_key": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "admission"?: string | null,"category_id": string,"certificate"?: string | null,"check_tier"?: Database["public"]['Enums']["check_tier"],"class_size_note"?: string | null,"created_at"?: string,"duration_months"?: number | null,"formats"?: (string)[],"hands_on_hours"?: number | null,"id"?: string,"institution_id": string,"institution_promises"?: string | null,"last_checked_at"?: string | null,"lecture_hours"?: number | null,"lecturers_note"?: string | null,"lecturers_summary"?: string | null,"next_cohort_date"?: string | null,"page_url"?: string | null,"product_type"?: string,"region"?: string | null,"schedule"?: string | null,"site_price_ils"?: number | null,"slug": string,"status"?: Database["public"]['Enums']["course_status"],"summary_good"?: string | null,"summary_weak"?: string | null,"syllabus"?: NonNullable<Json>,"time_slots"?: (string)[],"title": string,"total_hours"?: number | null,"updated_at"?: string,"video_url"?: string | null
+                    "category_id"?: string | null,"client_hash"?: string | null,"course_id"?: string | null,"course_title"?: string | null,"course_type"?: Database["public"]['Enums']["course_type"] | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"decision_reason"?: string | null,"id"?: never,"institution_name"?: string | null,"merged_into"?: string | null,"note"?: string | null,"page_id"?: number | null,"source": string,"status"?: string,"submitted_by"?: string | null,"url": string,"url_key": string
                   }
                   Update: {
-                    "admission"?: string | null,"category_id"?: string,"certificate"?: string | null,"check_tier"?: Database["public"]['Enums']["check_tier"],"class_size_note"?: string | null,"created_at"?: string,"duration_months"?: number | null,"formats"?: (string)[],"hands_on_hours"?: number | null,"id"?: string,"institution_id"?: string,"institution_promises"?: string | null,"last_checked_at"?: string | null,"lecture_hours"?: number | null,"lecturers_note"?: string | null,"lecturers_summary"?: string | null,"next_cohort_date"?: string | null,"page_url"?: string | null,"product_type"?: string,"region"?: string | null,"schedule"?: string | null,"site_price_ils"?: number | null,"slug"?: string,"status"?: Database["public"]['Enums']["course_status"],"summary_good"?: string | null,"summary_weak"?: string | null,"syllabus"?: NonNullable<Json>,"time_slots"?: (string)[],"title"?: string,"total_hours"?: number | null,"updated_at"?: string,"video_url"?: string | null
+                    "category_id"?: string | null,"client_hash"?: string | null,"course_id"?: string | null,"course_title"?: string | null,"course_type"?: Database["public"]['Enums']["course_type"] | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"decision_reason"?: string | null,"id"?: never,"institution_name"?: string | null,"merged_into"?: string | null,"note"?: string | null,"page_id"?: number | null,"source"?: string,"status"?: string,"submitted_by"?: string | null,"url"?: string,"url_key"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "course_submissions_category_id_fkey"
+      columns: ["category_id"]
+isOneToOne: false
+      referencedRelation: "categories"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_submissions_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_submissions_merged_into_fkey"
+      columns: ["merged_into"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_submissions_page_id_fkey"
+      columns: ["page_id"]
+isOneToOne: false
+      referencedRelation: "scrape_pages"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"courses": {
+                  Row: {
+                    "admission": string | null,"category_id": string | null,"certificate": string | null,"check_tier": Database["public"]['Enums']["check_tier"],"class_size_note": string | null,"created_at": string,"duration_months": number | null,"formats": (string)[],"hands_on_hours": number | null,"id": string,"institution_id": string,"institution_promises": string | null,"last_checked_at": string | null,"lecture_hours": number | null,"lecturers_note": string | null,"lecturers_summary": string | null,"next_cohort_date": string | null,"page_url": string | null,"product_type": string,"region": string | null,"schedule": string | null,"site_price_ils": number | null,"slug": string,"status": Database["public"]['Enums']["course_status"],"summary_good": string | null,"summary_weak": string | null,"syllabus": NonNullable<Json>,"time_slots": (string)[],"title": string,"total_hours": number | null,"updated_at": string,"video_url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "admission"?: string | null,"category_id"?: string | null,"certificate"?: string | null,"check_tier"?: Database["public"]['Enums']["check_tier"],"class_size_note"?: string | null,"created_at"?: string,"duration_months"?: number | null,"formats"?: (string)[],"hands_on_hours"?: number | null,"id"?: string,"institution_id": string,"institution_promises"?: string | null,"last_checked_at"?: string | null,"lecture_hours"?: number | null,"lecturers_note"?: string | null,"lecturers_summary"?: string | null,"next_cohort_date"?: string | null,"page_url"?: string | null,"product_type"?: string,"region"?: string | null,"schedule"?: string | null,"site_price_ils"?: number | null,"slug": string,"status"?: Database["public"]['Enums']["course_status"],"summary_good"?: string | null,"summary_weak"?: string | null,"syllabus"?: NonNullable<Json>,"time_slots"?: (string)[],"title": string,"total_hours"?: number | null,"updated_at"?: string,"video_url"?: string | null
+                  }
+                  Update: {
+                    "admission"?: string | null,"category_id"?: string | null,"certificate"?: string | null,"check_tier"?: Database["public"]['Enums']["check_tier"],"class_size_note"?: string | null,"created_at"?: string,"duration_months"?: number | null,"formats"?: (string)[],"hands_on_hours"?: number | null,"id"?: string,"institution_id"?: string,"institution_promises"?: string | null,"last_checked_at"?: string | null,"lecture_hours"?: number | null,"lecturers_note"?: string | null,"lecturers_summary"?: string | null,"next_cohort_date"?: string | null,"page_url"?: string | null,"product_type"?: string,"region"?: string | null,"schedule"?: string | null,"site_price_ils"?: number | null,"slug"?: string,"status"?: Database["public"]['Enums']["course_status"],"summary_good"?: string | null,"summary_weak"?: string | null,"syllabus"?: NonNullable<Json>,"time_slots"?: (string)[],"title"?: string,"total_hours"?: number | null,"updated_at"?: string,"video_url"?: string | null
                   }
                   Relationships: [
                     {
@@ -299,14 +337,14 @@ isOneToOne: false
                   ]
                 },"institutions": {
                   Row: {
-                    "business_number": string | null,"created_at": string,"id": string,"kind": string,"name": string,"slug": string,"website": string | null
+                    "business_number": string | null,"created_at": string,"id": string,"kind": string,"name": string,"slug": string,"status": string,"website": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "business_number"?: string | null,"created_at"?: string,"id"?: string,"kind": string,"name": string,"slug": string,"website"?: string | null
+                    "business_number"?: string | null,"created_at"?: string,"id"?: string,"kind": string,"name": string,"slug": string,"status"?: string,"website"?: string | null
                   }
                   Update: {
-                    "business_number"?: string | null,"created_at"?: string,"id"?: string,"kind"?: string,"name"?: string,"slug"?: string,"website"?: string | null
+                    "business_number"?: string | null,"created_at"?: string,"id"?: string,"kind"?: string,"name"?: string,"slug"?: string,"status"?: string,"website"?: string | null
                   }
                   Relationships: [
                     
@@ -633,11 +671,22 @@ isOneToOne: false
               "course_slug": string,"queue_id": number
             }[]
                            },
+"approve_course_submission":
+{ Args: { "p_admin_id": string,"p_category_id"?: string,"p_institution_id"?: string,"p_institution_kind"?: string,"p_institution_name"?: string,"p_submission_id": number,"p_title"?: string }; Returns: Json
+                           },
 "approve_institution_request":
 { Args: { "p_admin_id": string,"p_institution_id": string,"p_request_id": number }; Returns: number
                            },
 "count_review_read":
 { Args: { "p_review_id": string }; Returns: undefined
+                           },
+"course_link_queue":
+{ Args: { "p_limit"?: number }; Returns: {
+              "candidates": Json,"category_id": string,"category_name": string,"course_id": string,"course_slug": string,"course_title": string,"course_type": string,"created_at": string,"id": number,"institution_id": string,"institution_is_new": boolean,"institution_kind": string,"institution_name": string,"is_social": boolean,"known_page": boolean,"note": string,"reviews": Json,"source": string,"submitters": number,"suggested_institution_id": string,"total": number,"typed_institution": string,"typed_title": string,"url": string
+            }[]
+                           },
+"course_link_type":
+{ Args: { "p_course_id": string }; Returns: Database["public"]['Enums']["course_type"]
                            },
 "course_paid_range":
 { Args: { "p_course_id": string }; Returns: {
@@ -668,6 +717,17 @@ isOneToOne: false
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"merge_course_submission":
+{ Args: { "p_admin_id": string,"p_submission_id": number,"p_target_course_id": string }; Returns: Json
+                           },
+"my_course_link":
+{ Args: { "p_course_id": string }; Returns: Json
+                           },
+"my_course_links":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "course_id": string,"course_title": string,"decision_reason": string,"institution_name": string,"status": string
+            }[]
+                           },
 "my_review_badges":
 { Args: Record<PropertyKey, never>; Returns: {
               "review_id": string,"show_name": boolean,"token": string
@@ -687,6 +747,9 @@ isOneToOne: false
 "purge_company_requests":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"purge_course_submissions":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "purge_institution_requests":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
@@ -700,6 +763,9 @@ isOneToOne: false
 { Args: { "p_admin_id": string,"p_ids": (number)[] }; Returns: {
               "course_slug": string,"queue_id": number
             }[]
+                           },
+"reject_course_submission":
+{ Args: { "p_admin_id": string,"p_reason": string,"p_submission_id": number }; Returns: undefined
                            },
 "reject_institution_request":
 { Args: { "p_admin_id": string,"p_request_id": number }; Returns: undefined
@@ -735,6 +801,12 @@ isOneToOne: false
                            },
 "submit_company_request":
 { Args: { "p_client_hash": string,"p_company_name": string,"p_contact_name": string,"p_email": string,"p_format"?: string,"p_needs": string,"p_phone"?: string,"p_team_size"?: string,"p_timing"?: string }; Returns: string
+                           },
+"submit_course_link":
+{ Args: { "p_category_id"?: string,"p_course_type"?: Database["public"]['Enums']["course_type"],"p_institution_name": string,"p_title": string,"p_url": string,"p_user_id": string }; Returns: Json
+                           },
+"submit_course_request":
+{ Args: { "p_client_hash": string,"p_name": string,"p_note": string,"p_url": string }; Returns: Json
                            },
 "submit_institution_request":
 { Args: { "p_client_hash": string,"p_contact_email": string,"p_course_url": string,"p_institution_name": string }; Returns: string
