@@ -23,18 +23,21 @@ const smallLink =
  * (מרקר ירוק), ובסוף השורות הנוספות. במחשב השורה נפרשת לעמודות, כמו ברשימת הקורסים: השם והשורות הנוספות,
  * הציון, והמחיר. כך הציונים עומדים זה מתחת לזה, ואפשר להשוות בעין. בלי נקודות מובילות (The Not A Menu Rule).
  * השורה נכתבת אל הדף כשהיא נכנסת למסך (data-anim="ink"), ובריחוף העט מותח קו מתחת לשם (.pen-under).
- * children: שורות נוספות. בעמוד מוסד: מה המוסד מבטיח. בעמוד מרצה: התפקיד, ומה הבוגרים אומרים על המרצים.
+ * detail: שורה קצרה מיד מתחת לשם, לפני הציון. בעמוד מרצה: התפקיד בקורס.
+ * children: שורות נוספות בסוף. בעמוד מוסד: מה המוסד מבטיח. בעמוד מרצה: מה הבוגרים אומרים על המרצים.
  */
 export function CourseRow({
   course,
   showInstitution = false,
   scoreLabel = 'ציון בוגרים מתוך 10',
+  detail,
   children,
 }: {
   course: CoursePageData;
   /** בעמוד מרצה: שם המוסד, עם קישור לעמוד שלו. */
   showInstitution?: boolean;
   scoreLabel?: string;
+  detail?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const { score } = course;
@@ -75,6 +78,7 @@ export function CourseRow({
             )}
           </p>
         )}
+        {detail}
       </div>
 
       {score.status === 'scored' ? (
