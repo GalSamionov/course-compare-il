@@ -34,23 +34,13 @@ function tiltFor(children: React.ReactNode): (typeof TILTS)[number] {
 /**
  * מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה.
  * משיכה עם קצוות משופעים (globals.css, .hl), וכל שורה מקבלת משיכה משלה.
- * המשיכה נמרחת פעם אחת כשהיא נכנסת למסך (globals.css, "תנועה"). delay: השהיה נוספת לפני המריחה.
+ * המשיכה נמרחת פעם אחת, קצרה, כשהיא נכנסת למסך (globals.css, "תנועה").
  */
-export function Mark({
-  source,
-  delay,
-  children,
-}: {
-  source: MarkSource;
-  /** השהיה נוספת במילישניות לפני שהמשיכה נמרחת. */
-  delay?: number;
-  children: React.ReactNode;
-}) {
+export function Mark({ source, children }: { source: MarkSource; children: React.ReactNode }) {
   return (
     <mark
       data-source={source}
       data-tilt={tiltFor(children)}
-      data-delay={delay}
       className={cn('hl', `hl-${source}`)}
     >
       <span className="sr-only">{markLabel[source]}: </span>
@@ -76,26 +66,20 @@ export function Claim({ children }: { children: React.ReactNode }) {
  * הערה קצרה של האתר לקורא, בעט הכחול (Rubik). זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
  * arrow: חץ בעט לפני ההערה. true: חץ קטן בכיוון הקריאה. 'up': חץ מעוקל שעולה מתחילת ההערה אל מה שמעליה,
  * ולא תופס מקום בשורה. 'back': חץ קטן שמצביע אחורה, אל מה שעומד מימין להערה.
- * נכתבת מימין לשמאל כשהיא נכנסת למסך (data-anim="write").
  * רכיב בלוק (p): אסור למקם אותו בתוך <p>.
  */
 export function PenNote({
   children,
   arrow = false,
-  delay,
   className,
 }: {
   children: React.ReactNode;
   arrow?: boolean | 'up' | 'back';
-  /** השהיה נוספת במילישניות לפני שהעט מתחיל לכתוב, למשל אחרי שהעיגול סביב הציון נסגר. */
-  delay?: number;
   className?: string;
 }) {
   return (
     <p
-      data-anim="write"
-      data-delay={delay}
-      className={cn(' font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}
+      className={cn('font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}
     >
       {arrow === true && <PenArrow />}
       {arrow === 'back' && <PenArrow className="-scale-x-100" />}
@@ -161,7 +145,6 @@ const noteColor: Record<NoteTone, string> = {
 
 /**
  * פתק דביק: צהוב לקול של בוגר, כחול לקול של המוסד. מודבק בסלוטייפ.
- * כשהוא נכנס למסך הוא יורד על הדף ונלחץ, והסלוטייפ מונח אחריו (data-anim="stick").
  * רכיב בלוק (div): אסור למקם אותו בתוך <p>.
  */
 export function StickyNote({
@@ -189,9 +172,6 @@ export function StickyNote({
   const angle = clamp(tilt);
   return (
     <div
-      // פתק עם סלוטייפ נדבק. פתק בלי סלוטייפ תלוי על פתק אחר (אחרי 3 חודשים), ומתנדנד עד שהוא נח.
-      data-anim={tape ? 'stick' : 'hang'}
-      data-delay={tape ? undefined : 520}
       className={cn(
         'relative font-sans text-[13px] leading-snug text-pretty',
         // נייר של פתק: כהה מעט בתחתית, וצל של פינה שמתרוממת. פתק לבן מקבל צל אפור-קר, בלי הגוון הצהוב.
@@ -204,14 +184,9 @@ export function StickyNote({
         className,
       )}
       style={
-        // --stick-from: ההדבקה מתחילה מוטה מעט לכיוון האפס, כך שגם פתק של 4 מעלות לא עובר את התקרה.
         tiltLg === undefined
-          ? ({ transform: `rotate(${angle}deg)`, '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg` } as React.CSSProperties)
-          : ({
-              '--tilt': `${angle}deg`,
-              '--tilt-lg': `${clamp(tiltLg)}deg`,
-              '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg`,
-            } as React.CSSProperties)
+          ? { transform: `rotate(${angle}deg)` }
+          : ({ '--tilt': `${angle}deg`, '--tilt-lg': `${clamp(tiltLg)}deg` } as React.CSSProperties)
       }
     >
       {tape && <Tape width={58} tilt={angle > 0 ? -4 : 3} washi={tone === 'paper' ? washi : undefined} />}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { PenNote, StickyNote, type WashiTone } from '@/components/course/marks';
-import { PenArrow, PenLoop } from '@/components/site/pen';
+import { PenLoop } from '@/components/site/pen';
 import type { CategoryEntry } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
 
@@ -58,8 +58,8 @@ export function SubjectsToc({
                 washi={WASHI[i % WASHI.length]}
                 className={cn(
                   'flex min-h-[84px] w-full flex-col px-3 pt-3.5 pb-2.5 text-[13px]',
-                  // בריחוף הפתק מתרומם מעט מהדף, והעט מותח קו מתחת לשם.
-                  'transition-[translate,box-shadow] duration-200 ease-out group-hover:-translate-y-1 group-focus-visible:-translate-y-1',
+                  // בריחוף הצל של הפתק מתחזק מעט, והעט מותח קו מתחת לשם.
+                  'transition-shadow duration-150 ease-out',
                   'group-hover:shadow-[0_0_0_1px_rgb(30_36_44/0.08),0_2px_3px_rgb(30_36_44/0.08),0_18px_20px_-12px_rgb(30_36_44/0.42)]',
                 )}
               >
@@ -82,7 +82,6 @@ export function SubjectsToc({
                       <span className="sr-only"> מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}</span>
                     </span>
                   </span>
-                  <PenArrow className="me-0 h-[0.75em] w-[1.4em] flex-none opacity-0 transition-[opacity,translate] duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-safe:translate-x-1 motion-safe:group-hover:translate-x-0" />
                 </span>
               </StickyNote>
             </Link>

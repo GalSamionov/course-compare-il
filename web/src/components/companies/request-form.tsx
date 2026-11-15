@@ -296,7 +296,7 @@ function FormRound({ className, onAnother }: { className?: string; onAnother: ()
                           onChange={() => set('format')(o.value)}
                           className="sr-only"
                         />
-                        {on ? <PenLoop>{o.label}</PenLoop> : o.label}
+                        {on ? <PenLoop draw>{o.label}</PenLoop> : o.label}
                       </label>
                     );
                   })}

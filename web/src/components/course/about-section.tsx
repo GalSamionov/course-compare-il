@@ -12,10 +12,10 @@ const formatLabels: Record<string, string> = {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
-      <dt data-anim="ink" className="font-sans font-bold">
+      <dt className="font-sans font-bold">
         {label}
       </dt>
-      <dd data-anim="ink" className="m-0">
+      <dd className="m-0">
         {children}
       </dd>
     </>
@@ -46,7 +46,7 @@ export function AboutSection({ course }: { course: CoursePageData }) {
           <h3 className="mt-4 font-sans text-base font-bold">מה לומדים, {course.syllabus.length} פרקים</h3>
           <ol className="mt-1 list-decimal pr-6">
             {course.syllabus.map((item, i) => (
-              <li key={`${i}-${item.title}`} data-anim="ink">
+              <li key={`${i}-${item.title}`}>
                 {item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}
               </li>
             ))}

@@ -94,7 +94,7 @@ function ReviewRow({
   onAsk: () => void;
   onCancel: () => void;
   onDelete: () => void;
-  /** נמחקה עכשיו: העט מוחק את השם בקו, והשורה נעלמת (globals.css, data-leaving). */
+  /** נמחקה עכשיו: השורה דוהה החוצה לפני שהיא יוצאת מהרשימה (globals.css, data-leaving). */
   leaving?: boolean;
   /** קישור "בוגר מאומת" של הביקורת, אם כבר נוצר. */
   badge: MyBadge | undefined;
@@ -113,7 +113,7 @@ function ReviewRow({
   }, [confirming]);
 
   return (
-    <li data-anim="ink" data-leaving={leaving ? '' : undefined} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
+    <li data-leaving={leaving ? '' : undefined} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
       {/* השם ראשון בקוד, כדי שקורא מסך יקרא את הקורס לפני המצב. הרשת קובעת את המיקום. */}
       <h3 className="col-start-2 row-start-1 ps-3 text-[19px] leading-snug font-bold">
         {course ? (
@@ -204,7 +204,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  /** הביקורת שנמחקה עכשיו, בזמן שהעט מוחק אותה מהרשימה. */
+  /** הביקורת שנמחקה עכשיו, בזמן שהיא דוהה החוצה. */
   const [leaving, setLeaving] = useState<string | null>(null);
   /** קישורי "בוגר מאומת", לפי הביקורת. בלי טעינה מוצלחת: אין קישורים, והביקורות עצמן עדיין מוצגות. */
   const [badges, setBadges] = useState<ReadonlyMap<string, MyBadge>>(new Map());
@@ -256,10 +256,10 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
     });
     // הקבצים שהועלו ולא נשלחו כבר נמחקו בשרת. גם הרשימה שלהם בדפדפן כבר לא צריכה להישמר.
     writeAttached(review.id, []);
-    // העט מוחק את השורה בקו לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
+    // השורה דוהה החוצה לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setLeaving(review.id);
-      await new Promise((resolve) => window.setTimeout(resolve, 620));
+      await new Promise((resolve) => window.setTimeout(resolve, 200));
       setLeaving(null);
     }
     setLoad((current) =>
@@ -373,7 +373,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
               return (
                 <li
                   key={review.id}
-                  data-anim="ink"
+                 
                   className="ruled-row grid min-h-[54px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center py-1"
                 >
                   <p className="col-start-2 flex flex-wrap items-baseline gap-x-2.5 ps-3">
