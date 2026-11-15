@@ -75,10 +75,15 @@ export function reasonText(reason: string): string {
   return field ? `${fieldLabel(field)}: ${text}` : text;
 }
 
-const dateLabel = (iso: string) =>
-  new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(
-    new Date(`${iso}T00:00:00Z`),
-  );
+/** "2026-13-01" עובר את התבנית, אבל Intl זורק על תאריך לא תקין, והתור כולו נופל. אז: הטקסט כמו שהוא. */
+const dateLabel = (iso: string) => {
+  const date = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat('he-IL', { day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(date);
+};
+
+/** ערך שאינו בצורה שהשדה מצפה לה: טקסט קריא, ולא "[object Object]". */
+const asText = (value: Json) => (typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value));
 
 const isObject = (value: Json): value is { [key: string]: Json | undefined } =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -101,23 +106,24 @@ export function displayValue(field: string, value: Json | null | undefined): str
   switch (spec.kind) {
     case 'int':
     case 'number': {
-      const n = typeof value === 'number' ? value : Number(value);
-      if (!Number.isFinite(n)) return String(value);
+      const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+      if (!Number.isFinite(n)) return asText(value);
       if (field === 'site_price_ils') return formatIls(n);
       return `${new Intl.NumberFormat('he-IL').format(n)}${spec.unit ? ` ${spec.unit}` : ''}`;
     }
     case 'date':
-      return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? dateLabel(value) : String(value);
+      return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? dateLabel(value) : asText(value);
     case 'choices':
-      if (!Array.isArray(value)) return String(value);
+      if (!Array.isArray(value)) return asText(value);
       if (value.length === 0) return null;
-      return value.map((v) => spec.choiceLabel?.[String(v)] ?? String(v)).join(', ');
+      return value.map((v) => (typeof v === 'string' ? (spec.choiceLabel?.[v] ?? v) : asText(v))).join(', ');
     case 'syllabus': {
       const titles = syllabusTitles(value);
-      return titles.length === 0 ? null : titles.join(' · ');
+      if (titles.length > 0) return titles.join(' · ');
+      return Array.isArray(value) && value.length === 0 ? null : asText(value);
     }
     default:
-      return String(value);
+      return asText(value);
   }
 }
 

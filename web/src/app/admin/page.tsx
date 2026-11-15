@@ -14,7 +14,7 @@ import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
 import { COMPANY_REQUESTS_PAGE, loadCompanyRequests } from '@/lib/admin/company-requests';
 import { COURSE_QUEUE_PAGE, loadCourseQueue, loadJoinRequests, loadLatestRun } from '@/lib/admin/course-queue';
-import { adminGate } from '@/lib/admin/gate';
+import { adminGate, keyProblemMessage, type AdminGate } from '@/lib/admin/gate';
 import { loadQueue } from '@/lib/admin/queue';
 import { SITE_NAME } from '@/lib/site';
 
@@ -63,6 +63,15 @@ function companiesLine(open: number, waiting: number, shown: number): string {
   return `${head} ${wait} היעד: תשובה תוך 2 ימי עבודה.`;
 }
 
+/** מה גל עושה כשאין מפתח סודי שעובד. המפתח עצמו לא מוצג אף פעם, גם לא חלק ממנו. */
+function keyProblemFix(gate: Extract<AdminGate, { kind: 'no-key' | 'bad-key' }>): string {
+  if (gate.kind === 'no-key') return 'אחרי שמוסיפים אותו ב-Vercel, צריך לפרוס מחדש.';
+  if (gate.reason === 'public') {
+    return 'מחליפים אותו ב-Vercel במפתח שמתחיל ב-sb_secret_ (ב-Supabase: Project Settings, API Keys), ופורסים מחדש.';
+  }
+  return 'בודקים ב-Vercel שזה המפתח הסודי של הפרויקט הזה ושהוא לא בוטל, ופורסים מחדש. אם המפתח נכון, אולי המסד לא ענה: לרענן בעוד דקה.';
+}
+
 const sectionTitle = 'pen-rule text-[21px] leading-snug font-bold lg:text-[28px]';
 const countText = 'mt-2 font-sans text-[15px] leading-normal text-ink-soft';
 
@@ -93,10 +102,10 @@ async function AdminQueues() {
     <Sheet className="sheet-long">
       <main className="pb-10 lg:pb-14">
         <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px]">מה מחכה להחלטה</h1>
-        {gate.kind === 'no-key' ? (
+        {gate.kind === 'no-key' || gate.kind === 'bad-key' ? (
           <div role="alert" className="mt-4 max-w-[60ch] space-y-2 font-sans text-[15px] leading-normal">
-            <p className="font-bold">חסר SUPABASE_SECRET_KEY בשרת. בלעדיו אי אפשר לפתוח הוכחות או להחליט.</p>
-            <p>אחרי שמוסיפים אותו ב-Vercel, צריך לפרוס מחדש. עד אז שום ביקורת לא מתפרסמת ושום קובץ לא נמחק.</p>
+            <p className="font-bold">{keyProblemMessage(gate)}</p>
+            <p>{keyProblemFix(gate)} עד אז שום ביקורת לא מתפרסמת ושום קובץ לא נמחק.</p>
           </div>
         ) : (
           <>
