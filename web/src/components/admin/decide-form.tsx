@@ -71,7 +71,8 @@ export function DecideForm({
   mismatches,
 }: {
   reviewId: string;
-  courseSlug: string;
+  /** null: הקורס עוד טיוטה, ואין עמוד לבדוק. */
+  courseSlug: string | null;
   courseTitle: string;
   defaultKind: ProofKind;
   /** הסכום שהמודל קרא. רק רמז ליד השדה: טקסט מוסתר במסמך יכול לגרום לו לקרוא סכום אחר (prompt injection). */
@@ -86,7 +87,7 @@ export function DecideForm({
   const [approveState, approve, approving] = useActionState(async (previous: DecisionState, form: FormData) => {
     const result = await approveReview(previous, form);
     if (result.status === 'done') {
-      logDecision({ id: `review:${reviewId}`, title: courseTitle, message: result.message, warning: result.warning, href: `/courses/${courseSlug}` });
+      logDecision({ id: `review:${reviewId}`, title: courseTitle, message: result.message, warning: result.warning, href: courseSlug ? `/courses/${courseSlug}` : undefined });
     }
     return result;
   }, IDLE);

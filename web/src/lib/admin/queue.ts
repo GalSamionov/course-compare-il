@@ -27,6 +27,8 @@ export interface QueueItem {
   waitingHours: number | null;
   courseSlug: string;
   courseTitle: string;
+  /** הקורס עוד טיוטה: בוגר הוסיף אותו מקישור, והוא מחכה בתור "קורסים מקישורים". אין לו עמוד. */
+  courseIsDraft: boolean;
   institutionName: string;
   sitePrice: number | null;
   cohortMonth: string;
@@ -42,6 +44,7 @@ export interface QueueItem {
 type CourseRef = {
   slug: string;
   title: string;
+  status: string;
   site_price_ils: number | null;
   institutions: { name: string } | { name: string }[] | null;
 };
@@ -52,7 +55,7 @@ export async function loadQueue(db: AdminDb): Promise<QueueItem[]> {
     db
       .from('reviews')
       .select(
-        'id, submitted_at, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(slug, title, site_price_ils, institutions(name)), proofs(id, claimed_kind, mime_type, size_bytes, storage_path, check_status, check_result, flags, status)',
+        'id, submitted_at, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(slug, title, status, site_price_ils, institutions(name)), proofs(id, claimed_kind, mime_type, size_bytes, storage_path, check_status, check_result, flags, status)',
       )
       .eq('status', 'pending')
       .order('submitted_at', { ascending: true }),
@@ -85,6 +88,7 @@ export async function loadQueue(db: AdminDb): Promise<QueueItem[]> {
       waitingHours: row.submitted_at ? Math.floor((now - new Date(row.submitted_at).getTime()) / 3_600_000) : null,
       courseSlug: course?.slug ?? '',
       courseTitle: course?.title ?? '',
+      courseIsDraft: course?.status === 'draft',
       institutionName: one(course?.institutions ?? null)?.name ?? '',
       sitePrice: course?.site_price_ils ?? null,
       cohortMonth: row.cohort_month,

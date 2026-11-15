@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { CompanyRequestItem } from '@/components/admin/company-request-item';
+import { CourseLinkItemView } from '@/components/admin/course-link-item';
 import { textLink } from '@/components/admin/controls';
 import { CourseQueueItemView } from '@/components/admin/course-queue-item';
 import { DecisionLog } from '@/components/admin/decision-log';
@@ -15,6 +16,7 @@ import { ScrapeRunReportView } from '@/components/admin/scrape-run-report';
 import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
 import { COMPANY_REQUESTS_PAGE, loadCompanyRequests } from '@/lib/admin/company-requests';
+import { COURSE_LINKS_PAGE, loadCourseLinks } from '@/lib/admin/course-links';
 import {
   COURSE_QUEUE_PAGE,
   loadCourseQueue,
@@ -137,6 +139,13 @@ function CourseFilters({ view, groups }: { view: CourseQueueView; groups: NewCou
   );
 }
 
+/** קורסים שבוגרים הוסיפו מקישור, ובקשות מ-/request-course. */
+function linksLine(total: number, shown: number): string {
+  if (total === 0) return '';
+  const head = total === 1 ? 'פריט אחד מחכה.' : `${fmt(total)} פריטים מחכים, הישן ראשון.`;
+  return shown < total ? `${head} כאן ${shown} הראשונים, ואחרי כל החלטה עולה הבא.` : head;
+}
+
 function requestsLine(count: number): string {
   if (count === 1) return 'בקשה אחת מחכה.';
   return `${count} בקשות מחכות, הישנה ראשונה.`;
@@ -171,7 +180,7 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
   if (gate.kind === 'not-admin') notFound();
   // ?cq=unsafe|duplicates ו-&inst: רשימה מסוננת של קורסים חדשים, במקום הסיכום לפי מוסד.
   const view = parseQueueView(await searchParams);
-  const [reviews, courses, groups, filtered, run, join, companies] =
+  const [reviews, courses, groups, filtered, run, join, companies, links] =
     gate.kind === 'ok'
       ? await Promise.all([
           loadQueue(gate.db),
@@ -181,6 +190,7 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
           loadLatestRun(gate.db),
           loadJoinRequests(gate.db),
           loadCompanyRequests(gate.db),
+          loadCourseLinks(gate.db),
         ])
       : [
           [],
@@ -190,6 +200,7 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
           null,
           { requests: [], institutions: [] },
           { requests: [], open: 0, waiting: 0 },
+          { items: [], total: 0, institutions: [], categories: [] },
         ];
   const filteredInstitution = view.institutionId
     ? (groups.find((g) => g.institutionId === view.institutionId)?.institutionName ?? 'המוסד')
@@ -197,6 +208,7 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
   const queues = [
     { id: 'reviews', label: 'ביקורות לאימות', count: reviews.length },
     { id: 'courses', label: 'קורסים לאישור', count: courses.total },
+    { id: 'links', label: 'קורסים מקישורים', count: links.total },
     { id: 'requests', label: 'בקשות של מוסדות', count: join.requests.length },
     { id: 'companies', label: 'פניות מחברות', count: companies.open },
   ];
@@ -278,6 +290,38 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
                     </div>
                   </>
                 )}
+              </section>
+
+              <section id="links" aria-labelledby="links-title" className="mt-10 scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
+                <h2 id="links-title" className={sectionTitle}>
+                  קורסים מקישורים
+                </h2>
+                <p className={`${countText} max-w-[68ch]`}>
+                  {links.total === 0 ? (
+                    <>
+                      אין קורסים שמחכים. בוגר מוסיף קורס מקישור כשהוא לא מוצא אותו ב
+                      <Link href="/review" className={textLink}>
+                        כתיבת ביקורת
+                      </Link>
+                      , וכל אחד יכול לבקש ב
+                      <Link href="/request-course" className={textLink}>
+                        בקשו שנבדוק קורס
+                      </Link>
+                      .
+                    </>
+                  ) : (
+                    linksLine(links.total, Math.min(links.items.length, COURSE_LINKS_PAGE))
+                  )}
+                </p>
+                <div className="mt-6">
+                  {links.items.map((item) => (
+                    <CourseLinkItemView
+                      key={item.id}
+                      item={item}
+                      choices={{ institutions: links.institutions, categories: links.categories }}
+                    />
+                  ))}
+                </div>
               </section>
 
               <section id="requests" aria-labelledby="requests-title" className="mt-10 scroll-mt-4 lg:mt-16 lg:scroll-mt-8">
