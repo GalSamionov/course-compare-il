@@ -66,7 +66,7 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
         ביקורת שלכם יכולה לתת לקורס ציון. מספיקות {MIN_REVIEWS} ביקורות מאומתות.
       </p>
       <PenNote arrow className="mt-1.5 lg:text-base">
-        כתיבת ביקורת נפתחת בקרוב. בינתיים, אלה הקורסים שהכי קרובים לציון:
+        אלה הקורסים שהכי קרובים לציון. לוחצים על קורס וכותבים:
       </PenNote>
       <ul className="mt-2 space-y-1 font-sans text-[15px] leading-snug lg:mt-3 lg:text-base">
         {closest.map((course) => {
@@ -74,7 +74,7 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
           return (
             <li key={course.slug}>
               <Link
-                href={`/courses/${course.slug}`}
+                href={`/courses/${course.slug}/review`}
                 className="group flex min-h-11 flex-col justify-center gap-1 py-1.5 transition-colors duration-150 hover:text-link-hover"
               >
                 <span className="min-w-0 underline underline-offset-[3px]">{course.title}</span>
