@@ -1,0 +1,110 @@
+{
+ "is_course_page": true,
+ "category": "cooking",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "סדנת סכינים",
+   "quote": "סדנת סכינים",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 450,
+   "quote": "מחיר הסדנה: 450 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 4,
+   "quote": "סדנה של 4 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "במטבח שלנו בהרצליה",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "הרצליה",
+   "quote": "במטבח שלנו בהרצליה",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": true,
+   "value": "2026-09-01",
+   "quote": "הסדנה הבאה: 1.9.2026",
+   "confidence": "high"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

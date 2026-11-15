@@ -1,0 +1,115 @@
+{
+ "is_course_page": true,
+ "category": "psychometric",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "פסיכומטרי אונליין",
+   "quote": "פסיכומטרי אונליין",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 3400,
+   "quote": "מחיר: 3,400 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 100,
+   "quote": "100 שעות של שיעורים מוקלטים",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "online"
+   ],
+   "quote": "100 שעות של שיעורים מוקלטים",
+   "confidence": "high"
+  },
+  "region": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "חשיבה כמותית",
+    "חשיבה מילולית",
+    "אנגלית",
+    "סימולציות"
+   ],
+   "quote": "חשיבה כמותית",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

@@ -1,0 +1,112 @@
+{
+ "is_course_page": true,
+ "category": "ai",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "Prompt Engineering Workshop",
+   "quote": "Prompt Engineering Workshop",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 1450,
+   "quote": "Price: NIS 1,450",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 12,
+   "quote": "Four evenings, 12 hours in total",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": true,
+   "value": "ארבעה ערבים",
+   "quote": "Four evenings, 12 hours in total",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "online"
+   ],
+   "quote": "Live on Zoom",
+   "confidence": "high"
+  },
+  "region": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "Four evenings, 12 hours in total",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

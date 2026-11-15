@@ -1,0 +1,112 @@
+{
+ "is_course_page": true,
+ "category": "cooking",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "מטבח טבעוני בסופ\"ש",
+   "quote": "מטבח טבעוני בסופ\"ש",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 690,
+   "quote": "רק 690 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 6,
+   "quote": "יום שישי אחד, 6 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "בכפר סבא",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "כפר סבא",
+   "quote": "בכפר סבא",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "weekend"
+   ],
+   "quote": "יום שישי אחד, 6 שעות",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": true,
+   "value": "עד 12 משתתפים",
+   "quote": "עד 12 משתתפים",
+   "confidence": "high"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

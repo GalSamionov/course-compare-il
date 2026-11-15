@@ -1,0 +1,115 @@
+{
+ "is_course_page": true,
+ "category": "ai",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "בינה מלאכותית למנהלים",
+   "quote": "בינה מלאכותית למנהלים",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 4200,
+   "quote": "השקעה: 4,200 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 24,
+   "quote": "6 מפגשים של 4 שעות, 24 שעות בסך הכול",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "online"
+   ],
+   "quote": "כל המפגשים בזום",
+   "confidence": "high"
+  },
+  "region": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": true,
+   "value": "2026-12-08",
+   "quote": "נפתח ב-8.12.2026",
+   "confidence": "high"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "מה מודל שפה יודע לעשות",
+    "כתיבת הנחיות",
+    "אוטומציה של משימות",
+    "מדיניות ופרטיות בארגון"
+   ],
+   "quote": "מה מודל שפה יודע לעשות",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}
