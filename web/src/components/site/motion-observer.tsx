@@ -3,23 +3,24 @@
 import { useEffect } from 'react';
 
 /**
- * מה זז כשהוא נכנס למסך (globals.css, "תנועה"): משיכות מרקר, קווי טענה של המוסד, קווי עט מתחת לכותרות,
- * שורות בטבלאות של עמודי הקריאה, וכל רכיב עם data-anim.
+ * מה זז כשהוא נכנס למסך (globals.css, "תנועה"): משיכות מרקר, קווי טענה של המוסד, קווי עט מתחת לכותרות
+ * (גם בעמודי הקריאה, שבהם הקו בא מ-@apply), שורות בטבלאות של עמודי הקריאה, וכל רכיב עם data-anim.
  */
-const SELECTOR = '.hl, .claim, .pen-rule, .text-page tbody tr, [data-anim]';
+const SELECTOR = '.hl, .claim, .pen-rule, .text-page h2, .text-page tbody tr, [data-anim]';
 /** כמה רכיבים לכל היותר נכנסים בזה אחר זה באותו רגע, לפני שההשהיה מפסיקה לגדול. */
 const STAGGER_CAP = 6;
 const STAGGER_MS = 140;
 
 /**
  * מסמן כל רכיב שזז ברגע שהוא נכנס למסך (data-inview), פעם אחת. ה-CSS עושה את השאר.
- * פועל רק כשיש data-motion על <html>: הסקריפט ב-layout שם אותו רק אם המבקר לא ביקש פחות תנועה,
+ * פועל עם data-motion על <html>: הסקריפט ב-layout שם אותו רק אם המבקר לא ביקש פחות תנועה,
  * ומוריד אותו אם הסימון לא התחיל תוך 3 שניות (data-motion-ready). אז, או בלי JavaScript, הכול גלוי ועומד.
+ * אם הסימון מתחיל מאוחר יותר (טלפון איטי), מה שכבר על המסך נשאר כמו שהוא, ומה שמתחתיו עדיין זז.
  */
 export function MotionObserver() {
   useEffect(() => {
     const root = document.documentElement;
-    if (!root.hasAttribute('data-motion')) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
 
     /** רכיבים שמחכים להיכנס למסך. */
     const pending = new Set<HTMLElement>();
@@ -104,7 +105,7 @@ export function MotionObserver() {
     const replayHeading = () => {
       const id = decodeURIComponent(window.location.hash.slice(1));
       const target = id ? document.getElementById(id) : null;
-      const rule = target?.matches('.pen-rule') ? target : target?.querySelector<HTMLElement>('.pen-rule');
+      const rule = target?.matches('.pen-rule, .text-page h2') ? target : target?.querySelector<HTMLElement>('.pen-rule, .text-page h2');
       if (!rule) return;
       rule.classList.remove('pen-rule-replay');
       void rule.offsetWidth;
@@ -112,13 +113,23 @@ export function MotionObserver() {
       rule.addEventListener('animationend', () => rule.classList.remove('pen-rule-replay'), { once: true });
     };
 
-    // מתחילים רק אחרי שהדף נטען ו-React סיים לחבר אותו (hydration): סימון של רכיב לפני כן
-    // הוא שינוי ב-HTML שהשרת שלח, ו-React מזהיר עליו. requestIdleCallback רץ רק כשאין עבודה ממתינה.
+    // מתחילים אחרי שכל ה-HTML הגיע (DOMContentLoaded, גם החלקים שהגיעו בזרימה) ו-React סיים לחבר אותו
+    // (hydration): סימון של רכיב לפני כן הוא שינוי ב-HTML שהשרת שלח, ו-React מזהיר עליו.
+    // requestIdleCallback רץ רק כשאין עבודה ממתינה. לא מחכים ל-load: תמונות וגופנים איטיים לא צריכים לעכב את התנועה.
     // data-motion-ready רק כאן: אם זה לא קרה תוך 3 שניות, הסקריפט ב-layout מוריד את data-motion.
     let idle = 0;
     let timer = 0;
     const go = () => {
-      if (!root.hasAttribute('data-motion')) return;
+      if (!root.hasAttribute('data-motion')) {
+        // הגענו אחרי 3 השניות, והדף כבר גלוי ועומד. מה שעל המסך או מעליו נשאר כמו שהוא (data-still: בלי תנועה
+        // ובלי הבהוב), ומה שמתחתיו עדיין יזוז כשיגיעו אליו.
+        document.querySelectorAll(SELECTOR).forEach((el) => {
+          if (el.getBoundingClientRect().top >= window.innerHeight) return;
+          el.setAttribute('data-inview', '');
+          el.setAttribute('data-still', '');
+        });
+        root.setAttribute('data-motion', '');
+      }
       root.setAttribute('data-motion-ready', '');
       scan(document);
       mo.observe(document.body, { childList: true, subtree: true });
@@ -127,14 +138,14 @@ export function MotionObserver() {
       atBottom();
     };
     const start = () => {
-      if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(go, { timeout: 1200 });
+      if (typeof window.requestIdleCallback === 'function') idle = window.requestIdleCallback(go, { timeout: 500 });
       else timer = window.setTimeout(go, 120);
     };
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
+    if (document.readyState !== 'loading') start();
+    else document.addEventListener('DOMContentLoaded', start, { once: true });
 
     return () => {
-      window.removeEventListener('load', start);
+      document.removeEventListener('DOMContentLoaded', start);
       window.removeEventListener('scroll', atBottom);
       window.removeEventListener('hashchange', replayHeading);
       cancelAnimationFrame(frame);

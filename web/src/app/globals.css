@@ -412,6 +412,12 @@ body {
    ו-data-inview על רכיב כשהוא נכנס למסך, פעם אחת (motion-observer.tsx). --enter-delay: התור באותה כניסה.
    כל תנועה היא פעולה של יד על הדף: מרקר שנמרח, עט שכותב או מקיף, פתק שנדבק. */
 @media screen and (prefers-reduced-motion: no-preference) {
+  /* רכיב שהיה על המסך כשהתנועה התחילה באיחור (motion-observer.tsx): נשאר כמו שהוא, בלי תנועה. */
+  html[data-motion] :is([data-still], [data-still] path, [data-still] > .tape, [data-still] .proof-clip) {
+    animation: none !important;
+    transition: none !important;
+  }
+
   /* המרקר נמרח על העובדה מימין לשמאל. הטקסט גלוי כל הזמן. */
   html[data-motion] .hl:not([data-inview]) {
     background-size: 0 100%, 0 100%, 0 100%;
@@ -421,10 +427,11 @@ body {
   }
 
   /* קו העט מתחת לכותרת נמשך מימין לשמאל. */
-  html[data-motion] .pen-rule {
+  /* גם כותרות של עמודי קריאה: שם הקו בא מ-@apply pen-rule ולא מהמחלקה. */
+  html[data-motion] :is(.pen-rule, .text-page h2) {
     transition: background-size 780ms cubic-bezier(0.55, 0, 0.25, 1) var(--enter-delay, 0ms);
   }
-  html[data-motion] .pen-rule:not([data-inview]) {
+  html[data-motion] :is(.pen-rule, .text-page h2):not([data-inview]) {
     background-size: 0 0.42em;
   }
 
