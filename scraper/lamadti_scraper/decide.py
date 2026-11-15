@@ -136,8 +136,11 @@ def decide_changed(
     institution_slug: str,
     category_ids: dict[str, str],
     institution_categories: tuple[str, ...],
+    skip_fields: frozenset[str] = frozenset(),
 ) -> PagePlan:
-    """דף שהתוכן שלו השתנה (או חדש), אחרי החילוץ. course: השורה הנוכחית מ-courses, כולל status."""
+    """דף שהתוכן שלו השתנה (או חדש), אחרי החילוץ. course: השורה הנוכחית מ-courses, כולל status.
+    skip_fields: שדות שלא משווים בקורס קיים. בקורס שאוחד מכמה דפים (series.py) הדף המוביל הוא רק מפגש או מסלול
+    אחד, והשם, הסילבוס, הימים והמסלולים של הקורס באו מכל הדפים יחד."""
     if not extraction.is_course_page:
         plan.outcome = "not_course"
         if course is not None and course.get("status") in ("active", "maybe_inactive"):
@@ -171,6 +174,8 @@ def decide_changed(
 
     previous = ((page.last_extracted if page else None) or {}).get("fields") or {}
     for f in FIELDS:
+        if f.name in skip_fields:
+            continue
         fv = extraction.fields[f.name]
         prev = previous.get(f.name)
         old = course.get(f.name)

@@ -268,6 +268,57 @@ COURSES: list[dict] = [
     },
 ]
 
+# מפגשים, מחזורים ומסלולים של אותו קורס (series.py). בריצה האמיתית הראשונה כל מפגש בסדרה נכנס כקורס נפרד.
+# באתר: 3 מפגשים במחזור 4, ומפגש 1 של מחזור 5. האוסף צריך ליצור קורס אחד, "יסודות האפייה".
+SERIES_BASE = "יסודות האפייה"
+SERIES_PRICE = (1200, 'מחיר הסדנה המלאה, 3 מפגשים: 1,200 ש"ח')
+SERIES_PLACE = {"formats": (["in_person"], "במטבח שלנו בחולון"), "region": ("חולון", "במטבח שלנו בחולון")}
+for _key, _name, _session, _cohort, _date, _date_text in (
+    ("baking-basics-c4-1", "בצק פריך", 1, 4, "2027-01-05", "5.1.2027"),
+    ("baking-basics-c4-2", "בצק עלים", 2, 4, "2027-01-12", "12.1.2027"),
+    ("baking-basics-c4-3", "בצק רבוך", 3, 4, "2027-01-19", "19.1.2027"),
+    ("baking-basics-c5-1", "בצק פריך", 1, 5, "2027-03-02", "2.3.2027"),
+):
+    _title = f"{SERIES_BASE} | {_name} (מפגש {_session} מתוך 3) מחזור {_cohort}"
+    COURSES.append({
+        "key": _key,
+        "layout": "classic",
+        "category": "cooking",
+        "title": (_title, _title),
+        "site_price_ils": SERIES_PRICE,
+        "next_cohort_date": (_date, f"המפגש מתקיים ב-{_date_text}"),
+        **SERIES_PLACE,
+    })
+# מסלול בוקר ומסלול ערב של אותו קורס.
+COURSES += [
+    {
+        "key": "pasta-morning",
+        "layout": "cards",
+        "category": "cooking",
+        "title": ("קורס פסטה טרייה - בוקר", "קורס פסטה טרייה - בוקר"),
+        "site_price_ils": (650, 'מחיר: 650 ש"ח'),
+        "schedule": ("ראשון, 9:00-13:00", "בימי ראשון, 9:00-13:00"),
+        "time_slots": (["morning"], "בימי ראשון, 9:00-13:00"),
+    },
+    {
+        "key": "pasta-evening",
+        "layout": "cards",
+        "category": "cooking",
+        "title": ("קורס פסטה טרייה - ערב", "קורס פסטה טרייה - ערב"),
+        "site_price_ils": (650, 'מחיר: 650 ש"ח'),
+        "schedule": ("ראשון, 18:00-22:00", "בימי ראשון, 18:00-22:00"),
+        "time_slots": (["evening"], "בימי ראשון, 18:00-22:00"),
+    },
+    # אירוע שכבר היה. לא נהיה טיוטה.
+    {
+        "key": "tasting-evening-2024",
+        "layout": "landing",
+        "category": "cooking",
+        "title": ("ערב טעימות - 1 מאי 2024", "ערב טעימות - 1 מאי 2024"),
+        "site_price_ils": (180, 'כרטיס: 180 ש"ח'),
+    },
+]
+
 # דף שאינו קורס, ודף שאסור לאסוף לפי robots.txt.
 BLOG = {"key": "how-to-choose-a-course", "title": "איך בוחרים קורס"}
 PRIVATE = {"key": "price-list"}
