@@ -153,9 +153,11 @@ function JoinFormRound({ onAnother }: { onAnother: () => void }) {
                 </p>
               )}
               <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
-                {/* בשורה אחת, גם אם היא חורגת מעט מקו השוליים, כמו העט בשאר האתר (סקירת הסיום). */}
-                <p className={cn(marginNote, 'text-[13px] whitespace-nowrap lg:text-base')}>
-                  <PenArrow />
+                {/* בשורה אחת ובתוך השוליים (סקירת הסיום): בנייד, ב-70 פיקסלים, בלי החץ. במחשב השוליים רחבים, והחץ חוזר. */}
+                <p className={cn(marginNote, 'pe-0 text-[13px] whitespace-nowrap lg:pe-1.5 lg:text-base')}>
+                  <span className="hidden lg:inline">
+                    <PenArrow />
+                  </span>
                   בלי תשלום
                 </p>
                 <div className="ps-3">
