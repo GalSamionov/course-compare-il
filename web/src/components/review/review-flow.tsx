@@ -345,7 +345,7 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   if (account.status === 'signed-out' || !userId) {
     return (
       <Intro>
-        <Link href={`/login?next=${encodeURIComponent(`/courses/${form.slug}/review`)}`} className={primaryButton}>
+        <Link href={`/login?next=${encodeURIComponent(form.writePath ?? `/courses/${form.slug}/review`)}`} className={primaryButton}>
           להתחבר ולהתחיל
         </Link>
         <p className="mt-3 font-sans text-[13px] text-ink-soft">ההתחברות בקישור למייל, בלי סיסמה.</p>

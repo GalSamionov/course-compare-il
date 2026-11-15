@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { PenArrow } from '@/components/site/pen';
 import { loadMyBadges, type MyBadge } from '@/lib/badges/browser';
-import { deleteReview, loadMyReviews, writeAttached, type MyReview } from '@/lib/reviews/browser';
+import { deleteReview, loadMyCourseLinks, loadMyReviews, writeAttached, type MyCourseLink, type MyReview } from '@/lib/reviews/browser';
 import { verifiedLabel } from '@/lib/reviews/types';
 import type { Catalog, CourseSummary } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
@@ -31,8 +31,16 @@ function statusWord(review: MyReview): string {
 
 const link = 'inline-flex min-h-11 items-center font-semibold underline underline-offset-[3px] hover:text-link-hover';
 
-/** מה אפשר לעשות עכשיו עם הביקורת, אם בכלל. */
-function nextStep(review: MyReview, course: CourseSummary | undefined): { href: string; label: string } | null {
+/** מה אפשר לעשות עכשיו עם הביקורת, אם בכלל. קורס שהבוגר הוסיף מקישור, ועוד לא באתר: עמוד הכתיבה שלו. */
+function nextStep(
+  review: MyReview,
+  course: CourseSummary | undefined,
+  linked: MyCourseLink | undefined,
+): { href: string; label: string } | null {
+  if (!course && linked?.status === 'pending' && review.status === 'draft') {
+    const href = `/review/new?course=${linked.courseId}`;
+    return { href, label: isReturned(review) ? 'להעלות הוכחה אחרת' : 'להמשיך לכתוב' };
+  }
   if (!course) return null;
   if (isReturned(review)) return { href: `/courses/${course.slug}/review`, label: 'להעלות הוכחה אחרת' };
   if (review.status === 'draft') return { href: `/courses/${course.slug}/review`, label: 'להמשיך לכתוב' };
@@ -73,6 +81,7 @@ function Details({ review }: { review: MyReview }) {
 function ReviewRow({
   review,
   course,
+  linked,
   confirming,
   busy,
   error,
@@ -87,6 +96,8 @@ function ReviewRow({
 }: {
   review: MyReview;
   course: CourseSummary | undefined;
+  /** קורס שהבוגר הוסיף מקישור, ועדיין לא באתר. */
+  linked: MyCourseLink | undefined;
   confirming: boolean;
   busy: boolean;
   /** למה המחיקה נכשלה, בתוך שלב האישור, ליד הכפתור שנלחץ. */
@@ -104,8 +115,8 @@ function ReviewRow({
   onBadge: (badge: MyBadge | null) => void;
 }) {
   const question = useRef<HTMLParagraphElement>(null);
-  const title = course?.title ?? 'קורס שכבר לא באתר';
-  const step = nextStep(review, course);
+  const title = course?.title ?? linked?.title ?? 'קורס שכבר לא באתר';
+  const step = nextStep(review, course, linked);
 
   // שלב האישור נפתח: הפוקוס עובר לשאלה, כדי שקורא מסך יקרא אותה.
   useEffect(() => {
@@ -133,6 +144,13 @@ function ReviewRow({
       </p>
       <div className="col-start-2 row-start-2 ps-3">
         <p className="mt-0.5 font-sans text-sm leading-normal text-ink-soft">מחזור {monthLabel(review.cohortMonth)}</p>
+        {!course && linked && (
+          <p className="mt-0.5 font-sans text-sm leading-normal">
+            {linked.status === 'rejected'
+              ? `הקורס שהוספתם לא נוסף לאתר${linked.decisionReason ? `: ${linked.decisionReason}` : '.'}`
+              : 'קורס שהוספתם מקישור. עוד לא באתר: נבדוק אותו יחד עם הביקורת.'}
+          </p>
+        )}
         <Details review={review} />
         {confirming ? (
           <div role="group" aria-labelledby={`delete-${review.id}`} className="mt-2.5 mb-1 border-t-2 border-ink pt-2.5 font-sans">
@@ -210,6 +228,8 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
   const [badges, setBadges] = useState<ReadonlyMap<string, MyBadge>>(new Map());
   /** הביקורת שהחלק "לשתף ב-LinkedIn" שלה פתוח. */
   const [sharing, setSharing] = useState<string | null>(null);
+  /** קורסים שהבוגר הוסיף מקישור ועוד לא באתר, לפי הקורס. בלי טעינה מוצלחת: "קורס שכבר לא באתר", כמו קודם. */
+  const [links, setLinks] = useState<ReadonlyMap<string, MyCourseLink>>(new Map());
 
   useEffect(() => {
     let alive = true;
@@ -220,6 +240,12 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
       () => {
         if (alive) setLoad({ status: 'error' });
       },
+    );
+    loadMyCourseLinks().then(
+      (list) => {
+        if (alive) setLinks(new Map(list.map((l) => [l.courseId, l])));
+      },
+      () => {},
     );
     // מסד שהמיגרציה של הקישורים עוד לא עלתה אליו: אין קישורים, וזה לא שגיאה שהכותב צריך לראות.
     loadMyBadges().then(
@@ -265,7 +291,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
     setLoad((current) =>
       current.status === 'ready' ? { status: 'ready', reviews: current.reviews.filter((r) => r.id !== review.id) } : current,
     );
-    setNotice(`הביקורת על ${byId.get(review.courseId)?.title ?? 'הקורס'} נמחקה.`);
+    setNotice(`הביקורת על ${byId.get(review.courseId)?.title ?? links.get(review.courseId)?.title ?? 'הקורס'} נמחקה.`);
   }
 
   const emptyRows = (
@@ -318,6 +344,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 key={review.id}
                 review={review}
                 course={byId.get(review.courseId)}
+                linked={links.get(review.courseId)}
                 confirming={confirming === review.id}
                 busy={busy}
                 error={confirming === review.id ? error : null}

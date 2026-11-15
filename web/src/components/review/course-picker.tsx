@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useId, useState } from 'react';
+import { useId, useState, useSyncExternalStore } from 'react';
 import { PenArrow } from '@/components/site/pen';
 import { cn } from '@/lib/utils';
+import { ADD_COURSE_HASH, AddCourseLink, type PickerCategory } from './add-course-link';
 
 export interface PickerCourse {
   slug: string;
@@ -16,16 +17,29 @@ const normalize = (text: string) => text.normalize('NFKD').replace(/[֑-ׇ]/g, '
 
 const marginLabel = 'font-sans text-[13px] leading-tight text-ink-soft lg:text-[15px]';
 
+function subscribeHash(onChange: () => void) {
+  window.addEventListener('hashchange', onChange);
+  return () => window.removeEventListener('hashchange', onChange);
+}
+
+const addButton =
+  'inline-flex min-h-11 cursor-pointer items-center font-semibold underline underline-offset-[3px] hover:text-link-hover';
+
 /**
  * "איזה קורס סיימתם?": שורה במחברת, השאלה בשוליים והחיפוש בעט על הקו (כמו בעמוד ההתחברות).
- * מחפשים בשם הקורס או המוסד, וכל תוצאה מובילה לכתיבה.
+ * מחפשים בשם הקורס או המוסד, וכל תוצאה מובילה לכתיבה. קורס שלא ברשימה: מוסיפים מקישור (AddCourseLink).
  */
-export function CoursePicker({ courses }: { courses: PickerCourse[] }) {
+export function CoursePicker({ courses, categories }: { courses: PickerCourse[]; categories: PickerCategory[] }) {
   const [query, setQuery] = useState('');
+  const [opened, setAdding] = useState(false);
+  // חזרה מההתחברות (/review#add-course): הטופס פתוח.
+  const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => '');
+  const adding = opened || hash === `#${ADD_COURSE_HASH}`;
   const inputId = useId();
   const q = normalize(query.trim());
   const shown = (q ? courses.filter((c) => normalize(`${c.title} ${c.institutionName}`).includes(q)) : courses).slice(0, 30);
   return (
+    <>
     <div className="margin-rule mt-6 lg:mt-10">
       <div className="ruled-top ruled-row ruled-active grid min-h-16 grid-cols-[var(--margin)_minmax(0,1fr)] items-center lg:min-h-[72px]">
         <label htmlFor={inputId} className={marginLabel}>
@@ -55,9 +69,11 @@ export function CoursePicker({ courses }: { courses: PickerCourse[] }) {
             </p>
             <p className="ps-3 font-sans text-[15px] leading-normal">
               לא מצאנו קורס כזה.{' '}
-              <Link href="/request-course" className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover">
-                לבקש שנוסיף אותו
-              </Link>
+              {!adding && (
+                <button type="button" onClick={() => setAdding(true)} className={addButton}>
+                  הדביקו קישור לדף הקורס
+                </button>
+              )}
             </p>
           </div>
         ) : (
@@ -81,6 +97,16 @@ export function CoursePicker({ courses }: { courses: PickerCourse[] }) {
           </ul>
         )}
       </div>
+      {shown.length > 0 && !adding && (
+        <p className="ms-(--margin) mt-3 ps-3 font-sans text-[15px] leading-normal">
+          הקורס לא ברשימה?{' '}
+          <button type="button" onClick={() => setAdding(true)} className={addButton}>
+            הדביקו קישור לדף הקורס
+          </button>
+        </p>
+      )}
     </div>
+    {adding && <AddCourseLink initialTitle={query.trim()} categories={categories} courses={courses} />}
+    </>
   );
 }

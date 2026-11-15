@@ -64,6 +64,33 @@ export async function loadMyReviews(): Promise<MyReview[]> {
   }));
 }
 
+/** קורס שהמשתמש הוסיף מקישור, ועדיין טיוטה (my_course_links). קורס שאושר כבר בקטלוג. */
+export interface MyCourseLink {
+  courseId: string;
+  title: string;
+  institutionName: string;
+  status: 'pending' | 'rejected';
+  decisionReason: string | null;
+}
+
+export async function loadMyCourseLinks(): Promise<MyCourseLink[]> {
+  const { data, error } = await createBrowserSupabase().rpc('my_course_links');
+  if (error) throw error;
+  return (data ?? []).flatMap((row) =>
+    row.status === 'pending' || row.status === 'rejected'
+      ? [
+          {
+            courseId: row.course_id,
+            title: row.course_title,
+            institutionName: row.institution_name,
+            status: row.status,
+            decisionReason: row.decision_reason ?? null,
+          },
+        ]
+      : [],
+  );
+}
+
 /** 'duplicate': כבר יש ביקורת של המשתמש על אותו קורס ומחזור (reviews_one_per_cohort). */
 export type SaveResult = 'ok' | 'duplicate' | 'error';
 

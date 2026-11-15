@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: `כתיבת ביקורת | ${SITE_NAM
 
 /** המסלול "סיימתי קורס, רוצה לכתוב עליו" מדף הבית: בוחרים קורס, ועוברים לכתיבה. */
 export default async function ReviewPage() {
-  const { courses } = await getCatalog();
+  const { courses, categories } = await getCatalog();
   return (
     <Sheet narrow>
       <main className="pt-[22px] pb-10 lg:pt-12 lg:pb-14">
@@ -23,6 +23,7 @@ export default async function ReviewPage() {
         </p>
         <CoursePicker
           courses={courses.map(({ slug, title, institutionName }) => ({ slug, title, institutionName }))}
+          categories={categories.map(({ slug, name, parentSlug, isLeaf }) => ({ slug, name, parentSlug, isLeaf }))}
         />
       </main>
     </Sheet>

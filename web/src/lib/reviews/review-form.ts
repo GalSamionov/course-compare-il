@@ -12,6 +12,8 @@ export interface ReviewFormData {
   courseType: CourseType;
   /** השאלות לפי סוג הקורס, בלי "אחרי 3 חודשים". */
   questions: Question[];
+  /** איפה הכתיבה, כדי לחזור אליה אחרי ההתחברות. בלי: /courses/<slug>/review. קורס מקישור: /review/new?course=<id>. */
+  writePath?: string;
 }
 
 /**
@@ -23,6 +25,21 @@ export async function getReviewForm(slug: string): Promise<ReviewFormData | null
   cacheLife('hours');
   cacheTag(`course:${slug}`);
   return loadReviewForm(slug);
+}
+
+/**
+ * השאלות של כל הסוגים, לעמוד הכתיבה של קורס מקישור (/review/new): הקורס עצמו טיוטה, ונטען בדפדפן,
+ * אבל השאלות ציבוריות וקבועות. מהמטמון, לשעות.
+ */
+export async function getReviewMetrics(): Promise<MetricDef[]> {
+  'use cache';
+  cacheLife('hours');
+  const { data, error } = await createPublicClient()
+    .from('metrics')
+    .select('key, label, scale, course_types, sort_order')
+    .order('sort_order');
+  if (error) throw queryError('review metrics', error);
+  return data as MetricDef[];
 }
 
 async function loadReviewForm(slug: string): Promise<ReviewFormData | null> {
