@@ -510,7 +510,7 @@ export async function renderCareerCard(page: { courses: number; graduates: numbe
             {page.graduates > 0 ? (
               <div style={{ position: 'relative', display: 'flex', marginRight: 14, padding: '4px 16px' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
-                <img src={PEN_LOOP} width={340} height={62} style={{ position: 'absolute', left: -6, top: -6, width: '104%', height: '120%' }} />
+                <img src={PEN_LOOP} width={340} height={62} style={{ position: 'absolute', left: '-7%', top: -8, width: '114%', height: '130%' }} />
                 <Rtl text={verifiedGraduatesText(page.graduates)} size={34} style={{ fontWeight: 700 }} />
               </div>
             ) : (
@@ -518,12 +518,13 @@ export async function renderCareerCard(page: { courses: number; graduates: numbe
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+        {/* השורות התחתונות מימין, רחוק מהסלוטייפ של "נתוני דוגמה" שבפינה השמאלית. */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <Rtl text="ציון רק מבוגרים שהוכיחו שלמדו בקורס" size={27} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 10 }}>
             <Marked text="שילמו בפועל" size={28} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
             <Rtl text="לפי חשבוניות, ומה לשאול לפני שמשלמים" size={26} style={{ marginRight: 12 }} />
           </div>
-          <Rtl text="ציון רק מבוגרים שהוכיחו שלמדו" size={26} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
         </div>
       </Desk>
     ),
@@ -552,12 +553,12 @@ export async function renderBadgeCard(badge: {
   courseTitle: string;
   institutionName: string;
 }): Promise<ImageResponse> {
-  const course = clip(badge.courseTitle, 56);
+  const course = clip(badge.courseTitle, 44);
   return new ImageResponse(
     (
       <Desk sample={SAMPLE_DATA}>
         <SheetHeader />
-        <div style={{ display: 'flex', flexDirection: 'row-reverse', flexGrow: 1, alignItems: 'center', marginTop: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'row-reverse', flexGrow: 1, alignItems: 'flex-start', marginTop: 16 }}>
           <div
             style={{
               display: 'flex',
@@ -577,25 +578,26 @@ export async function renderBadgeCard(badge: {
                 alignItems: 'flex-end',
                 width: '100%',
                 border: `1.5px solid ${INK}`,
-                padding: '24px 34px 26px',
+                padding: '14px 30px 16px',
               }}
             >
-              {badge.name && <Rtl text={badge.name} size={34} style={{ fontWeight: 700, marginBottom: 6 }} />}
+              {badge.name && <Rtl text={badge.name} size={30} style={{ fontWeight: 700, marginBottom: 4 }} />}
               <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
-                <Marked text={badge.title} size={46} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+                <Marked text={badge.title} size={42} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
                 {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
                 <img src={PEN_TICK} width={58} height={58} style={{ marginRight: 14, marginTop: -10 }} />
               </div>
-              <Rtl text={`של ${course}`} size={titleSize(course)} style={{ fontWeight: 700, lineHeight: 1.08, marginTop: 14, maxWidth: 900 }} />
-              <div style={{ display: 'flex', marginTop: 20 }}>
+              <Rtl text={`של ${course}`} size={Math.min(50, titleSize(course))} style={{ fontWeight: 700, lineHeight: 1.08, marginTop: 10, maxWidth: 900 }} />
+              <div style={{ display: 'flex', marginTop: 14 }}>
                 <Stamp text={badge.institutionName} />
               </div>
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
-          <Rtl text="העלה/תה הוכחה שלמד/ה בקורס. ההוכחה נמחקה אחרי הבדיקה." size={24} style={{ color: INK_SOFT }} />
-          <Rtl text="לקרוא את הביקורות, או לכתוב אחת" size={26} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
+        {/* מימין, רחוק מהסלוטייפ של "נתוני דוגמה" שבפינה השמאלית. */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: 6 }}>
+          <Rtl text="ביקורת מתפרסמת רק אחרי הוכחה שלמדו בקורס, וההוכחה נמחקת אחרי הבדיקה." size={23} style={{ color: INK_SOFT }} />
+          <Rtl text="לקרוא את הביקורות על הקורס, או לכתוב אחת" size={27} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN, marginTop: 4 }} />
         </div>
       </Desk>
     ),
