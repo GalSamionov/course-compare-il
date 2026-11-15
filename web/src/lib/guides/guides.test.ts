@@ -71,3 +71,11 @@ describe('parseGuide', () => {
     expect(sectionLabel("עמ' 26")).toBe("עמ' 26");
   });
 });
+
+describe('cards.json', () => {
+  it('תואם למדריכים. אם לא: pnpm guides:cards', async () => {
+    const { guideCards } = await import('./cards');
+    const saved = (await import('./cards.json')).default;
+    expect(saved).toEqual(guideCards());
+  });
+});

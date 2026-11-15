@@ -25,4 +25,11 @@ test('מהרשימה אל מדריך, ומעובדה ירוקה אל המקור 
   await expect(card).toBeHidden();
 
   await expect(page.locator('#sources ol > li')).toHaveCount(7);
+
+  // תמונת השיתוף: תמונה אמיתית, מהכתובת שבתגית og:image.
+  const ogUrl = await page.locator('meta[property="og:image"]').getAttribute('content');
+  expect(ogUrl).toMatch(/\/guides\/questions-before-signing-up\/opengraph-image/);
+  const og = await page.request.get(new URL(ogUrl!).pathname);
+  expect(og.status()).toBe(200);
+  expect(og.headers()['content-type']).toBe('image/png');
 });
