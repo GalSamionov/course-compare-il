@@ -37,7 +37,7 @@ export default function CompaniesPage() {
   return (
     <Sheet>
       <main className="pb-6">
-        <h1 className="mt-[22px] max-w-[22ch] text-[30px] leading-tight font-bold text-balance lg:mt-12 lg:text-[54px] lg:leading-[1.06]">
+        <h1 className="mt-[22px] max-w-[30ch] text-[30px] leading-tight font-bold text-balance lg:mt-12 lg:text-[54px] lg:leading-[1.06]">
           לבחור קורס, הרצאה או סדנה לעובדים, לפי מי שכבר היה שם
         </h1>
         <p className="mt-3 max-w-[56ch] font-sans text-[17px] leading-normal text-pretty lg:mt-5 lg:text-xl">
@@ -55,23 +55,26 @@ export default function CompaniesPage() {
             <h2 id="offer-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
               מה תקבלו
             </h2>
-            <ul className="margin-rule ruled-top mt-4 lg:mt-6">
-              {OFFER.map((item) => (
-                <li
-                  key={item.label}
-                  data-anim="ink"
-                  className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start"
-                >
-                  <span className="pt-3 font-sans text-[13px] leading-tight text-ink-soft lg:pt-[18px] lg:text-[15px]">
-                    {item.label}
-                  </span>
-                  <p className="pt-2.5 ps-3 pb-[9px] text-base leading-normal text-pretty lg:pt-3.5 lg:pb-3 lg:text-lg">
-                    {item.text}
-                  </p>
-                </li>
-              ))}
-            </ul>
-            <PenNote arrow className="ms-(--margin) mt-4 max-w-[44ch] ps-3 text-base lg:mt-5 lg:text-lg">
+            {/* השוליים והקו העליון על שני רכיבים: שניהם מצוירים ב-::before (globals.css), כמו בטופס למוסדות. */}
+            <div className="margin-rule mt-4 lg:mt-6">
+              <ul className="ruled-top">
+                {OFFER.map((item) => (
+                  <li
+                    key={item.label}
+                    data-anim="ink"
+                    className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start"
+                  >
+                    <span className="pt-3 font-sans text-[13px] leading-tight text-ink-soft lg:pt-[18px] lg:text-[15px]">
+                      {item.label}
+                    </span>
+                    <p className="pt-2.5 ps-3 pb-[9px] text-base leading-normal text-pretty lg:pt-3.5 lg:pb-3 lg:text-lg">
+                      {item.text}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <PenNote arrow className="ms-(--margin) mt-4 max-w-[44ch] ps-3 text-base leading-snug lg:mt-5 lg:text-lg">
               השירות נבנה עכשיו, יחד עם החברות הראשונות. עוד אין מחירון: מתחילים בשיחת היכרות, בלי התחייבות.
             </PenNote>
             <p className="ms-(--margin) mt-1 ps-3 font-sans text-[13px] text-ink-soft lg:text-sm">

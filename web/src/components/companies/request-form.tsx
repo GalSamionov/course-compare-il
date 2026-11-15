@@ -37,13 +37,14 @@ const errorText = 'col-start-2 pr-3 pb-2.5 font-sans text-[13px] leading-snug fo
 /**
  * "מה אתם מחפשים" נכתב על קווי מחברת בתוך השדה: קו בתחתית כל שורת טקסט (36 פיקסלים, 40 במחשב).
  * הגובה קצר בפיקסל אחד מחמש שורות, כדי שהקו החמישי לא ייפול על הקו של השורה עצמה. הקווים זזים עם הטקסט בגלילה.
+ * גובה השורה אחרי גודל הגופן: cn ממזג כמו tailwind-merge, וגודל שבא אחרי leading מוחק אותו.
  */
 const ruledArea = cn(
-  'mt-2 block h-[179px] w-full resize-none bg-transparent pt-0 pr-3 pb-0 pl-1 leading-[36px] lg:h-[199px] lg:leading-[40px]',
+  'mt-2 block h-[179px] w-full resize-none bg-transparent pt-0 pr-3 pb-0 pl-1 lg:h-[199px]',
   'bg-[repeating-linear-gradient(to_bottom,transparent_0_35px,var(--color-ruled)_35px_36px)] [background-attachment:local]',
   'lg:bg-[repeating-linear-gradient(to_bottom,transparent_0_39px,var(--color-ruled)_39px_40px)]',
-  'font-sans text-[17px] font-semibold text-ink caret-ink outline-none',
-  'placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft',
+  'font-sans text-[17px] leading-[36px] font-semibold text-ink caret-ink outline-none lg:leading-[40px]',
+  'placeholder:text-[15px] placeholder:leading-[36px] placeholder:font-normal placeholder:text-ink-soft lg:placeholder:leading-[40px]',
 );
 
 /** חץ קטן מצויר בדיו רכה, בצד של ה-select: יש כאן רשימה לפתוח. לא סימן של האתר, ולכן לא בעט. */
@@ -67,6 +68,13 @@ export function CompanyRequestForm({ className }: { className?: string }) {
 function FormRound({ className, onAnother }: { className?: string; onAnother: () => void }) {
   const [state, dispatch, pending] = useActionState(submitCompanyRequest, IDLE);
   const [values, setValues] = useState<Values>(EMPTY);
+  // שדה שתוקן אחרי שליחה עם בעיות: ההודעה שלו יורדת מיד, ולא נשארת עד השליחה הבאה. מתאפס בכל תשובה חדשה.
+  const [answered, setAnswered] = useState(state);
+  const [edited, setEdited] = useState<Partial<Record<CompanyField, true>>>({});
+  if (answered !== state) {
+    setAnswered(state);
+    setEdited({});
+  }
   const heading = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const base = useId();
@@ -76,8 +84,14 @@ function FormRound({ className, onAnother }: { className?: string; onAnother: ()
   const privacyHint = `${base}-privacy`;
   const formatLabel = `${base}-format-label`;
   const sent = state.status === 'sent';
-  const errors = state.status === 'invalid' ? state.errors : {};
-  const set = (name: CompanyField) => (value: string) => setValues((v) => ({ ...v, [name]: value }));
+  const errors: Partial<Record<CompanyField, string>> =
+    state.status === 'invalid'
+      ? Object.fromEntries(Object.entries(state.errors).filter(([name]) => !edited[name as CompanyField]))
+      : {};
+  const set = (name: CompanyField) => (value: string) => {
+    setValues((v) => ({ ...v, [name]: value }));
+    setEdited((e) => (e[name] ? e : { ...e, [name]: true }));
+  };
   const needsCount = charCount(values.needs.trim());
 
   useEffect(() => {
@@ -315,7 +329,7 @@ function FormRound({ className, onAnother }: { className?: string; onAnother: ()
             )}
             <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
               {/* בנייד, ב-70 פיקסלים, בלי החץ. במחשב השוליים רחבים, והחץ חוזר (כמו בטופס למוסדות). */}
-              <p className={cn(marginNote, 'text-[13px] lg:pe-1.5 lg:text-base')}>
+              <p className={cn(marginNote, 'text-[13px] leading-snug lg:pe-1.5 lg:text-base')}>
                 <span className="hidden lg:inline">
                   <PenArrow />
                 </span>
