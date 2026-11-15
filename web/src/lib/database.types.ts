@@ -39,14 +39,14 @@ export type Database = {
                   ]
                 },"audit_log": {
                   Row: {
-                    "action": string,"actor_id": string | null,"created_at": string,"details": NonNullable<Json>,"id": number,"review_id": string
+                    "action": string,"actor_id": string | null,"course_queue_id": number | null,"created_at": string,"details": NonNullable<Json>,"id": number,"institution_request_id": number | null,"review_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "action": string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"review_id": string
+                    "action": string,"actor_id"?: string | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Update: {
-                    "action"?: string,"actor_id"?: string | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"review_id"?: string
+                    "action"?: string,"actor_id"?: string | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Relationships: [
                     
@@ -91,6 +91,88 @@ isOneToOne: true
       referencedColumns: ["user_id","course_id"]
     }
                   ]
+                },"course_change_queue": {
+                  Row: {
+                    "confidence": string | null,"course_id": string | null,"created_at": string,"decided_at": string | null,"decided_by": string | null,"field": string | null,"id": number,"kind": string,"new_value": Json | null,"old_value": Json | null,"page_id": number | null,"quote": string | null,"reasons": (string)[],"run_id": number | null,"snapshot_id": number | null,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "confidence"?: string | null,"course_id"?: string | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"field"?: string | null,"id"?: never,"kind": string,"new_value"?: Json | null,"old_value"?: Json | null,"page_id"?: number | null,"quote"?: string | null,"reasons"?: (string)[],"run_id"?: number | null,"snapshot_id"?: number | null,"status"?: string
+                  }
+                  Update: {
+                    "confidence"?: string | null,"course_id"?: string | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"field"?: string | null,"id"?: never,"kind"?: string,"new_value"?: Json | null,"old_value"?: Json | null,"page_id"?: number | null,"quote"?: string | null,"reasons"?: (string)[],"run_id"?: number | null,"snapshot_id"?: number | null,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "course_change_queue_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_change_queue_page_id_fkey"
+      columns: ["page_id"]
+isOneToOne: false
+      referencedRelation: "scrape_pages"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_change_queue_run_id_fkey"
+      columns: ["run_id"]
+isOneToOne: false
+      referencedRelation: "scrape_runs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_change_queue_snapshot_id_fkey"
+      columns: ["snapshot_id"]
+isOneToOne: false
+      referencedRelation: "course_snapshots"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"course_changes": {
+                  Row: {
+                    "approved_by": string | null,"course_id": string,"created_at": string,"field": string,"id": number,"new_value": Json | null,"old_value": Json | null,"queue_id": number | null,"quote": string | null,"reverts_id": number | null,"run_id": number | null,"snapshot_id": number | null,"source": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "approved_by"?: string | null,"course_id": string,"created_at"?: string,"field": string,"id"?: never,"new_value"?: Json | null,"old_value"?: Json | null,"queue_id"?: number | null,"quote"?: string | null,"reverts_id"?: number | null,"run_id"?: number | null,"snapshot_id"?: number | null,"source": string
+                  }
+                  Update: {
+                    "approved_by"?: string | null,"course_id"?: string,"created_at"?: string,"field"?: string,"id"?: never,"new_value"?: Json | null,"old_value"?: Json | null,"queue_id"?: number | null,"quote"?: string | null,"reverts_id"?: number | null,"run_id"?: number | null,"snapshot_id"?: number | null,"source"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "course_changes_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_changes_queue_id_fkey"
+      columns: ["queue_id"]
+isOneToOne: false
+      referencedRelation: "course_change_queue"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_changes_reverts_id_fkey"
+      columns: ["reverts_id"]
+isOneToOne: false
+      referencedRelation: "course_changes"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_changes_run_id_fkey"
+      columns: ["run_id"]
+isOneToOne: false
+      referencedRelation: "scrape_runs"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_changes_snapshot_id_fkey"
+      columns: ["snapshot_id"]
+isOneToOne: false
+      referencedRelation: "course_snapshots"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"course_lecturers": {
                   Row: {
                     "course_id": string,"lecturer_id": string,"role": string | null,"sort_order": number
@@ -117,6 +199,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"course_snapshots": {
+                  Row: {
+                    "content_hash": string,"course_id": string | null,"created_at": string,"extracted": NonNullable<Json>,"fetch_method": string,"fetched_at": string,"id": number,"model": string | null,"page_id": number,"page_text": string,"run_id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "content_hash": string,"course_id"?: string | null,"created_at"?: string,"extracted"?: NonNullable<Json>,"fetch_method": string,"fetched_at": string,"id"?: never,"model"?: string | null,"page_id": number,"page_text": string,"run_id": number
+                  }
+                  Update: {
+                    "content_hash"?: string,"course_id"?: string | null,"created_at"?: string,"extracted"?: NonNullable<Json>,"fetch_method"?: string,"fetched_at"?: string,"id"?: never,"model"?: string | null,"page_id"?: number,"page_text"?: string,"run_id"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "course_snapshots_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_snapshots_page_id_fkey"
+      columns: ["page_id"]
+isOneToOne: false
+      referencedRelation: "scrape_pages"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "course_snapshots_run_id_fkey"
+      columns: ["run_id"]
+isOneToOne: false
+      referencedRelation: "scrape_runs"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"courses": {
                   Row: {
                     "admission": string | null,"category_id": string,"certificate": string | null,"check_tier": Database["public"]['Enums']["check_tier"],"class_size_note": string | null,"created_at": string,"duration_months": number | null,"formats": (string)[],"hands_on_hours": number | null,"id": string,"institution_id": string,"institution_promises": string | null,"last_checked_at": string | null,"lecture_hours": number | null,"lecturers_note": string | null,"lecturers_summary": string | null,"next_cohort_date": string | null,"page_url": string | null,"product_type": string,"region": string | null,"schedule": string | null,"site_price_ils": number | null,"slug": string,"status": Database["public"]['Enums']["course_status"],"summary_good": string | null,"summary_weak": string | null,"syllabus": NonNullable<Json>,"time_slots": (string)[],"title": string,"total_hours": number | null,"updated_at": string,"video_url": string | null
@@ -140,6 +254,32 @@ isOneToOne: false
       columns: ["institution_id"]
 isOneToOne: false
       referencedRelation: "institutions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"institution_requests": {
+                  Row: {
+                    "client_hash": string | null,"contact_email": string | null,"course_url": string,"created_at": string,"decided_at": string | null,"decided_by": string | null,"id": number,"institution_id": string | null,"institution_name": string,"page_id": number | null,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_hash"?: string | null,"contact_email"?: string | null,"course_url": string,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"id"?: never,"institution_id"?: string | null,"institution_name": string,"page_id"?: number | null,"status"?: string
+                  }
+                  Update: {
+                    "client_hash"?: string | null,"contact_email"?: string | null,"course_url"?: string,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"id"?: never,"institution_id"?: string | null,"institution_name"?: string,"page_id"?: number | null,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "institution_requests_institution_id_fkey"
+      columns: ["institution_id"]
+isOneToOne: false
+      referencedRelation: "institutions"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "institution_requests_page_id_fkey"
+      columns: ["page_id"]
+isOneToOne: false
+      referencedRelation: "scrape_pages"
       referencedColumns: ["id"]
     }
                   ]
@@ -345,6 +485,52 @@ isOneToOne: false
       referencedColumns: ["version"]
     }
                   ]
+                },"scrape_pages": {
+                  Row: {
+                    "course_id": string | null,"fail_count": number,"first_seen_at": string,"id": number,"institution_id": string,"last_error": string | null,"last_extracted": Json | null,"last_fetched_at": string | null,"last_hash": string | null,"last_seen_at": string | null,"last_snapshot_id": number | null,"missing_count": number,"source": string,"state": string,"url": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "course_id"?: string | null,"fail_count"?: number,"first_seen_at"?: string,"id"?: never,"institution_id": string,"last_error"?: string | null,"last_extracted"?: Json | null,"last_fetched_at"?: string | null,"last_hash"?: string | null,"last_seen_at"?: string | null,"last_snapshot_id"?: number | null,"missing_count"?: number,"source"?: string,"state"?: string,"url": string
+                  }
+                  Update: {
+                    "course_id"?: string | null,"fail_count"?: number,"first_seen_at"?: string,"id"?: never,"institution_id"?: string,"last_error"?: string | null,"last_extracted"?: Json | null,"last_fetched_at"?: string | null,"last_hash"?: string | null,"last_seen_at"?: string | null,"last_snapshot_id"?: number | null,"missing_count"?: number,"source"?: string,"state"?: string,"url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "scrape_pages_course_id_fkey"
+      columns: ["course_id"]
+isOneToOne: false
+      referencedRelation: "courses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "scrape_pages_institution_id_fkey"
+      columns: ["institution_id"]
+isOneToOne: false
+      referencedRelation: "institutions"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "scrape_pages_last_snapshot_fk"
+      columns: ["last_snapshot_id"]
+isOneToOne: false
+      referencedRelation: "course_snapshots"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"scrape_runs": {
+                  Row: {
+                    "abort_reason": string | null,"changes_auto": number,"changes_queued": number,"courses_missing": number,"finished_at": string | null,"id": number,"model": string | null,"pages_changed": number,"pages_checked": number,"pages_failed": number,"pages_new": number,"pages_skipped": number,"pages_unchanged": number,"report": NonNullable<Json>,"started_at": string,"status": string,"trigger": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "abort_reason"?: string | null,"changes_auto"?: number,"changes_queued"?: number,"courses_missing"?: number,"finished_at"?: string | null,"id"?: never,"model"?: string | null,"pages_changed"?: number,"pages_checked"?: number,"pages_failed"?: number,"pages_new"?: number,"pages_skipped"?: number,"pages_unchanged"?: number,"report"?: NonNullable<Json>,"started_at"?: string,"status"?: string,"trigger": string
+                  }
+                  Update: {
+                    "abort_reason"?: string | null,"changes_auto"?: number,"changes_queued"?: number,"courses_missing"?: number,"finished_at"?: string | null,"id"?: never,"model"?: string | null,"pages_changed"?: number,"pages_checked"?: number,"pages_failed"?: number,"pages_new"?: number,"pages_skipped"?: number,"pages_unchanged"?: number,"report"?: NonNullable<Json>,"started_at"?: string,"status"?: string,"trigger"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"user_answers": {
                   Row: {
                     "answers": NonNullable<Json>,"updated_at": string,"user_id": string
@@ -385,7 +571,13 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "count_review_read":
+            "approve_course_change":
+{ Args: { "p_admin_id": string,"p_queue_id": number,"p_value"?: Json }; Returns: undefined
+                           },
+"approve_institution_request":
+{ Args: { "p_admin_id": string,"p_institution_id": string,"p_request_id": number }; Returns: number
+                           },
+"count_review_read":
 { Args: { "p_review_id": string }; Returns: undefined
                            },
 "course_paid_range":
@@ -415,8 +607,32 @@ isOneToOne: false
 "publish_review":
 { Args: { "p_admin_id": string,"p_paid_bucket"?: number,"p_proof_kind": Database["public"]['Enums']["proof_kind"],"p_review_id": string }; Returns: string
                            },
+"purge_institution_requests":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"reject_course_change":
+{ Args: { "p_admin_id": string,"p_queue_id": number }; Returns: undefined
+                           },
+"reject_institution_request":
+{ Args: { "p_admin_id": string,"p_request_id": number }; Returns: undefined
+                           },
 "return_review":
 { Args: { "p_action": string,"p_admin_id": string,"p_note": string,"p_reason": string,"p_review_id": string }; Returns: undefined
+                           },
+"scraper_apply_page":
+{ Args: { "p_page": Json,"p_run_id": number }; Returns: Json
+                           },
+"scraper_finish_run":
+{ Args: { "p_abort_reason"?: string,"p_counts": Json,"p_report": Json,"p_run_id": number,"p_status": string }; Returns: undefined
+                           },
+"scraper_mark_missing":
+{ Args: { "p_institution_id": string,"p_run_id": number,"p_seen_urls": (string)[] }; Returns: number
+                           },
+"scraper_start_run":
+{ Args: { "p_model": string,"p_trigger": string }; Returns: number
+                           },
+"submit_institution_request":
+{ Args: { "p_client_hash": string,"p_contact_email": string,"p_course_url": string,"p_institution_name": string }; Returns: string
                            },
 "submit_review":
 { Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string,"p_validated": Json }; Returns: undefined
@@ -428,6 +644,9 @@ isOneToOne: false
 { Args: { "p_browser_id": string,"p_review_id": string }; Returns: {
               "is_helpful": boolean,"total": number
             }[]
+                           },
+"undo_course_change":
+{ Args: { "p_admin_id": string,"p_change_id": number }; Returns: undefined
                            }
           }
           Enums: {

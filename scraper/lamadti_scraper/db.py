@@ -88,7 +88,7 @@ class Db:
     def pages(self, institution_id: str) -> dict[str, PageState]:
         rows = self.select(
             "scrape_pages",
-            {"select": "url,course_id,state,last_hash,last_extracted,fail_count", "institution_id": f"eq.{institution_id}"},
+            {"select": "url,course_id,state,last_hash,last_extracted,fail_count,source", "institution_id": f"eq.{institution_id}"},
         )
         return {r["url"]: PageState(**r) for r in rows}
 
