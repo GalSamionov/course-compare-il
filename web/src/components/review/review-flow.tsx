@@ -27,11 +27,13 @@ import {
   stepErrors,
   thisMonthOf,
   type DraftFields,
+  type ErrorField,
+  type StepError,
   type StepId,
 } from '@/lib/reviews/steps';
 import { cn } from '@/lib/utils';
 import { ProofStep, primaryButton } from './proof-step';
-import { NameStep, QuestionsStep, WhenStep, WordsStep } from './review-steps';
+import { NameStep, QuestionsStep, WhenStep, WordsStep, fieldId } from './review-steps';
 
 /** הטופס: השדות, מזהה הטיוטה (אחרי צעד 1), ההודעה של גל אם חזרה, והשם כפי שהוקלד. */
 interface Draft extends DraftFields {
@@ -71,6 +73,24 @@ function fromReview(review: MyReview): Draft {
   };
 }
 
+/** אילו הודעות יורדות כששדה בטיוטה משתנה. שני החודשים נבדקים יחד, ולכן כל אחד מוריד את שתיהן. */
+const CLEARS: Partial<Record<keyof Draft, readonly ErrorField[]>> = {
+  cohortMonth: ['cohortMonth', 'finishedMonth'],
+  finishedMonth: ['cohortMonth', 'finishedMonth'],
+  body: ['body'],
+  displayMode: ['displayName'],
+  typedName: ['displayName'],
+};
+
+/** פוקוס לשדה הראשון שיש בו בעיה. בקבוצת רדיו: לתשובה שבסדר הטאב, הנבחרת או הראשונה. */
+function focusField(field: ErrorField) {
+  const element = document.getElementById(fieldId(field));
+  if (!element) return;
+  const target =
+    element.getAttribute('role') === 'radiogroup' ? element.querySelector<HTMLElement>('[tabindex="0"]') : element;
+  (target ?? element).focus();
+}
+
 /** השדות כמו שיישמרו: השם לתצוגה נגזר ממה שהוקלד. */
 const fieldsOf = (draft: Draft): DraftFields => ({
   ...draft,
@@ -93,8 +113,8 @@ const textLink = 'inline-flex min-h-11 items-center underline underline-offset-[
 const sectionTitle = 'pen-rule text-[21px] leading-snug font-bold outline-none lg:text-[28px]';
 /** דף מחברת: עמודת שוליים עם קו כפול, והתוכן אחריה (globals.css, .margin-rule). */
 const notebookPage = 'margin-rule grid grid-cols-[var(--margin)_minmax(0,1fr)]';
-/** הערה של האתר בשוליים: עט, מוטה (כמו בעמוד ההתחברות). */
-const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
+/** הערה של האתר בשוליים: עט כחול (כמו בעמוד ההתחברות). */
+const marginNote = ' pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
 
 /** לפני הצעד הראשון: מה צריך ובכמה זמן (מסמך העיצוב, סעיף 3). החמישה צעדים כשורות במחברת, ממוספרים בעט. */
 function Intro({ note, children }: { note?: string | null; children: React.ReactNode }) {
@@ -140,9 +160,16 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [proofs, setProofs] = useState<AttachedProof[]>([]);
   const [thisMonth, setThisMonth] = useState('');
-  const [errors, setErrors] = useState<string[]>([]);
+  /** הודעות של שדה, כל אחת מתחת לשדה שלה. */
+  const [fieldErrors, setFieldErrors] = useState<StepError[]>([]);
+  /** הודעה שאינה של שדה אחד: שמירה שנכשלה, ביקורת כפולה, שליחה שנכשלה. */
+  const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  /** לאיזה כיוון מדפדפים לצעד הבא. */
+  const [turn, setTurn] = useState<'next' | 'back'>('next');
+  const [uploading, setUploading] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
+  const focusAfterErrors = useRef<ErrorField | null>(null);
 
   // הטיוטה הפתוחה של הקורס הזה, אם יש. ביקורת שכבר נשלחה או פורסמה: הודעה, ואפשר לכתוב על מחזור אחר.
   useEffect(() => {
@@ -175,15 +202,48 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
     if (phase.kind === 'step' || phase.kind === 'sent') heading.current?.focus();
   }, [phase]);
 
+  // הודעות חדשות על שדות: הפוקוס עובר לשדה הראשון, וקורא המסך קורא את ההודעה שמתחתיו (aria-describedby).
+  useEffect(() => {
+    const field = focusAfterErrors.current;
+    focusAfterErrors.current = null;
+    if (field) focusField(field);
+  }, [fieldErrors]);
+
   const ctx = { questions: form.questions, thisMonth };
+
+  function clearErrors(fields: readonly ErrorField[]) {
+    setFieldErrors((current) =>
+      current.some((e) => fields.includes(e.field)) ? current.filter((e) => !fields.includes(e.field)) : current,
+    );
+    setFormError(null);
+  }
+
+  function showFieldErrors(errors: StepError[]) {
+    focusAfterErrors.current = errors[0]?.field ?? null;
+    setFieldErrors(errors);
+    setFormError(null);
+  }
+
+  function showFormError(message: string) {
+    setFieldErrors([]);
+    setFormError(message);
+  }
 
   function update(change: Partial<Draft>) {
     setDraft((current) => ({ ...current, ...change }));
-    setErrors([]);
+    clearErrors((Object.keys(change) as (keyof Draft)[]).flatMap((key) => CLEARS[key] ?? []));
+  }
+
+  function answer(key: string, value: number) {
+    setDraft((current) => ({ ...current, answers: { ...current.answers, [key]: value } }));
+    clearErrors([`question:${key}`]);
   }
 
   function go(step: StepId) {
-    setErrors([]);
+    setFieldErrors([]);
+    setFormError(null);
+    // קדימה הדף החדש נכנס משמאל, אחורה מימין: כמו לדפדף במחברת בעברית (globals.css, page-turn).
+    setTurn(phase.kind === 'step' && STEPS.indexOf(step) < STEPS.indexOf(phase.step) ? 'back' : 'next');
     setPhase({ kind: 'step', step });
   }
 
@@ -227,14 +287,14 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   async function next(step: StepId) {
     const problems = stepErrors(step, fieldsOf(draft), ctx, proofs);
     if (problems.length > 0) {
-      setErrors(problems);
+      showFieldErrors(problems);
       return;
     }
     setBusy(true);
     const failed = await save(step);
     setBusy(false);
     if (failed) {
-      setErrors([failed]);
+      showFormError(failed);
       return;
     }
     go(STEPS[STEPS.indexOf(step) + 1]);
@@ -244,10 +304,11 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
     if (!draft.reviewId) return;
     const problems = stepErrors('proof', fieldsOf(draft), ctx, proofs);
     if (problems.length > 0) {
-      setErrors(problems);
+      showFieldErrors(problems);
       return;
     }
-    setErrors([]);
+    setFieldErrors([]);
+    setFormError(null);
     setBusy(true);
     const result = await submitReview(draft.reviewId, proofs);
     setBusy(false);
@@ -256,12 +317,15 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
       setPhase({ kind: 'sent' });
       return;
     }
+    // קובץ שכבר לא אצלנו או שלא נפתח: ההודעה מתחת לבחירת הקובץ, שחוזרת כשהרשימה מתרוקנת.
     if (result === 'file_missing' || result === 'bad_file') {
       writeAttached(draft.reviewId, []);
       setProofs([]);
+      showFieldErrors([{ field: 'proofs', message: SUBMIT_MESSAGE[result] }]);
+      return;
     }
     if (result === 'incomplete') setPhase({ kind: 'step', step: firstIncompleteStep(fieldsOf(draft), ctx) });
-    setErrors([SUBMIT_MESSAGE[result]]);
+    showFormError(SUBMIT_MESSAGE[result]);
   }
 
   // לפני שידוע מי המבקר: ההקדמה כבר על הדף, והמקום של הכפתור שמור, כדי שהדף לא יקפוץ.
@@ -363,15 +427,17 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   const index = STEPS.indexOf(step);
   const body =
     step === 'when' ? (
-      <WhenStep cohortMonth={draft.cohortMonth} finishedMonth={draft.finishedMonth} thisMonth={thisMonth} onChange={update} />
-    ) : step === 'questions' ? (
-      <QuestionsStep
-        questions={form.questions}
-        answers={draft.answers}
-        onAnswer={(key, value) => update({ answers: { ...draft.answers, [key]: value } })}
+      <WhenStep
+        cohortMonth={draft.cohortMonth}
+        finishedMonth={draft.finishedMonth}
+        thisMonth={thisMonth}
+        errors={fieldErrors}
+        onChange={update}
       />
+    ) : step === 'questions' ? (
+      <QuestionsStep questions={form.questions} answers={draft.answers} errors={fieldErrors} onAnswer={answer} />
     ) : step === 'words' ? (
-      <WordsStep body={draft.body} onChange={(text) => update({ body: text })} />
+      <WordsStep body={draft.body} errors={fieldErrors} onChange={(text) => update({ body: text })} />
     ) : step === 'name' ? (
       <NameStep
         displayMode={draft.displayMode}
@@ -379,6 +445,7 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
         authorTitle={draft.authorTitle}
         cohortMonth={draft.cohortMonth}
         body={draft.body}
+        errors={fieldErrors}
         onChange={update}
       />
     ) : draft.reviewId ? (
@@ -387,12 +454,13 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
         reviewId={draft.reviewId}
         proofs={proofs}
         decisionNote={draft.decisionNote}
-        busy={busy}
+        uploading={uploading}
+        errors={fieldErrors}
+        onUploading={setUploading}
         onChange={(next) => {
           setProofs(next);
-          setErrors([]);
+          clearErrors(['proofs']);
         }}
-        onSubmit={() => void send()}
       />
     ) : null;
 
@@ -402,20 +470,23 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
       <p className={cn(marginNote, 'pt-1.5')}>
         צעד {index + 1} מתוך {STEPS.length}
       </p>
-      <div className="min-w-0 ps-3">
+      {/* key: כל צעד הוא דף חדש, והוא נכנס בדפדוף (globals.css, page-turn). */}
+      <div key={step} data-turn={turn} className="page-turn min-w-0 ps-3">
         <h2 id="step-h" ref={heading} tabIndex={-1} className={sectionTitle}>
           {STEP_TITLE[step]}
         </h2>
         <div className="mt-5">{body}</div>
-        {errors.length > 0 && (
-          <div role="alert" className="mt-4 space-y-1 font-sans text-[15px] leading-normal font-bold">
-            {errors.map((error) => (
-              <p key={error}>{error}</p>
-            ))}
-          </div>
+        {formError && (
+          <p role="alert" className="mt-4 font-sans text-[15px] leading-normal font-bold">
+            {formError}
+          </p>
         )}
-        <div className="mt-8 flex flex-wrap gap-3">
-          {step !== 'proof' && (
+        <div className={cn('flex flex-wrap gap-3', step === 'proof' ? 'mt-10' : 'mt-8')}>
+          {step === 'proof' ? (
+            <button type="button" className={primaryButton} disabled={busy || uploading} onClick={() => void send()}>
+              {busy ? 'שולחים…' : 'לשלוח לבדיקה'}
+            </button>
+          ) : (
             <button type="button" className={primaryButton} disabled={busy} onClick={() => void next(step)}>
               {busy ? 'שומרים…' : 'הבא'}
             </button>

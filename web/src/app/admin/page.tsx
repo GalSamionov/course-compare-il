@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { DecisionLog } from '@/components/admin/decision-log';
 import { QueueItemView } from '@/components/admin/queue-item';
@@ -35,13 +36,16 @@ function countLine(count: number): string {
 }
 
 async function AdminQueue() {
+  // הכול בבקשה, לפני שנוגעים בשעון: getUser של Supabase בודק תפוגה עם Date.now(), והתור מחשב כמה זמן כל
+  // ביקורת מחכה (08-caching.md, "Random values and timestamps").
+  await connection();
   const gate = await adminGate({ readOnly: true });
   if (gate.kind === 'not-admin') notFound();
   const items = gate.kind === 'ok' ? await loadQueue(gate.db) : [];
   return (
     <Sheet>
       <main className="pb-10 lg:pb-14">
-        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px] lg:font-extrabold">
+        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px]">
           תור האימות
         </h1>
         {gate.kind === 'no-key' ? (

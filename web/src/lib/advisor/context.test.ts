@@ -47,7 +47,7 @@ describe('buildCourseContext', () => {
     );
     expect(text).not.toContain('תעודה');
     expect(text).not.toContain('שילמו בפועל');
-    expect(text).toContain('[graduates] ציון בוגרים: עוד אין. יש 3 ביקורות מאומתות, וחסרות עוד 2');
+    expect(text).toContain('[graduates] ציון בוגרים: עוד אין. יש 3 ביקורות מאומתות, וחסרות עוד 2 ביקורות');
   });
 
   it('turns text from the database into data that cannot close or open a tag', () => {

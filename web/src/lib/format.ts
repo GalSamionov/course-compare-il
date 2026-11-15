@@ -40,6 +40,37 @@ export function invoiceCountText(range: PaidRange): string {
 /** למה רק חצי: ליד הטווח בחלק המחיר. */
 export const PAID_RANGE_NOTE = 'את הקצוות לא מראים, כדי שאף אחד לא יזוהה לפי הסכום ששילם.';
 
+/**
+ * ספירה בעברית: "אחת" ו"אחד" באים אחרי שם העצם ובלי ספרה ("ביקורת מאומתת אחת"), ושאר המספרים לפניו
+ * ובספרות ("3 ביקורות מאומתות"). אפס הוא לא ספירה: כל מקום שמציג אותו כותב "עוד אין" בניסוח שלו.
+ */
+const counted = (n: number, one: string, many: string) => (n === 1 ? one : `${n} ${many}`);
+
+/** "ביקורת מאומתת אחת", "3 ביקורות מאומתות". */
+export function verifiedReviewsText(n: number): string {
+  return counted(n, 'ביקורת מאומתת אחת', 'ביקורות מאומתות');
+}
+
+/** "בוגר מאומת אחד", "23 בוגרים מאומתים". */
+export function verifiedGraduatesText(n: number): string {
+  return counted(n, 'בוגר מאומת אחד', 'בוגרים מאומתים');
+}
+
+/** כמה ביקורות חסרות לציון: "עוד ביקורת אחת", "עוד 2 ביקורות". */
+export function moreReviewsText(n: number): string {
+  return `עוד ${counted(n, 'ביקורת אחת', 'ביקורות')}`;
+}
+
+/** "עוד ביקורת אחת עד לציון", "עוד 2 ביקורות עד לציון". */
+export function reviewsToScoreText(n: number): string {
+  return `${moreReviewsText(n)} עד לציון`;
+}
+
+/** עם הפועל, שמתאים למספר: "חסרה עוד ביקורת אחת", "חסרות עוד 5 ביקורות". */
+export function missingReviewsText(n: number): string {
+  return `${n === 1 ? 'חסרה' : 'חסרות'} ${moreReviewsText(n)}`;
+}
+
 // מחיר 0 או null אומר "לא מציגים" (לקורס חינם אין עלות לשעה), ולכן מחזירים null.
 export function costPerHandsOnHour(price: number | null, handsOnHours: number | null): number | null {
   if (!price || !handsOnHours) return null;

@@ -52,7 +52,7 @@ export function NotebookPage({
               className={cn(
                 'leading-tight font-bold text-balance',
                 headingLevel === 1
-                  ? 'mt-[22px] text-[30px] lg:mt-8 lg:text-[54px] lg:leading-[1.08] lg:font-extrabold'
+                  ? 'mt-[22px] text-[30px] lg:mt-8 lg:text-[54px] lg:leading-[1.08] lg:font-bold'
                   : 'pen-rule text-[26px] lg:text-[38px]',
               )}
             >

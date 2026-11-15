@@ -1,21 +1,27 @@
 import type { Metadata } from 'next';
-import { Assistant, Noto_Serif_Hebrew, Playpen_Sans_Hebrew } from 'next/font/google';
+import { IBM_Plex_Sans_Hebrew, Rubik } from 'next/font/google';
 import { FirstVisit } from '@/components/site/first-visit';
+import { MotionObserver } from '@/components/site/motion-observer';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
-const serif = Noto_Serif_Hebrew({
+// הדיו המודפסת: כותרות, גוף, תוויות ונתונים. גל בחר ב-14.11.2026, במקום Noto Serif Hebrew ו-Assistant.
+const print = IBM_Plex_Sans_Hebrew({
   subsets: ['hebrew', 'latin'],
-  variable: '--font-noto-serif-hebrew',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex',
 });
-const sans = Assistant({
+// העט הכחול: הקול של האתר בלבד. Rubik, עגול וחם יותר מהדיו המודפסת, כדי שהקול של האתר יישמע כיד אחרת.
+// גל בחר ב-14.11.2026, במקום כתב היד של Playpen Sans Hebrew. החיצים, העיגולים וקווי העט נשארים מצוירים ביד.
+const pen = Rubik({
   subsets: ['hebrew', 'latin'],
-  variable: '--font-assistant',
+  weight: ['400', '500', '600'],
+  variable: '--font-rubik',
 });
-const pen = Playpen_Sans_Hebrew({
-  subsets: ['hebrew', 'latin'],
-  variable: '--font-playpen',
-});
+
+// תנועה: רק אם המבקר לא ביקש פחות תנועה. בלי הסימון הזה (או בלי JavaScript) הכול גלוי ועומד.
+// אם MotionObserver לא עלה תוך 3 שניות (טלפון איטי, שגיאה), מורידים את הסימון והכול נשאר גלוי.
+const MOTION_SCRIPT = `(function(){try{var d=document.documentElement;if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){d.setAttribute('data-motion','');setTimeout(function(){if(!d.hasAttribute('data-motion-ready'))d.removeAttribute('data-motion')},3000)}}catch(e){}})();`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,9 +38,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl" className={`${serif.variable} ${sans.variable} ${pen.variable}`}>
+    <html
+      lang="he"
+      dir="rtl"
+      suppressHydrationWarning
+      className={`${print.variable} ${pen.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: MOTION_SCRIPT }} />
+      </head>
       <body className="antialiased">
         {children}
+        <MotionObserver />
         {/* ההיכרות למבקר ראשון: בכל עמוד ציבורי, כי רוב המבקרים נכנסים ישר לעמוד קורס מקישור. */}
         <FirstVisit />
       </body>

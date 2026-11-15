@@ -22,17 +22,18 @@
   --color-line: #bdbdbd;
   --color-leader: #9a9a9a;
   --color-link-hover: #132a85;
-  /* העולם: דף מודפס על משטח לבד אפור. הקווים של המחברת אפורים קרים, לא בצבע של אף מקור. */
-  --color-desk: #474b50;
-  --color-desk-deep: #3a3e42;
+  /* העולם: דף מודפס על שולחן בהיר. הקווים של המחברת אפורים קרים, לא בצבע של אף מקור.
+     desk-deep: מסילת פס הגלילה על השולחן. */
+  --color-desk: #e9ebee;
+  --color-desk-deep: #a3a9b0;
   --color-paper: #ffffff;
-  --color-paper-under: #eef0f2;
+  --color-paper-under: #f6f7f9;
   --color-ruled: #c3cad3;
   --color-margin-rule: #9ca5b0;
-  --font-serif: var(--font-noto-serif-hebrew), serif;
-  --font-sans: var(--font-assistant), sans-serif;
-  --font-heading: var(--font-assistant), sans-serif;
-  --font-pen: var(--font-playpen), cursive;
+  /* שתי ידיים: IBM Plex Sans Hebrew היא הדיו המודפסת (כותרות, גוף, תוויות, נתונים), ו-Rubik בכחול הוא העט של האתר. */
+  --font-sans: var(--font-plex), system-ui, sans-serif;
+  --font-heading: var(--font-plex), system-ui, sans-serif;
+  --font-pen: var(--font-rubik), system-ui, sans-serif;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -86,8 +87,8 @@
 
   --pen-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%231F3FBF' d='M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z'/%3E%3C/svg%3E");
   --tape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E6E9ED' fill-opacity='.74' d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3Cpath fill='%23fff' fill-opacity='.35' d='M4 3.4L76 2.9 76 7.2 4 7.6Z'/%3E%3C/svg%3E");
-  --label-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='1.6' d='M9 1.5H27A7.5 7.5 0 0 0 34.5 9V27A7.5 7.5 0 0 0 27 34.5H9A7.5 7.5 0 0 0 1.5 27V9A7.5 7.5 0 0 0 9 1.5Z'/%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='.8' d='M10.2 4.5H25.8A6.5 6.5 0 0 0 31.5 10.2V25.8A6.5 6.5 0 0 0 25.8 31.5H10.2A6.5 6.5 0 0 0 4.5 25.8V10.2A6.5 6.5 0 0 0 10.2 4.5Z'/%3E%3C/svg%3E");
-  --felt: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 -.33'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* צורת הסלוטייפ עם הקצוות הקרועים, כמסכה: לסלוטייפ צבעוני (מסקינג טייפ) על פתק לבן. */
+  --tape-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3C/svg%3E");
   --stamp-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
@@ -116,8 +117,12 @@
   }
 }
 body {
-  font-family: var(--font-serif);
-  line-height: 1.8;
+  font-family: var(--font-plex), system-ui, sans-serif;
+  line-height: 1.75;
+}
+/* כותרות מודפסות: מעט צפופות, כמו כותרת שהודפסה ולא נכתבה. */
+:where(h1, h2) {
+  letter-spacing: -0.012em;
 }
 
 @layer base {
@@ -155,14 +160,13 @@ body {
 }
 
 /* ===== השולחן והדף =====
-   במחשב: דף מודפס לבן מונח על משטח לבד אפור, ומתחתיו עוד דף מהערימה.
-   בנייד הדף ממלא את המסך, והשולחן לא נראה. */
+   במחשב: דף מודפס לבן מונח על שולחן בהיר, ומתחתיו עוד דף מהערימה.
+   בנייד הדף ממלא את המסך, והשולחן לא נראה.
+   שולחן בהיר ושטוח, בלי תפס: דף לבן על משטח כהה עם תפס נקרא כמו תפריט על קליפבורד (משוב מ-14.11.2026). */
 @media (min-width: 1024px) {
   html {
     background-color: var(--color-desk);
-    background-image: var(--felt);
-    background-size: 220px 220px;
-    scrollbar-color: #8b9198 var(--color-desk-deep);
+    scrollbar-color: var(--color-desk-deep) var(--color-desk);
   }
   body {
     background: transparent;
@@ -181,9 +185,9 @@ body {
       overflow-x: visible;
       margin-block: 44px 64px;
       box-shadow:
-        0 1px 1px rgb(0 0 0 / 0.18),
-        0 3px 6px -2px rgb(0 0 0 / 0.22),
-        0 28px 48px -18px rgb(0 0 0 / 0.55);
+        0 1px 1px rgb(30 36 44 / 0.1),
+        0 3px 8px -3px rgb(30 36 44 / 0.12),
+        0 24px 44px -20px rgb(30 36 44 / 0.28);
     }
     /* הדף שמתחת, בערימה: מציץ בפינה, מוטה מעט. */
     .sheet::before {
@@ -193,7 +197,9 @@ body {
       z-index: -1;
       background: var(--color-paper-under);
       transform: rotate(0.7deg);
-      box-shadow: 0 18px 36px -16px rgb(0 0 0 / 0.5);
+      box-shadow:
+        0 1px 1px rgb(30 36 44 / 0.08),
+        0 16px 30px -18px rgb(30 36 44 / 0.25);
     }
   }
 
@@ -237,12 +243,6 @@ body {
     --hl-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M10 2.6L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L10 17.8Z'/%3E%3Cpath fill='%23FF9DC7' d='M5.6 2.9L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L2.9 17.9C2.7 15.6 3.1 12.6 3.8 9.9 4.3 7.4 5 5 5.6 2.9Z'/%3E%3C/svg%3E");
     --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%23FF9DC7' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
   }
-  /* המשיכה נמרחת מימין לשמאל, פעם אחת, בכרטיס הדוגמה של דף הבית. הטקסט גלוי כל הזמן. */
-  @media (prefers-reduced-motion: no-preference) {
-    .hl-swipe {
-      animation: hl-swipe 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-  }
 
   /* ===== סלוטייפ ===== */
   .tape {
@@ -252,6 +252,28 @@ body {
     background-image: var(--tape);
     background-size: 100% 100%;
     filter: drop-shadow(0 1px 0.5px rgb(0 0 0 / 0.12));
+  }
+
+  /* מסקינג טייפ צבעוני: רק על פתק לבן, שהוא קישור ולא קול. הגוונים בכוונה רחוקים מצבעי המקור
+     (ירוק, צהוב, ורוד, כחול), כדי שאף אחד לא יקרא אותם כסימון. פסים עדינים, כמו נייר יפני. */
+  .tape[data-washi] {
+    background-color: var(--washi);
+    background-image: repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.32) 0 2.5px, transparent 2.5px 7px);
+    background-size: auto;
+    -webkit-mask-image: var(--tape-mask);
+    mask-image: var(--tape-mask);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    opacity: 0.9;
+  }
+  .tape[data-washi='lilac'] {
+    --washi: #c3b0ef;
+  }
+  .tape[data-washi='teal'] {
+    --washi: #8dd3cc;
+  }
+  .tape[data-washi='peach'] {
+    --washi: #ffc29b;
   }
 
   /* ===== שורות מחברת =====
@@ -303,11 +325,6 @@ body {
     pointer-events: none;
   }
 
-  /* ===== תווית המחברת: שם האתר ===== */
-  .label-frame {
-    border: 12px solid transparent;
-    border-image: var(--label-frame) 12 / 12px / 0 stretch;
-  }
 
   /* ===== חותמת המוסד ===== */
   .stamp {
@@ -329,6 +346,24 @@ body {
   background-size: calc(100% + 0.2em) 0.42em;
 }
 
+@keyframes stick-in {
+  from {
+    opacity: 0;
+    translate: 0 -16px;
+    scale: 1.05;
+    rotate: var(--stick-from, 1.5deg);
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes tape-in {
+  from {
+    opacity: 0;
+    scale: 1.25;
+  }
+}
+
 @keyframes hl-swipe {
   from {
     background-size: 0 100%, 0 100%, 0 100%;
@@ -338,24 +373,177 @@ body {
   }
 }
 
+/* ===== תנועה =====
+   הכול גלוי ועומד כברירת מחדל. data-motion על <html> רק כשהמבקר לא ביקש פחות תנועה (layout.tsx),
+   ו-data-inview על רכיב כשהוא נכנס למסך, פעם אחת (motion-observer.tsx). --enter-delay: התור באותה כניסה.
+   כל תנועה היא פעולה של יד על הדף: מרקר שנמרח, עט שכותב או מקיף, פתק שנדבק. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* המרקר נמרח על העובדה מימין לשמאל. הטקסט גלוי כל הזמן. */
+  html[data-motion] .hl:not([data-inview]) {
+    background-size: 0 100%, 0 100%, 0 100%;
+  }
+  html[data-motion] .hl[data-inview] {
+    animation: hl-swipe 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay, 0ms) both;
+  }
+
+  /* קו העט מתחת לכותרת נמשך מימין לשמאל. */
+  html[data-motion] .pen-rule {
+    transition: background-size 780ms cubic-bezier(0.55, 0, 0.25, 1) var(--enter-delay, 0ms);
+  }
+  html[data-motion] .pen-rule:not([data-inview]) {
+    background-size: 0 0.42em;
+  }
+
+  /* העט מצייר: עיגול סביב מספר, חץ, וי. לכל path יש pathLength="1". --d: השהיה נוספת בתוך הציור. */
+  html[data-motion] [data-anim~='draw'] path {
+    stroke-dasharray: 1 1;
+    transition: stroke-dashoffset var(--draw-ms, 680ms) cubic-bezier(0.5, 0, 0.2, 1)
+      calc(var(--enter-delay, 0ms) + var(--d, 0ms));
+  }
+  html[data-motion] [data-anim~='draw']:not([data-inview]) path {
+    stroke-dashoffset: 1;
+  }
+
+  /* העט כותב: ההערה נחשפת מימין לשמאל, בקצב של כתיבה. */
+  html[data-motion] [data-anim~='write'] {
+    clip-path: inset(-40px -40px -40px -40px);
+    transition: clip-path var(--write-ms, 1000ms) cubic-bezier(0.4, 0, 0.3, 1) calc(var(--enter-delay, 0ms) + var(--d, 0ms));
+  }
+  html[data-motion] [data-anim~='write']:not([data-inview]) {
+    clip-path: inset(-40px -40px -40px 100%);
+  }
+
+  /* פתק נדבק: יורד על הדף, מתיישר ונלחץ. הסלוטייפ מונח אחריו.
+     אנימציה ולא מעבר, ורק backwards: אחרי שהפתק נדבק, translate פנוי לריחוף של פתק שהוא קישור. */
+  html[data-motion] [data-anim~='stick']:not([data-inview]) {
+    opacity: 0;
+  }
+  html[data-motion] [data-anim~='stick'][data-inview] {
+    animation: stick-in 680ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay, 0ms) backwards;
+  }
+  html[data-motion] [data-anim~='stick']:not([data-inview]) > .tape {
+    opacity: 0;
+  }
+  html[data-motion] [data-anim~='stick'][data-inview] > .tape {
+    animation: tape-in 320ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-delay, 0ms) + 460ms) backwards;
+  }
+
+}
+
+/* ===== הדוגמה בשורה הראשונה של המחברת (pen-example.tsx) =====
+   גלויה רק כשהשורה ריקה ולא בפוקוס. כל דוגמה נכתבת מימין לשמאל, נשארת רגע ונעלמת. */
+.pen-example {
+  visibility: hidden;
+}
+[data-empty]:not(:focus-within) > .pen-example {
+  visibility: visible;
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  .pen-example-word {
+    animation: pen-example 3000ms cubic-bezier(0.4, 0, 0.3, 1) both;
+  }
+}
+@keyframes pen-example {
+  0% {
+    clip-path: inset(-12px -12px -12px 100%);
+  }
+  34% {
+    clip-path: inset(-12px -12px -12px -12px);
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(-12px -12px -12px -12px);
+    opacity: 0;
+  }
+}
+
+/* ===== שורה ברשימה נכתבת אל המחברת (results.tsx) =====
+   אנימציה עם backwards בלבד: בסוף אין clip-path, כי קו המחברת של השורה נמשך עד קצה הנייר. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  html[data-motion] [data-anim~='ink']:not([data-inview]) {
+    opacity: 0;
+  }
+  html[data-motion] [data-anim~='ink'][data-inview] {
+    animation: ink-in 720ms cubic-bezier(0.4, 0, 0.3, 1) var(--enter-delay, 0ms) backwards;
+  }
+}
+@keyframes ink-in {
+  from {
+    clip-path: inset(-200px -200px -200px 100%);
+  }
+  to {
+    clip-path: inset(-200px -200px -200px -200px);
+  }
+}
+
+/* ===== דפדוף בין צעדים בכתיבת ביקורת (review-flow.tsx) =====
+   קדימה הדף נכנס משמאל, אחורה מימין. קצר, כדי שלא יעכב את מי שממלא. */
+@media screen and (prefers-reduced-motion: no-preference) {
+  .page-turn {
+    animation: page-next 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .page-turn[data-turn='back'] {
+    animation-name: page-back;
+  }
+}
+@keyframes page-next {
+  from {
+    opacity: 0;
+    translate: -28px 0;
+  }
+}
+@keyframes page-back {
+  from {
+    opacity: 0;
+    translate: 28px 0;
+  }
+}
+
+/* ===== תגובות לריחוף וללחיצה ===== */
+/* הלוגו: בריחוף העט מקיף שוב את ה-ל (logo-mark.tsx). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .logo:hover .logo-loop {
+    animation: loop-redraw 760ms cubic-bezier(0.5, 0, 0.2, 1);
+  }
+}
+@keyframes loop-redraw {
+  from {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+  }
+}
+/* טקסט של קישור שהעט מותח תחתיו קו כשמרחפים או מגיעים אליו במקלדת, מימין לשמאל.
+   .pen-under יושב על הטקסט שבתוך הקישור, כדי שהקו יהיה צמוד למילים ולא לתחתית של יעד המגע. */
 @layer components {
-  /* עמודי טקסט: כותרת משנה עם קו עט מתחתיה, כמו בשאר האתר. */
-  .text-page h2 {
-    @apply pen-rule mt-9 text-[21px] leading-snug font-bold lg:text-[26px];
+  .pen-under {
+    background-image: var(--pen-rule);
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: 0 0.32em;
+    padding-bottom: 0.2em;
   }
-  .text-page p,
-  .text-page ul,
-  .text-page ol,
-  .text-page table {
-    @apply mt-3;
+  :is(a, button):is(:hover, :focus-visible) .pen-under,
+  a[aria-current='page'] .pen-under {
+    background-size: calc(100% + 0.15em) 0.32em;
   }
-  .text-page ul {
-    @apply list-disc ps-5;
+  /* קו עט שנמצא שם תמיד, בהיר, ומתכהה בריחוף: לדוגמאות שלוחצים עליהן במחברת. */
+  .pen-under-shown {
+    background-size: calc(100% + 0.15em) 0.32em;
+    background-image: linear-gradient(rgb(255 255 255 / 0.55), rgb(255 255 255 / 0.55)), var(--pen-rule);
   }
-  .text-page li + li {
-    @apply mt-1;
+  :is(a, button):is(:hover, :focus-visible) .pen-under-shown {
+    background-image: var(--pen-rule);
   }
-  .text-page a {
-    @apply underline underline-offset-[3px] hover:text-link-hover;
+  @media (prefers-reduced-motion: no-preference) {
+    .pen-under {
+      transition: background-size 360ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
   }
 }

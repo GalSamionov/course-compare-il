@@ -1,0 +1,74 @@
+name: Weekly scraper
+
+# האוסף השבועי (מסמך העיצוב, סעיף 5): פרטי קורסים מהאתרים של המוסדות שב-scraper/institutions.yaml.
+# schedule רץ רק מהענף הראשי של המאגר (main). עד שהענף ימוזג ל-main האוסף לא ירוץ לבד.
+# בלי ANTHROPIC_API_KEY או בלי SUPABASE_SECRET_KEY ב-GitHub Secrets: הודעה ודילוג, בלי כישלון.
+# בלי מוסדות מאושרים ברשימה, או לפני שהמיגרציה של האוסף הוחלה על המסד: הודעה ויציאה, בלי לשנות כלום.
+on:
+  schedule:
+    - cron: '0 3 * * 0' # יום ראשון, 05:00 או 06:00 בישראל
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'run: האיסוף עצמו. check-fixtures: החילוץ האמיתי מול 20 דפי הדוגמה, בלי מסד.'
+        type: choice
+        options: [run, check-fixtures]
+        default: run
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scraper
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      MODE: ${{ inputs.mode || 'run' }}
+      # הכתובת של הפרויקט בענן אינה סוד (היא גם ב-docs/STATUS.md). המפתחות רק ב-GitHub Secrets,
+      # ו-GitHub מסתיר אותם ביומן. הסקריפט מדפיס רק את הכתובת והמספרים.
+      SUPABASE_URL: https://bndxpogjvzhouoljiwrc.supabase.co
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - name: Skip without the secret keys
+        id: gate
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::notice::ANTHROPIC_API_KEY is not in GitHub Secrets yet. Skipping the scraper."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "$MODE" = "run" ] && [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::notice::SUPABASE_SECRET_KEY is not in GitHub Secrets yet. Skipping the scraper."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
+      - uses: astral-sh/setup-uv@v6
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: scraper/uv.lock
+
+      - name: Install
+        if: steps.gate.outputs.run == 'true'
+        working-directory: scraper
+        run: |
+          uv sync --frozen
+          uv run playwright install --with-deps chromium
+
+      - name: Scrape
+        if: steps.gate.outputs.run == 'true' && env.MODE == 'run'
+        working-directory: scraper
+        run: uv run python -m lamadti_scraper run --trigger ${{ github.event_name == 'schedule' && 'schedule' || 'manual' }}
+
+      - name: Check extraction against the sample pages
+        if: steps.gate.outputs.run == 'true' && env.MODE == 'check-fixtures'
+        working-directory: scraper
+        run: uv run python -m lamadti_scraper check-fixtures

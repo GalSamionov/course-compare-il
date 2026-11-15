@@ -114,7 +114,7 @@ export function FirstVisit() {
             <h2 ref={title} id={titleId} tabIndex={-1} className="pe-10 text-[19px] leading-snug font-bold outline-none lg:text-xl">
               פעם ראשונה בלמדתי?
             </h2>
-            <p className="mt-0.5 -rotate-1 font-pen text-[15px] leading-snug font-medium text-pen">
+            <p className="mt-0.5 font-pen text-[15px] leading-snug font-medium text-pen">
               <PenArrow />
               שלושה דברים, בחצי דקה
             </p>
@@ -170,7 +170,7 @@ function StepOne() {
       <p className="mt-1">
         כל ביקורת כאן נכתבה על ידי בוגר שהעלה הוכחה שלמד בקורס: חשבונית, קבלה או תעודת סיום. ואף מוכר קורסים לא משלם לנו.
       </p>
-      <p className="mt-2 -rotate-1 font-pen text-sm leading-snug font-medium text-pen">
+      <p className="mt-2 font-pen text-sm leading-snug font-medium text-pen">
         <PenArrow />
         כאן הכול נתוני דוגמה, עד ההשקה.
       </p>
@@ -307,9 +307,9 @@ function VideoSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
       onClick={(event) => {
         if (event.target === dialog.current) onClose();
       }}
-      className="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 backdrop:bg-desk-deep/85"
+      className="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 backdrop:bg-ink/75"
     >
-      <figure className="bg-white p-2 font-sans shadow-[0_1px_1px_rgb(0_0_0/0.18),0_3px_6px_-2px_rgb(0_0_0/0.22),0_28px_48px_-18px_rgb(0_0_0/0.55)] lg:p-3">
+      <figure className="bg-white p-2 font-sans shadow-[0_1px_1px_rgb(30_36_44/0.1),0_3px_8px_-3px_rgb(30_36_44/0.12),0_24px_44px_-20px_rgb(30_36_44/0.28)] lg:p-3">
         {open && (
           <video
             key={kind}
@@ -330,7 +330,7 @@ function VideoSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           </video>
         )}
         <figcaption className="flex items-center justify-between gap-4 pt-1.5 ps-1">
-          <p className="-rotate-1 font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
+          <p className=" font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
           <button
             type="button"
             onClick={onClose}

@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { AccountLink } from './account-link';
 import { Wordmark } from './wordmark';
 
-const navLink =
-  'inline-flex min-h-11 items-center underline-offset-[5px] decoration-pen decoration-[1.5px] hover:text-link-hover hover:underline';
+// בריחוף העט מותח קו מתחת למילה (globals.css, .pen-under) והטקסט מתכהה.
+const navLink = 'inline-flex min-h-11 items-center transition-colors duration-150 hover:text-link-hover';
 
 /**
  * הכותרת של כל עמוד: שם האתר, "אף מוכר לא משלם לנו", והתפריט (מסמך העיצוב, 3א.1).
@@ -17,10 +17,10 @@ export function SiteHeader() {
       <p className="ms-auto text-xs leading-tight font-semibold text-ink-soft lg:ms-0 lg:text-sm">אף מוכר לא משלם לנו</p>
       <nav aria-label="ראשי" className="mt-1 flex basis-full flex-wrap gap-x-5 text-sm lg:ms-auto lg:mt-0 lg:basis-auto lg:gap-x-7 lg:text-[15px] lg:font-semibold">
         <Link href="/courses#subjects" className={navLink}>
-          תחומים
+          <span className="pen-under">תחומים</span>
         </Link>
         <Link href="/method" className={navLink}>
-          איך אנחנו מדרגים
+          <span className="pen-under">איך אנחנו מדרגים</span>
         </Link>
         <AccountLink className={navLink} />
       </nav>

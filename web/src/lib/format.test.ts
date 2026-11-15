@@ -1,5 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import { costPerHandsOnHour, formatHebrewDate, formatIls, invoiceCountText, paidRangeSentence } from './format';
+import {
+  costPerHandsOnHour,
+  formatHebrewDate,
+  formatIls,
+  invoiceCountText,
+  missingReviewsText,
+  moreReviewsText,
+  paidRangeSentence,
+  reviewsToScoreText,
+  verifiedGraduatesText,
+  verifiedReviewsText,
+} from './format';
+
+describe('counts in Hebrew', () => {
+  it('puts "one" after the noun, without a digit', () => {
+    expect(verifiedReviewsText(1)).toBe('ביקורת מאומתת אחת');
+    expect(verifiedGraduatesText(1)).toBe('בוגר מאומת אחד');
+    expect(moreReviewsText(1)).toBe('עוד ביקורת אחת');
+    expect(reviewsToScoreText(1)).toBe('עוד ביקורת אחת עד לציון');
+    expect(missingReviewsText(1)).toBe('חסרה עוד ביקורת אחת');
+  });
+  it('puts any other number before the plural noun', () => {
+    expect(verifiedReviewsText(3)).toBe('3 ביקורות מאומתות');
+    expect(verifiedGraduatesText(23)).toBe('23 בוגרים מאומתים');
+    expect(moreReviewsText(2)).toBe('עוד 2 ביקורות');
+    expect(reviewsToScoreText(2)).toBe('עוד 2 ביקורות עד לציון');
+    expect(missingReviewsText(5)).toBe('חסרות עוד 5 ביקורות');
+  });
+});
 
 describe('formatIls', () => {
   it('adds thousands separators and the shekel sign', () => {

@@ -18,7 +18,7 @@ export function HomeHero({ example }: { example: { course: CourseSummary; page: 
       <div className="lg:col-start-1 lg:row-start-1">
         <h1
           id="promise"
-          className="text-[33px] leading-[1.14] font-extrabold tracking-[-0.01em] text-balance lg:text-[54px] lg:leading-[1.08]"
+          className="text-[33px] leading-[1.14] font-bold tracking-[-0.01em] text-balance lg:text-[54px] lg:leading-[1.08]"
         >
           לפני שמשלמים על קורס: מה אומרים בוגרים שהוכיחו שלמדו בו
         </h1>

@@ -1,5 +1,12 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatHebrewDate, formatIls, invoiceCountText, paidRangeSentence } from '@/lib/format';
+import {
+  formatHebrewDate,
+  formatIls,
+  invoiceCountText,
+  missingReviewsText,
+  paidRangeSentence,
+  verifiedReviewsText,
+} from '@/lib/format';
 import type { AdviceSource } from './types';
 
 const FORMAT_WORDS: Record<string, string> = {
@@ -72,10 +79,10 @@ function factLines(course: CoursePageData): string[] {
     'graduates',
     'ציון בוגרים',
     score.status === 'scored'
-      ? `${score.value.toFixed(1)} מתוך 10, לפי ${score.reviewCount} ביקורות מאומתות` +
+      ? `${score.value.toFixed(1)} מתוך 10, לפי ${verifiedReviewsText(score.reviewCount)}` +
           (score.recommendPct !== null ? `. ${score.recommendPct}% ממליצים` : '')
       : score.status === 'not_enough_reviews'
-        ? `עוד אין. ${score.reviewCount === 0 ? 'אין עדיין ביקורות מאומתות' : `יש ${score.reviewCount} ביקורות מאומתות`}, וחסרות עוד ${score.reviewsNeeded}`
+        ? `עוד אין. ${score.reviewCount === 0 ? 'אין עדיין ביקורות מאומתות' : `יש ${verifiedReviewsText(score.reviewCount)}`}, ו${missingReviewsText(score.reviewsNeeded)}`
         : 'עוד אין',
   );
   add(

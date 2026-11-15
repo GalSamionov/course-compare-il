@@ -1,0 +1,112 @@
+{
+ "is_course_page": true,
+ "category": "bookkeeping",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "הנהלת חשבונות סוג 1",
+   "quote": "הנהלת חשבונות סוג 1",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 5600,
+   "quote": "שכר לימוד: 5,600 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 180,
+   "quote": "180 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": true,
+   "value": "שני וחמישי בערב",
+   "quote": "בימי שני וחמישי בערב",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "בנתניה",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "נתניה",
+   "quote": "בנתניה",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "בימי שני וחמישי בערב",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": true,
+   "value": "הכנה למבחנים חיצוניים בהנהלת חשבונות",
+   "quote": "הכנה למבחנים החיצוניים בהנהלת חשבונות",
+   "confidence": "high"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

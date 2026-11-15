@@ -39,35 +39,49 @@ describe('questionsFor', () => {
 });
 
 describe('stepErrors', () => {
-  it('needs a start month that already came, and a finish month after it', () => {
-    expect(stepErrors('when', { ...done, cohortMonth: null }, ctx)).toEqual(['בחרו את חודש ההתחלה.']);
-    expect(stepErrors('when', { ...done, cohortMonth: '2026-12-01', finishedMonth: null }, ctx)).toEqual([
-      'חודש ההתחלה עוד לא הגיע.',
+  it('needs a start month that already came, and a finish month after it, each under its own field', () => {
+    expect(stepErrors('when', { ...done, cohortMonth: null }, ctx)).toEqual([
+      { field: 'cohortMonth', message: 'בחרו את חודש ההתחלה.' },
     ]);
-    expect(stepErrors('when', { ...done, finishedMonth: '2026-01-01' }, ctx)).toEqual(['חודש הסיום לפני חודש ההתחלה.']);
+    expect(stepErrors('when', { ...done, cohortMonth: '2026-12-01', finishedMonth: null }, ctx)).toEqual([
+      { field: 'cohortMonth', message: 'חודש ההתחלה עוד לא הגיע.' },
+    ]);
+    expect(stepErrors('when', { ...done, finishedMonth: '2026-01-01' }, ctx)).toEqual([
+      { field: 'finishedMonth', message: 'חודש הסיום לפני חודש ההתחלה.' },
+    ]);
     expect(stepErrors('when', { ...done, finishedMonth: null }, ctx)).toEqual([]);
   });
 
-  it('needs every question, and a yes or no answer is only 1 or 5', () => {
+  it('needs every question, in order, and a yes or no answer is only 1 or 5', () => {
     expect(stepErrors('questions', { ...done, answers: { teaching: 4 } }, ctx)).toEqual([
-      'חסרות תשובות: ערך לכסף, רכשתי את המיומנות, ממליץ.',
+      { field: 'question:value', message: 'בחרו תשובה.' },
+      { field: 'question:skill_gained', message: 'בחרו תשובה.' },
+      { field: 'question:recommend', message: 'בחרו תשובה.' },
     ]);
     expect(stepErrors('questions', { ...done, answers: { ...done.answers, skill_gained: 3 } }, ctx)).toEqual([
-      'תשובה לא תקינה: רכשתי את המיומנות.',
+      { field: 'question:skill_gained', message: 'התשובה לא תקינה. בחרו שוב.' },
     ]);
     expect(stepErrors('questions', done, ctx)).toEqual([]);
   });
 
   it('counts the review between 80 and 2,000 characters, without the spaces around it', () => {
-    expect(stepErrors('words', { ...done, body: ` ${'א'.repeat(79)} ` }, ctx)).toEqual(['עוד תו אחד לפחות.']);
-    expect(stepErrors('words', { ...done, body: 'א'.repeat(70) }, ctx)).toEqual(['עוד 10 תווים לפחות.']);
-    expect(stepErrors('words', { ...done, body: 'א'.repeat(2005) }, ctx)).toEqual(['ארוך ב-5 תווים מהמותר.']);
+    const words = (body: string) => stepErrors('words', { ...done, body }, ctx).map((e) => e.message);
+    expect(words(` ${'א'.repeat(79)} `)).toEqual(['עוד תו אחד לפחות.']);
+    expect(words('א'.repeat(70))).toEqual(['עוד 10 תווים לפחות.']);
+    expect(words('א'.repeat(2005))).toEqual(['ארוך ב-5 תווים מהמותר.']);
+    expect(stepErrors('words', { ...done, body: 'א'.repeat(70) }, ctx)[0].field).toBe('body');
     expect(stepErrors('words', done, ctx)).toEqual([]);
   });
 
   it('needs a name unless the review is anonymous', () => {
-    expect(stepErrors('name', { ...done, displayName: ' ' }, ctx)).toEqual(['כתבו איך להציג את השם.']);
+    expect(stepErrors('name', { ...done, displayName: ' ' }, ctx)).toEqual([
+      { field: 'displayName', message: 'כתבו איך להציג את השם.' },
+    ]);
     expect(stepErrors('name', { ...done, displayMode: 'anonymous', displayName: 'בוגר מאומת' }, ctx)).toEqual([]);
+  });
+
+  it('puts the proof messages under the files', () => {
+    expect(stepErrors('proof', done, ctx, [])).toEqual([{ field: 'proofs', message: 'צריך לצרף קובץ אחד לפחות.' }]);
   });
 });
 
@@ -84,7 +98,7 @@ describe('displayNameFor', () => {
 describe('proofErrors', () => {
   const pdf = { mime: 'application/pdf', size: 1000 };
   it('takes a screenshot or a project only together with a proof that stands alone', () => {
-    expect(proofErrors([])).toEqual(['צריך לפחות קובץ אחד.']);
+    expect(proofErrors([])).toEqual(['צריך לצרף קובץ אחד לפחות.']);
     expect(proofErrors([{ kind: 'screenshot', ...pdf }])).toHaveLength(1);
     expect(proofErrors([{ kind: 'screenshot', ...pdf }, { kind: 'invoice', ...pdf }])).toEqual([]);
   });

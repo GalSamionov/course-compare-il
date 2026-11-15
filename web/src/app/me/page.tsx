@@ -17,7 +17,7 @@ export default async function MePage() {
   return (
     <Sheet>
       <main>
-        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[54px] lg:font-extrabold">האזור שלי</h1>
+        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[54px]">האזור שלי</h1>
         <p className="mt-2 font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
           מה ששמרתם, ההשוואה והתשובות שלכם. רק אתם רואים את העמוד הזה.
         </p>

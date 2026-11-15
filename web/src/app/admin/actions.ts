@@ -4,7 +4,7 @@ import { refresh, updateTag } from 'next/cache';
 import { adminGate, type AdminDb } from '@/lib/admin/gate';
 import { decisionNote, isRejectReason } from '@/lib/admin/reasons';
 import { removeProofFiles } from '@/lib/reviews/files';
-import { paidBucket } from '@/lib/reviews/proof-check';
+import { paidBucketFromInput } from '@/lib/reviews/paid-bucket';
 import { isUploadKind, isUuid } from '@/lib/reviews/types';
 import { recomputeAllScores } from '@/lib/score/recompute';
 
@@ -56,12 +56,9 @@ export async function approveReview(_previous: DecisionState, form: FormData): P
   const reviewId = form.get('reviewId');
   const kind = String(form.get('proofKind') ?? '');
   if (!isUuid(reviewId) || !isUploadKind(kind)) return fail('הבקשה לא תקינה.');
-  const amountText = String(form.get('amount') ?? '').replace(/[\s,₪]/g, '');
-  let bucket: number | null = null;
-  if (kind === 'invoice' && amountText !== '') {
-    bucket = paidBucket(Number(amountText));
-    if (bucket === null) return fail('הסכום לא תקין. רק מספר בשקלים, או להשאיר ריק.');
-  }
+  // אותה קריאה של הסכום כמו בשורה "יישמר כ" שבטופס (decide-form.tsx).
+  const bucket = kind === 'invoice' ? paidBucketFromInput(String(form.get('amount') ?? '')) : null;
+  if (bucket === 'invalid') return fail('הסכום לא תקין. רק מספר בשקלים, או להשאיר ריק.');
 
   const pending = await loadPending(gate.db, reviewId);
   if (pending === null) return fail('לא הצלחנו לקרוא את הביקורת. לא פורסם כלום.');

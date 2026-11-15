@@ -9,7 +9,7 @@ export function Soon({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        'inline-block -rotate-2 font-pen text-[13px] leading-none font-medium whitespace-nowrap text-pen lg:text-sm',
+        'inline-block font-pen text-[13px] leading-none font-medium whitespace-nowrap text-pen lg:text-sm',
         className,
       )}
     >

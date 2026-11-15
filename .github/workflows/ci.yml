@@ -75,3 +75,20 @@ jobs:
         run: |
           pnpm exec playwright install --with-deps chromium
           pnpm e2e
+
+      # האוסף השבועי: בדיקות היחידה, ושלושה שבועות של אתר הדוגמה מול המסד של ה-CI.
+      # אחרי בדיקות הקצה, כי ההדגמה מוסיפה מוסד דוגמה (שהקורסים שלו מוסתרים בסוף).
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: scraper/uv.lock
+
+      - name: Scraper tests
+        working-directory: scraper
+        run: |
+          set -a; . ../web/.env.local; set +a
+          export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+          uv sync --frozen
+          uv run playwright install --with-deps chromium
+          uv run pytest

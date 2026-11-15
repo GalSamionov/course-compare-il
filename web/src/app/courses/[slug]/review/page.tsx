@@ -43,7 +43,7 @@ export default async function CourseReviewPage({ params }: Props) {
             {form.title}
           </Link>
         </nav>
-        <h1 className="mt-0.5 text-[30px] leading-tight font-bold text-balance lg:text-[48px] lg:leading-[1.1] lg:font-extrabold">
+        <h1 className="mt-0.5 text-[30px] leading-tight font-bold text-balance lg:text-[48px] lg:leading-[1.1]">
           ביקורת על {form.title}
         </h1>
         {form.institutionName && (

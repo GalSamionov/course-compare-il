@@ -70,7 +70,7 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
               </Link>
               {course.score.status === 'scored' ? (
                 <p className="mt-1 flex flex-wrap items-baseline gap-x-1 font-sans text-[13px] leading-tight text-ink-soft">
-                  <span className="font-serif text-xl leading-none font-bold text-ink">
+                  <span className="text-xl leading-none font-bold text-ink">
                     {course.score.value.toFixed(1)}
                   </span>
                   ציון בוגרים

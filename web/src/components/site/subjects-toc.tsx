@@ -1,13 +1,23 @@
 import Link from 'next/link';
-import { PenNote } from '@/components/course/marks';
-import { PenLoop } from '@/components/site/pen';
+import { PenNote, StickyNote, type WashiTone } from '@/components/course/marks';
+import { PenArrow, PenLoop } from '@/components/site/pen';
 import type { CategoryEntry } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
 
+const coursesText = (n: number) => (n === 1 ? 'קורס אחד' : `${n} קורסים`);
+const gradsText = (n: number) => (n === 1 ? 'בוגר אחד' : `${n} בוגרים`);
+
+/** הטיות לסירוגין, כדי שהפתקים ייראו מודבקים ביד ולא מסודרים ברשת. עד 2 מעלות. */
+const TILTS = [-1.6, 1.2, -0.7, 1.8, -1.2, 0.8];
+/** מסקינג טייפ בשלושה גוונים לסירוגין. */
+const WASHI: WashiTone[] = ['lilac', 'teal', 'peach'];
+
 /**
- * תוכן עניינים של התחומים, עם מספר הקורסים ומספר הבוגרים המאומתים. כמו בציור.
+ * התחומים כפתקים לבנים מודבקים: שם התחום, ומתחתיו, מאותו צד, כמה קורסים וכמה בוגרים מאומתים.
+ * לא שורה של שם ומספר בקצה השני: זה המבנה של תפריט מסעדה (משוב מ-14.11.2026).
+ * לבן ולא צהוב: פתק צהוב הוא קול של בוגר (DESIGN.md), ותחום הוא מקום באתר.
  * id="subjects" הוא היעד של "תחומים" בתפריט העליון.
- * המספר הגדול בעמודת הבוגרים מוקף בעט, והערה בעט אומרת מה העיגול אומר. עט ולא מרקר:
+ * מספר הבוגרים הגדול ברשימה מוקף בעט, והערה בעט אומרת מה העיגול אומר. עט ולא מרקר:
  * מרקר הוא מקור (ירוק, צהוב, ורוד), ועיגול הוא האתר שמצביע על עובדה מהרשימה עצמה.
  */
 export function SubjectsToc({
@@ -38,34 +48,49 @@ export function SubjectsToc({
       <h2 id="subjects-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
         {heading}
       </h2>
-      <div aria-hidden="true" className="mt-2.5 flex justify-end font-sans text-xs leading-tight text-ink-soft lg:text-[13px]">
-        <span className="w-11 text-end">קורסים</span>
-        <span className="w-[52px] text-end">בוגרים</span>
-      </div>
-      <ol className="tabular-nums">
-        {rows.map((c) => (
-          <li key={c.slug}>
-            <Link
-              href={`/categories/${c.slug}`}
-              className="flex min-h-11 items-baseline pt-1.5 text-ink hover:text-link-hover lg:text-lg"
-            >
-              <span>{c.name}</span>
-              <span aria-hidden="true" className="mx-2 flex-1 border-b-2 border-dotted border-leader" />
-              <span aria-hidden="true" className="w-11 text-end font-sans text-[15px] font-bold">
-                {c.courseCount}
-              </span>
-              <span aria-hidden="true" className="w-[52px] text-end font-sans text-[15px]">
-                {c === busiest ? <PenLoop className="font-bold">{c.gradCount}</PenLoop> : c.gradCount}
-              </span>
-              <span className="sr-only">
-                : {c.courseCount} קורסים, {c.gradCount} בוגרים מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}
-              </span>
+      <ol className="mt-7 grid grid-cols-2 gap-x-3 gap-y-6 tabular-nums lg:mt-8 lg:gap-x-5 lg:gap-y-7">
+        {rows.map((c, i) => (
+          <li key={c.slug} className="flex">
+            <Link href={`/categories/${c.slug}`} className="group flex w-full text-ink">
+              <StickyNote
+                tone="paper"
+                tilt={TILTS[i % TILTS.length]}
+                washi={WASHI[i % WASHI.length]}
+                className={cn(
+                  'flex min-h-[84px] w-full flex-col px-3 pt-3.5 pb-2.5 text-[13px]',
+                  // בריחוף הפתק מתרומם מעט מהדף, והעט מותח קו מתחת לשם.
+                  'transition-[translate,box-shadow] duration-200 ease-out group-hover:-translate-y-1 group-focus-visible:-translate-y-1',
+                  'group-hover:shadow-[0_0_0_1px_rgb(30_36_44/0.08),0_2px_3px_rgb(30_36_44/0.08),0_18px_20px_-12px_rgb(30_36_44/0.42)]',
+                )}
+              >
+                <span className="text-[16px] leading-snug font-bold group-hover:text-link-hover lg:text-[17px]">
+                  <span className="pen-under">{c.name}</span>
+                </span>
+                <span className="mt-auto flex items-end justify-between gap-1.5 pt-2 font-sans leading-tight text-ink-soft lg:text-sm">
+                  {/* שתי שורות קבועות: קורסים, ומתחתם בוגרים. כך גם פתק צר בנייד לא שובר באמצע. */}
+                  <span className="flex flex-col gap-0.5">
+                    <span>
+                      {coursesText(c.courseCount)}
+                      <span className="sr-only">,</span>
+                    </span>
+                    <span>
+                      {c === busiest ? (
+                        <PenLoop className="font-bold text-ink">{gradsText(c.gradCount)}</PenLoop>
+                      ) : (
+                        gradsText(c.gradCount)
+                      )}
+                      <span className="sr-only"> מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}</span>
+                    </span>
+                  </span>
+                  <PenArrow className="me-0 h-[0.75em] w-[1.4em] flex-none opacity-0 transition-[opacity,translate] duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 motion-safe:translate-x-1 motion-safe:group-hover:translate-x-0" />
+                </span>
+              </StickyNote>
             </Link>
           </li>
         ))}
       </ol>
       {busiest && (
-        <PenNote className="ms-auto mt-2 w-fit lg:text-base">
+        <PenNote className="ms-auto mt-4 w-fit lg:text-base">
           בעיגול: הכי הרבה בוגרים מאומתים
         </PenNote>
       )}

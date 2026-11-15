@@ -1,16 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-/** Mailpit של Supabase המקומי: כל מייל שנשלח נתפס שם (pnpm db:status, MAILPIT_URL). */
-const MAILPIT = 'http://127.0.0.1:54324';
-
-/** הקישור מהמייל האחרון שנשלח לכתובת, או '' אם עוד לא הגיע. */
-async function magicLink(email: string): Promise<string> {
-  const search = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${email}"`)}`);
-  const { messages } = (await search.json()) as { messages: { ID: string }[] };
-  if (messages.length === 0) return '';
-  const message = (await (await fetch(`${MAILPIT}/api/v1/message/${messages[0].ID}`)).json()) as { Text: string };
-  return message.Text.match(/http:\/\/127\.0\.0\.1:54321\/auth\/v1\/verify\?[^\s)]+/)?.[0] ?? '';
-}
+import { magicLink } from './support/mail';
 
 test('the personal area sends a signed-out visitor to log in', async ({ page }) => {
   await page.goto('/me');

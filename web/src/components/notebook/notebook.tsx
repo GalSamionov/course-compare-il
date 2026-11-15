@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { FIRST_ANSWER_ID, useAdvisor } from './advisor';
 import { AnswerLine, PenAnswer } from './answer-line';
 import { ChoiceChip } from './choice-chip';
+import { PenExample, WHAT_EXAMPLES } from './pen-example';
 import { Results, allCoursesTitle, coursesTitle } from './results';
 
 /** שינוי בתשובות: מקבל את התשובות העדכניות מהכתובת, ומחזיר את החדשות. */
@@ -104,9 +105,9 @@ async function understandText(text: string, categories: KeywordCategory[]): Prom
 const BUDGET_PRESETS = [3000, 5000, 10000, 15000];
 
 const lineText = 'self-stretch pt-4 ps-3 pb-1 pe-1 text-start text-lg leading-normal lg:text-xl';
-/** מה שהמבקר מקליד: עט כחול, מוטה מעט כמו בציור. הדוגמה (placeholder) נשארת ישרה. */
+/** מה שהמבקר מקליד: עט כחול. הדוגמה (placeholder) בגופן המודפס ובאפור. */
 const penInput =
-  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none not-placeholder-shown:-rotate-1 lg:text-[23px]';
+  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none lg:text-[23px]';
 const inputExample =
   'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft lg:placeholder:text-[17px]';
 /**
@@ -116,7 +117,11 @@ const inputExample =
  */
 const growCopy =
   'after:invisible after:col-start-1 after:row-start-1 after:whitespace-pre-wrap after:break-words after:content-[attr(data-copy)] after:font-pen after:text-[21px] after:font-medium after:leading-normal lg:after:text-[23px] data-empty:after:font-sans data-empty:after:text-[15px] data-empty:after:font-normal lg:data-empty:after:text-[17px]';
-const WHAT_EXAMPLE = 'למשל: לבנות אתרים, אקסל לעבודה, עוגות';
+/**
+ * הדוגמה המודפסת בשורה הראשונה: לקורא מסך ולמי שכבר בשדה. היא גם קובעת את רוחב השורה הריקה,
+ * ולכן היא קצרה, באורך הדוגמה שנכתבת בעט (pen-example.tsx), כדי שהווי יעמוד ממש אחריה.
+ */
+const WHAT_EXAMPLE = 'למשל: אקסל לעבודה, עוגות';
 /** ההערה בעט מתחת לשורה הראשונה, כשהיועץ פועל. */
 const WHAT_NOTE_ID = 'what-advisor-note';
 /** הדוגמה לשורה 4 מוצגת ליד הקו הריק ולא בתוכו, כדי שלא תיראה כמו תקציב שכבר נקבע. */
@@ -371,12 +376,35 @@ export function Notebook({
                         'col-start-1 row-start-1 min-w-0 resize-none overflow-hidden pt-4 ps-3 pb-1 pe-1 text-start',
                         penInput,
                         inputExample,
+                        // הדוגמה המודפסת נשארת לקורא מסך ולמי שכבר בשדה. מחוץ לשדה מוצגת הדוגמה שנכתבת בעט.
+                        '[&:not(:focus)]:placeholder:text-transparent',
                         isStruck('what') && struck,
                       )}
                     />
+                    <PenExample className="col-start-1 row-start-1 self-start pt-4 ps-3 pe-1 leading-normal" />
                   </div>
                 )}
               </AnswerLine>
+              {!fixedWhat && shownWhat === '' && open !== 'what' && (
+                // דוגמאות שלוחצים עליהן: נכתבות בשורה הראשונה ומראות את הרשימה, כמו Enter.
+                <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center pt-1 pb-1.5">
+                  <span className={cn(panelLabel, 'pt-0')}>או</span>
+                  <div className="flex flex-wrap gap-x-2 ps-2">
+                    {WHAT_EXAMPLES.map((text) => (
+                      <button
+                        key={text}
+                        type="button"
+                        onClick={() => {
+                          void commitWhat(text).then(scrollToResults);
+                        }}
+                        className="inline-flex min-h-11 items-center px-1 font-pen text-base font-medium text-pen transition-colors duration-150 hover:text-link-hover lg:text-[17px]"
+                      >
+                        <span className="pen-under pen-under-shown">{text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {advisor && !fixedWhat && (
                 // הערה של האתר בעט, על השורה שמתחת לשורה הראשונה, עם חץ שעולה אליה: גם שאלה נכתבת שם.
                 <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-2.5 pb-2 lg:pt-3 lg:pb-2.5">
@@ -535,7 +563,8 @@ export function Notebook({
                     className={cn(
                       growCopy,
                       'relative inline-block min-w-[2ch] after:whitespace-pre',
-                      budgetEmpty && 'min-w-[4.5em] border-b-[1.5px] border-dotted border-leader',
+                      // קו מלא ולא מנוקד: קו מנוקד בין מילה למספר הוא המבנה של תפריט.
+                      budgetEmpty && 'min-w-[4.5em] border-b-[1.5px] border-line',
                     )}
                   >
                     <input

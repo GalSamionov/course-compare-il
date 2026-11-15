@@ -44,7 +44,7 @@ export function ReviewsSection({ slug, reviews, total }: { slug: string; reviews
                 )}
                 , מחזור {cohortLabel(r.cohortMonth)}
               </p>
-              <p className="mt-1.5 font-serif text-[15px] leading-relaxed lg:text-base">{r.body}</p>
+              <p className="mt-1.5 text-[15px] leading-relaxed lg:text-base">{r.body}</p>
               {r.followUp && (
                 <StickyNote tone="grad-light" tilt={-4} tape={false} className="absolute -bottom-6 left-2.5 w-[164px] px-2.5 py-1.5">
                   <strong>אחרי 3 חודשים:</strong> {r.followUp}

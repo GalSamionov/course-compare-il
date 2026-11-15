@@ -34,24 +34,24 @@ function tiltFor(children: React.ReactNode): (typeof TILTS)[number] {
 /**
  * מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה.
  * משיכה עם קצוות משופעים (globals.css, .hl), וכל שורה מקבלת משיכה משלה.
- * swipe: המשיכה נמרחת פעם אחת כשהדף נטען (רק בכרטיס הדוגמה בדף הבית).
+ * המשיכה נמרחת פעם אחת כשהיא נכנסת למסך (globals.css, "תנועה"). delay: השהיה נוספת לפני המריחה.
  */
 export function Mark({
   source,
-  swipe,
+  delay,
   children,
 }: {
   source: MarkSource;
-  /** השהיה במילישניות לפני שהמשיכה נמרחת. */
-  swipe?: number;
+  /** השהיה נוספת במילישניות לפני שהמשיכה נמרחת. */
+  delay?: number;
   children: React.ReactNode;
 }) {
   return (
     <mark
       data-source={source}
       data-tilt={tiltFor(children)}
-      className={cn('hl', `hl-${source}`, swipe !== undefined && 'hl-swipe')}
-      style={swipe !== undefined ? { animationDelay: `${swipe}ms` } : undefined}
+      data-delay={delay}
+      className={cn('hl', `hl-${source}`)}
     >
       <span className="sr-only">{markLabel[source]}: </span>
       {children}
@@ -70,22 +70,30 @@ export function Claim({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * הערה קצרה של האתר לקורא, בכתב יד בעט כחול. זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
+ * הערה קצרה של האתר לקורא, בעט הכחול (Rubik). זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
  * arrow: חץ בעט לפני ההערה. true: חץ קטן בכיוון הקריאה. 'up': חץ מעוקל שעולה מתחילת ההערה אל מה שמעליה,
  * ולא תופס מקום בשורה. 'back': חץ קטן שמצביע אחורה, אל מה שעומד מימין להערה.
+ * נכתבת מימין לשמאל כשהיא נכנסת למסך (data-anim="write").
  * רכיב בלוק (p): אסור למקם אותו בתוך <p>.
  */
 export function PenNote({
   children,
   arrow = false,
+  delay,
   className,
 }: {
   children: React.ReactNode;
   arrow?: boolean | 'up' | 'back';
+  /** השהיה נוספת במילישניות לפני שהעט מתחיל לכתוב, למשל אחרי שהעיגול סביב הציון נסגר. */
+  delay?: number;
   className?: string;
 }) {
   return (
-    <p className={cn('-rotate-1 font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}>
+    <p
+      data-anim="write"
+      data-delay={delay}
+      className={cn(' font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}
+    >
       {arrow === true && <PenArrow />}
       {arrow === 'back' && <PenArrow className="-scale-x-100" />}
       {arrow === 'up' && <PenArrowUp className="absolute start-0 -top-[15px] h-[26px] w-[22px]" />}
@@ -98,16 +106,21 @@ export function PenNote({
  * פס סלוטייפ עם קצוות קרועים. side: איפה הוא מודבק.
  * width ב-px. הפס הוא קישוט בלבד.
  */
+export type WashiTone = 'lilac' | 'teal' | 'peach';
+
 export function Tape({
   side = 'top',
   width = 64,
   tilt = -3,
+  washi,
   className,
   children,
 }: {
   side?: 'top' | 'top-start' | 'top-end';
   width?: number;
   tilt?: number;
+  /** מסקינג טייפ צבעוני במקום סלוטייפ שקוף. רק על פתק לבן (paper), שהוא קישור ולא קול. */
+  washi?: WashiTone;
   className?: string;
   /** טקסט על הסלוטייפ, כמו תווית "לדוגמה". בלי טקסט הפס מוסתר מקורא מסך. */
   children?: React.ReactNode;
@@ -121,6 +134,7 @@ export function Tape({
   return (
     <span
       aria-hidden={children ? undefined : true}
+      data-washi={washi}
       className={cn('tape z-[1]', children && 'flex items-center justify-center', className)}
       style={{ width, ...place }}
     >
@@ -129,16 +143,22 @@ export function Tape({
   );
 }
 
-type NoteTone = 'grad' | 'grad-light' | 'institution';
+/**
+ * grad: קול של בוגר. grad-light: אותו בוגר, 3 חודשים אחרי. institution: תגובת המוסד בלבד.
+ * paper: פתק לבן, שהוא מקום באתר ולא קול של אף אחד: רק לקישור (תחום, מסלול). אין לו צבע של מקור.
+ */
+type NoteTone = 'grad' | 'grad-light' | 'institution' | 'paper';
 
 const noteColor: Record<NoteTone, string> = {
   grad: 'bg-note-grad',
   'grad-light': 'bg-note-grad-light',
   institution: 'bg-note-institution',
+  paper: 'bg-white',
 };
 
 /**
  * פתק דביק: צהוב לקול של בוגר, כחול לקול של המוסד. מודבק בסלוטייפ.
+ * כשהוא נכנס למסך הוא יורד על הדף ונלחץ, והסלוטייפ מונח אחריו (data-anim="stick").
  * רכיב בלוק (div): אסור למקם אותו בתוך <p>.
  */
 export function StickyNote({
@@ -146,10 +166,13 @@ export function StickyNote({
   tilt = 0,
   tiltLg,
   tape = true,
+  washi,
   className,
   children,
 }: {
   tone: NoteTone;
+  /** סלוטייפ צבעוני: רק לפתק לבן (tone="paper"). */
+  washi?: WashiTone;
   tilt?: number;
   /** הטיה אחרת מרוחב מחשב: פתק צר בעמודה מוטה יותר מפתק ברוחב מלא בנייד. */
   tiltLg?: number;
@@ -163,22 +186,30 @@ export function StickyNote({
   const angle = clamp(tilt);
   return (
     <div
+      data-anim="stick"
       className={cn(
         'relative font-sans text-[13px] leading-snug text-pretty',
-        // נייר של פתק: כהה מעט בתחתית, וצל של פינה שמתרוממת.
+        // נייר של פתק: כהה מעט בתחתית, וצל של פינה שמתרוממת. פתק לבן מקבל צל אפור-קר, בלי הגוון הצהוב.
         'bg-[linear-gradient(to_bottom,transparent_70%,rgb(0_0_0/0.035))]',
-        'shadow-[0_1px_1px_rgb(0_0_0/0.08),0_10px_14px_-9px_rgb(40_40_20/0.45)]',
+        tone === 'paper'
+          ? 'shadow-[0_0_0_1px_rgb(30_36_44/0.07),0_1px_1px_rgb(30_36_44/0.08),0_10px_14px_-9px_rgb(30_36_44/0.4)]'
+          : 'shadow-[0_1px_1px_rgb(0_0_0/0.08),0_10px_14px_-9px_rgb(40_40_20/0.45)]',
         noteColor[tone],
         tiltLg !== undefined && 'rotate-(--tilt) lg:rotate-(--tilt-lg)',
         className,
       )}
       style={
+        // --stick-from: ההדבקה מתחילה מוטה מעט לכיוון האפס, כך שגם פתק של 4 מעלות לא עובר את התקרה.
         tiltLg === undefined
-          ? { transform: `rotate(${angle}deg)` }
-          : ({ '--tilt': `${angle}deg`, '--tilt-lg': `${clamp(tiltLg)}deg` } as React.CSSProperties)
+          ? ({ transform: `rotate(${angle}deg)`, '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg` } as React.CSSProperties)
+          : ({
+              '--tilt': `${angle}deg`,
+              '--tilt-lg': `${clamp(tiltLg)}deg`,
+              '--stick-from': `${angle > 0 ? -1.5 : 1.5}deg`,
+            } as React.CSSProperties)
       }
     >
-      {tape && <Tape width={58} tilt={angle > 0 ? -4 : 3} />}
+      {tape && <Tape width={58} tilt={angle > 0 ? -4 : 3} washi={tone === 'paper' ? washi : undefined} />}
       {children}
     </div>
   );
