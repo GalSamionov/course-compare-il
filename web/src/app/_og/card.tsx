@@ -521,10 +521,8 @@ export async function renderCareerCard(page: { courses: number; graduates: numbe
         {/* השורות התחתונות מימין, רחוק מהסלוטייפ של "נתוני דוגמה" שבפינה השמאלית. */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
           <Rtl text="ציון רק מבוגרים שהוכיחו שלמדו בקורס" size={27} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
-          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 10 }}>
-            <Marked text="שילמו בפועל" size={28} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
-            <Rtl text="לפי חשבוניות, ומה לשאול לפני שמשלמים" size={26} style={{ marginRight: 12 }} />
-          </div>
+          {/* בדיו ולא במרקר: זו שורה על מה יש בעמוד, ולא נתון שנבדק מול מסמך. */}
+          <Rtl text="כמה שילמו בפועל לפי חשבוניות, ומה לשאול לפני שמשלמים" size={26} style={{ marginTop: 8 }} />
         </div>
       </Desk>
     ),
@@ -553,7 +551,8 @@ export async function renderBadgeCard(badge: {
   courseTitle: string;
   institutionName: string;
 }): Promise<ImageResponse> {
-  const course = clip(badge.courseTitle, 44);
+  // עם שם, הכותרת בשורה אחת: אחרת הכרטיס דוחק את שתי השורות התחתונות אל קצה הדף.
+  const course = clip(badge.courseTitle, badge.name ? 30 : 44);
   return new ImageResponse(
     (
       <Desk sample={SAMPLE_DATA}>
@@ -578,7 +577,7 @@ export async function renderBadgeCard(badge: {
                 alignItems: 'flex-end',
                 width: '100%',
                 border: `1.5px solid ${INK}`,
-                padding: '14px 30px 16px',
+                padding: '12px 30px 14px',
               }}
             >
               {badge.name && <Rtl text={badge.name} size={30} style={{ fontWeight: 700, marginBottom: 4 }} />}
@@ -587,7 +586,7 @@ export async function renderBadgeCard(badge: {
                 {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
                 <img src={PEN_TICK} width={58} height={58} style={{ marginRight: 14, marginTop: -10 }} />
               </div>
-              <Rtl text={`של ${course}`} size={Math.min(50, titleSize(course))} style={{ fontWeight: 700, lineHeight: 1.08, marginTop: 10, maxWidth: 900 }} />
+              <Rtl text={`של ${course}`} size={Math.min(badge.name ? 44 : 50, titleSize(course))} style={{ fontWeight: 700, lineHeight: 1.08, marginTop: 10, maxWidth: 900 }} />
               <div style={{ display: 'flex', marginTop: 14 }}>
                 <Stamp text={badge.institutionName} />
               </div>
