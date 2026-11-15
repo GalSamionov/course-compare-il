@@ -433,6 +433,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"review_badges": {
+                  Row: {
+                    "created_at": string,"review_id": string,"show_name": boolean,"token": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"review_id": string,"show_name"?: boolean,"token": string
+                  }
+                  Update: {
+                    "created_at"?: string,"review_id"?: string,"show_name"?: boolean,"token"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "review_badges_review_id_fkey"
+      columns: ["review_id"]
+isOneToOne: true
+      referencedRelation: "reviews"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"review_helpful": {
                   Row: {
                     "browser_hash": string,"created_at": string,"review_id": string
@@ -633,6 +653,11 @@ isOneToOne: false
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
+"my_review_badges":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "review_id": string,"show_name": boolean,"token": string
+            }[]
+                           },
 "my_reviews":
 { Args: Record<PropertyKey, never>; Returns: {
               "answers": Json,"author_title": Database["public"]['Enums']["author_title"],"body": string,"cohort_month": string,"course_id": string,"decision_note": string,"display_mode": Database["public"]['Enums']["display_name_mode"],"display_name": string,"finished_month": string,"helpful_count": number,"id": string,"published_at": string,"read_count": number,"status": Database["public"]['Enums']["review_status"],"submitted_at": string,"updated_at": string
@@ -662,6 +687,11 @@ isOneToOne: false
 "return_review":
 { Args: { "p_action": string,"p_admin_id": string,"p_note": string,"p_reason": string,"p_review_id": string }; Returns: undefined
                            },
+"review_badge":
+{ Args: { "p_token": string }; Returns: {
+              "course_slug": string,"course_title": string,"institution_name": string,"shown_name": string,"shown_title": Database["public"]['Enums']["author_title"]
+            }[]
+                           },
 "scraper_apply_page":
 { Args: { "p_page": Json,"p_run_id": number }; Returns: Json
                            },
@@ -679,6 +709,9 @@ isOneToOne: false
                            },
 "set_vendor_response":
 { Args: { "p_admin_id": string,"p_body": string,"p_review_id": string }; Returns: string
+                           },
+"share_review_badge":
+{ Args: { "p_review_id": string,"p_show_name"?: boolean }; Returns: string
                            },
 "submit_company_request":
 { Args: { "p_client_hash": string,"p_company_name": string,"p_contact_name": string,"p_email": string,"p_format"?: string,"p_needs": string,"p_phone"?: string,"p_team_size"?: string,"p_timing"?: string }; Returns: string
@@ -707,6 +740,9 @@ isOneToOne: false
                            },
 "undo_course_change":
 { Args: { "p_admin_id": string,"p_change_id": number }; Returns: undefined
+                           },
+"unshare_review_badge":
+{ Args: { "p_review_id": string }; Returns: boolean
                            }
           }
           Enums: {
