@@ -10,7 +10,8 @@ test('the lecturer page shows what the institution says, what we checked, and th
 
   await expect(page.getByRole('heading', { level: 1, name: 'יעל כהן' })).toBeVisible();
   await expect(page.getByText('אין כאן ציון למרצה. המרצים מתחלפים בין מחזורים, ולכל קורס יש ציון משלו.')).toBeVisible();
-  await expect(page.locator('[data-source="claim"]', { hasText: 'מפתחת בכירה עם 10 שנות ניסיון בתעשייה' })).toBeVisible();
+  // בתוך "מה ידוע": עמוד הקורס שממנו הגענו נשאר מוסתר ב-DOM אחרי הניווט (Next שומר אותו לחזרה), ושם אותה טענה.
+  await expect(page.locator('#about [data-source="claim"]', { hasText: 'מפתחת בכירה עם 10 שנות ניסיון בתעשייה' })).toBeVisible();
   await expect(page.getByRole('link', { name: /בנתה ומתחזקת ספריית קוד פתוח/ })).toHaveAttribute(
     'href',
     'https://example.com/open-source-sample',
@@ -18,7 +19,7 @@ test('the lecturer page shows what the institution says, what we checked, and th
 
   await expect(page.locator('#courses h3')).toHaveText(['פיתוח Full Stack', 'כלי AI לעבודה יומיומית']);
   await expect(page.getByText('התפקיד בקורס: מרצה ראשית, מלמדת 4 מתוך 7 הפרקים')).toBeVisible();
-  await expect(page.getByText(/יעל מסבירה מצוין/)).toBeVisible();
+  await expect(page.locator('#courses').getByText(/יעל מסבירה מצוין/)).toBeVisible();
 });
 
 test('an unknown lecturer returns 404', async ({ page }) => {
