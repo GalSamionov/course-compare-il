@@ -22,7 +22,8 @@ async function main() {
     `reviews deleted: ${result.reviewsDeleted}, files deleted: ${result.filesDeleted}, check usage rows deleted: ${result.checkUsageDeleted}, ` +
       `institution request emails deleted: ${result.requestEmailsDeleted ?? 'skipped (no purge_institution_requests yet)'}, ` +
       `company requests deleted: ${result.companyRequestsDeleted ?? 'skipped (no purge_company_requests yet)'}, ` +
-      `report details deleted: ${result.reportDetailsDeleted ?? 'skipped (no purge_reports yet)'}`,
+      `report details deleted: ${result.reportDetailsDeleted ?? 'skipped (no purge_reports yet)'}, ` +
+      `course request notes deleted: ${result.courseRequestNotesDeleted ?? 'skipped (no purge_course_submissions yet)'}`,
   );
   for (const failure of result.failures) console.error(failure);
   if (result.failures.length > 0) process.exit(1);

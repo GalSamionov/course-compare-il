@@ -1,15 +1,23 @@
 import type { Metadata } from 'next';
-import { ComingSoon } from '@/components/site/coming-soon';
+import { RequestCourseForm } from '@/components/request-course/request-course-form';
+import { Sheet } from '@/components/site/sheet';
 import { SITE_NAME } from '@/lib/site';
 
-export const metadata: Metadata = { title: `בקשו שנבדוק קורס | ${SITE_NAME}` };
+export const metadata: Metadata = {
+  title: `בקשו שנבדוק קורס | ${SITE_NAME}`,
+  description: 'ראיתם קורס במודעה או בדף נחיתה, והוא לא באתר? שולחים קישור, ואנחנו בודקים את הקורס לפני שהוא עולה.',
+};
 
-/** "בקשו שנבדוק קורס" (מסמך העיצוב, 3א.6). עד שיהיה מסד לבקשות. */
+/**
+ * "בקשו שנבדוק קורס" (מסמך העיצוב, 3א.6): כל אחד, בלי התחברות, שולח קישור למודעה, לדף נחיתה או לדף בפייסבוק.
+ * העמוד סטטי: הטופס בדפדפן, והשליחה בפעולת שרת (actions.ts). הבקשה מגיעה לתור ב-/admin.
+ */
 export default function RequestCoursePage() {
   return (
-    <ComingSoon
-      title="בקשו שנבדוק קורס"
-      line="לא מצאתם את הקורס? כאן תוכלו לבקש שנוסיף אותו. אנחנו בודקים את פרטי הקורס מול אתר המוסד לפני שהוא עולה."
-    />
+    <Sheet>
+      <main className="pb-6">
+        <RequestCourseForm />
+      </main>
+    </Sheet>
   );
 }
