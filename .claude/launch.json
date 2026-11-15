@@ -4,66 +4,26 @@
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--dir",
-        "web",
-        "start"
-      ],
+      "runtimeArgs": ["--dir", "web", "start"],
       "port": 3000
     },
     {
       "name": "web-dev-3100",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--dir",
-        "web",
-        "exec",
-        "next",
-        "dev",
-        "--port",
-        "3100"
-      ],
+      "runtimeArgs": ["--dir", "web", "exec", "next", "dev", "--port", "3100"],
       "port": 3100
     },
     {
       "name": "visual-refresh-3300",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--dir",
-        ".claude/worktrees/visual-refresh/web",
-        "exec",
-        "next",
-        "dev",
-        "--port",
-        "3300"
-      ],
+      "runtimeArgs": ["--dir", ".claude/worktrees/visual-refresh/web", "exec", "next", "dev", "--port", "3300"],
       "port": 3300
     },
     {
       "name": "prototypes",
       "runtimeExecutable": "python",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "4321",
-        "--directory",
-        "design/prototypes"
-      ],
+      "runtimeArgs": ["-m", "http.server", "4321", "--directory", "design/prototypes"],
       "port": 4321
-    },
-    {
-      "name": "guides-dev-3400",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "--dir",
-        "web",
-        "exec",
-        "next",
-        "dev",
-        "--port",
-        "3400"
-      ],
-      "port": 3400
     }
   ]
 }
