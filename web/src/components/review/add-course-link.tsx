@@ -87,7 +87,14 @@ export function AddCourseLink({
   const kindLabelId = useId();
   const hintId = useId();
   const firstField = useRef<HTMLInputElement>(null);
-  const errors = state.status === 'invalid' ? state.errors : {};
+  // הודעה של שדה יורדת כשמתקנים אותו, ולא נשארת עד השליחה הבאה. שליחה חדשה מתחילה מחדש.
+  const [edited, setEdited] = useState<{ after: AddLinkState; fields: LinkField[] }>({ after: IDLE, fields: [] });
+  const editedFields = edited.after === state ? edited.fields : [];
+  const edit = (field: LinkField) => setEdited({ after: state, fields: [...editedFields, field] });
+  const allErrors = state.status === 'invalid' ? state.errors : {};
+  const errors = Object.fromEntries(
+    Object.entries(allErrors).filter(([field]) => !editedFields.includes(field as LinkField)),
+  ) as typeof allErrors;
   const groups = useMemo(() => categoryGroups(categories), [categories]);
   const likely = state.status === 'existing' ? null : findLikelyCourse(values, courses);
 
@@ -166,7 +173,10 @@ export function AddCourseLink({
                     enterKeyHint="next"
                     placeholder={row.placeholder}
                     value={values[row.name]}
-                    onChange={(e) => setValues((v) => ({ ...v, [row.name]: e.target.value }))}
+                    onChange={(e) => {
+                      setValues((v) => ({ ...v, [row.name]: e.target.value }));
+                      edit(row.name);
+                    }}
                     aria-invalid={error ? true : undefined}
                     aria-describedby={describedBy || undefined}
                     className={answer}
@@ -196,7 +206,10 @@ export function AddCourseLink({
                   id={categoryId}
                   name="category"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    edit('courseKind');
+                  }}
                   className={cn(selectClass, 'mt-0 max-w-[340px]')}
                 >
                   <option value="">אין כאן תחום מתאים</option>
@@ -222,7 +235,10 @@ export function AddCourseLink({
                     <RadioGroup
                       options={COURSE_KINDS.map((k) => ({ value: k.value, text: k.label }))}
                       value={kind}
-                      onChange={setKind}
+                      onChange={(value) => {
+                        setKind(value);
+                        edit('courseKind');
+                      }}
                       labelledBy={kindLabelId}
                       className="mt-2 flex flex-wrap gap-2"
                       itemClassName="px-3.5"

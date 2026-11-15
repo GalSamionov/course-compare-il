@@ -27,7 +27,7 @@ function reviewsLine(reviews: CourseLinkItem['reviews']): string {
   const parts: string[] = [];
   if (reviews.pending) parts.push(`${counted(reviews.pending, 'ביקורת אחת ממתינה', 'ביקורות ממתינות')} לאימות, בתור הביקורות`);
   if (reviews.published) parts.push(`${counted(reviews.published, 'ביקורת אחת כבר אומתה', 'ביקורות כבר אומתו')}, ותעלה עם הקורס`);
-  if (reviews.draft) parts.push(`${counted(reviews.draft, 'טיוטה אחת', 'טיוטות')} שעוד לא נשלחו`);
+  if (reviews.draft) parts.push(reviews.draft === 1 ? 'טיוטה אחת שעוד לא נשלחה' : `${counted(reviews.draft, '', 'טיוטות')} שעוד לא נשלחו`);
   return parts.length > 0 ? `${parts.join('. ')}.` : 'עוד אין ביקורת.';
 }
 
@@ -258,7 +258,12 @@ export function CourseLinkItemView({ item, choices }: { item: CourseLinkItem; ch
             <p className="text-[13px] text-ink-soft">
               {item.isSocial
                 ? 'קישור לרשת חברתית לא נכנס לאוסף אף פעם.'
-                : 'הקישור נכנס לאוסף כמו בקשה של מוסד, ונקרא אם המוסד ב-scraper/institutions.yaml והקישור באתר שלו.'}
+                : (
+                  <>
+                    הקישור נכנס לאוסף כמו בקשה של מוסד, ונקרא אם המוסד ב-<bdi dir="ltr">scraper/institutions.yaml</bdi> והקישור
+                    באתר שלו.
+                  </>
+                )}
             </p>
           </fieldset>
 

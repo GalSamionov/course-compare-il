@@ -47,7 +47,17 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const ids = { url: useId(), name: useId(), note: useId() };
   const done = state.status === 'sent' || state.status === 'existing';
-  const errors = state.status === 'invalid' ? state.errors : {};
+  // הודעה של שדה יורדת כשמתקנים אותו, ולא נשארת עד השליחה הבאה.
+  const [edited, setEdited] = useState<{ after: RequestState; fields: RequestField[] }>({ after: IDLE, fields: [] });
+  const editedFields = edited.after === state ? edited.fields : [];
+  const allErrors = state.status === 'invalid' ? state.errors : {};
+  const errors = Object.fromEntries(
+    Object.entries(allErrors).filter(([field]) => !editedFields.includes(field as RequestField)),
+  ) as typeof allErrors;
+  const change = (field: RequestField, value: string) => {
+    setValues((v) => ({ ...v, [field]: value }));
+    setEdited({ after: state, fields: [...editedFields, field] });
+  };
 
   useEffect(() => {
     if (done) heading.current?.focus();
@@ -119,7 +129,7 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                         enterKeyHint="next"
                         placeholder={row.placeholder}
                         value={values[row.name]}
-                        onChange={(e) => setValues((v) => ({ ...v, [row.name]: e.target.value }))}
+                        onChange={(e) => change(row.name, e.target.value)}
                         aria-invalid={error ? true : undefined}
                         aria-describedby={error ? errorId : undefined}
                         className={cn(answer, 'min-h-16 lg:min-h-[72px]')}
@@ -143,7 +153,7 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                     maxLength={500}
                     placeholder="למשל: ראיתי את המודעה באינסטגרם, ושילמו עליו הרבה"
                     value={values.note}
-                    onChange={(e) => setValues((v) => ({ ...v, note: e.target.value }))}
+                    onChange={(e) => change('note', e.target.value)}
                     aria-invalid={errors.note ? true : undefined}
                     aria-describedby={errors.note ? `${ids.note}-error` : undefined}
                     className={cn(answer, 'min-h-24 resize-y pt-5 leading-normal')}
