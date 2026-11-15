@@ -93,7 +93,8 @@ as $$
            min(i.id) over (partition by i.url_key) as first_same_url
     from item i
   ),
-  live as (
+  -- materialized: בלי זה, הנרמול של כל הקורסים באתר רץ מחדש לכל פריט בתור.
+  live as materialized (
     select c.id, c.institution_id, private.course_title_key(c.title) as title_key, private.course_url_key(c.page_url) as url_key
     from public.courses c
     where c.status <> 'draft'
