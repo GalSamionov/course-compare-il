@@ -10,7 +10,7 @@ from lamadti_scraper.series import NewPage, group_new_pages, split_title
 from lamadti_scraper.extract import parse_extraction
 from tests.helpers import raw_response
 
-TODAY = date(2026, 11, 16)
+TODAY = date(2026, 11, 15)
 BASE = "יסודות האפייה"
 
 
