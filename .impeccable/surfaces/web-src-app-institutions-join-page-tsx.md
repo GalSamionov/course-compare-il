@@ -33,6 +33,6 @@ STORY: נציג של מוסד מבין שאין כאן תשלום ואין "הש
 
 FIRST VIEWPORT: הכותרת, שורה אחת מתחתיה, שלוש שורות המחברת, והכפתור. בנייד כל הטופס נכנס במסך וחצי לכל היותר.
 
-FORM: הרחבה של העולם הקיים לטופס קצר, בלי מהלך חדש, כמו ההתחברות. seed: none (unavailable)
+FORM: הרחבה של העולם הקיים לטופס קצר, בלי מהלך חדש, כמו ההתחברות. בקשה צרה ומוגדרת, ולכן בלי סבב מבנים: הראשון ברשימה, שורות המחברת של ההתחברות. seed:0ca0aa88ff82f11e
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

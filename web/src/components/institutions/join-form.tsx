@@ -101,33 +101,35 @@ function JoinFormRound({ onAnother }: { onAnother: () => void }) {
                   const errorId = `${ids[row.name]}-error`;
                   const describedBy = [error ? errorId : null, row.name === 'contactEmail' ? emailHint : null].filter(Boolean).join(' ');
                   return (
-                    <div key={row.name}>
-                      <div className="ruled-row ruled-active grid min-h-16 grid-cols-[var(--margin)_minmax(0,1fr)] items-center lg:min-h-[72px]">
-                        <label htmlFor={ids[row.name]} className={marginLabel}>
-                          {row.label}
-                        </label>
-                        <input
-                          id={ids[row.name]}
-                          name={row.name}
-                          type={row.type}
-                          dir={row.ltr ? 'ltr' : undefined}
-                          required
-                          maxLength={row.name === 'institutionName' ? 120 : row.name === 'courseUrl' ? 500 : 254}
-                          autoComplete={row.name === 'contactEmail' ? 'email' : row.name === 'institutionName' ? 'organization' : 'url'}
-                          inputMode={row.type === 'url' ? 'url' : row.type === 'email' ? 'email' : undefined}
-                          autoCapitalize={row.ltr ? 'none' : undefined}
-                          spellCheck={row.ltr ? false : undefined}
-                          enterKeyHint={row.name === 'contactEmail' ? 'send' : 'next'}
-                          placeholder={row.placeholder}
-                          value={values[row.name]}
-                          onChange={(e) => setValues((v) => ({ ...v, [row.name]: e.target.value }))}
-                          aria-invalid={error ? true : undefined}
-                          aria-describedby={describedBy || undefined}
-                          className={answer}
-                        />
-                      </div>
+                    // השגיאה בתוך השורה שלה, מתחת לתשובה ולפני הקו, ולא בשורה הבאה (סקירת הסיום).
+                    <div
+                      key={row.name}
+                      className="ruled-row ruled-active grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center"
+                    >
+                      <label htmlFor={ids[row.name]} className={cn(marginLabel, 'flex min-h-16 items-center lg:min-h-[72px]')}>
+                        {row.label}
+                      </label>
+                      <input
+                        id={ids[row.name]}
+                        name={row.name}
+                        type={row.type}
+                        dir={row.ltr ? 'ltr' : undefined}
+                        required
+                        maxLength={row.name === 'institutionName' ? 120 : row.name === 'courseUrl' ? 500 : 254}
+                        autoComplete={row.name === 'contactEmail' ? 'email' : row.name === 'institutionName' ? 'organization' : 'url'}
+                        inputMode={row.type === 'url' ? 'url' : row.type === 'email' ? 'email' : undefined}
+                        autoCapitalize={row.ltr ? 'none' : undefined}
+                        spellCheck={row.ltr ? false : undefined}
+                        enterKeyHint={row.name === 'contactEmail' ? 'send' : 'next'}
+                        placeholder={row.placeholder}
+                        value={values[row.name]}
+                        onChange={(e) => setValues((v) => ({ ...v, [row.name]: e.target.value }))}
+                        aria-invalid={error ? true : undefined}
+                        aria-describedby={describedBy || undefined}
+                        className={cn(answer, 'min-h-16 lg:min-h-[72px]')}
+                      />
                       {error && (
-                        <p id={errorId} className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] leading-normal font-bold">
+                        <p id={errorId} className="col-start-2 pr-3 pb-2.5 font-sans text-[13px] leading-snug font-bold lg:text-[15px]">
                           {error}
                         </p>
                       )}
@@ -151,7 +153,8 @@ function JoinFormRound({ onAnother }: { onAnother: () => void }) {
                 </p>
               )}
               <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
-                <p className={marginNote}>
+                {/* בשורה אחת, גם אם היא חורגת מעט מקו השוליים, כמו העט בשאר האתר (סקירת הסיום). */}
+                <p className={cn(marginNote, 'text-[13px] whitespace-nowrap lg:text-base')}>
                   <PenArrow />
                   בלי תשלום
                 </p>
