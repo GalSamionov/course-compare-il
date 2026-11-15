@@ -35,3 +35,6 @@ design/_shadcn-build/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# לוגים של בנייה מקומית
+*.log

@@ -223,7 +223,7 @@ export function CourseQueueItemView({ item }: { item: CourseQueueItem }) {
   const courseHref = course && course.status !== 'draft' ? `/courses/${course.slug}` : null;
   const copy = decisionCopy(item);
   return (
-    <article aria-labelledby={headingId} className="border-t border-rule py-6 lg:py-8">
+    <article aria-labelledby={headingId} data-anim="ink" className="border-t border-rule py-6 lg:py-8">
       <header>
         <h3 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
           {courseHref ? (

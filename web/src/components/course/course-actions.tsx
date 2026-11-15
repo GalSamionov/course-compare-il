@@ -8,8 +8,13 @@ import { TickMark } from '@/components/notebook/tick';
 import { buttonVariants } from '@/components/ui/button';
 import { toggleCompare, useAccount } from '@/lib/account/store';
 import { cn } from '@/lib/utils';
+import { ShareLinks } from './share-links';
 
 type Note = 'added-local' | 'added' | 'full' | 'error' | null;
+
+/** הקישור לעמוד ההשוואה בהערה: בשורה משלו, עם יעד מגע של 44 פיקסלים. */
+const compareLink =
+  'inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover';
 
 /**
  * שני הכפתורים מהציור (Chosen.dc.html), ומתחתם "לשמור".
@@ -22,11 +27,14 @@ export function CourseActions({
   courseId,
   slug,
   title,
+  share,
   stacked = false,
 }: {
   courseId: string;
   slug: string;
   title: string;
+  /** "לשלוח בוואטסאפ": ההודעה והכתובת, מהשרת (share-text.ts). */
+  share?: { text: string; url: string };
   /** בעמודה הצדדית במחשב: הכפתורים זה מתחת לזה. */
   stacked?: boolean;
 }) {
@@ -83,29 +91,34 @@ export function CourseActions({
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2">
         <SaveButton courseId={courseId} title={title} />
+        {share && <ShareLinks text={share.text} url={share.url} />}
       </div>
       <div role="status">
         {note === 'added-local' && (
-          <PenNote arrow className="mt-2.5">נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.</PenNote>
+          <PenNote arrow className="mt-2.5">
+            נוסף להשוואה. היא נשמרת בדפדפן הזה, ואחרי התחברות תעבור לאזור שלכם.
+            <br />
+            <Link href="/compare" className={compareLink}>
+              לעמוד ההשוואה
+            </Link>
+          </PenNote>
         )}
         {note === 'added' && (
           <PenNote arrow className="mt-2.5">
-            נוסף להשוואה ולשמורים.{' '}
-            <Link href="/me#compare" className="underline underline-offset-[3px]">
-              לאזור שלי
+            נוסף להשוואה ולשמורים.
+            <br />
+            <Link href="/compare" className={compareLink}>
+              לעמוד ההשוואה
             </Link>
           </PenNote>
         )}
         {note === 'full' && (
           <PenNote arrow className="mt-2.5">
-            בהשוואה כבר יש 3 קורסים.{' '}
-            {account.status === 'signed-in' ? (
-              <Link href="/me#compare" className="underline underline-offset-[3px]">
-                להוציא אחד באזור שלי
-              </Link>
-            ) : (
-              'אפשר להוציא קורס מהעמוד שלו.'
-            )}
+            בהשוואה כבר יש 3 קורסים.
+            <br />
+            <Link href="/compare" className={compareLink}>
+              להוציא אחד בעמוד ההשוואה
+            </Link>
           </PenNote>
         )}
         {note === 'error' && <p className="mt-2.5 text-[13px] text-ink-soft">לא הצלחנו לעדכן את ההשוואה. נסו שוב.</p>}

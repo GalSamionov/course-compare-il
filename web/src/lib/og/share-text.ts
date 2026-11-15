@@ -6,7 +6,7 @@ import {
   verifiedGraduatesText,
   verifiedReviewsText,
 } from '@/lib/format';
-import { SAMPLE_DATA } from '@/lib/site';
+import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
 
 /**
  * הטקסט של קישור לעמוד קורס, כמו שהוא מופיע בוואטסאפ ובפייסבוק: כותרת, תיאור, ושורות התמונה.
@@ -33,4 +33,24 @@ export function courseShareDescription(course: Pick<CoursePageData, 'score' | 'p
   parts.push('אף מוכר לא משלם לנו.');
   if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
   return parts.join(' ');
+}
+
+/** ההודעה בוואטסאפ: הכותרת של הקישור, ומתחתיה התיאור. אותו ניסוח כמו בתצוגה של הקישור עצמו. */
+export function courseShareMessage(course: Pick<CoursePageData, 'title' | 'institutionName' | 'score' | 'paid'>): string {
+  return `${courseShareTitle(course)}\n${courseShareDescription(course)}`;
+}
+
+/** הודעה על השוואה: שמות הקורסים, ומי משלם לנו. */
+export function compareShareMessage(titles: readonly string[]): string {
+  const parts = [`השוואה ב${SITE_NAME}: ${titles.join(', ')}.`, 'אף מוכר לא משלם לנו.'];
+  if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
+  return parts.join(' ');
+}
+
+/**
+ * קישור ששולח הודעה בוואטסאפ, בלי נמען מראש (wa.me/?text=). הכתובת בשורה האחרונה:
+ * וואטסאפ מציג ממנה את תמונת השיתוף (opengraph-image.tsx).
+ */
+export function whatsappHref(message: string, url: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(`${message}\n${url}`)}`;
 }

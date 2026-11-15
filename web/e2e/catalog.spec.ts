@@ -9,6 +9,8 @@ test('a category page lists its courses, scored first', async ({ page }) => {
     'בישול ביתי למתחילים',
   ]);
   await expect(page.getByText('חסרות עוד 5 ביקורות.')).toBeVisible();
+  // סבב 4: המובילים לפי בוגרים, רק קורסים עם ציון, מהגבוה לנמוך. בישול ביתי למתחילים (בלי ציון) לא שם.
+  await expect(page.locator('section[aria-labelledby="top-title"] li a')).toHaveText(['אפייה ביתית: לחמים ועוגות', 'בישול איטלקי']);
 });
 
 test('an unknown category returns 404', async ({ page }) => {

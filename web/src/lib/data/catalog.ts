@@ -2,13 +2,12 @@ import { cacheLife, cacheTag } from 'next/cache';
 import type { MetricKey } from '@/lib/score/types';
 import {
   COURSE_FORMATS,
-  PRODUCT_TYPES,
   TIME_SLOTS,
+  isProductType,
   type Catalog,
   type CategoryEntry,
   type CourseFormat,
   type CourseSummary,
-  type ProductType,
   type RowScore,
   type TimeSlot,
 } from '@/lib/search/types';
@@ -30,7 +29,6 @@ export async function getCatalog(): Promise<Catalog> {
 
 const isTimeSlot = (value: string): value is TimeSlot => (TIME_SLOTS as readonly string[]).includes(value);
 const isFormat = (value: string): value is CourseFormat => (COURSE_FORMATS as readonly string[]).includes(value);
-const isProductType = (value: string): value is ProductType => (PRODUCT_TYPES as readonly string[]).includes(value);
 
 type PerMetric = Partial<Record<MetricKey, { mean: number; n: number }>>;
 

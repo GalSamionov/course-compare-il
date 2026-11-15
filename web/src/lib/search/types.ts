@@ -13,6 +13,8 @@ export type ProductType = 'course' | 'workshop' | 'lecture';
 
 export const TIME_SLOTS: readonly TimeSlot[] = ['evening', 'morning', 'weekend'];
 export const PRODUCT_TYPES: readonly ProductType[] = ['course', 'workshop', 'lecture'];
+/** ערך מהמסד (courses.product_type), שאולי לא מוכר לקוד. */
+export const isProductType = (value: string): value is ProductType => (PRODUCT_TYPES as readonly string[]).includes(value);
 /** מה נכתב ליד המוסד. קורס הוא ברירת המחדל, ולכן לא נכתב. */
 export const PRODUCT_TYPE_LABEL: Record<ProductType, string | null> = { course: null, workshop: 'סדנה', lecture: 'הרצאה' };
 export const COURSE_FORMATS: readonly CourseFormat[] = ['online', 'in_person'];

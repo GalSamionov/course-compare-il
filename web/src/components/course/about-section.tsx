@@ -1,6 +1,5 @@
 import type { CoursePageData } from '@/lib/data/course-page';
-import { formatHebrewDate } from '@/lib/format';
-import { outcomeHeadline } from './at-a-glance';
+import { formatHebrewDate, outcomeBasis, outcomeHeadline } from '@/lib/format';
 import { Claim, Mark, StickyNote } from './marks';
 
 const formatLabels: Record<string, string> = {
@@ -13,8 +12,12 @@ const formatLabels: Record<string, string> = {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
-      <dt className="font-sans font-bold">{label}</dt>
-      <dd className="m-0">{children}</dd>
+      <dt data-anim="ink" className="font-sans font-bold">
+        {label}
+      </dt>
+      <dd data-anim="ink" className="m-0">
+        {children}
+      </dd>
     </>
   );
 }
@@ -43,7 +46,9 @@ export function AboutSection({ course }: { course: CoursePageData }) {
           <h3 className="mt-4 font-sans text-base font-bold">מה לומדים, {course.syllabus.length} פרקים</h3>
           <ol className="mt-1 list-decimal pr-6">
             {course.syllabus.map((item, i) => (
-              <li key={`${i}-${item.title}`}>{item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}</li>
+              <li key={`${i}-${item.title}`} data-anim="ink">
+                {item.weak ? <Mark source="weak">{item.title}</Mark> : item.title}
+              </li>
             ))}
           </ol>
         </>
@@ -81,12 +86,10 @@ export function AboutSection({ course }: { course: CoursePageData }) {
 
       {course.outcome && (
         // מול "המוסד מבטיח": מה הבוגרים עצמם אמרו. במספר אנשים כשהנתונים מאפשרים. בשאלת ההמשך נשמר רק ממוצע,
-        // ולכן כתוב כמה ענו ומה הממוצע, ולא "כמה עובדים בתחום".
+        // ולכן כתוב הממוצע ועל איזו שאלה הוא, ואחריו כמה ענו, ולא "כמה עובדים בתחום".
         <StickyNote tone="grad" tilt={1} tiltLg={1.6} className="mt-6 ml-8 px-3 pt-4 pb-2.5 text-sm lg:ml-0 lg:max-w-[340px] lg:text-[15px]">
-          <strong>מה קרה בפועל:</strong> {outcomeHeadline(course.outcome)}
-          {course.outcome.kind === 'after_3m'
-            ? `, ובממוצע נתנו לתוצאה ${course.outcome.mean.toFixed(1)} מתוך 5.`
-            : '.'}
+          <strong>מה קרה בפועל:</strong> {outcomeHeadline(course.outcome)}.
+          {outcomeBasis(course.outcome) && ` ${outcomeBasis(course.outcome)}.`}
         </StickyNote>
       )}
     </section>

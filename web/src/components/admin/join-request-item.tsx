@@ -31,7 +31,7 @@ export function JoinRequestItem({ request, institutions }: { request: JoinReques
   const hostMismatch = chosen !== null && chosen.host !== request.host;
 
   return (
-    <article aria-labelledby={headingId} className="border-t border-rule py-6 lg:py-8">
+    <article aria-labelledby={headingId} data-anim="ink" className="border-t border-rule py-6 lg:py-8">
       <header>
         <h3 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
           {request.institutionName}

@@ -1,3 +1,5 @@
+import type { OutcomeView } from '@/lib/data/course-page';
+
 const ilsNumber = new Intl.NumberFormat('he-IL', { maximumFractionDigits: 0 });
 
 /** מספר עם מפרידי אלפים, בלי ₪. לשורת התקציב במחברת. */
@@ -89,4 +91,24 @@ export function formatHebrewDate(iso: string): string {
   const parts = israelDate.formatToParts(new Date(iso));
   const get = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((p) => p.type === type)?.value);
   return `${get('day')}.${get('month')}.${get('year')}`;
+}
+
+/**
+ * מה קרה לבוגרים, במילים של אנשים: קודם התוצאה. אותו ניסוח ב"בקצרה", בפתק של "על הקורס" ובהשוואה.
+ * בשאלת ההמשך נשמר רק ממוצע מתוך 5, ולכן השורה אומרת על איזו שאלה הוא. כמה ענו: outcomeBasis.
+ */
+export function outcomeHeadline(outcome: OutcomeView): string {
+  switch (outcome.kind) {
+    case 'after_3m':
+      return `${outcome.mean.toFixed(1)} מתוך 5 בשאלה ״${outcome.question}״`;
+    case 'skill_gained':
+      return `${outcome.yes} מתוך ${outcome.n} אומרים שרכשו את המיומנות`;
+    case 'passed_exam':
+      return `${outcome.yes} מתוך ${outcome.n} אומרים שעברו את המבחן`;
+  }
+}
+
+/** כמה ענו, כשזה לא כתוב בתוצאה עצמה: "14 בוגרים ענו 3 חודשים אחרי הסיום". בשאלת כן או לא המספר כבר בשורה. */
+export function outcomeBasis(outcome: OutcomeView): string | null {
+  return outcome.kind === 'after_3m' ? `${outcome.n} בוגרים ענו 3 חודשים אחרי הסיום` : null;
 }

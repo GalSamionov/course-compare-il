@@ -1,8 +1,9 @@
+import Link from 'next/link';
 import type { CoursePageData } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
 import { Claim, Mark, PenNote, StickyNote } from './marks';
 
-const initials = (name: string) =>
+export const initials = (name: string) =>
   name
     .split(' ')
     .filter(Boolean)
@@ -24,7 +25,7 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
 
       <div className="mt-4 flex flex-col gap-5">
         {course.lecturers.map((lecturer) => (
-          <article key={lecturer.slug} className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
+          <article key={lecturer.slug} data-anim="ink" className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
             {/* ראשי תיבות בעיגול דיו: אין לנו תמונות של מרצים, ולא ממציאים. */}
             <div
               aria-hidden="true"
@@ -33,7 +34,15 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
               {initials(lecturer.name)}
             </div>
             <div>
-              <h3 className="text-lg leading-snug font-bold lg:text-xl">{lecturer.name}</h3>
+              <h3 className="text-lg leading-snug font-bold lg:text-xl">
+                {/* לעמוד המרצה. בריחוף העט מותח קו מתחת לשם, כמו בשם של קורס ברשימה. */}
+                <Link
+                  href={`/lecturers/${lecturer.slug}`}
+                  className="-my-2.5 inline-flex min-h-11 items-center transition-colors duration-150 hover:text-link-hover"
+                >
+                  <span className="pen-under">{lecturer.name}</span>
+                </Link>
+              </h3>
               {lecturer.role && <p className="font-sans text-sm text-ink-soft">{lecturer.role}</p>}
               {lecturer.institutionBio && (
                 <p className="mt-1.5 text-[15px] leading-relaxed">

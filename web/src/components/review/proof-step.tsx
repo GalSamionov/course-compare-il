@@ -22,7 +22,7 @@ export function PaperClip() {
     <svg
       aria-hidden="true"
       viewBox="0 0 20 48"
-      className="pointer-events-none absolute -top-[22px] start-7 h-[52px] w-[22px] overflow-visible drop-shadow-[0_1px_1px_rgb(0_0_0/0.25)]"
+      className="proof-clip pointer-events-none absolute -top-[22px] start-7 h-[52px] w-[22px] overflow-visible drop-shadow-[0_1px_1px_rgb(0_0_0/0.25)]"
     >
       <path d={wire} fill="none" stroke="#8b9198" strokeWidth="2.6" strokeLinecap="round" />
       <path d={wire} fill="none" stroke="#e9ecef" strokeWidth="0.9" strokeLinecap="round" />
@@ -126,6 +126,9 @@ export function ProofStep({
             // מסמך שהוצמד לדף: כרטיס נייר עם צל של חפץ מונח, מוטה מעט, והמהדק מעליו.
             <li
               key={proof.path}
+              // המסמך יורד על הדף ונלחץ, והמהדק נסגר עליו אחר כך (globals.css, proof-clip).
+              data-anim="stick"
+              style={{ '--stick-from': i % 2 === 0 ? '1.5deg' : '-1.5deg' } as React.CSSProperties}
               className={cn(
                 'relative max-w-[340px] bg-white px-4 pt-5 pb-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.16),0_10px_18px_-12px_rgb(0_0_0/0.4)] ring-1 ring-black/5',
                 i % 2 === 0 ? '-rotate-[0.7deg]' : 'rotate-[0.6deg]',

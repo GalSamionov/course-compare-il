@@ -467,7 +467,8 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   return (
     <section aria-labelledby="step-h" className={cn(notebookPage, 'mt-8 lg:mt-12')}>
       {/* ההתקדמות בעט, בשוליים (מסמך העיצוב, סעיף 9). */}
-      <p className={cn(marginNote, 'pt-1.5')}>
+      {/* key: בכל צעד העט כותב את המספר מחדש בשוליים. */}
+      <p key={step} data-anim="write" className={cn(marginNote, 'pt-1.5')}>
         צעד {index + 1} מתוך {STEPS.length}
       </p>
       {/* key: כל צעד הוא דף חדש, והוא נכנס בדפדוף (globals.css, page-turn). */}
