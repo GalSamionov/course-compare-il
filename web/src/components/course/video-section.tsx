@@ -12,9 +12,7 @@ export function VideoSection({ url }: { url: string }) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          data-anim="stick"
-          style={{ '--stick-from': '-1.5deg' } as React.CSSProperties}
-          className="group relative block w-[136px] flex-none rotate-[1.2deg] bg-white p-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.18),0_10px_16px_-10px_rgb(0_0_0/0.45)] ring-1 ring-black/[0.06] transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-[0_2px_3px_rgb(0_0_0/0.16),0_16px_22px_-12px_rgb(0_0_0/0.42)] lg:w-[168px]"
+          className="group relative block w-[136px] flex-none rotate-[1.2deg] bg-white p-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.18),0_10px_16px_-10px_rgb(0_0_0/0.45)] ring-1 ring-black/[0.06] lg:w-[168px]"
         >
           <Tape width={44} tilt={-5} />
           <span className="flex aspect-video items-center justify-center bg-[#23262b]">

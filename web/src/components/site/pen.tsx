@@ -74,7 +74,7 @@ export const PEN_LOOPS = [
   'M28.4 8.4C22.6 3.8 11.8 4.2 7.2 11.4 2.8 18.4 5 29.6 13.4 33.8 22 38 32.6 33.4 35 24.6 37 17.2 33.4 9.6 23.8 6.4',
 ];
 
-/** מספר מוקף בעט: לשאלות בשוליים ולצעדים. העיגול נמשך כשהוא נכנס למסך. */
+/** מספר מוקף בעט: לשאלות בשוליים ולצעדים. */
 export function PenNumber({ n, className }: { n: number; className?: string }) {
   return (
     <span
@@ -84,7 +84,7 @@ export function PenNumber({ n, className }: { n: number; className?: string }) {
         className,
       )}
     >
-      <svg data-anim="draw" viewBox="0 0 40 40" className="absolute inset-0 size-full overflow-visible">
+      <svg viewBox="0 0 40 40" className="absolute inset-0 size-full overflow-visible">
         <path
           d={PEN_LOOPS[(n - 1) % PEN_LOOPS.length]}
           pathLength={1}
@@ -105,13 +105,13 @@ export function PenNumber({ n, className }: { n: number; className?: string }) {
  */
 export function PenLoop({
   children,
-  delay,
+  draw = false,
   className,
   loopClassName = '-inset-x-[9px] -inset-y-[5px] h-[calc(100%+10px)] w-[calc(100%+18px)]',
 }: {
   children: React.ReactNode;
-  /** השהיה נוספת במילישניות לפני שהעט מתחיל להקיף. */
-  delay?: number;
+  /** העיגול נמשך כשהוא מופיע: רק כתגובה לבחירה של המבקר (קבוצת רדיו), כמו וי. בשאר המקומות הוא פשוט שם. */
+  draw?: boolean;
   className?: string;
   /** כמה העיגול רחב מהתוכן. מספר גדול (הציון) צריך יותר אוויר ממספר בטבלה. */
   loopClassName?: string;
@@ -119,8 +119,7 @@ export function PenLoop({
   return (
     <span className={cn('relative inline-block', className)}>
       <svg
-        data-anim="draw"
-        data-delay={delay}
+        data-anim={draw ? 'tick' : undefined}
         aria-hidden="true"
         viewBox="0 0 60 34"
         preserveAspectRatio="none"
@@ -163,7 +162,7 @@ export function PenBox({ className }: { className?: string }) {
 /** חץ גדול ומעוקל בעט, בין ההבטחה בדף הבית לבין הסיכום לדוגמה. */
 export function PenSwoosh({ className }: { className?: string }) {
   return (
-    <svg data-anim="draw" aria-hidden="true" viewBox="0 0 120 64" className={cn('overflow-visible text-pen', className)}>
+    <svg aria-hidden="true" viewBox="0 0 120 64" className={cn('overflow-visible text-pen', className)}>
       <path
         d="M114 8C96 4 70 6 52 18 36 28 26 42 10 52"
         pathLength={1}
@@ -175,7 +174,6 @@ export function PenSwoosh({ className }: { className?: string }) {
       <path
         d="M19.6 53.8 9.4 52.6 13.2 43"
         pathLength={1}
-        style={{ '--d': '420ms' } as React.CSSProperties}
         fill="none"
         stroke="currentColor"
         strokeWidth="2.2"

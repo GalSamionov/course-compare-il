@@ -223,7 +223,7 @@ function RadioGroup<T extends string | number>({
               itemClassName,
             )}
           >
-            {on ? <PenLoop>{option.text}</PenLoop> : option.text}
+            {on ? <PenLoop draw>{option.text}</PenLoop> : option.text}
           </button>
         );
       })}

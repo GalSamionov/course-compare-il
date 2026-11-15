@@ -20,7 +20,7 @@ const PATHS = [
  * כל מסלול הוא מסגרת דקה ושקטה. מסלול שעוד לא נפתח מקבל "נפתח בקרוב" בעט על הקו העליון, לפני הלחיצה,
  * כמו "כתיבת ביקורת" בעמוד הקורס. ההערה בתוך הקישור, ולכן גם קורא מסך שומע אותה.
  * לא רשימה של קישורים עם קו תחתון: שלוש שורות טקסט זו מתחת לזו נקראו כמו תפריט (משוב מ-14.11.2026).
- * בריחוף המסגרת והטקסט עוברים לעט, והחץ מתקרב. במחשב הם עומדים ליד המחברת, בלי שוליים משלהם.
+ * בריחוף המסגרת והטקסט עוברים לעט. במחשב הם עומדים ליד המחברת, בלי שוליים משלהם.
  */
 export function SecondaryPaths() {
   return (
@@ -44,7 +44,7 @@ export function SecondaryPaths() {
               )}
             >
               <span className="min-w-0 flex-1 text-pretty">{p.label}</span>
-              <PenArrow className="me-0 h-[0.7em] w-[1.3em] flex-none text-ink-soft transition-[translate,color] duration-200 group-hover:text-pen motion-safe:group-hover:-translate-x-1" />
+              <PenArrow className="me-0 h-[0.7em] w-[1.3em] flex-none text-ink-soft transition-colors duration-150 group-hover:text-pen" />
               {/* "נפתח בקרוב" יושב על הקו העליון, על רקע הנייר, כמו הערה שנכתבה על המסגרת. */}
               {p.soon && <Soon className="absolute -top-[8px] end-2.5 bg-white px-1 text-[12px] lg:text-[13px]" />}
             </Link>

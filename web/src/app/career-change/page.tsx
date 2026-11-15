@@ -62,7 +62,7 @@ function chapters(page: CareerChangePage, questions: number) {
             {page.graduates === 0 ? (
               'עוד בלי בוגרים מאומתים'
             ) : (
-              <PenLoop delay={420}>{verifiedGraduatesText(page.graduates)}</PenLoop>
+              <PenLoop>{verifiedGraduatesText(page.graduates)}</PenLoop>
             )}
             {page.withPaid > 0 && `. מחיר לפי חשבוניות ${inHowMany(page.withPaid, total)}`}
           </>

@@ -20,8 +20,6 @@ export function HelpfulButton({ reviewId, count }: { reviewId: string; count: nu
   const [total, setTotal] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  /** כמה פעמים סומן כאן עכשיו: מפתח ל"+1" בעט שעולה מהמספר, כדי שכל סימון יקבל אחד משלו. */
-  const [bumps, setBumps] = useState(0);
 
   async function onClick() {
     if (busy) return;
@@ -29,10 +27,8 @@ export function HelpfulButton({ reviewId, count }: { reviewId: string; count: nu
     setFailed(false);
     const result = await toggleHelpful(reviewId);
     setBusy(false);
-    if (result) {
-      setTotal(result.total);
-      if (!marked) setBumps((n) => n + 1);
-    } else setFailed(true);
+    if (result) setTotal(result.total);
+    else setFailed(true);
   }
 
   // המספר מהמטמון של העמוד יכול לפגר. מי שכבר סימן בדפדפן הזה יודע שיש לפחות אחד, ולא רואה "סימנתי, ואין מספר".
@@ -59,14 +55,8 @@ export function HelpfulButton({ reviewId, count }: { reviewId: string; count: nu
         עזר לי
         {shown > 0 && (
           <>
-            <span aria-hidden="true" className="relative font-normal text-ink-soft tabular-nums">
-              · <span key={bumps} className={cn('inline-block', bumps > 0 && 'helpful-count')}>{shown}</span>
-              {/* +1 בעט שעולה מהמספר ונעלם: האתר מאשר שהסימון נקלט. */}
-              {bumps > 0 && marked && (
-                <span key={`plus-${bumps}`} className="helpful-plus absolute -top-3 start-full ms-0.5 font-pen text-xs font-medium text-pen">
-                  +1
-                </span>
-              )}
+            <span aria-hidden="true" className="font-normal text-ink-soft tabular-nums">
+              · {shown}
             </span>
             <span className="sr-only">, {markedText(shown)}</span>
           </>

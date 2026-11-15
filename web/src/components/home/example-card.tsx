@@ -66,7 +66,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
         <div className="mt-3.5 space-y-2 text-[15px] leading-relaxed lg:mt-5 lg:space-y-2.5 lg:text-[17px]">
           {page?.paid ? (
             <p>
-              <Mark source="verified" delay={350}>
+              <Mark source="verified">
                 {PAID_RANGE_LEAD} <bdi dir="rtl">{formatPaidRange(page.paid)}</bdi>, {invoiceCountText(page.paid)}
               </Mark>
             </p>
@@ -90,7 +90,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
           {page?.summaryWeak && (
             <p>
               <span className="font-sans font-bold">חלש:</span>{' '}
-              <Mark source="weak" delay={500}>
+              <Mark source="weak">
                 {page.summaryWeak}
               </Mark>
             </p>

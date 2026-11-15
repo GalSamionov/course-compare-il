@@ -18,16 +18,13 @@ const TALLY = [
  * כמה ביקורות כבר יש וכמה חסרות עד לציון: חמישה קווי ספירה בעט, קו לכל ביקורת שיש,
  * והחסרים קווקוו בהיר. קווי ספירה ולא תיבות סימון: תיבה עם וי היא הסימון של שורה במחברת,
  * וכאן אין מה ללחוץ. מאותו צד של שם הקורס, ולא מספר בקצה השני של השורה, כדי שהרשימה לא תיקרא כמו תפריט.
- * הקווים שיש נמשכים כשהשורה נכנסת למסך, אחד אחרי השני.
  */
 export function ReviewTally({ have }: { have: number }) {
   return (
     <svg
-      data-anim="draw"
       aria-hidden="true"
       viewBox="0 0 40 28"
       className="h-[22px] w-[32px] flex-none overflow-visible text-pen"
-      style={{ '--draw-ms': '260ms' } as React.CSSProperties}
     >
       {TALLY.slice(0, MIN_REVIEWS).map((d, i) =>
         i < have ? (
@@ -39,7 +36,6 @@ export function ReviewTally({ have }: { have: number }) {
             stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
-            style={{ '--d': `${i * 170}ms` } as React.CSSProperties}
           />
         ) : (
           <path key={d} d={d} fill="none" stroke="currentColor" strokeOpacity=".3" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="2.4 3" />
