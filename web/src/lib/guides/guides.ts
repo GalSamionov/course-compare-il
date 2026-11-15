@@ -26,7 +26,7 @@ declare module 'mdast' {
 }
 
 /** התיקייה של המדריכים, מחוץ ל-web. process.cwd() הוא web גם ב-next build וגם ב-vitest. */
-export const GUIDES_DIR = join(process.cwd(), '..', 'content', 'guides');
+export const GUIDES_DIR = join(process.cwd(), 'content', 'guides');
 
 /** קובץ מדריך: מספר סידורי ושם, כמו 02-questions-before-signing-up.md. README ו-LEGAL-AND-UPDATES הם לא עמודים. */
 const GUIDE_FILE = /^\d{2}-[a-z0-9-]+\.md$/;
