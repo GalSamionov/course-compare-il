@@ -628,6 +628,11 @@ isOneToOne: false
             "approve_course_change":
 { Args: { "p_admin_id": string,"p_edit"?: boolean,"p_queue_id": number,"p_value"?: Json }; Returns: undefined
                            },
+"approve_course_changes":
+{ Args: { "p_admin_id": string,"p_ids": (number)[] }; Returns: {
+              "course_slug": string,"queue_id": number
+            }[]
+                           },
 "approve_institution_request":
 { Args: { "p_admin_id": string,"p_institution_id": string,"p_request_id": number }; Returns: number
                            },
@@ -637,6 +642,16 @@ isOneToOne: false
 "course_paid_range":
 { Args: { "p_course_id": string }; Returns: {
               "invoice_count": number,"max_ils": number,"min_ils": number
+            }[]
+                           },
+"course_queue_new_course_groups":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "all_ids": (number)[],"causes": Json,"duplicates": number,"institution_id": string,"institution_name": string,"institution_slug": string,"oldest": string,"safe": number,"safe_ids": (number)[],"samples": Json,"total": number
+            }[]
+                           },
+"course_queue_new_course_items":
+{ Args: { "p_filter": string,"p_institution_id"?: string,"p_limit"?: number }; Returns: {
+              "causes": (string)[],"institution_id": string,"queue_id": number,"total": number
             }[]
                            },
 "decide_review_reports":
@@ -680,6 +695,11 @@ isOneToOne: false
                            },
 "reject_course_change":
 { Args: { "p_admin_id": string,"p_queue_id": number }; Returns: undefined
+                           },
+"reject_course_changes":
+{ Args: { "p_admin_id": string,"p_ids": (number)[] }; Returns: {
+              "course_slug": string,"queue_id": number
+            }[]
                            },
 "reject_institution_request":
 { Args: { "p_admin_id": string,"p_request_id": number }; Returns: undefined
