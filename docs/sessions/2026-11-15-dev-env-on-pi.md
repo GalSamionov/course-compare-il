@@ -98,7 +98,8 @@
 
 | קומיט | מה | סטטוס |
 |---|---|---|
-| (בקומיט הזה) | Supabase לפיתוח על הפיי: `scripts/pi-db.mjs`, ‏`package.json`, ‏README ו-STATUS | נבדק |
+| `4229cca` | השינוי ב-STATUS. נכנס לקומיט של הסשן הראשי | נבדק |
+| `4ac0f11` | Supabase לפיתוח על הפיי: `scripts/pi-db.mjs`, ‏`package.json` ו-README. נדחף | נבדק מקומית. CI עוד לא |
 
 ## מה צריך לבדוק בסשן הבא
 
