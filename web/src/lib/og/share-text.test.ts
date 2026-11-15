@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { compareShareMessage, courseShareDescription, courseShareMessage, whatsappHref } from './share-text';
+import {
+  careerChangeCounts,
+  careerChangeShareMessage,
+  compareShareMessage,
+  courseShareDescription,
+  courseShareMessage,
+  whatsappHref,
+} from './share-text';
 
 describe('courseShareDescription', () => {
   it('leads with the score and the verified count, then what people paid', () => {
@@ -41,5 +48,19 @@ describe('compareShareMessage', () => {
     expect(compareShareMessage(['פיתוח Full Stack', 'אפייה ביתית'])).toBe(
       'השוואה בלמדתי: פיתוח Full Stack, אפייה ביתית. אף מוכר לא משלם לנו. נתוני דוגמה.',
     );
+  });
+});
+
+describe('careerChangeShareMessage', () => {
+  it('says how many courses and verified graduates the page has, and who pays us', () => {
+    expect(careerChangeShareMessage({ courses: [1, 2, 3], graduates: 26 })).toBe(
+      'קורסי הסבה להייטק, לפי מי שכבר סיים אותם\n3 קורסים, 26 בוגרים מאומתים. ציון רק מבוגרים שהוכיחו שלמדו, כמה שילמו בפועל לפי חשבוניות, ומה לשאול לפני שמשלמים. אף מוסד לא משלם לנו. נתוני דוגמה.',
+    );
+  });
+
+  it('counts in Hebrew, and says so when there is nothing yet', () => {
+    expect(careerChangeCounts({ courses: [1], graduates: 1 })).toBe('קורס אחד, בוגר מאומת אחד');
+    expect(careerChangeCounts({ courses: [1, 2], graduates: 0 })).toBe('2 קורסים, עוד בלי בוגרים מאומתים');
+    expect(careerChangeCounts({ courses: [], graduates: 0 })).toBe('עוד אין קורסים');
   });
 });

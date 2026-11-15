@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { CareerChangeLink } from '@/components/category/career-change-link';
 import { TopByGraduates } from '@/components/category/top-by-graduates';
 import { PenNote } from '@/components/course/marks';
 import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
+import { isTechCategory } from '@/lib/data/career-change';
 import { getCatalog } from '@/lib/data/catalog';
 import { EMPTY_QUERY } from '@/lib/search/types';
 import { SITE_NAME } from '@/lib/site';
@@ -45,6 +47,11 @@ export default async function CategoryPage({ params }: Props) {
   const category = catalog.categories.find((c) => c.slug === slug);
   if (!category) notFound();
   const parent = catalog.categories.find((c) => c.slug === category.parentSlug);
+  // תחום בהייטק ("טכנולוגיה" וכל מה שמתחתיו) מקשר לעמוד ההסבה. תחום מסוג תחביב או מבחן לא, גם אם הוא שם.
+  const parentOf = (s: string) => catalog.categories.find((c) => c.slug === s)?.parentSlug ?? null;
+  const careerLink = isTechCategory(category.slug, parentOf) && catalog.courses.some(
+    (c) => (c.categorySlug === category.slug || c.categoryParentSlug === category.slug) && c.courseType === 'career',
+  );
 
   return (
     <NotebookPage
@@ -63,6 +70,7 @@ export default async function CategoryPage({ params }: Props) {
             בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
           </PenNote>
           <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
+          {careerLink && <CareerChangeLink className="mt-6 lg:mt-7" />}
         </div>
       }
       after={

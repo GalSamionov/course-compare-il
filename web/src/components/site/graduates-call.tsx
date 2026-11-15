@@ -20,7 +20,7 @@ const TALLY = [
  * וכאן אין מה ללחוץ. מאותו צד של שם הקורס, ולא מספר בקצה השני של השורה, כדי שהרשימה לא תיקרא כמו תפריט.
  * הקווים שיש נמשכים כשהשורה נכנסת למסך, אחד אחרי השני.
  */
-function ReviewTally({ have }: { have: number }) {
+export function ReviewTally({ have }: { have: number }) {
   return (
     <svg
       data-anim="draw"

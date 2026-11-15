@@ -489,3 +489,116 @@ export async function renderGuideCard(guide: {
     { ...OG_SIZE, fonts: await loadFonts() },
   );
 }
+
+/**
+ * תמונת השיתוף של "הסבה להייטק": הכותרת של העמוד, ומתחתיה מה יש בו, במספרים מהמסד. מספר הבוגרים המאומתים
+ * מוקף בעט, כמו בתוכן העניינים של העמוד. בלי ציון ובלי מחיר של קורס מסוים: העמוד לא ממליץ על אף אחד.
+ */
+export async function renderCareerCard(page: { courses: number; graduates: number }): Promise<ImageResponse> {
+  const courses = page.courses === 0 ? 'עוד אין קורסים' : page.courses === 1 ? 'קורס אחד' : `${page.courses} קורסים`;
+  return new ImageResponse(
+    (
+      <Desk sample={SAMPLE_DATA}>
+        <SheetHeader />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexGrow: 1, marginTop: 30 }}>
+          {/* שבורה ביד לשתי שורות, כדי שאף שורה לא תישאר עם מילה אחת. */}
+          {['קורסי הסבה להייטק,', 'לפי מי שכבר סיים אותם'].map((line) => (
+            <Rtl key={line} text={line} size={70} style={{ fontWeight: 700, lineHeight: 1.1, letterSpacing: -0.8, flexWrap: 'nowrap' }} />
+          ))}
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 30 }}>
+            <Rtl text={`${courses},`} size={34} style={{ fontWeight: 700 }} />
+            {page.graduates > 0 ? (
+              <div style={{ position: 'relative', display: 'flex', marginRight: 14, padding: '4px 16px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+                <img src={PEN_LOOP} width={340} height={62} style={{ position: 'absolute', left: -6, top: -6, width: '104%', height: '120%' }} />
+                <Rtl text={verifiedGraduatesText(page.graduates)} size={34} style={{ fontWeight: 700 }} />
+              </div>
+            ) : (
+              <Rtl text="עוד בלי בוגרים מאומתים" size={34} style={{ fontWeight: 700, marginRight: 14 }} />
+            )}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+            <Marked text="שילמו בפועל" size={28} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+            <Rtl text="לפי חשבוניות, ומה לשאול לפני שמשלמים" size={26} style={{ marginRight: 12 }} />
+          </div>
+          <Rtl text="ציון רק מבוגרים שהוכיחו שלמדו" size={26} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
+        </div>
+      </Desk>
+    ),
+    { ...OG_SIZE, fonts: await loadFonts() },
+  );
+}
+
+/** עיגול בעט סביב מספר, כמו PenLoop באתר (components/site/pen.tsx). */
+const PEN_LOOP = svgUri(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 34" preserveAspectRatio="none"><path d="M40.6 4.2C30.8 1.6 14.6 2.8 7 9.4 1.4 14.2 2.6 23.6 10.4 28.2 19.6 33.4 41.8 32.6 51.6 26.4 59 21.6 58.4 12.6 50.8 7.8 44.6 3.8 33.2 2.8 24.4 4" fill="none" stroke="${PEN}" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+);
+
+/** וי בעט, אותו קו כמו TickMark באתר (components/notebook/tick.tsx). */
+const PEN_TICK = svgUri(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 34 34"><path d="M5 16 C8 19, 10 22, 12 25 C16 15, 21 8, 29 1" fill="none" stroke="${PEN}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+);
+
+/**
+ * תמונת השיתוף של "בוגר מאומת", ל-LinkedIn: מדבקת שם של מחברת (כמו הלוגו), עם "בוגר/ת מאומת/ת" במרקר הירוק,
+ * כי ההשתתפות נבדקה מול מסמך, ושם הקורס בדיו. בלי שם ובלי טקסט של ביקורת, אלא אם הכותב בחר להראות את השם.
+ * למטה ההזמנה: לקרוא את הביקורות על הקורס, או לכתוב אחת.
+ */
+export async function renderBadgeCard(badge: {
+  title: string;
+  name: string | null;
+  courseTitle: string;
+  institutionName: string;
+}): Promise<ImageResponse> {
+  const course = clip(badge.courseTitle, 56);
+  return new ImageResponse(
+    (
+      <Desk sample={SAMPLE_DATA}>
+        <SheetHeader />
+        <div style={{ display: 'flex', flexDirection: 'row-reverse', flexGrow: 1, alignItems: 'center', marginTop: 18 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              flexGrow: 1,
+              flexBasis: 0,
+              border: `3px solid ${INK}`,
+              padding: 5,
+              transform: 'rotate(-1deg)',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                width: '100%',
+                border: `1.5px solid ${INK}`,
+                padding: '24px 34px 26px',
+              }}
+            >
+              {badge.name && <Rtl text={badge.name} size={34} style={{ fontWeight: 700, marginBottom: 6 }} />}
+              <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+                <Marked text={badge.title} size={46} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+                {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+                <img src={PEN_TICK} width={58} height={58} style={{ marginRight: 14, marginTop: -10 }} />
+              </div>
+              <Rtl text={`של ${course}`} size={titleSize(course)} style={{ fontWeight: 700, lineHeight: 1.08, marginTop: 14, maxWidth: 900 }} />
+              <div style={{ display: 'flex', marginTop: 20 }}>
+                <Stamp text={badge.institutionName} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginTop: 22 }}>
+          <Rtl text="העלה/תה הוכחה שלמד/ה בקורס. ההוכחה נמחקה אחרי הבדיקה." size={24} style={{ color: INK_SOFT }} />
+          <Rtl text="לקרוא את הביקורות, או לכתוב אחת" size={26} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
+        </div>
+      </Desk>
+    ),
+    { ...OG_SIZE, fonts: await loadFonts() },
+  );
+}

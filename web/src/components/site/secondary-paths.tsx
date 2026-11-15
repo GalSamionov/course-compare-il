@@ -3,8 +3,12 @@ import { PenArrow } from '@/components/site/pen';
 import { Soon } from '@/components/site/soon';
 import { cn } from '@/lib/utils';
 
-/** soon: המסלול עוד לא נבנה, ולכן "נפתח בקרוב" על המסגרת. כתיבת ביקורת פתוחה מסבב 3, והוספת קורס והפנייה של חברות מסבב 5. */
+/**
+ * soon: המסלול עוד לא נבנה, ולכן "נפתח בקרוב" על המסגרת. כתיבת ביקורת פתוחה מסבב 3, והוספת קורס והפנייה של חברות מסבב 5.
+ * ההסבה להייטק ראשונה: זה המסלול שממנו מגיעים המשתמשים הראשונים (docs/b2b/2026-11-15-go-to-market.md, מסלול 2).
+ */
 const PATHS = [
+  { href: '/career-change', label: 'רוצה לעבור להייטק, ולבחור קורס הסבה', soon: false },
   { href: '/review', label: 'סיימתי קורס, רוצה לכתוב עליו', soon: false },
   { href: '/institutions/join', label: 'אני מוסד או מרצה, רוצה להוסיף קורס', soon: false },
   { href: '/companies', label: 'אנחנו חברה, מחפשים קורס או הרצאה לעובדים', soon: false },
