@@ -79,3 +79,12 @@
 - web/src/lib/reviews/steps.test.ts
 - web/src/lib/reviews/steps.ts
 
+
+## 2026-11-15 10:21 (סשן 701e61f9)
+
+קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:
+
+- .claude/launch.json
+- web/src/app/guides/[slug]/opengraph-image.tsx
+- .impeccable/surfaces/web-src-app-guides-slug-page-tsx.md
+
