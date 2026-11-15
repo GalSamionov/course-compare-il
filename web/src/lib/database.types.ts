@@ -714,6 +714,9 @@ isOneToOne: false
 "forget_auth_log":
 { Args: { "p_user_id": string }; Returns: undefined
                            },
+"get_ad_check":
+{ Args: { "p_url": string }; Returns: Json
+                           },
 "is_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -743,6 +746,9 @@ isOneToOne: false
                            },
 "publish_review":
 { Args: { "p_admin_id": string,"p_paid_bucket"?: number,"p_proof_kind": Database["public"]['Enums']["proof_kind"],"p_review_id": string }; Returns: string
+                           },
+"purge_ad_checks":
+{ Args: Record<PropertyKey, never>; Returns: number
                            },
 "purge_company_requests":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -777,6 +783,9 @@ isOneToOne: false
 { Args: { "p_token": string }; Returns: {
               "course_slug": string,"course_title": string,"institution_name": string,"shown_name": string,"shown_title": Database["public"]['Enums']["author_title"]
             }[]
+                           },
+"save_ad_check":
+{ Args: { "p_result": Json,"p_url": string }; Returns: string
                            },
 "scraper_apply_page":
 { Args: { "p_page": Json,"p_run_id": number }; Returns: Json
@@ -816,6 +825,9 @@ isOneToOne: false
                            },
 "submit_review_report":
 { Args: { "p_client_hash": string,"p_details"?: string,"p_reason": string,"p_review_id": string }; Returns: string
+                           },
+"take_ad_check":
+{ Args: { "p_ip_hash": string }; Returns: boolean
                            },
 "take_proof_checks":
 { Args: { "p_author_id": string,"p_per_day": number,"p_want": number }; Returns: number
