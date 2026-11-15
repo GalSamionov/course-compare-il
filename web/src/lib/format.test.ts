@@ -6,6 +6,8 @@ import {
   invoiceCountText,
   missingReviewsText,
   moreReviewsText,
+  outcomeBasis,
+  outcomeHeadline,
   paidRangeSentence,
   reviewsToScoreText,
   verifiedGraduatesText,
@@ -66,5 +68,19 @@ describe('formatHebrewDate', () => {
   });
   it('accepts a date-only string from a Postgres date column', () => {
     expect(formatHebrewDate('2027-01-10')).toBe('10.1.2027');
+  });
+});
+
+describe('what happened to graduates', () => {
+  it('leads with the result of the follow-up question, and names the question', () => {
+    const outcome = { kind: 'after_3m', n: 14, mean: 3.7, question: 'אחרי 3 חודשים' } as const;
+    expect(outcomeHeadline(outcome)).toBe('3.7 מתוך 5 בשאלה ״אחרי 3 חודשים״');
+    expect(outcomeBasis(outcome)).toBe('14 בוגרים ענו 3 חודשים אחרי הסיום');
+  });
+  it('says how many said yes, with the count already in the line', () => {
+    const skill = { kind: 'skill_gained', yes: 8, n: 8 } as const;
+    expect(outcomeHeadline(skill)).toBe('8 מתוך 8 אומרים שרכשו את המיומנות');
+    expect(outcomeBasis(skill)).toBeNull();
+    expect(outcomeHeadline({ kind: 'passed_exam', yes: 5, n: 7 })).toBe('5 מתוך 7 אומרים שעברו את המבחן');
   });
 });

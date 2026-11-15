@@ -80,6 +80,36 @@
 - web/src/lib/reviews/steps.ts
 
 
+## 2026-11-15 09:12 (סשן a5587d0a)
+
+קומיטים בסשן:
+
+- b358b02 feat: ההשוואה: הקריאה של ?c= והשורות, עם הסימון של עמוד הקורס
+- 71693bc feat: הנתונים של עמוד מוסד ועמוד מרצה, וה-slug של המוסד בעמוד הקורס
+- 1517377 docs: מסמך העיצוב ותוכנית הבנייה של סבב 4
+
+קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:
+
+- docs/sessions/2026-11-15-round-4.md
+- .build-vr.log
+- docs/sessions/2026-11-15-dev-env-on-pi.md
+
+
+## 2026-11-15 09:30 (סשן a5587d0a)
+
+קומיטים בסשן:
+
+- d297bc2 feat: לשלוח בוואטסאפ מעמוד הקורס
+- b223d5b feat: עמוד מוסד עם כל הקורסים שלו, בלי ציון למוסד
+
+קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:
+
+- docs/sessions/2026-11-15-dev-env-on-pi.md
+- web/src/components/course/course-row.tsx
+- web/src/components/course/lecturers-section.tsx
+- web/e2e/lecturer.spec.ts
+- web/src/app/lecturers/
+- web/src/components/lecturer/
 ## 2026-11-15 10:21 (סשן 701e61f9)
 
 קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:

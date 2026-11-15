@@ -77,6 +77,7 @@ function ReviewRow({
   onAsk,
   onCancel,
   onDelete,
+  leaving = false,
 }: {
   review: MyReview;
   course: CourseSummary | undefined;
@@ -87,6 +88,8 @@ function ReviewRow({
   onAsk: () => void;
   onCancel: () => void;
   onDelete: () => void;
+  /** נמחקה עכשיו: העט מוחק את השם בקו, והשורה נעלמת (globals.css, data-leaving). */
+  leaving?: boolean;
 }) {
   const question = useRef<HTMLParagraphElement>(null);
   const title = course?.title ?? 'קורס שכבר לא באתר';
@@ -98,7 +101,7 @@ function ReviewRow({
   }, [confirming]);
 
   return (
-    <li className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
+    <li data-anim="ink" data-leaving={leaving ? '' : undefined} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
       {/* השם ראשון בקוד, כדי שקורא מסך יקרא את הקורס לפני המצב. הרשת קובעת את המיקום. */}
       <h3 className="col-start-2 row-start-1 ps-3 text-[19px] leading-snug font-bold">
         {course ? (
@@ -170,6 +173,8 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  /** הביקורת שנמחקה עכשיו, בזמן שהעט מוחק אותה מהרשימה. */
+  const [leaving, setLeaving] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -203,6 +208,12 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
     setConfirming(null);
     // הקבצים שהועלו ולא נשלחו כבר נמחקו בשרת. גם הרשימה שלהם בדפדפן כבר לא צריכה להישמר.
     writeAttached(review.id, []);
+    // העט מוחק את השורה בקו לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setLeaving(review.id);
+      await new Promise((resolve) => window.setTimeout(resolve, 620));
+      setLeaving(null);
+    }
     setLoad((current) =>
       current.status === 'ready' ? { status: 'ready', reviews: current.reviews.filter((r) => r.id !== review.id) } : current,
     );
@@ -271,6 +282,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                   setConfirming(null);
                 }}
                 onDelete={() => void remove(review)}
+                leaving={leaving === review.id}
               />
             ))}
           </ul>
@@ -298,6 +310,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
               return (
                 <li
                   key={review.id}
+                  data-anim="ink"
                   className="ruled-row grid min-h-[54px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center py-1"
                 >
                   <p className="col-start-2 flex flex-wrap items-baseline gap-x-2.5 ps-3">

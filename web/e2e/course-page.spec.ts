@@ -23,6 +23,10 @@ test('course page shows the score, the legend and every section', async ({ page 
   // הטווח מופיע גם ב"בקצרה" ליד הציון. כאן בודקים את חלק המחיר.
   // מסבב 3: החצי האמצעי, מ-5 חשבוניות, מעוגל החוצה ל-2,000. מספר החשבוניות בקפיצות של 5.
   await expect(page.locator('#price').getByText('חצי מהבוגרים שילמו בין 12,000 ל-16,000 ₪')).toBeVisible();
+  // סבב 4: "לשלוח בוואטסאפ", עם הטקסט של קישור משותף והכתובת של הקורס. בנייד רק הפעולות שבסוף העמוד גלויות.
+  const whatsapp = page.getByRole('link', { name: /לשלוח בוואטסאפ/ });
+  await expect(whatsapp).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=/);
+  expect(decodeURIComponent((await whatsapp.getAttribute('href')) ?? '')).toContain('/courses/full-stack-sample');
 });
 
 test('a course with too few reviews says how many are missing', async ({ page }) => {

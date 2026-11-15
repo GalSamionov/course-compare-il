@@ -1,18 +1,6 @@
-import type { CoursePageData, OutcomeView } from '@/lib/data/course-page';
-import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
+import type { CoursePageData } from '@/lib/data/course-page';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText, outcomeBasis, outcomeHeadline } from '@/lib/format';
 import { Mark } from './marks';
-
-/** מה קרה לבוגרים, במילים של אנשים. אותו ניסוח ב"בקצרה" ובפתק של "על הקורס". */
-export function outcomeHeadline(outcome: OutcomeView): string {
-  switch (outcome.kind) {
-    case 'after_3m':
-      return `${outcome.n} בוגרים ענו 3 חודשים אחרי הסיום`;
-    case 'skill_gained':
-      return `${outcome.yes} מתוך ${outcome.n} אומרים שרכשו את המיומנות`;
-    case 'passed_exam':
-      return `${outcome.yes} מתוך ${outcome.n} אומרים שעברו את המבחן`;
-  }
-}
 
 /** החולשה הבולטת: הסיכום של הבוגרים, ואם אין, פרק שסומן כחלש בסילבוס. */
 function topWeakness(course: CoursePageData): { label: string; text: string } | null {
@@ -67,9 +55,7 @@ export function AtAGlance({ course }: { course: CoursePageData }) {
         {course.outcome && (
           <li>
             <Mark source="grads">{outcomeHeadline(course.outcome)}</Mark>
-            {course.outcome.kind === 'after_3m' && (
-              <span className={sub}>בממוצע הם נתנו לתוצאה {course.outcome.mean.toFixed(1)} מתוך 5.</span>
-            )}
+            {outcomeBasis(course.outcome) && <span className={sub}>{outcomeBasis(course.outcome)}.</span>}
           </li>
         )}
         {weak && (

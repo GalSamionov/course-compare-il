@@ -18,6 +18,7 @@ export function NotebookPage({
   before,
   hero,
   headSide,
+  headSideAlign = 'end',
   after,
   ...props
 }: NotebookProps & {
@@ -31,6 +32,11 @@ export function NotebookPage({
   hero?: React.ReactNode;
   /** ליד הכותרת, משמאל במחשב ומתחתיה בנייד: הערה קצרה בעט על מה שברשימה. */
   headSide?: React.ReactNode;
+  /**
+   * במחשב, איפה headSide עומד מול הכותרת. end: מול סוף הפתיח (הערה קצרה).
+   * start: מול ראש העמודה, כשהוא גבוה מהכותרת, כדי שלא יעלה מעל פירורי הלחם (עמוד תחום עם המובילים).
+   */
+  headSideAlign?: 'end' | 'start';
   /** אחרי הרשימה. בדף הבית: הבוגרים והתחומים. */
   after?: React.ReactNode;
 }) {
@@ -41,7 +47,8 @@ export function NotebookPage({
         {hero}
         <div
           className={cn(
-            'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:items-end lg:gap-x-16',
+            'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:gap-x-16',
+            headSideAlign === 'start' ? 'lg:items-start' : 'lg:items-end',
             hero ? 'mt-12 lg:mt-11' : 'lg:mt-4',
           )}
         >
