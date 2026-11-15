@@ -46,6 +46,7 @@ export const fieldLabel = (field: string) => COURSE_FIELDS[field]?.label ?? fiel
 /** למה הפריט בתור (decide.py, sanity.py, והמיגרציה של האוסף). מה שלא כאן מוצג כמו שהוא. */
 export const QUEUE_REASON: Record<string, string> = {
   new_course: 'קורס חדש באתר של המוסד',
+  grouped_pages: 'אוחד מכמה דפים באתר: מפגשים, מחזורים, מסלולים או דף הרשמה',
   price_jump: 'המחיר זז ביותר מ-20%',
   price_new: 'מחיר ראשון לקורס',
   low_confidence: 'המודל לא היה בטוח',

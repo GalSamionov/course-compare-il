@@ -22,6 +22,7 @@ export const CAUSE_LABEL: Record<string, string> = {
   duplicate_url: 'אותו קישור כמו קורס אחר בתור',
   duplicate_existing: 'קורס כזה שכבר באתר',
   not_draft: 'קורס שכבר אינו טיוטה',
+  grouped_pages: 'קורס שאוחד מכמה דפים',
 };
 
 export const DUPLICATE_CAUSES = ['duplicate_title', 'duplicate_url', 'duplicate_existing'] as const;

@@ -147,3 +147,49 @@ def test_approved_institutions_are_created_and_new_categories_are_dropped():
     assert db.created[0] == {"slug": "outside", "name": "מוסד", "kind": "school", "website": site.base + "/"}
     assert summary.report["dropped_categories"] == {"inside": ["ux-ui"]}
     assert set(summary.report["skipped_institutions"]) == {"new-only", "no-name"}
+
+
+class RecordingDb(FakeDb):
+    """מסד ריק שרושם מה הריצה שולחת לכל דף."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.payloads: list[dict] = []
+
+    def categories(self):
+        from tests.fixtures import specs
+
+        return {c: (f"cat-{c}", c) for c in specs.CATEGORIES}
+
+    def apply_page(self, run_id, payload):
+        self.payloads.append(payload)
+        return {"auto": 0, "queued": len(payload["queue"])}
+
+
+def test_fixture_site_series_become_one_course_without_a_database():
+    """השבוע הראשון של אתר הדוגמה, כמו test_run_db, אבל בלי מסד: מה נשלח לכל דף."""
+    from lamadti_scraper.extract import ReplayExtractor
+    from lamadti_scraper.fixtures import FIXTURES
+    from tests.fixtures import specs
+
+    db = RecordingDb()
+    with serve_fixtures() as site:
+        config = Config([InstitutionConfig(slug="scraper-demo", website=site.base + "/", categories=tuple(specs.CATEGORIES))])
+        summary = run_scraper(
+            config=config, db=db, extractor=ReplayExtractor(FIXTURES / "extractions"), today=date(2026, 11, 14),
+            trigger="local", limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
+        )
+    assert summary.status == "completed"
+    by_page = {p["url"].rsplit("/", 1)[-1]: p for p in db.payloads}
+    drafts = {p["new_course"]["title"]: p for p in db.payloads if p["new_course"]}
+    assert len(drafts) == 22  # 27 דפי קורס: 4 דפים של הסדרה הם קורס אחד, בוקר וערב קורס אחד, והאירוע שעבר לא נכנס
+    series = drafts["יסודות האפייה"]
+    assert series["url"].endswith("/baking-basics-c5-1.html")
+    assert series["new_course"]["fields"]["schedule"] == "3 מפגשים"
+    assert series["new_course"]["fields"]["next_cohort_date"] == "2027-01-05"
+    assert "grouped_pages" in series["queue"][0]["reasons"]
+    assert sorted(drafts["קורס פסטה טרייה"]["new_course"]["fields"]["time_slots"]) == ["evening", "morning"]
+    for member in ("baking-basics-c4-1.html", "baking-basics-c4-2.html", "baking-basics-c4-3.html", "tasting-evening-2024.html"):
+        assert by_page[member]["outcome"] == "not_course" and not by_page[member]["queue"], member
+    assert by_page["baking-basics-c4-2.html"]["snapshot"]["page_text"]  # העותק של מפגש נשמר
+    assert by_page["tasting-evening-2024.html"]["snapshot"]["extracted"]["series"]["past_event"] is True
