@@ -52,9 +52,11 @@ test('the admin approves a price change from the scraper queue, and the course p
     await page.goto('/login?next=%2Fadmin');
     await signIn(page, ADMIN_EMAIL);
     await expect(page).toHaveURL(/\/admin$/);
+    // שם מדויק ורק "שינוי בשדה": בהדגמה של האוסף יש קורס חדש בשם "הרצאה: צילום בטלפון", עם מחיר.
     const item = page
       .getByRole('article')
-      .filter({ has: page.getByRole('heading', { level: 3, name: COURSE_TITLE }) })
+      .filter({ has: page.getByRole('heading', { level: 3, name: COURSE_TITLE, exact: true }) })
+      .filter({ hasText: 'שינוי בשדה' })
       .filter({ hasText: 'מחיר באתר' });
     await expect(item).toHaveCount(1);
     await expect(item.getByText('באתר עכשיו')).toBeVisible();

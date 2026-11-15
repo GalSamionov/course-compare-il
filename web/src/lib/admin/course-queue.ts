@@ -2,6 +2,7 @@ import 'server-only';
 import { one } from '@/lib/data/shared';
 import type { Json } from '@/lib/database.types';
 import type { AdminDb } from './gate';
+import { suggestInstitution, urlHost } from './institution-match';
 
 export type CourseQueueKind = 'new_course' | 'field' | 'maybe_inactive' | 'fetch_failed';
 
@@ -222,17 +223,6 @@ export interface InstitutionOption {
   host: string | null;
 }
 
-/** המארח בלי www, כמו private.url_host במסד וכמו same_site באוסף. */
-export function urlHost(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
-    return host || null;
-  } catch {
-    return null;
-  }
-}
-
 /** הבקשות של מוסדות שממתינות, הישנה ראשונה, והמוסדות שאפשר לשייך אליהם קישור (רק עם אתר). */
 export async function loadJoinRequests(db: AdminDb): Promise<{ requests: JoinRequest[]; institutions: InstitutionOption[] }> {
   const [requestsRes, institutionsRes] = await Promise.all([
@@ -246,6 +236,7 @@ export async function loadJoinRequests(db: AdminDb): Promise<{ requests: JoinReq
   if (requestsRes.error) throw new Error(`join requests: ${requestsRes.error.message}`);
   if (institutionsRes.error) throw new Error(`institutions: ${institutionsRes.error.message}`);
   const institutions = institutionsRes.data.map((i) => ({ id: i.id, name: i.name, host: urlHost(i.website) }));
+  const withSites = institutionsRes.data;
   const urls = requestsRes.data.map((r) => r.course_url);
   const [pagesRes, coursesRes] = urls.length
     ? await Promise.all([
@@ -268,7 +259,7 @@ export async function loadJoinRequests(db: AdminDb): Promise<{ requests: JoinReq
         host,
         contactEmail: r.contact_email,
         createdAt: r.created_at,
-        suggestedInstitutionId: institutions.find((i) => i.host === host)?.id ?? null,
+        suggestedInstitutionId: suggestInstitution({ institutionName: r.institution_name, courseUrl: r.course_url }, withSites),
         knownPage: known.has(r.course_url),
       };
     }),

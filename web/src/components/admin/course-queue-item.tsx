@@ -34,7 +34,12 @@ function Value({ label, text, strong, extra }: { label: string; text: string | n
       <p className="text-[13px] text-ink-soft">{label}</p>
       <p className={`mt-0.5 text-[17px] leading-snug [overflow-wrap:anywhere] ${strong ? 'font-bold' : 'font-semibold'}`}>
         {text ?? <span className="font-normal text-ink-soft">ריק</span>}
-        {extra && <span className="ms-2 text-[15px] font-semibold tabular-nums">{extra}</span>}
+        {/* הרווח מחוץ ל-bdi: בתוכו ms היא שמאל, והרווח צריך להיות בין המחיר לאחוז. */}
+        {extra && (
+          <span className="ms-2 text-[15px] font-semibold tabular-nums">
+            <bdi dir="ltr">{extra}</bdi>
+          </span>
+        )}
       </p>
     </div>
   );
@@ -65,9 +70,11 @@ function SyllabusDiff({ label, list, other, mode }: { label: string; list: strin
   );
 }
 
+/** הסיבות, ורמת הביטחון בתוך "המודל לא היה בטוח" (ולא בשורה נוספת שחוזרת על אותו דבר). */
 function Reasons({ reasons, confidence }: { reasons: string[]; confidence: string | null }) {
-  const lines = reasons.map(reasonText);
-  if (confidence && confidence !== 'high') lines.push(`ביטחון המודל: ${CONFIDENCE_LABEL[confidence] ?? confidence}`);
+  const level = confidence && confidence !== 'high' ? (CONFIDENCE_LABEL[confidence] ?? confidence) : null;
+  const lines = reasons.map((r) => (r === 'low_confidence' && level ? `${reasonText(r)} (ביטחון ${level})` : reasonText(r)));
+  if (level && !reasons.includes('low_confidence')) lines.push(`ביטחון המודל: ${level}`);
   if (lines.length === 0) return null;
   return (
     <div className="mt-4 text-[15px] leading-normal font-bold">

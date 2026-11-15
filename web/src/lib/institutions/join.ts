@@ -56,7 +56,8 @@ export function parseJoinForm(form: FormData): JoinParse {
   const rawUrl = field(form, 'courseUrl');
   const courseUrl = normalizeCourseUrl(rawUrl);
   if (rawUrl.trim() === '') errors.courseUrl = 'הדביקו את הקישור לדף הקורס באתר שלכם.';
-  else if (!courseUrl) errors.courseUrl = 'זה לא נראה כמו קישור לדף באתר. למשל: www.example.co.il/courses/design';
+  // הכתובת בדוגמה מבודדת לכיוון שמאל-לימין (LRI ו-PDI), כדי שלא תתהפך בתוך משפט בעברית.
+  else if (!courseUrl) errors.courseUrl = 'זה לא נראה כמו קישור לדף באתר. למשל: \u2066www.example.co.il/courses/design\u2069';
 
   const contactEmail = field(form, 'contactEmail').trim().toLowerCase();
   if (contactEmail === '') errors.contactEmail = 'כתבו מייל שנוכל לחזור אליו.';
