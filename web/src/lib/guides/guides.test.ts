@@ -13,10 +13,10 @@ function internalGuideLinks(nodes: readonly unknown[]): string[] {
 describe('content/guides', () => {
   const guides = getGuides();
 
-  it('קורא את ארבעת המדריכים לפי הסדר, וכל עובדה ירוקה מגיעה עם מקור מהרשימה', () => {
-    expect(guides.map((g) => g.order)).toEqual([1, 2, 3, 4]);
-    // 109 עובדות ירוקות, כמו ביומן הכתיבה (docs/sessions/2026-11-14-guides-before-paying.md).
-    expect(guides.reduce((sum, g) => sum + g.refs.length, 0)).toBe(109);
+  it('קורא את חמשת המדריכים לפי הסדר, וכל עובדה ירוקה מגיעה עם מקור מהרשימה', () => {
+    expect(guides.map((g) => g.order)).toEqual([1, 2, 3, 4, 5]);
+    // 109 עובדות ירוקות בארבעת הראשונים (docs/sessions/2026-11-14-guides-before-paying.md), ועוד 4 בדגלים האדומים.
+    expect(guides.reduce((sum, g) => sum + g.refs.length, 0)).toBe(113);
     for (const g of guides) {
       expect(g.sections.length, g.slug).toBeGreaterThan(3);
       for (const s of g.sources) {
