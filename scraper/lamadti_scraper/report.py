@@ -44,6 +44,12 @@ def format_report(summary: RunSummary) -> str:
         problems = [(slug, e) for slug, item in sorted(institutions.items()) for e in item.get("errors", [])]
         if problems:
             lines += ["", "### תקלות", ""] + [f"- {slug}: {e}" for slug, e in problems[:50]]
+    created = summary.report.get("created_institutions", [])
+    if created:
+        lines += ["", "### מוסדות שנוספו לטבלה (מהרשימה המאושרת)", ""] + [f"- {slug}" for slug in created]
+    dropped = summary.report.get("dropped_categories", {})
+    if dropped:
+        lines += ["", "### תחומים שעוד אין באתר, ולכן לא נאספו", ""] + [f"- {slug}: {', '.join(c)}" for slug, c in sorted(dropped.items())]
     skipped = summary.report.get("skipped_institutions", {})
     if skipped:
         lines += ["", "### מוסדות שדולגו", ""] + [f"- {slug}: {reason}" for slug, reason in sorted(skipped.items())]

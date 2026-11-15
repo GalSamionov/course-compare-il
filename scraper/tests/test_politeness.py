@@ -54,3 +54,18 @@ def test_robots_specific_agent_and_sitemaps():
     )
     assert rules.allowed("https://a.example/courses/x") is False
     assert rules.sitemaps == ["https://a.example/sitemap_index.xml"]
+
+
+def test_subdomains_share_one_rate_limit():
+    from lamadti_scraper.politeness import site_key
+
+    assert site_key("blog.sela.co.il") == site_key("www.sela.co.il") == "sela.co.il"
+    assert site_key("pro.6bstudio.co.il") == "6bstudio.co.il"
+    assert site_key("academy.studio972.co.il") == "studio972.co.il"
+    assert site_key("www.ani-mator.com") == "ani-mator.com"
+    assert site_key("127.0.0.1") == "127.0.0.1"
+    t = FakeClock()
+    limiter = HostLimiter(clock=t.clock, sleep=t.sleep)
+    limiter.wait("blog.sela.co.il")
+    limiter.wait("www.sela.co.il")
+    assert t.slept == [1.0]

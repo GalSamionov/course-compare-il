@@ -61,6 +61,19 @@ def parse_sitemap(body: bytes) -> tuple[list[str], list[str]]:
     return pages, nested
 
 
+def _first_segment(url: str) -> str:
+    parts = [p for p in urlsplit(url).path.split("/") if p]
+    return parts[0].lower() if len(parts) > 1 else ""
+
+
+def prioritize(urls: list[str], known: tuple[str, ...]) -> list[str]:
+    """כש-max_pages חותך, קודם הדפים הידועים, אחריהם כתובות באותה תיקייה שלהם (/courses/...), ואז השאר.
+    הסדר בתוך כל קבוצה נשמר."""
+    segments = {_first_segment(u) for u in known} - {""}
+    known_set = set(known)
+    return sorted(urls, key=lambda u: 0 if u in known_set else 1 if _first_segment(u) in segments else 2)
+
+
 def _clean(url: str) -> str:
     return url.split("#", 1)[0].strip()
 
@@ -87,6 +100,12 @@ def discover(institution: InstitutionConfig, fetcher: PageGetter, robots: Robots
         if url and url not in seen and institution.wants(url):
             seen.add(url)
             found.append(url)
+
+    for known in institution.course_urls:
+        add(known)
+    if institution.course_urls:
+        result.ok = True
+        result.sources.append("course_urls")
 
     queue: list[tuple[str, int]] = [(u, 0) for u in _sitemap_roots(institution, robots)]
     fetched = 0
@@ -125,6 +144,7 @@ def discover(institution: InstitutionConfig, fetcher: PageGetter, robots: Robots
             add(urljoin(response.final_url, link))
 
     result.seen = list(found)
+    found = prioritize(found, institution.course_urls)
     result.urls = found[: institution.max_pages]
     if len(found) > institution.max_pages:
         result.errors.append(f"found {len(found)} pages, kept the first {institution.max_pages}")

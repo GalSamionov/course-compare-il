@@ -8,7 +8,7 @@ from __future__ import annotations
 import threading
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timezone
 from typing import Any, Callable
 
@@ -138,6 +138,9 @@ def process_institution(
             category_ids=work.category_ids,
             institution_categories=cfg.categories,
         )
+        if plan.outcome == "not_course":
+            # דף שאינו קורס: רק הטביעה נשמרת, כדי לדלג עליו בשבוע הבא. הטקסט לא נחוץ ותופס מקום במסד.
+            plan.snapshot["page_text"] = ""
         result.plans.append(plan)
     return result
 
@@ -169,24 +172,39 @@ def run_scraper(
     limiter = limiter or HostLimiter()
     ids = db.institution_ids([i.slug for i in config.institutions])
     all_categories = db.categories()
-    report: dict[str, Any] = {"institutions": {}, "skipped_institutions": {}}
+    report: dict[str, Any] = {"institutions": {}, "skipped_institutions": {}, "created_institutions": [], "dropped_categories": {}}
     works: list[InstitutionWork] = []
+    ready: list[tuple[InstitutionConfig, tuple[str, ...]]] = []
     for inst in config.institutions:
-        if inst.slug not in ids:
-            report["skipped_institutions"][inst.slug] = "not in the institutions table"
-            continue
+        known = tuple(c for c in inst.categories if c in all_categories)
         unknown = [c for c in inst.categories if c not in all_categories]
-        if unknown:
-            report["skipped_institutions"][inst.slug] = f"unknown categories: {', '.join(unknown)}"
+        if not known:
+            report["skipped_institutions"][inst.slug] = f"no category of this institution is on the site yet: {', '.join(unknown)}"
             continue
+        if unknown:
+            report["dropped_categories"][inst.slug] = unknown
+        if inst.slug not in ids and not (inst.name and inst.kind):
+            report["skipped_institutions"][inst.slug] = "not in the institutions table, and no name and kind to create it"
+            continue
+        ready.append((inst, known))
+    # מוסד מהרשימה המאושרת שעוד לא בטבלה נוצר כאן. בלי קורס שאינו טיוטה אין לו עמוד באתר.
+    missing = [
+        {"slug": inst.slug, "name": inst.name, "kind": inst.kind, "website": inst.website}
+        for inst, _ in ready
+        if inst.slug not in ids
+    ]
+    if missing:
+        report["created_institutions"] = db.create_institutions(missing)
+        ids = db.institution_ids([inst.slug for inst, _ in ready])
+    for inst, known in ready:
         works.append(
             InstitutionWork(
-                config=inst,
+                config=replace(inst, categories=known),
                 id=ids[inst.slug],
                 pages=db.pages(ids[inst.slug]),
                 courses=db.courses(ids[inst.slug]),
-                categories=tuple((c, all_categories[c][1]) for c in inst.categories),
-                category_ids={c: all_categories[c][0] for c in inst.categories},
+                categories=tuple((c, all_categories[c][1]) for c in known),
+                category_ids={c: all_categories[c][0] for c in known},
             )
         )
     for slug, reason in report["skipped_institutions"].items():

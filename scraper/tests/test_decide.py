@@ -133,3 +133,9 @@ def test_slug_matches_the_database_rule():
 
     assert re.match(r"^[a-z0-9]+(-[a-z0-9]+)*$", make_slug("sample-college", "https://a.example/%D7%A7%D7%95%D7%A8%D7%A1"))
     assert make_slug("sample-college", "https://a.example/courses/Full_Stack.html").startswith("sample-college-full-stack-")
+
+
+def test_new_page_outside_the_institution_categories_is_not_a_course():
+    plan = run(extraction(category="none", title=("ניהול רשתות", "ניהול רשתות")))
+    assert plan.outcome == "not_course"
+    assert plan.new_course is None and plan.queue == []

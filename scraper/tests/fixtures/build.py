@@ -189,7 +189,7 @@ def blog_expected() -> dict:
 
 def sitemap(keys: list[str]) -> str:
     urls = [f"{{{{BASE}}}}/courses/{k}.html" for k in keys]
-    urls += [f"{{{{BASE}}}}/blog/{BLOG['key']}.html", f"{{{{BASE}}}}/private/{PRIVATE['key']}.html"]
+    urls += [f"{{{{BASE}}}}/guides/{BLOG['key']}.html", f"{{{{BASE}}}}/private/{PRIVATE['key']}.html"]
     items = "".join(f"<url><loc>{u}</loc></url>" for u in urls)
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{items}</urlset>\n'
 
@@ -204,7 +204,7 @@ def main() -> None:
         shutil.rmtree(folder, ignore_errors=True)
     write(SITE / "robots.txt", "User-agent: *\nDisallow: /private/\n\nSitemap: {{BASE}}/sitemap.xml\n")
     write(SITE / "sitemap.xml", sitemap([c["key"] for c in COURSES]))
-    write(SITE / "blog" / f"{BLOG['key']}.html", blog_page())
+    write(SITE / "guides" / f"{BLOG['key']}.html", blog_page())
     write(SITE / "private" / f"{PRIVATE['key']}.html", chrome("<h1>מחירון פנימי</h1>", "מחירון"))
     write(EXTRACTIONS / f"{BLOG['key']}.json", json.dumps(blog_expected(), ensure_ascii=False, indent=1))
     for spec in COURSES:

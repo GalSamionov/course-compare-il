@@ -86,7 +86,7 @@ SYSTEM = "\n".join(
         'When a field is not on the page: found false, value "" or 0 or [], quote "", confidence low.',
         "Text values (schedule, region, admission, class_size_note, certificate, institution_promises) are written in Hebrew, in your own words, as one short factual statement of at most 25 words. No marketing language and no praise. Never copy promotional sentences into a value; the quote field is where the original text goes.",
         "is_course_page is true only when the page describes one specific course, workshop or lecture series that people can sign up for. A list of many courses, a blog post, an about page or a contact page is false; then mark every field as not found.",
-        "category is the slug of the given category that fits the course best.",
+        'category is the slug of the given category that fits the course best, or "none" when the course belongs to none of them.',
         "Field rules:",
         *[f"- {f.name}: {f.rule}" for f in FIELDS],
     ]
@@ -112,7 +112,7 @@ def build_schema(category_slugs: list[str]) -> dict[str, Any]:
         "type": "object",
         "properties": {
             "is_course_page": {"type": "boolean"},
-            "category": {"type": "string", "enum": category_slugs},
+            "category": {"type": "string", "enum": [*category_slugs, "none"]},
             "fields": {
                 "type": "object",
                 "properties": {f.name: field_schema(f) for f in FIELDS},

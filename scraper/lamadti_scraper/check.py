@@ -32,7 +32,7 @@ def check_fixtures(extractor: Extractor, echo=print) -> int:
         fetcher = Fetcher(HostLimiter(local_interval=0.0))
         try:
             for key in keys:
-                folder = "blog" if key == specs.BLOG["key"] else "courses"
+                folder = "guides" if key == specs.BLOG["key"] else "courses"
                 url = f"{site.base}/{folder}/{key}.html"
                 response = fetcher.get(url)
                 content = extract_page(response.html, url)

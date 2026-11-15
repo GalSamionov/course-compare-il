@@ -16,6 +16,14 @@ import yaml
 SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 DEFAULT_MAX_PAGES = 100
 HARD_MAX_PAGES = 500
+KINDS = ("college", "school", "independent", "university", "other")
+# כתובות שכמעט אף פעם אינן דף של קורס. חלות על כל מוסד, לפני ההגדרה שלו, כדי לא לשלם על בלוג ותגיות.
+DEFAULT_EXCLUDE = re.compile(
+    r"/(blog|blogs|news|articles?|magazine|tag|tags|category|categories|author|authors|wp-content|wp-json|feed|"
+    r"cart|checkout|my-account|login|privacy|terms|accessibility|careers|jobs|contact|about|search)(/|$|\?)"
+    r"|\.(pdf|jpe?g|png|gif|webp|svg|mp4|mp3|zip|docx?|xlsx?)($|\?)",
+    re.I,
+)
 
 
 class ConfigError(ValueError):
@@ -33,18 +41,28 @@ class InstitutionConfig:
     exclude: str | None = None
     render: str = "auto"  # auto | browser
     max_pages: int = DEFAULT_MAX_PAGES
+    # דפי קורס שכבר ידועים (מהרשימה המאושרת). תמיד נקראים, וכתובות דומות להן קודמות בתור.
+    course_urls: tuple[str, ...] = ()
+    # השם והסוג, כדי שהאוסף ייצור את המוסד בטבלה אם הוא עוד לא שם. המוסד אושר כבר כשנכנס לקובץ.
+    name: str | None = None
+    kind: str | None = None
 
     @property
     def host(self) -> str:
         return (urlsplit(self.website).hostname or "").lower()
 
     def same_site(self, url: str) -> bool:
-        """אותו אתר, עם או בלי www. רק מאתר המוסד עצמו (סעיף 5, כללים)."""
-        host = (urlsplit(url).hostname or "").lower()
-        return host.removeprefix("www.") == self.host.removeprefix("www.")
+        """האתר של המוסד או תת-דומיין שלו (blog.example.co.il), עם או בלי www. סעיף 5, כללים."""
+        host = (urlsplit(url).hostname or "").lower().removeprefix("www.")
+        base = self.host.removeprefix("www.")
+        return bool(base) and (host == base or host.endswith("." + base))
 
     def wants(self, url: str) -> bool:
         if not self.same_site(url):
+            return False
+        if url in self.course_urls:
+            return True
+        if DEFAULT_EXCLUDE.search(urlsplit(url).path):
             return False
         if self.include and not re.search(self.include, url):
             return False
@@ -112,8 +130,20 @@ def parse_config(data: object) -> Config:
         listing = item.get("listing_urls") or []
         if not isinstance(listing, list):
             raise ConfigError(f"{where}.listing_urls: expected a list")
+        course_urls = item.get("course_urls") or []
+        if not isinstance(course_urls, list):
+            raise ConfigError(f"{where}.course_urls: expected a list")
+        name = item.get("name")
+        if name is not None and (not isinstance(name, str) or not name.strip()):
+            raise ConfigError(f"{where}.name: expected text")
+        kind = item.get("kind")
+        if kind is not None and kind not in KINDS:
+            raise ConfigError(f"{where}.kind: expected one of {', '.join(KINDS)}")
         institution = InstitutionConfig(
             slug=slug,
+            course_urls=tuple(_url(u, f"{where}.course_urls") for u in course_urls),
+            name=name.strip() if name else None,
+            kind=kind,
             website=_url(item.get("website"), f"{where}.website"),
             categories=tuple(categories),
             sitemap=sitemap,
@@ -123,11 +153,11 @@ def parse_config(data: object) -> Config:
             render=render,
             max_pages=max_pages,
         )
-        for url in institution.listing_urls + ((sitemap,) if sitemap not in ("auto", "none") else ()):
+        for url in institution.listing_urls + institution.course_urls + ((sitemap,) if sitemap not in ("auto", "none") else ()):
             if not institution.same_site(url):
                 raise ConfigError(f"{where}: {url} is not on the institution's own site")
-        if sitemap == "none" and not institution.listing_urls:
-            raise ConfigError(f"{where}: needs a sitemap or listing_urls")
+        if sitemap == "none" and not institution.listing_urls and not institution.course_urls:
+            raise ConfigError(f"{where}: needs a sitemap, listing_urls or course_urls")
         result.append(institution)
     return Config(institutions=result)
 

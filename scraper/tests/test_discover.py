@@ -72,3 +72,19 @@ def test_max_pages():
     ) + b"</urlset>"
     result = discover(institution(max_pages=3), FakeFetcher({"https://a.example/sitemap.xml": many}), FakeRobots())
     assert len(result.urls) == 3
+
+
+def test_subdomains_known_pages_and_default_excludes():
+    inst = institution(include=None, course_urls=["https://blog.a.example/sblog/full-stack"])
+    assert inst.same_site("https://blog.a.example/x") is True
+    assert inst.same_site("https://a.example.evil.com/x") is False
+    assert inst.wants("https://a.example/blog/how-to-choose") is False
+    assert inst.wants("https://a.example/wp-content/uploads/syllabus.pdf") is False
+    assert inst.wants("https://a.example/about") is False
+    assert inst.wants("https://a.example/about-the-course-x") is True
+    sitemap = b'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + b"".join(
+        f"<url><loc>https://a.example/{p}</loc></url>".encode() for p in ("about", "misc/one", "sblog/data", "blog/post")
+    ) + b"</urlset>"
+    result = discover(inst, FakeFetcher({"https://a.example/sitemap.xml": sitemap}), FakeRobots())
+    # הדף הידוע ראשון, אחריו מה שבאותה תיקייה שלו, ואז השאר.
+    assert result.urls == ["https://blog.a.example/sblog/full-stack", "https://a.example/sblog/data", "https://a.example/misc/one"]
