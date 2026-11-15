@@ -23,6 +23,8 @@ export interface CleanupResult {
   reportDetailsDeleted: number | null;
   /** הערות בבקשות "בקשו שנבדוק קורס" שנמחקו (90 יום אחרי ההחלטה). null: הפונקציה עוד לא במסד הזה. */
   courseRequestNotesDeleted: number | null;
+  /** תוצאות של בדיקת קישור שנמחקו (7 ימים אחרי הבדיקה). null: הפונקציה עוד לא במסד הזה. */
+  adChecksDeleted: number | null;
   failures: string[];
 }
 
@@ -42,6 +44,8 @@ const hoursAgo = (now: Date, hours: number) => new Date(now.getTime() - hours * 
  *    (purge_reports, סבב 5). הדיווח עצמו נשאר, בלי הטקסט.
  * 7. קורסים מקישור (/review ו-/request-course): ההערה 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
  *    (purge_course_submissions, ומדיניות הפרטיות).
+ * 8. בדיקת קישור (/request-course): התוצאה 7 ימים אחרי הבדיקה, והמונים של המכסה אחרי יומיים (purge_ad_checks).
+ *    טקסט הדף לא נשמר בכלל.
  * המחיקה מהאחסון דרך ה-API של Storage בלבד (protect_delete חוסם מחיקה ב-SQL).
  */
 export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Promise<CleanupResult> {
@@ -99,6 +103,12 @@ export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Pr
   if (notesError && notesError.code !== 'PGRST202') failures.push(`course_submissions: ${notesError.message}`);
   else if (!notesError) courseRequestNotesDeleted = notes ?? 0;
 
+  // ואותו דבר למסד שהמיגרציה של בדיקת הקישור (20261116020001) עוד לא עלתה אליו.
+  let adChecksDeleted: number | null = null;
+  const { data: adChecks, error: adChecksError } = await db.rpc('purge_ad_checks');
+  if (adChecksError && adChecksError.code !== 'PGRST202') failures.push(`ad_checks: ${adChecksError.message}`);
+  else if (!adChecksError) adChecksDeleted = adChecks ?? 0;
+
   return {
     reviewsDeleted,
     filesDeleted,
@@ -107,6 +117,7 @@ export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Pr
     companyRequestsDeleted,
     reportDetailsDeleted,
     courseRequestNotesDeleted,
+    adChecksDeleted,
     failures,
   };
 }

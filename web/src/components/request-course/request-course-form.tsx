@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useActionState, useEffect, useId, useRef, useState } from 'react';
 import { submitCourseRequest, type RequestState } from '@/app/request-course/actions';
 import { PenArrow } from '@/components/site/pen';
+import { AdCheckResult, checkHeading } from './ad-check-result';
 import { buttonVariants } from '@/components/ui/button';
 import type { RequestField } from '@/lib/course-links/form';
 import { cn } from '@/lib/utils';
@@ -27,26 +28,87 @@ const FACTS = [
   'מי שמוכר את הקורס לא משלם לנו, ולא יודע מי ביקש שנבדוק.',
 ];
 
+/** עם בדיקת הקישור (docs/superpowers/specs/2026-11-15-ad-check-design.md): מה הבדיקה עושה, ומה היא לא. */
+const CHECK_FACTS: { label: string; text: string }[] = [
+  {
+    label: 'מה בודקים?',
+    text: 'קוראים את הדף שהקישור מוביל אליו, ומחפשים בו את שמונת הדגלים מהמדריך. כל דגל מגיע עם ציטוט מהדף.',
+  },
+  { label: '', text: 'אין בבדיקה ציון, ואין בה "הקורס גרוע". היא אומרת מה כתוב בדף, ואתם מחליטים.' },
+  {
+    label: '',
+    text: 'כל קישור שבודקים נכנס גם לרשימה שלנו. קורס עולה לקטלוג רק אחרי שבדקנו אותו. מי שמוכר אותו לא משלם לנו.',
+  },
+  {
+    label: 'קישור לפוסט?',
+    text: 'פוסט או דף בפייסבוק ובאינסטגרם אנחנו לא קוראים. פתחו את המודעה, לחצו על הכפתור שלה, והעתיקו את הקישור מהדפדפן.',
+  },
+];
+
 const ROWS: { name: Exclude<RequestField, 'note'>; label: string; placeholder: string; ltr: boolean; max: number }[] = [
   { name: 'url', label: 'הקישור', placeholder: 'מודעה, דף נחיתה או דף בפייסבוק', ltr: true, max: 500 },
   { name: 'name', label: 'שם (לא חובה)', placeholder: 'שם הקורס או המרצה', ltr: false, max: 160 },
 ];
+const CHECK_URL_PLACEHOLDER = 'הקישור לדף שהמודעה מובילה אליו';
 
 /**
  * "בקשו שנבדוק קורס": קישור, ושם והערה אם רוצים. שורות במחברת, כמו בטופס למוסדות. אחרי השליחה הכותרת
  * מתחלפת, והפוקוס עובר אליה כדי שקורא מסך יקרא את המצב החדש. בלי תנועה חדשה (DESIGN.md, Motion).
+ * checkEnabled: יש מפתח למודל, והטופס הוא גם בדיקת הקישור ("בדקו את הדף"). בלי מפתח, כמו קודם.
  */
-export function RequestCourseForm() {
+export function RequestCourseForm({ checkEnabled = false }: { checkEnabled?: boolean }) {
   const [round, setRound] = useState(0);
-  return <RequestRound key={round} onAnother={() => setRound((r) => r + 1)} />;
+  // אחרי "הבדיקות להיום נגמרו" הטופס חוזר כשליחה רגילה, כדי לא להבטיח בדיקה שלא תרוץ עד מחר.
+  const [quotaUsed, setQuotaUsed] = useState(false);
+  return (
+    <RequestRound
+      key={round}
+      checkEnabled={checkEnabled && !quotaUsed}
+      onAnother={(afterQuota) => {
+        if (afterQuota) setQuotaUsed(true);
+        setRound((r) => r + 1);
+      }}
+    />
+  );
 }
 
-function RequestRound({ onAnother }: { onAnother: () => void }) {
+function headingFor(state: RequestState, checkEnabled: boolean): { title: string; lead: React.ReactNode } {
+  switch (state.status) {
+    case 'sent':
+      return {
+        title: 'קיבלנו את הקישור',
+        lead: 'נקרא את הדף ונבדוק את הקורס. אם הוא מתאים, הוא יעלה לקטלוג. אין צורך לשלוח שוב.',
+      };
+    case 'existing':
+      return { title: 'הקורס כבר באתר', lead: 'לא הוספנו אותו שוב. אפשר לראות מה כבר ידוע עליו.' };
+    case 'checked':
+      return checkHeading(state.check, state.url);
+    default:
+      return checkEnabled
+        ? {
+            title: 'ראיתם מודעה לקורס?',
+            lead: 'הדביקו את הקישור לדף שהמודעה מובילה אליו. נראה לכם מה הדף מבטיח, אילו דגלים מהמדריך מופיעים בו, ואם בוגרים כבר כתבו על הקורס.',
+          }
+        : {
+            title: 'בקשו שנבדוק קורס',
+            lead: 'ראיתם קורס במודעה, בדף נחיתה או אצל מרצה עצמאי, והוא לא באתר? הדביקו את הקישור, ונבדוק אותו.',
+          };
+  }
+}
+
+function RequestRound({
+  checkEnabled,
+  onAnother,
+}: {
+  checkEnabled: boolean;
+  onAnother: (afterQuota: boolean) => void;
+}) {
   const [state, dispatch, pending] = useActionState(submitCourseRequest, IDLE);
   const [values, setValues] = useState({ url: '', name: '', note: '' });
   const heading = useRef<HTMLHeadingElement>(null);
   const ids = { url: useId(), name: useId(), note: useId() };
-  const done = state.status === 'sent' || state.status === 'existing';
+  const done = state.status === 'sent' || state.status === 'existing' || state.status === 'checked';
+  const { title, lead } = headingFor(state, checkEnabled);
   // הודעה של שדה יורדת כשמתקנים אותו, ולא נשארת עד השליחה הבאה.
   const [edited, setEdited] = useState<{ after: RequestState; fields: RequestField[] }>({ after: IDLE, fields: [] });
   const editedFields = edited.after === state ? edited.fields : [];
@@ -70,19 +132,22 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
         tabIndex={-1}
         className="mt-[22px] text-[30px] leading-tight font-bold text-balance outline-none lg:mt-12 lg:text-[54px] lg:leading-[1.06]"
       >
-        {state.status === 'sent' ? 'קיבלנו את הקישור' : state.status === 'existing' ? 'הקורס כבר באתר' : 'בקשו שנבדוק קורס'}
+        {title}
       </h1>
-      <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
-        {state.status === 'sent'
-          ? 'נקרא את הדף ונבדוק את הקורס. אם הוא מתאים, הוא יעלה לקטלוג. אין צורך לשלוח שוב.'
-          : state.status === 'existing'
-            ? 'לא הוספנו אותו שוב. אפשר לראות מה כבר ידוע עליו.'
-            : 'ראיתם קורס במודעה, בדף נחיתה או אצל מרצה עצמאי, והוא לא באתר? הדביקו את הקישור, ונבדוק אותו.'}
+      <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-pretty text-ink-soft lg:mt-3 lg:text-lg">
+        {lead}
       </p>
 
       <div className="mt-[18px] lg:mt-12 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-20">
-        <div className="margin-rule">
-          {done ? (
+        <div className={state.status === 'checked' ? undefined : 'margin-rule'}>
+          {state.status === 'checked' ? (
+            <AdCheckResult
+              url={state.url}
+              check={state.check}
+              request={state.request}
+              onAnother={() => onAnother(state.check.kind === 'quota')}
+            />
+          ) : done ? (
             <div className="ruled-top">
               <div className="ruled-row grid min-h-16 grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
                 <p className={marginNote}>
@@ -95,7 +160,7 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                       {state.title || 'לעמוד הקורס'}
                     </Link>
                   )}
-                  <button type="button" onClick={onAnother} className={cn(smallLink, 'cursor-pointer')}>
+                  <button type="button" onClick={() => onAnother(false)} className={cn(smallLink, 'cursor-pointer')}>
                     לשלוח קישור נוסף
                   </button>
                   <Link href="/" className={smallLink}>
@@ -127,7 +192,7 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                         autoCapitalize={row.ltr ? 'none' : undefined}
                         spellCheck={row.ltr ? false : undefined}
                         enterKeyHint="next"
-                        placeholder={row.placeholder}
+                        placeholder={checkEnabled && row.name === 'url' ? CHECK_URL_PLACEHOLDER : row.placeholder}
                         value={values[row.name]}
                         onChange={(e) => change(row.name, e.target.value)}
                         aria-invalid={error ? true : undefined}
@@ -165,6 +230,7 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                   )}
                 </div>
               </div>
+              {checkEnabled && <input type="hidden" name="check" value="1" />}
               {/* מלכודת לבוטים: מוסתרת מהעין ומקורא מסך, בלי טאב ובלי מילוי אוטומטי (actions.ts). */}
               <div aria-hidden="true" className="sr-only">
                 <label>
@@ -194,22 +260,31 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
                       'disabled:border-[1.5px] disabled:border-line disabled:bg-white disabled:text-ink-soft disabled:opacity-100',
                     )}
                   >
-                    {pending ? 'שולחים…' : 'לשלוח לבדיקה'}
+                    {checkEnabled ? (pending ? 'קוראים את הדף…' : 'בדקו את הדף') : pending ? 'שולחים…' : 'לשלוח לבדיקה'}
                   </button>
                 </div>
               </div>
+              {checkEnabled && (
+                <p aria-live="polite" className="ms-(--margin) mt-2 min-h-6 ps-3 font-pen text-[15px] leading-snug font-medium text-pen">
+                  {pending ? 'קוראים את הדף ומחפשים בו את הדגלים. זה לוקח כמה שניות.' : ''}
+                </p>
+              )}
             </form>
           )}
         </div>
 
         <div className="margin-rule mt-10 lg:mt-0 lg:[--bleed:0px]">
           <ul className="ruled-top">
-            {FACTS.map((fact, i) => (
-              <li key={fact} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start">
-                <span className={cn(marginLabel, 'pt-3')}>{i === 0 ? 'מה קורה אחרי?' : ''}</span>
-                <p className="pt-2.5 ps-3 pb-[7px] text-base leading-normal text-pretty lg:pt-3.5 lg:pb-2 lg:text-lg">{fact}</p>
-              </li>
-            ))}
+            {(checkEnabled ? CHECK_FACTS : FACTS.map((text, i) => ({ label: i === 0 ? 'מה קורה אחרי?' : '', text }))).map(
+              (fact) => (
+                <li key={fact.text} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start">
+                  <span className={cn(marginLabel, 'pt-3')}>{fact.label}</span>
+                  <p className="pt-2.5 ps-3 pb-[7px] text-base leading-normal text-pretty lg:pt-3.5 lg:pb-2 lg:text-lg">
+                    {fact.text}
+                  </p>
+                </li>
+              ),
+            )}
             <li className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start">
               <span className={cn(marginLabel, 'pt-3')}>סיימתם אותו?</span>
               <p className="pt-2.5 ps-3 pb-[7px] text-base leading-normal text-pretty lg:pt-3.5 lg:pb-2 lg:text-lg">
@@ -221,7 +296,11 @@ function RequestRound({ onAnother }: { onAnother: () => void }) {
             </li>
           </ul>
           <div className="ms-(--margin) mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
-            <p className="text-pretty">שומרים רק את מה שבטופס. בלי מייל ובלי שם שלכם.</p>
+            <p className="text-pretty">
+              {checkEnabled
+                ? 'שומרים רק את מה שבטופס, ואת תוצאת הבדיקה לשבוע. את הטקסט של הדף לא שומרים. בלי מייל ובלי שם שלכם.'
+                : 'שומרים רק את מה שבטופס. בלי מייל ובלי שם שלכם.'}
+            </p>
             <Link href="/privacy#course-links" className={smallLink}>
               מדיניות הפרטיות
             </Link>
