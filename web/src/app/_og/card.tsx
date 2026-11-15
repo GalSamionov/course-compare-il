@@ -436,3 +436,56 @@ export async function renderSiteCard(): Promise<ImageResponse> {
     { ...OG_SIZE, fonts: await loadFonts() },
   );
 }
+
+/** כותרת של מדריך: אין לידה ציון, ולכן היא יכולה להיות גדולה יותר מכותרת של קורס. */
+function guideTitleSize(title: string): number {
+  const n = title.length;
+  if (n <= 22) return 76;
+  if (n <= 34) return 66;
+  return 56;
+}
+
+/**
+ * תמונת השיתוף של מדריך "לפני שמשלמים": הכותרת, מה יש בו, וכמה עובדות בו נבדקו מול מסמך.
+ * הירוק הוא דוגמה מהמקרא, כמו בכרטיס של האתר, ולא מרקר על נתון. אין כאן נתוני דוגמה: המדריכים אמיתיים.
+ */
+export async function renderGuideCard(guide: {
+  title: string;
+  description: string;
+  order: number;
+  total: number;
+  verifiedCount: number;
+}): Promise<ImageResponse> {
+  const title = clip(guide.title, 60);
+  return new ImageResponse(
+    (
+      <Desk sample={false}>
+        <SheetHeader />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexGrow: 1, marginTop: 34 }}>
+          <Rtl
+            text={title}
+            size={guideTitleSize(title)}
+            style={{ fontWeight: 700, lineHeight: 1.08, maxWidth: 960, letterSpacing: -0.5 }}
+          />
+          <Rtl
+            text={clip(guide.description, 118)}
+            size={27}
+            style={{ color: INK_SOFT, lineHeight: 1.4, marginTop: 20, maxWidth: 900 }}
+          />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+            <Marked text="ירוק" size={28} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+            <Rtl text={`${guide.verifiedCount} עובדות נבדקו מול מסמך, כל אחת עם המקור שלה`} size={26} style={{ marginRight: 12 }} />
+          </div>
+          <Rtl
+            text={`מדריך ${guide.order} מתוך ${guide.total}`}
+            size={26}
+            style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }}
+          />
+        </div>
+      </Desk>
+    ),
+    { ...OG_SIZE, fonts: await loadFonts() },
+  );
+}
