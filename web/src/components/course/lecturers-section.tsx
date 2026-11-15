@@ -24,7 +24,7 @@ export function LecturersSection({ course }: { course: CoursePageData }) {
 
       <div className="mt-4 flex flex-col gap-5">
         {course.lecturers.map((lecturer) => (
-          <article key={lecturer.slug} className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
+          <article key={lecturer.slug} data-anim="ink" className="grid grid-cols-[52px_minmax(0,1fr)] gap-x-3">
             {/* ראשי תיבות בעיגול דיו: אין לנו תמונות של מרצים, ולא ממציאים. */}
             <div
               aria-hidden="true"

@@ -122,7 +122,7 @@ export function QueueItemView({ item }: { item: QueueItem }) {
   const name = item.displayMode === 'anonymous' ? null : item.displayName;
   const headingId = `q-${item.reviewId}`;
   return (
-    <article aria-labelledby={headingId} className="border-t border-rule py-6 lg:py-8">
+    <article aria-labelledby={headingId} data-anim="ink" className="border-t border-rule py-6 lg:py-8">
       <header>
         <h2 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
           <Link

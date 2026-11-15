@@ -69,9 +69,10 @@ export function ResultRow({
             {/* יעד מגע של 44 פיקסלים, בלי להגדיל את השורה: השוליים השליליים מחזירים את הגובה. */}
             <Link
               href={`/courses/${course.slug}`}
-              className="-my-2.5 inline-flex min-h-11 items-center decoration-[1.5px] underline-offset-4 hover:text-link-hover hover:underline"
+              className="group/title -my-2.5 inline-flex min-h-11 items-center gap-1.5 transition-colors duration-150 hover:text-link-hover"
             >
-              {course.title}
+              <span className="pen-under">{course.title}</span>
+              <PenArrow className="me-0 h-[0.6em] w-[1.2em] flex-none opacity-0 transition-[opacity,translate] duration-200 group-hover/title:opacity-100 group-focus-visible/title:opacity-100 motion-safe:translate-x-1.5 motion-safe:group-hover/title:translate-x-0" />
             </Link>
           </h3>
           <p className="mt-0.5 font-sans text-sm leading-normal text-ink-soft @3xl:col-start-2 @3xl:row-start-2 @3xl:ps-3 @3xl:text-[15px]">

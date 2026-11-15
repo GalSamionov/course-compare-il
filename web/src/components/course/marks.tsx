@@ -59,10 +59,13 @@ export function Mark({
   );
 }
 
-/** טענה של המוסד שלא בדקנו: קו כחול מתחת לטקסט. */
+/**
+ * טענה של המוסד שלא בדקנו: קו כחול של 2 פיקסלים מתחת לטקסט (globals.css, .claim).
+ * הקו נמתח מימין לשמאל כשהטענה נכנסת למסך, כמו המרקרים: גם הוא סימון של מקור.
+ */
 export function Claim({ children }: { children: React.ReactNode }) {
   return (
-    <span data-source="claim" className="underline decoration-claim decoration-2 underline-offset-[5px]">
+    <span data-source="claim" className="claim">
       <span className="sr-only">המוסד אומר, לא נבדק: </span>
       {children}
     </span>
@@ -186,7 +189,9 @@ export function StickyNote({
   const angle = clamp(tilt);
   return (
     <div
-      data-anim="stick"
+      // פתק עם סלוטייפ נדבק. פתק בלי סלוטייפ תלוי על פתק אחר (אחרי 3 חודשים), ומתנדנד עד שהוא נח.
+      data-anim={tape ? 'stick' : 'hang'}
+      data-delay={tape ? undefined : 520}
       className={cn(
         'relative font-sans text-[13px] leading-snug text-pretty',
         // נייר של פתק: כהה מעט בתחתית, וצל של פינה שמתרוממת. פתק לבן מקבל צל אפור-קר, בלי הגוון הצהוב.

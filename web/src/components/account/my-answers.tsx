@@ -13,7 +13,7 @@ import { MeSection, marginNote } from './me-section';
 
 function AnswerRow({ number, question, children }: { number: number; question: string; children?: React.ReactNode }) {
   return (
-    <li className="ruled-row grid min-h-[58px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
+    <li data-anim="ink" className="ruled-row grid min-h-[58px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center">
       <span className="flex flex-col items-start gap-0.5 font-sans text-[13px] leading-tight text-ink-soft lg:flex-row lg:items-center lg:gap-2.5 lg:text-[15px]">
         <PenNumber n={number} className="lg:size-[34px] lg:text-[19px]" />
         {question}

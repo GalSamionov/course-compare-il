@@ -244,6 +244,19 @@ body {
     --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%23FF9DC7' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
   }
 
+  /* ===== טענה של המוסד =====
+     קו כחול של 2 פיקסלים מתחת לטקסט, כרקע ולא כקו תחתון: כך הוא נמתח מימין לשמאל כשהטענה נכנסת למסך,
+     וכל שורה שבורה מקבלת קו משלה. */
+  .claim {
+    background-image: linear-gradient(var(--color-claim), var(--color-claim));
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: 100% 2px;
+    padding-bottom: 3px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
   /* ===== סלוטייפ ===== */
   .tape {
     position: absolute;
@@ -346,6 +359,27 @@ body {
   background-size: calc(100% + 0.2em) 0.42em;
 }
 
+@keyframes hang-in {
+  0% {
+    opacity: 0;
+    rotate: 7deg;
+  }
+  20% {
+    opacity: 1;
+  }
+  55% {
+    rotate: 0deg;
+  }
+  76% {
+    rotate: 1.6deg;
+  }
+}
+@keyframes clip-on {
+  from {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+}
 @keyframes stick-in {
   from {
     opacity: 0;
@@ -392,6 +426,36 @@ body {
   }
   html[data-motion] .pen-rule:not([data-inview]) {
     background-size: 0 0.42em;
+  }
+
+  /* קו הטענה של המוסד נמתח מימין לשמאל, כמו המרקר: גם הוא סימון של מקור. */
+  html[data-motion] .claim {
+    transition: background-size 640ms cubic-bezier(0.55, 0, 0.25, 1) var(--enter-delay, 0ms);
+  }
+  html[data-motion] .claim:not([data-inview]) {
+    background-size: 0 2px;
+  }
+
+  /* פתק תלוי (אחרי 3 חודשים): נתלה מהקצה העליון ומתנדנד עד שהוא נח, אחרי שהפתק שמעליו נדבק. */
+  html[data-motion] [data-anim~='hang']:not([data-inview]) {
+    opacity: 0;
+  }
+  html[data-motion] [data-anim~='hang'][data-inview] {
+    transform-origin: 50% 0;
+    animation: hang-in 1100ms cubic-bezier(0.3, 0, 0.2, 1) var(--enter-delay, 0ms) backwards;
+  }
+
+  /* שורה בטבלה של עמוד קריאה: מופיעה בעדינות, בלי תזוזה. */
+  html[data-motion] .text-page tbody tr:not([data-inview]) {
+    opacity: 0;
+  }
+  html[data-motion] .text-page tbody tr[data-inview] {
+    transition: opacity 500ms ease-out var(--enter-delay, 0ms);
+  }
+
+  /* מסמך שהוצמד לביקורת: אחרי שהוא נח על הדף, המהדק נסגר עליו מלמעלה. */
+  html[data-motion] [data-anim~='stick'][data-inview] .proof-clip {
+    animation: clip-on 380ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-delay, 0ms) + 480ms) backwards;
   }
 
   /* העט מצייר: עיגול סביב מספר, חץ, וי. לכל path יש pathLength="1". --d: השהיה נוספת בתוך הציור. */
@@ -503,6 +567,78 @@ body {
 }
 
 /* ===== תגובות לריחוף וללחיצה ===== */
+/* צבע של קישור ושל כפתור משתנה ברכות. רכיב עם transition משלו גובר, כי השכבה הזאת נמוכה יותר. */
+@layer base {
+  :where(a, button) {
+    transition:
+      color 150ms linear,
+      border-color 150ms linear,
+      background-color 150ms linear;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  /* "עזר לי": המספר קופץ, ו-+1 בעט עולה ממנו ונעלם. */
+  .helpful-count {
+    animation: count-bump 380ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .helpful-plus {
+    animation: plus-float 950ms cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
+  }
+  /* ביקורת שנמחקה מהרשימה: העט מוחק את השם בקו, והשורה דוהה החוצה. */
+  [data-leaving] h3 > * {
+    background-image: linear-gradient(var(--color-pen), var(--color-pen));
+    background-repeat: no-repeat;
+    background-position: right 0 top 55%;
+    background-size: 100% 2px;
+    animation: strike-through 300ms cubic-bezier(0.4, 0, 0.3, 1) backwards;
+  }
+  [data-leaving] {
+    animation: row-leave 260ms ease-in 340ms forwards;
+  }
+  /* קפיצה לפרק (#): העט מותח שוב את הקו מתחת לכותרת שלו (motion-observer.tsx). */
+  .pen-rule-replay {
+    animation: pen-rule-replay 780ms cubic-bezier(0.55, 0, 0.25, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .helpful-plus {
+    display: none;
+  }
+}
+@keyframes count-bump {
+  40% {
+    scale: 1.3;
+  }
+}
+@keyframes plus-float {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  25% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -14px;
+  }
+}
+@keyframes strike-through {
+  from {
+    background-size: 0 2px;
+  }
+}
+@keyframes row-leave {
+  to {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+@keyframes pen-rule-replay {
+  from {
+    background-size: 0 0.42em;
+  }
+}
 /* הלוגו: בריחוף העט מקיף שוב את ה-ל (logo-mark.tsx). */
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .logo:hover .logo-loop {

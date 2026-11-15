@@ -2,8 +2,11 @@
 
 import { useEffect } from 'react';
 
-/** מה זז כשהוא נכנס למסך: משיכות מרקר, קווי עט מתחת לכותרות, וכל רכיב עם data-anim (globals.css, "תנועה"). */
-const SELECTOR = '.hl, .pen-rule, [data-anim]';
+/**
+ * מה זז כשהוא נכנס למסך (globals.css, "תנועה"): משיכות מרקר, קווי טענה של המוסד, קווי עט מתחת לכותרות,
+ * שורות בטבלאות של עמודי הקריאה, וכל רכיב עם data-anim.
+ */
+const SELECTOR = '.hl, .claim, .pen-rule, .text-page tbody tr, [data-anim]';
 /** כמה רכיבים לכל היותר נכנסים בזה אחר זה באותו רגע, לפני שההשהיה מפסיקה לגדול. */
 const STAGGER_CAP = 6;
 const STAGGER_MS = 140;
@@ -97,6 +100,18 @@ export function MotionObserver() {
       });
     };
 
+    // קפיצה לפרק בעמוד (קישור עם #): העט מותח שוב את הקו מתחת לכותרת שלו, כדי שיהיה ברור לאן הגענו.
+    const replayHeading = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      const rule = target?.matches('.pen-rule') ? target : target?.querySelector<HTMLElement>('.pen-rule');
+      if (!rule) return;
+      rule.classList.remove('pen-rule-replay');
+      void rule.offsetWidth;
+      rule.classList.add('pen-rule-replay');
+      rule.addEventListener('animationend', () => rule.classList.remove('pen-rule-replay'), { once: true });
+    };
+
     // מתחילים רק אחרי שהדף נטען ו-React סיים לחבר אותו (hydration): סימון של רכיב לפני כן
     // הוא שינוי ב-HTML שהשרת שלח, ו-React מזהיר עליו. requestIdleCallback רץ רק כשאין עבודה ממתינה.
     // data-motion-ready רק כאן: אם זה לא קרה תוך 3 שניות, הסקריפט ב-layout מוריד את data-motion.
@@ -108,6 +123,7 @@ export function MotionObserver() {
       scan(document);
       mo.observe(document.body, { childList: true, subtree: true });
       window.addEventListener('scroll', atBottom, { passive: true });
+      window.addEventListener('hashchange', replayHeading);
       atBottom();
     };
     const start = () => {
@@ -120,6 +136,7 @@ export function MotionObserver() {
     return () => {
       window.removeEventListener('load', start);
       window.removeEventListener('scroll', atBottom);
+      window.removeEventListener('hashchange', replayHeading);
       cancelAnimationFrame(frame);
       if (idle) window.cancelIdleCallback?.(idle);
       window.clearTimeout(timer);
