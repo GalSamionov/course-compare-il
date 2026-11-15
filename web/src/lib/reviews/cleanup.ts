@@ -15,6 +15,8 @@ export interface CleanupResult {
   reviewsDeleted: number;
   filesDeleted: number;
   checkUsageDeleted: number;
+  /** מיילים של בקשות ממוסדות שנמחקו (90 יום אחרי ההחלטה). null: הפונקציה עוד לא במסד הזה. */
+  requestEmailsDeleted: number | null;
   failures: string[];
 }
 
@@ -26,6 +28,8 @@ const hoursAgo = (now: Date, hours: number) => new Date(now.getTime() - hours * 
  * 2. כל קובץ בתיקיית ההוכחות שאף הוכחה פתוחה לא מצביעה עליו, ושהועלה לפני יותר מיום. גם הקבצים משלב 1.
  *    קובץ של הוכחה שממתינה לגל לא נמחק כאן: proof_orphans מדלגת על כל נתיב שיש לו שורה ב-proofs.
  * 3. שורות של מכסת הבדיקות בנות יותר מיומיים.
+ * 4. בקשות ממוסדות (/institutions/join): המייל 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_institution_requests, ומדיניות הפרטיות).
  * המחיקה מהאחסון דרך ה-API של Storage בלבד (protect_delete חוסם מחיקה ב-SQL).
  */
 export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Promise<CleanupResult> {
@@ -59,5 +63,11 @@ export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Pr
     .lt('created_at', hoursAgo(now, CHECK_USAGE_KEEP_HOURS));
   if (usageError) failures.push(`proof_check_usage: ${usageError.message}`);
 
-  return { reviewsDeleted, filesDeleted, checkUsageDeleted: count ?? 0, failures };
+  // מסד שהמיגרציה של תוכנית 5ב עוד לא עלתה אליו: אין מה לנקות, וזה לא כישלון.
+  let requestEmailsDeleted: number | null = null;
+  const { data: purged, error: purgeError } = await db.rpc('purge_institution_requests');
+  if (purgeError && purgeError.code !== 'PGRST202') failures.push(`institution_requests: ${purgeError.message}`);
+  else if (!purgeError) requestEmailsDeleted = purged ?? 0;
+
+  return { reviewsDeleted, filesDeleted, checkUsageDeleted: count ?? 0, requestEmailsDeleted, failures };
 }

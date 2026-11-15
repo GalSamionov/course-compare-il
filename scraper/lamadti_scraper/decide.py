@@ -35,6 +35,8 @@ class PageState:
     last_hash: str | None = None
     last_extracted: dict[str, Any] | None = None
     fail_count: int = 0
+    # request: גל אישר את הדף מבקשה של מוסד (/institutions/join). נקרא בכל ריצה, גם כשהוא לא במפת האתר.
+    source: str = "discovered"
 
 
 @dataclass

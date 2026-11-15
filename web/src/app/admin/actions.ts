@@ -1,7 +1,7 @@
 'use server';
 
 import { refresh, updateTag } from 'next/cache';
-import { adminGate, type AdminDb } from '@/lib/admin/gate';
+import { requireAdmin, type AdminDb } from '@/lib/admin/gate';
 import { decisionNote, isRejectReason } from '@/lib/admin/reasons';
 import { removeProofFiles } from '@/lib/reviews/files';
 import { paidBucketFromInput } from '@/lib/reviews/paid-bucket';
@@ -13,17 +13,8 @@ export type DecisionState =
   | { status: 'error'; message: string }
   | { status: 'done'; message: string; warning?: string };
 
-const NO_KEY = 'חסר SUPABASE_SECRET_KEY בשרת. בלעדיו אי אפשר לפתוח הוכחות או להחליט.';
-
 function fail(message: string): DecisionState {
   return { status: 'error', message };
-}
-
-/** בכל פעולה מחדש: getUser, ו-admins דרך המפתח הסודי. ה-proxy הוא לא ההגנה היחידה (server-actions.md, Security). */
-async function requireAdmin() {
-  const gate = await adminGate();
-  if (gate.kind === 'ok') return gate;
-  return gate.kind === 'no-key' ? NO_KEY : 'אין הרשאה.';
 }
 
 type Pending = { authorId: string | null; paths: string[] };

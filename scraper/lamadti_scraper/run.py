@@ -65,11 +65,25 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def add_requested(discovery: Discovery, work: InstitutionWork) -> None:
+    """דפים שגל אישר מבקשה של מוסד: נקראים בכל ריצה, גם כשהם לא במפת האתר, מעבר ל-max_pages או מחוץ ל-include.
+    רק מהאתר של המוסד עצמו (גם המסד בודק את זה באישור). הם גם "נראו", ולכן לא נספרים כדף שנעלם.
+    """
+    for url, page in work.pages.items():
+        if page.source != "request" or page.state != "active" or not work.config.same_site(url):
+            continue
+        if url not in discovery.seen:
+            discovery.seen.append(url)
+        if url not in discovery.urls:
+            discovery.urls.append(url)
+
+
 def process_institution(
     work: InstitutionWork, fetcher: Any, extractor: Extractor, today: date, stop: threading.Event
 ) -> InstitutionResult:
     cfg = work.config
     discovery = discover(cfg, fetcher, fetcher.robots)
+    add_requested(discovery, work)
     result = InstitutionResult(
         slug=cfg.slug,
         institution_id=work.id,

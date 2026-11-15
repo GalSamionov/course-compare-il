@@ -142,7 +142,7 @@ test('a graduate writes a review with a proof, the admin approves it, it is on t
     await expect(page).toHaveURL(/\/admin$/);
     const item = page
       .getByRole('article')
-      .filter({ has: page.getByRole('heading', { level: 2, name: COURSE_TITLE }) })
+      .filter({ has: page.getByRole('heading', { level: 3, name: COURSE_TITLE }) })
       .filter({ hasText: body });
     await expect(item).toBeVisible();
     await expect(item.getByRole('link', { name: /^לפתוח את ההוכחה/ })).toBeVisible();
