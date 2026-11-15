@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion';
-import { C, FELT, LABEL_FRAME, SHADOW, TAPE, pen, sans, type Box } from './theme';
+import { C, LOGO_LAMED, LOGO_LAMED_TRANSFORM, LOGO_LOOP, SHADOW, TAPE, pen, sans, serif, type Box } from './theme';
 
 /** הזמן של אנימציה מ-from ולמשך dur, בין 0 ל-1. */
 export function useProgress(from: number, dur: number, ease: (t: number) => number = Easing.bezier(0.45, 0, 0.2, 1)) {
@@ -8,17 +8,9 @@ export function useProgress(from: number, dur: number, ease: (t: number) => numb
   return interpolate(frame, [from, from + dur], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: ease });
 }
 
-/** משטח הלבד: הרקע של כל הסרטון. */
+/** השולחן: הרקע של כל הסרטון. בהיר ושטוח, בלי מרקם, כמו באתר אחרי הרענון. */
 export function Desk() {
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: C.desk,
-        backgroundImage: `${FELT}, radial-gradient(ellipse at 50% 40%, rgb(255 255 255 / 0.05), rgb(0 0 0 / 0.18))`,
-        backgroundSize: '220px 220px, 100% 100%',
-      }}
-    />
-  );
+  return <AbsoluteFill style={{ backgroundColor: C.desk }} />;
 }
 
 /** סלוטייפ, עם טקסט אם צריך (כמו "לדוגמה" באתר). */
@@ -57,22 +49,6 @@ export function Tape({
     >
       {children}
     </div>
-  );
-}
-
-/** התפס השחור שמחזיק את הדף, מ-web/src/components/site/sheet.tsx. */
-export function BinderClip({ width = 130, style }: { width?: number; style?: React.CSSProperties }) {
-  return (
-    <svg
-      viewBox="0 0 120 76"
-      style={{ position: 'absolute', width, filter: 'drop-shadow(0 6px 5px rgb(0 0 0 / 0.35))', zIndex: 4, ...style }}
-    >
-      <path d="M36 44 30 8C29.6 5.4 31.4 4 34 4H86C88.6 4 90.4 5.4 90 8L84 44" fill="none" stroke="#b9bec4" strokeWidth="3.4" strokeLinejoin="round" />
-      <path d="M36 44 30 8C29.6 5.4 31.4 4 34 4H86C88.6 4 90.4 5.4 90 8L84 44" fill="none" stroke="#e9ecef" strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M14 38C14 34 17 31.6 21 31.4L99 31.4C103 31.6 106 34 106 38L104 70C104 72.6 102 74 99.4 74H20.6C18 74 16 72.6 16 70Z" fill="#1d1f22" />
-      <path d="M18 36.6C18 35 19.4 34 21.4 34H98.6C100.6 34 102 35 102 36.6L101.6 42H18.4Z" fill="#3a3e43" />
-      <path d="M22 70.4H98" stroke="#000" strokeOpacity=".5" strokeWidth="1.4" />
-    </svg>
   );
 }
 
@@ -232,7 +208,7 @@ export function PenWrite({
   dur = 22,
   size,
   weight = 500,
-  tilt = -1,
+  tilt = 0,
   style,
 }: {
   children: React.ReactNode;
@@ -273,24 +249,33 @@ export function SmallArrow({ size }: { size: number }) {
   );
 }
 
-/** שם האתר על תווית של כריכת מחברת, והשם נכתב בעט. */
+/**
+ * הלוגו של למדתי, כמו בכותרת של האתר (web/src/components/site/wordmark.tsx):
+ * הסימן (ל בדיו, מוקפת בעט כחול שנמשך) והשם "למדתי" בדיו מודפסת, ב-Plex מודגש.
+ */
 export function Wordmark({ size, from }: { size: number; from: number }) {
-  const frame = useProgress(from, 10);
+  const loop = useProgress(from, 20, Easing.bezier(0.5, 0, 0.2, 1));
+  const name = useProgress(from + 6, 12);
+  const mark = Math.round(size * 1.35);
   return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        background: C.paper,
-        border: `${Math.round(size * 0.4)}px solid transparent`,
-        borderImage: `${LABEL_FRAME} 12 / ${Math.round(size * 0.4)}px / 0 stretch`,
-        padding: `${size * 0.06}px ${size * 0.42}px`,
-        opacity: frame,
-      }}
-    >
-      <PenWrite from={from + 6} dur={20} size={size} weight={600}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: size * 0.32, color: C.ink }}>
+      <svg viewBox="0 0 100 100" style={{ width: mark, height: mark, flex: 'none', overflow: 'visible' }}>
+        <DrawnPath d={LOGO_LOOP} progress={loop} width={6.5} />
+        <path fill="currentColor" transform={LOGO_LAMED_TRANSFORM} d={LOGO_LAMED} />
+      </svg>
+      <span
+        style={{
+          fontFamily: serif,
+          fontWeight: 700,
+          fontSize: size,
+          lineHeight: 1,
+          letterSpacing: '-0.015em',
+          opacity: name,
+          transform: `translateX(${(1 - name) * 10}px)`,
+        }}
+      >
         למדתי
-      </PenWrite>
+      </span>
     </div>
   );
 }

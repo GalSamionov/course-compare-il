@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { Easing, Img, interpolate, staticFile, useCurrentFrame } from 'remotion';
 import { C, SHADOW, STAGE, sans, type Box, type Layout } from './theme';
-import { BinderClip, CameraScale, Tape, useProgress } from './world';
+import { CameraScale, Tape, useProgress } from './world';
 
 /** נקודת מצלמה: באיזה פריים, איזה מרכז (בפיקסלים של CSS בצילום) ובאיזה קנה מידה (פיקסלים בפריים לכל פיקסל CSS). */
 export type Key = { f: number; x: number; y: number; s: number };
@@ -44,7 +44,6 @@ export function PageWindow({ layout, children, box }: { layout: Layout; children
       <div style={{ position: 'absolute', inset: 0, background: C.paper, boxShadow: SHADOW.sheet, overflow: 'hidden' }}>
         <WinSize.Provider value={{ w: win.w, h: win.h }}>{children}</WinSize.Provider>
       </div>
-      <BinderClip width={layout === 'wide' ? 128 : 132} style={{ top: -52, left: '50%', marginLeft: layout === 'wide' ? -64 : -66 }} />
       {/* כל נתון באתר הוא לדוגמה עד ההשקה, וזה כתוב (DESIGN.md). */}
       <Tape
         width={layout === 'wide' ? 150 : 170}

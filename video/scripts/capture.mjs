@@ -44,6 +44,8 @@ async function capture(name) {
   const meta = { device: name, viewport: DEVICES[name].viewport, base: BASE, capturedAt: new Date().toISOString() };
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ ...DEVICES[name], locale: 'he-IL', reducedMotion: 'reduce' });
+  // מבקר שכבר ראה את ההיכרות: בלי הכרטיס על המסך. ובלי תנועה, כדי שכל צילום יהיה במצב הסופי.
+  await ctx.addInitScript(() => window.localStorage.setItem('lamadti:intro-seen', '1'));
   const page = await ctx.newPage();
   const shot = async (file, opts = {}) => {
     await settle(page);
@@ -157,7 +159,7 @@ async function capture(name) {
       first: await viewBox(page.locator('#results h3').first()),
       firstRow: await viewBox(page.locator('#results h3').first().locator('xpath=ancestor::div[contains(@class,"@container")][1]')),
       firstScore: await viewBox(
-        page.locator('#results h3').first().locator('xpath=ancestor::div[contains(@class,"@container")][1]').locator('span.font-serif'),
+        page.locator('#results h3').first().locator('xpath=ancestor::div[contains(@class,"@container")][1]').locator('span.leading-none.font-bold'),
       ),
       firstGrads: await viewBox(page.locator('#results .hl-grads')),
     },

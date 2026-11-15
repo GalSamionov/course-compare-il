@@ -3,7 +3,7 @@ import { AbsoluteFill, OffthreadVideo, Sequence, spring, staticFile, useCurrentF
 import { PageWindow, Shot, center, useCrossfade, type Key } from './camera';
 import { DIR, META, sheetBounds } from './shots';
 import { C, SHADOW, STAGE, sans, serif, type Layout, type SceneProps } from './theme';
-import { BinderClip, Card, PenLoopAround, PenNumber, PenUnderline, PenWrite, Tape, Wordmark, useProgress } from './world';
+import { Card, PenLoopAround, PenNumber, PenUnderline, PenWrite, Tape, Wordmark, useProgress } from './world';
 
 /*
  * הסרטון קצר בכוונה (כ-30 שניות): אנשים מוותרים אחרי 20 שניות, ולכן הליבה (שואלים, רשימה, ציון) נגמרת לפני כן.
@@ -69,7 +69,6 @@ function CenterSheet({ layout, children }: { layout: Layout; children: React.Rea
         >
           {children}
         </div>
-        <BinderClip width={140} style={{ top: -58, left: '50%', marginLeft: -70 }} />
       </div>
     </AbsoluteFill>
   );
@@ -99,10 +98,10 @@ export function Intro({ layout }: SceneProps) {
         <h1
           style={{
             fontFamily: serif,
-            fontWeight: 800,
-            fontSize: wide ? 68 : 80,
+            fontWeight: 700,
+            fontSize: wide ? 68 : 66,
             lineHeight: 1.14,
-            letterSpacing: '-0.01em',
+            letterSpacing: '-0.012em',
             marginTop: wide ? 48 : 72,
             opacity: h1,
             transform: `translateY(${(1 - h1) * 14}px)`,
@@ -326,7 +325,7 @@ export function Outro({ layout, url }: SceneProps) {
         <h1
           style={{
             fontFamily: serif,
-            fontWeight: 800,
+            fontWeight: 700,
             fontSize: wide ? 72 : 70,
             lineHeight: 1.14,
             marginTop: wide ? 40 : 60,
