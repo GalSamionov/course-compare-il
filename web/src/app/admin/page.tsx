@@ -7,14 +7,32 @@ import { CompanyRequestItem } from '@/components/admin/company-request-item';
 import { textLink } from '@/components/admin/controls';
 import { CourseQueueItemView } from '@/components/admin/course-queue-item';
 import { DecisionLog } from '@/components/admin/decision-log';
+import { counted } from '@/components/admin/format';
 import { JoinRequestItem } from '@/components/admin/join-request-item';
+import { NewCourseGroups } from '@/components/admin/new-course-groups';
 import { QueueItemView } from '@/components/admin/queue-item';
 import { ScrapeRunReportView } from '@/components/admin/scrape-run-report';
 import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
 import { COMPANY_REQUESTS_PAGE, loadCompanyRequests } from '@/lib/admin/company-requests';
-import { COURSE_QUEUE_PAGE, loadCourseQueue, loadJoinRequests, loadLatestRun } from '@/lib/admin/course-queue';
+import {
+  COURSE_QUEUE_PAGE,
+  loadCourseQueue,
+  loadJoinRequests,
+  loadLatestRun,
+  loadNewCourseGroups,
+  loadNewCourseItems,
+  type CourseQueueItem,
+} from '@/lib/admin/course-queue';
 import { adminGate, keyProblemMessage, type AdminGate } from '@/lib/admin/gate';
+import {
+  groupTotals,
+  parseQueueView,
+  queueHref,
+  type CourseQueueView,
+  type NewCourseFilter,
+  type NewCourseGroup,
+} from '@/lib/admin/new-course-groups';
 import { loadQueue } from '@/lib/admin/queue';
 import { SITE_NAME } from '@/lib/site';
 
@@ -30,10 +48,12 @@ export const metadata: Metadata = {
  */
 export const instant = false;
 
-export default function AdminPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default function AdminPage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <Suspense fallback={null}>
-      <AdminQueues />
+      <AdminQueues searchParams={searchParams} />
     </Suspense>
   );
 }
@@ -44,11 +64,77 @@ function reviewsLine(count: number): string {
   return `${count} ביקורות מחכות, הישנה ראשונה. היעד: תשובה תוך 48 שעות.`;
 }
 
-function coursesLine(total: number, shown: number): string {
+const fmt = (n: number) => new Intl.NumberFormat('he-IL').format(n);
+
+/** "764 קורסים חדשים מ-49 מוסדות", ובמוסד אחד: "ממוסד אחד". */
+function newCoursesPhrase(total: number, institutions: number): string {
+  const from = institutions === 1 ? 'ממוסד אחד' : `מ-${fmt(institutions)} מוסדות`;
+  return `${counted(total, 'קורס חדש אחד', 'קורסים חדשים')} ${from}`;
+}
+
+/** השורה מתחת לכותרת של התור: מה מחכה, ומה "בטוח" אומר. */
+function coursesLine(total: number, groups: NewCourseGroup[], others: number): string {
   if (total === 0) return 'אין שינויים שמחכים. שינוי שגרתי עולה לבד, וקורס חדש או שינוי חריג מגיעים לכאן אחרי ריצה של האוסף.';
-  if (total === 1) return 'פריט אחד מחכה.';
-  if (shown < total) return `${total} פריטים מחכים. כאן ${shown} הישנים, ואחרי כל החלטה עולה הבא בתור.`;
-  return `${total} פריטים מחכים, הישן ראשון.`;
+  const parts: string[] = [];
+  if (groups.length > 0) {
+    const sums = groupTotals(groups);
+    const safe = sums.safe === 1 ? 'אחד מהם בטוח' : `${fmt(sums.safe)} מהם בטוחים`;
+    parts.push(
+      `${newCoursesPhrase(sums.total, groups.length)}. ${safe}: כל השדות בביטחון גבוה, בלי סימון בבדיקת הסבירות ובלי חשד לכפילות.`,
+    );
+  }
+  if (others > 0) {
+    const shown = Math.min(others, COURSE_QUEUE_PAGE);
+    const head = others === 1 ? 'שינוי אחד בקורס קיים מחכה' : `${fmt(others)} שינויים בקורסים קיימים מחכים`;
+    parts.push(shown < others ? `${head}. כאן ${shown} הישנים, ואחרי כל החלטה עולה הבא בתור.` : `${head}, הישן ראשון.`);
+  }
+  return parts.join(' ');
+}
+
+/** מעל הרשימה המסוננת: כמה, של מי, ומה בעמוד. */
+function filteredLine(view: CourseQueueView, total: number, shown: number, institution: string | null): string {
+  const of = institution ? ` של ${institution}` : '';
+  if (total === 0) {
+    return view.filter === 'duplicates' ? `אין קורסים חדשים${of} בחשד לכפילות.` : `אין קורסים חדשים${of} שאינם בטוחים.`;
+  }
+  const head =
+    view.filter === 'duplicates'
+      ? `${counted(total, 'קורס חדש אחד', 'קורסים חדשים')}${of} בחשד לכפילות. הכפילויות של אותו קורס עומדות זו ליד זו.`
+      : `${total === 1 ? 'קורס חדש אחד' : `${fmt(total)} קורסים חדשים`}${of} ${total === 1 ? 'לא בטוח' : 'לא בטוחים'}, הישן ראשון.`;
+  return shown < total ? `${head} כאן ${shown} הראשונים, ואחרי כל החלטה עולה הבא.` : head;
+}
+
+const FILTER_LABEL: Record<NewCourseFilter, string> = {
+  groups: 'לפי מוסד',
+  unsafe: 'רק לא בטוחים',
+  duplicates: 'חשד לכפילות',
+};
+
+/** איך להציג את הקורסים החדשים: לפי מוסד, או רשימה מסוננת. המסנן הנוכחי מודגש ואינו קישור. */
+function CourseFilters({ view, groups }: { view: CourseQueueView; groups: NewCourseGroup[] }) {
+  const sums = groupTotals(groups);
+  const counts: Record<NewCourseFilter, number> = { groups: groups.length, unsafe: sums.unsafe, duplicates: sums.duplicates };
+  return (
+    <nav aria-label="איך להציג את הקורסים החדשים" className="mt-3 flex flex-wrap items-center gap-x-5 font-sans text-[15px]">
+      {(['groups', 'unsafe', 'duplicates'] as const).map((filter) => {
+        const content = (
+          <>
+            {FILTER_LABEL[filter]}
+            <span className="ms-1.5 font-bold tabular-nums">{fmt(counts[filter])}</span>
+          </>
+        );
+        return view.filter === filter && view.institutionId === null ? (
+          <span key={filter} aria-current="page" className="inline-flex min-h-11 items-center font-bold">
+            {content}
+          </span>
+        ) : (
+          <Link key={filter} href={queueHref({ filter, institutionId: null })} className={`${textLink} font-semibold`}>
+            {content}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 }
 
 function requestsLine(count: number): string {
@@ -75,22 +161,39 @@ function keyProblemFix(gate: Extract<AdminGate, { kind: 'no-key' | 'bad-key' }>)
 const sectionTitle = 'pen-rule text-[21px] leading-snug font-bold lg:text-[28px]';
 const countText = 'mt-2 font-sans text-[15px] leading-normal text-ink-soft';
 
-async function AdminQueues() {
+const NO_ITEMS: { items: CourseQueueItem[]; total: number } = { items: [], total: 0 };
+
+async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
   // הכול בבקשה, לפני שנוגעים בשעון: getUser של Supabase בודק תפוגה עם Date.now(), והתור מחשב כמה זמן כל
   // ביקורת מחכה (08-caching.md, "Random values and timestamps").
   await connection();
   const gate = await adminGate({ readOnly: true });
   if (gate.kind === 'not-admin') notFound();
-  const [reviews, courses, run, join, companies] =
+  // ?cq=unsafe|duplicates ו-&inst: רשימה מסוננת של קורסים חדשים, במקום הסיכום לפי מוסד.
+  const view = parseQueueView(await searchParams);
+  const [reviews, courses, groups, filtered, run, join, companies] =
     gate.kind === 'ok'
       ? await Promise.all([
           loadQueue(gate.db),
           loadCourseQueue(gate.db),
+          loadNewCourseGroups(gate.db),
+          view.filter === 'groups' ? NO_ITEMS : loadNewCourseItems(gate.db, view),
           loadLatestRun(gate.db),
           loadJoinRequests(gate.db),
           loadCompanyRequests(gate.db),
         ])
-      : [[], { items: [], total: 0 }, null, { requests: [], institutions: [] }, { requests: [], open: 0, waiting: 0 }];
+      : [
+          [],
+          { items: [], total: 0, others: 0 },
+          [],
+          NO_ITEMS,
+          null,
+          { requests: [], institutions: [] },
+          { requests: [], open: 0, waiting: 0 },
+        ];
+  const filteredInstitution = view.institutionId
+    ? (groups.find((g) => g.institutionId === view.institutionId)?.institutionName ?? 'המוסד')
+    : null;
   const queues = [
     { id: 'reviews', label: 'ביקורות לאימות', count: reviews.length },
     { id: 'courses', label: 'קורסים לאישור', count: courses.total },
@@ -143,12 +246,39 @@ async function AdminQueues() {
                   קורסים לאישור
                 </h2>
                 <ScrapeRunReportView run={run} />
-                <p className={countText}>{coursesLine(courses.total, Math.min(courses.items.length, COURSE_QUEUE_PAGE))}</p>
-                <div className="mt-6">
-                  {courses.items.map((item) => (
-                    <CourseQueueItemView key={item.id} item={item} />
-                  ))}
-                </div>
+                <p className={`${countText} max-w-[68ch]`}>{coursesLine(courses.total, groups, courses.others)}</p>
+                {groups.length > 0 && <CourseFilters view={view} groups={groups} />}
+                {view.filter === 'groups' ? (
+                  <>
+                    <NewCourseGroups groups={groups} />
+                    {courses.items.length > 0 && (
+                      <div className="mt-6">
+                        {courses.items.map((item) => (
+                          <CourseQueueItemView key={item.id} item={item} />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <p className={countText}>
+                      {filteredLine(view, filtered.total, Math.min(filtered.items.length, COURSE_QUEUE_PAGE), filteredInstitution)}
+                      {filteredInstitution && (
+                        <>
+                          {' '}
+                          <Link href={queueHref({ filter: view.filter, institutionId: null })} className={textLink}>
+                            של כל המוסדות
+                          </Link>
+                        </>
+                      )}
+                    </p>
+                    <div className="mt-6">
+                      {filtered.items.map((item) => (
+                        <CourseQueueItemView key={item.id} item={item} />
+                      ))}
+                    </div>
+                  </>
+                )}
               </section>
 
               <section id="requests" aria-labelledby="requests-title" className="mt-10 scroll-mt-4 lg:mt-16 lg:scroll-mt-8">

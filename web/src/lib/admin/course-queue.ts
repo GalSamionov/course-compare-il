@@ -3,6 +3,7 @@ import { one } from '@/lib/data/shared';
 import type { Json } from '@/lib/database.types';
 import type { AdminDb } from './gate';
 import { suggestInstitution, urlHost } from './institution-match';
+import { toGroup, type CourseQueueView, type NewCourseGroup } from './new-course-groups';
 
 export type CourseQueueKind = 'new_course' | 'field' | 'maybe_inactive' | 'fetch_failed';
 
@@ -38,6 +39,8 @@ export interface CourseQueueItem {
   pageError: string | null;
   /** רק בקורס חדש. */
   newFields: NewCourseField[];
+  /** רק בקורס חדש, ברשימה מסוננת: למה הוא לא בטוח לאישור בבת אחת (מהמסד). */
+  causes: string[];
 }
 
 type CourseRef = {
@@ -79,27 +82,85 @@ const COURSE_COLUMNS =
  */
 export const COURSE_QUEUE_PAGE = 30;
 
-/** הפריטים שממתינים, הישן ראשון (מסמך העיצוב, סעיף 10, "קורסים לאישור"), ו-total: כמה ממתינים בסך הכול. */
-export async function loadCourseQueue(db: AdminDb): Promise<{ items: CourseQueueItem[]; total: number }> {
-  const [{ data, error }, countRes] = await Promise.all([
+/**
+ * מה שממתין, חוץ מקורסים חדשים: שינוי בשדה, קורס שנעלם ודף שלא נטען. הישן ראשון (מסמך העיצוב, סעיף 10,
+ * "קורסים לאישור"). קורסים חדשים מוצגים לפי מוסד (loadNewCourseGroups), כי ריצה ראשונה מכניסה מאות.
+ * total: כמה ממתינים בסך הכול, כולל קורסים חדשים. others: כמה מהם אינם קורסים חדשים.
+ */
+export async function loadCourseQueue(db: AdminDb): Promise<{ items: CourseQueueItem[]; total: number; others: number }> {
+  const [{ data, error }, countRes, othersRes] = await Promise.all([
     loadCourseQueueRows(db),
     db.from('course_change_queue').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+    db
+      .from('course_change_queue')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending')
+      .neq('kind', 'new_course'),
   ]);
   if (error) throw new Error(`course queue: ${error.message}`);
   if (countRes.error) throw new Error(`course queue count: ${countRes.error.message}`);
-  return { items: data.map(toQueueItem), total: countRes.count ?? data.length };
+  if (othersRes.error) throw new Error(`course queue count: ${othersRes.error.message}`);
+  return {
+    items: data.map(toQueueItem),
+    total: countRes.count ?? data.length,
+    others: othersRes.count ?? data.length,
+  };
 }
 
-function loadCourseQueueRows(db: AdminDb) {
+/** כל השדות של פריט בתור, עם הקורס והדף. */
+function queueRows(db: AdminDb) {
   return db
     .from('course_change_queue')
     .select(
       `id, kind, field, old_value, new_value, quote, confidence, reasons, created_at, courses(${COURSE_COLUMNS}), scrape_pages(url, last_error)`,
-    )
+    );
+}
+
+function loadCourseQueueRows(db: AdminDb) {
+  return queueRows(db)
     .eq('status', 'pending')
+    .neq('kind', 'new_course')
     .order('created_at', { ascending: true })
     .order('id', { ascending: true })
     .limit(COURSE_QUEUE_PAGE);
+}
+
+/** הקורסים החדשים בתור, שורה לכל מוסד. הסיכום נעשה במסד: העמוד לא טוען מאות פריטים. */
+export async function loadNewCourseGroups(db: AdminDb): Promise<NewCourseGroup[]> {
+  const { data, error } = await db.rpc('course_queue_new_course_groups');
+  if (error) throw new Error(`new course groups: ${error.message}`);
+  return data.map(toGroup);
+}
+
+/**
+ * רשימה מסוננת של קורסים חדשים (לא בטוחים, או חשד לכפילות), אולי של מוסד אחד: עד COURSE_QUEUE_PAGE
+ * הראשונים, בממשק הרגיל של פריט בתור. המסד בוחר ומסדר, וכאן נטענים רק הפריטים שבעמוד.
+ */
+export async function loadNewCourseItems(
+  db: AdminDb,
+  view: CourseQueueView,
+): Promise<{ items: CourseQueueItem[]; total: number }> {
+  const { data: picked, error } = await db.rpc('course_queue_new_course_items', {
+    p_filter: view.filter === 'duplicates' ? 'duplicates' : 'unsafe',
+    ...(view.institutionId ? { p_institution_id: view.institutionId } : {}),
+    p_limit: COURSE_QUEUE_PAGE,
+  });
+  if (error) throw new Error(`new course items: ${error.message}`);
+  if (picked.length === 0) return { items: [], total: 0 };
+  const { data, error: rowsError } = await queueRows(db).in(
+    'id',
+    picked.map((p) => p.queue_id),
+  );
+  if (rowsError) throw new Error(`new course items: ${rowsError.message}`);
+  const rows = new Map(data.map((row) => [row.id, row]));
+  return {
+    // הסדר של המסד: בכפילויות, הפריטים של אותה קבוצה זה ליד זה.
+    items: picked.flatMap((p) => {
+      const row = rows.get(p.queue_id);
+      return row ? [{ ...toQueueItem(row), causes: p.causes }] : [];
+    }),
+    total: Number(picked[0].total),
+  };
 }
 
 type QueueRow = NonNullable<Awaited<ReturnType<typeof loadCourseQueueRows>>['data']>[number];
@@ -131,6 +192,7 @@ function toQueueItem(row: QueueRow): CourseQueueItem {
     pageUrl: page?.url ?? null,
     pageError: page?.last_error ?? null,
     newFields: kind === 'new_course' ? newCourseFields(row.new_value) : [],
+    causes: [],
   };
 }
 

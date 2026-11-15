@@ -10,6 +10,7 @@ import {
   syllabusTitles,
 } from '@/lib/admin/course-fields';
 import type { CourseQueueItem } from '@/lib/admin/course-queue';
+import { DUPLICATE_LABEL } from '@/lib/admin/new-course-groups';
 import type { Json } from '@/lib/database.types';
 import { CourseDecideForm, type EditSpec } from './course-decide-form';
 import { textLink } from './controls';
@@ -84,6 +85,31 @@ function Reasons({ reasons, confidence }: { reasons: string[]; confidence: strin
           <li key={line}>{line}</li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/**
+ * ברשימה המסוננת של קורסים חדשים: חשד לכפילות, וקורס שכבר אינו טיוטה (מהמסד, private.new_course_queue).
+ * בחשד לכפילות, הפריטים של אותה קבוצה עומדים ברשימה זה ליד זה.
+ */
+function Suspicions({ causes }: { causes: string[] }) {
+  const duplicates = causes.flatMap((c) => (DUPLICATE_LABEL[c] ? [DUPLICATE_LABEL[c]] : []));
+  const notDraft = causes.includes('not_draft');
+  if (duplicates.length === 0 && !notDraft) return null;
+  return (
+    <div className="mt-4 space-y-2 text-[15px] leading-normal font-bold">
+      {duplicates.length > 0 && (
+        <div>
+          <p>חשד לכפילות:</p>
+          <ul className="mt-1 list-disc space-y-0.5 ps-5">
+            {duplicates.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {notDraft && <p>הקורס כבר לא טיוטה, ולכן פרסום ייכשל. אפשר לדחות את הפריט.</p>}
     </div>
   );
 }
@@ -274,6 +300,7 @@ export function CourseQueueItemView({ item }: { item: CourseQueueItem }) {
             </>
           )}
           <Reasons reasons={item.kind === 'fetch_failed' ? item.reasons.slice(0, 1) : item.reasons} confidence={item.confidence} />
+          <Suspicions causes={item.causes} />
         </section>
         <section aria-label="ההחלטה" className="min-w-0">
           <CourseDecideForm
