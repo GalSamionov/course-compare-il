@@ -39,14 +39,14 @@ export type Database = {
                   ]
                 },"audit_log": {
                   Row: {
-                    "action": string,"actor_id": string | null,"course_queue_id": number | null,"created_at": string,"details": NonNullable<Json>,"id": number,"institution_request_id": number | null,"review_id": string | null
+                    "action": string,"actor_id": string | null,"company_request_id": number | null,"course_queue_id": number | null,"created_at": string,"details": NonNullable<Json>,"id": number,"institution_request_id": number | null,"review_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "action": string,"actor_id"?: string | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
+                    "action": string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Update: {
-                    "action"?: string,"actor_id"?: string | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
+                    "action"?: string,"actor_id"?: string | null,"company_request_id"?: number | null,"course_queue_id"?: number | null,"created_at"?: string,"details"?: NonNullable<Json>,"id"?: never,"institution_request_id"?: number | null,"review_id"?: string | null
                   }
                   Relationships: [
                     
@@ -70,6 +70,20 @@ isOneToOne: false
       referencedRelation: "categories"
       referencedColumns: ["id"]
     }
+                  ]
+                },"company_requests": {
+                  Row: {
+                    "client_hash": string | null,"closed_at": string | null,"company_name": string,"contact_name": string,"contacted_at": string | null,"created_at": string,"email": string,"format": string | null,"id": number,"needs": string,"phone": string | null,"status": string,"team_size": string | null,"timing": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_hash"?: string | null,"closed_at"?: string | null,"company_name": string,"contact_name": string,"contacted_at"?: string | null,"created_at"?: string,"email": string,"format"?: string | null,"id"?: never,"needs": string,"phone"?: string | null,"status"?: string,"team_size"?: string | null,"timing"?: string | null
+                  }
+                  Update: {
+                    "client_hash"?: string | null,"closed_at"?: string | null,"company_name"?: string,"contact_name"?: string,"contacted_at"?: string | null,"created_at"?: string,"email"?: string,"format"?: string | null,"id"?: never,"needs"?: string,"phone"?: string | null,"status"?: string,"team_size"?: string | null,"timing"?: string | null
+                  }
+                  Relationships: [
+                    
                   ]
                 },"compare_items": {
                   Row: {
@@ -630,6 +644,9 @@ isOneToOne: false
 "publish_review":
 { Args: { "p_admin_id": string,"p_paid_bucket"?: number,"p_proof_kind": Database["public"]['Enums']["proof_kind"],"p_review_id": string }; Returns: string
                            },
+"purge_company_requests":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "purge_institution_requests":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
@@ -657,8 +674,14 @@ isOneToOne: false
 "scraper_start_run":
 { Args: { "p_model": string,"p_trigger": string }; Returns: number
                            },
+"set_company_request_status":
+{ Args: { "p_admin_id": string,"p_request_id": number,"p_status": string }; Returns: undefined
+                           },
 "set_vendor_response":
 { Args: { "p_admin_id": string,"p_body": string,"p_review_id": string }; Returns: string
+                           },
+"submit_company_request":
+{ Args: { "p_client_hash": string,"p_company_name": string,"p_contact_name": string,"p_email": string,"p_format"?: string,"p_needs": string,"p_phone"?: string,"p_team_size"?: string,"p_timing"?: string }; Returns: string
                            },
 "submit_institution_request":
 { Args: { "p_client_hash": string,"p_contact_email": string,"p_course_url": string,"p_institution_name": string }; Returns: string
