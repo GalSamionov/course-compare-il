@@ -271,7 +271,7 @@ export function AddCourseLink({
             </div>
           </div>
           <p className="ms-(--margin) mt-3 ps-3 font-sans text-[13px] leading-normal text-ink-soft text-pretty">
-            עד שנבדוק, הקורס לא מופיע באתר, ורק אתם רואים אותו. את הקישור אנחנו לא פותחים עכשיו.{' '}
+            עד שנבדוק, הקורס לא מופיע באתר. את הקישור אנחנו לא פותחים עכשיו.{' '}
             <Link href="/privacy#course-links" className={smallLink}>
               מה נשמר
             </Link>

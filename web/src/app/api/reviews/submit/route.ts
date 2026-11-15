@@ -28,6 +28,7 @@ type SubmitError =
   | 'not_configured'
   | 'bad_request'
   | 'not_draft'
+  | 'course_closed'
   | 'changed'
   | 'incomplete'
   | 'file_missing'
@@ -57,6 +58,7 @@ interface Check {
 
 type CourseRef = {
   id: string;
+  status: string;
   title: string;
   site_price_ils: number | null;
   institutions: { name: string; business_number: string | null } | { name: string; business_number: string | null }[] | null;
@@ -186,7 +188,7 @@ export async function POST(request: NextRequest) {
     admin
       .from('reviews')
       .select(
-        'id, author_id, status, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(id, title, site_price_ils, institutions(name, business_number), categories(course_type))',
+        'id, author_id, status, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(id, status, title, site_price_ils, institutions(name, business_number), categories(course_type))',
       )
       .eq('id', input.reviewId)
       .maybeSingle(),
@@ -208,6 +210,19 @@ export async function POST(request: NextRequest) {
     courseType = linked ?? null;
   }
   if (!course || !institution || !courseType) return fail('failed', 500);
+  // קורס טיוטה: רק קורס שהכותב הוסיף מקישור, ורק כל עוד הוא ממתין (כמו private.is_own_link_draft, שחוסמת
+  // טיוטה חדשה). טיוטה שנפתחה לפני שגל דחה את הקורס לא נשלחת לתור.
+  if (course.status === 'draft') {
+    const { data: link, error: linkError } = await admin
+      .from('course_submissions')
+      .select('id')
+      .eq('course_id', course.id)
+      .eq('submitted_by', userId)
+      .eq('status', 'pending')
+      .limit(1);
+    if (linkError) return fail('failed', 500);
+    if (link.length === 0) return fail('course_closed', 409);
+  }
 
   // אותה בדיקה של הצעדים שהדפדפן הריץ, על מה שבאמת שמור במסד.
   const draft: DraftFields = {

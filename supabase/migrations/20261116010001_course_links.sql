@@ -121,6 +121,14 @@ create unique index course_submissions_one_request_per_url on course_submissions
 alter table course_submissions enable row level security;
 revoke all on course_submissions from anon, authenticated;
 
+-- ===== 5א. אינדקסים לזיהוי כפילות =====
+-- הבדיקה "כבר באתר" רצה בכל שליחה, גם מהטופס הציבורי. בלי אינדקס היא נרמלה כל קורס וכל דף בכל פעם.
+-- הפונקציות immutable. רק service_role ובעל המסד כותבים לטבלאות האלה, ולשניהם יש הרשאה להריץ אותן.
+
+create index courses_url_key_idx on courses (private.course_url_key(page_url));
+create index courses_title_key_idx on courses (private.course_title_key(title));
+create index scrape_pages_url_key_idx on scrape_pages (private.course_url_key(url));
+
 -- ===== 5. עזרים =====
 
 -- רשתות חברתיות: לא קוראים אותן אף פעם (תנאי השימוש שלהן). אותה רשימה כמו SOCIAL_HOSTS ב-web/src/lib/course-links/url.ts.
@@ -131,7 +139,8 @@ set search_path = ''
 as $$
   select coalesce((
     select bool_or(h = d or h like '%.' || d)
-    from (select private.url_host(p_url) as h) x,
+    -- נקודה בסוף השם (facebook.com.) היא אותו אתר.
+    from (select rtrim(private.url_host(p_url), '.') as h) x,
          unnest(array[
            'facebook.com', 'fb.com', 'fb.me', 'fb.watch', 'instagram.com', 'instagr.am', 'threads.net', 'threads.com',
            'whatsapp.com', 'wa.me', 'tiktok.com', 'linkedin.com', 'lnkd.in', 'x.com', 'twitter.com', 't.co',
@@ -191,6 +200,7 @@ begin
 end $$;
 
 -- קורס שכבר באתר (לא טיוטה) עם אותו קישור: בדף הקורס, בדף של האוסף, או בקישור שכבר אושר או מוזג אליו.
+-- שלוש שאילתות נפרדות, כל אחת על אינדקס (סעיף 5א): הטפסים פתוחים, ובדיקה כזו לא עוברת על כל הקורסים.
 create function private.live_course_by_url(p_url_key text)
 returns uuid
 language sql stable
@@ -199,11 +209,13 @@ as $$
   select c.id
   from public.courses c
   where c.status <> 'draft'
-    and (private.course_url_key(c.page_url) = p_url_key
-      or exists (select 1 from public.scrape_pages p where p.course_id = c.id and private.course_url_key(p.url) = p_url_key)
-      or exists (select 1 from public.course_submissions s
-                 where coalesce(s.merged_into, s.course_id) = c.id and s.status in ('approved', 'merged')
-                   and s.url_key = p_url_key))
+    and c.id in (
+      select c2.id from public.courses c2 where private.course_url_key(c2.page_url) = p_url_key
+      union
+      select p.course_id from public.scrape_pages p where private.course_url_key(p.url) = p_url_key and p.course_id is not null
+      union
+      select coalesce(s.merged_into, s.course_id) from public.course_submissions s
+      where s.url_key = p_url_key and s.status in ('approved', 'merged'))
   order by (c.status = 'removed'), c.created_at
   limit 1;
 $$;
@@ -331,10 +343,7 @@ begin
   -- האתר של מרצה הוא סימן שזה אותו מוסד. דף בפייסבוק לא.
   v_host := case when v_social then null else private.url_host(v_url) end;
 
-  -- נעילה אחת לטופס: שתי שליחות במקביל לא יוצרות שני קורסים, ולא עוברות את המגבלה.
-  perform pg_advisory_xact_lock(hashtext('public.course_submissions'));
-
-  -- 1. כבר באתר: אותו קישור, או אותו שם אצל אותו מוסד.
+  -- 1. כבר באתר: אותו קישור, או אותו שם אצל אותו מוסד. לפני הנעילה: רק קריאה, ועל אינדקסים.
   v_course_id := private.live_course_by_url(v_url_key);
   if v_course_id is null then
     select c.id into v_course_id
@@ -352,7 +361,11 @@ begin
                               'course_title', v_course.title);
   end if;
 
+  -- מכאן נעילה אחת לטופס: שתי שליחות במקביל לא יוצרות שני קורסים, ולא עוברות את המגבלה.
+  perform pg_advisory_xact_lock(hashtext('public.course_submissions'));
+
   -- 2. בוגר (אולי אותו בוגר) כבר הוסיף אותו, והוא עוד ממתין: ממשיכים על אותה טיוטה.
+  -- הבוגר רואה בה רק את מה שהוא עצמו כתב (my_course_link), ולכן לא יודע שמישהו אחר הוסיף אותה.
   select c.* into v_course
   from public.course_submissions s
   join public.courses c on c.id = s.course_id and c.status = 'draft'
@@ -433,6 +446,13 @@ begin
   end if;
   v_url_key := private.course_url_key(v_url);
 
+  -- כבר באתר: לפני הנעילה ולפני המגבלה. רק קריאה, על אינדקסים, ומידע ציבורי.
+  v_course_id := private.live_course_by_url(v_url_key);
+  if v_course_id is not null then
+    select * into v_course from public.courses where id = v_course_id;
+    return jsonb_build_object('outcome', 'existing', 'course_slug', v_course.slug, 'course_title', v_course.title);
+  end if;
+
   perform pg_advisory_xact_lock(hashtext('public.course_submissions'));
   if (select count(*) from public.course_submissions s
       where s.client_hash = p_client_hash and s.created_at > now() - interval '1 day') >= 3 then
@@ -441,12 +461,6 @@ begin
   if (select count(*) from public.course_submissions s
       where s.source = 'request' and s.created_at > now() - interval '1 day') >= 50 then
     raise exception 'too many requests today' using errcode = 'LM043';
-  end if;
-
-  v_course_id := private.live_course_by_url(v_url_key);
-  if v_course_id is not null then
-    select * into v_course from public.courses where id = v_course_id;
-    return jsonb_build_object('outcome', 'existing', 'course_slug', v_course.slug, 'course_title', v_course.title);
   end if;
   if exists (select 1 from public.course_submissions s where s.status = 'pending' and s.url_key = v_url_key) then
     return jsonb_build_object('outcome', 'sent');
@@ -460,15 +474,15 @@ end $$;
 -- ===== 9. הבוגר: הקורסים שהוסיף, כדי ש"הביקורות שלי" ידע מה לכתוב ולאן להמשיך =====
 -- רק השורות של המשתמש המחובר, ורק קורס שעדיין טיוטה (קורס שאושר כבר בקטלוג).
 
+-- השם והמוסד כמו שהבוגר עצמו כתב: אם בוגר אחר הוסיף את אותו קורס קודם, לא רואים את מה שהוא כתב.
 create function my_course_links()
 returns table (course_id uuid, course_title text, institution_name text, status text, decision_reason text)
 language sql stable security definer
 set search_path = ''
 as $$
-  select distinct on (s.course_id) s.course_id, c.title, i.name, s.status, s.decision_reason
+  select distinct on (s.course_id) s.course_id, s.course_title, s.institution_name, s.status, s.decision_reason
   from public.course_submissions s
   join public.courses c on c.id = s.course_id and c.status = 'draft'
-  join public.institutions i on i.id = c.institution_id
   where s.submitted_by = (select auth.uid()) and s.source = 'review'
   order by s.course_id, s.created_at desc;
 $$;
@@ -478,6 +492,7 @@ grant execute on function my_course_links() to authenticated;
 -- ===== 10. עמוד הכתיבה של קורס מקישור (/review/new?course=<id>): רק למי שהוסיף אותו =====
 -- נטען בדפדפן, כמו הטיוטה של הביקורת, ולכן העמוד נשאר סטטי. null: הקורס לא שלו, או שכבר לא קיים (מוזג).
 -- live_slug: הקורס כבר אושר, והכתיבה ממשיכה בעמוד הרגיל. merged_slug: גל מיזג אותו לקורס שכבר באתר.
+-- השם והמוסד כמו שהבוגר עצמו כתב (כמו ב-my_course_links).
 
 create function my_course_link(p_course_id uuid)
 returns jsonb
@@ -485,14 +500,13 @@ language sql stable security definer
 set search_path = ''
 as $$
   select jsonb_build_object(
-    'course_id', c.id, 'title', c.title, 'institution_name', i.name,
+    'course_id', c.id, 'title', s.course_title, 'institution_name', s.institution_name,
     'course_type', private.link_course_type(c.id),
     'status', s.status, 'decision_reason', s.decision_reason,
     'live_slug', case when c.status <> 'draft' then c.slug end,
     'merged_slug', (select m.slug from public.courses m where m.id = s.merged_into and m.status <> 'draft'))
   from public.course_submissions s
   join public.courses c on c.id = s.course_id
-  join public.institutions i on i.id = c.institution_id
   where s.course_id = p_course_id and s.submitted_by = (select auth.uid()) and s.source = 'review'
   order by s.created_at desc
   limit 1;

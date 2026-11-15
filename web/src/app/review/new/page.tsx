@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** כתיבת ביקורת על קורס שהבוגר הוסיף מקישור (/review/new?course=<id>). רק הוא רואה את הקורס עד שנבדוק אותו. */
+/** כתיבת ביקורת על קורס שהבוגר הוסיף מקישור (/review/new?course=<id>). הקורס לא באתר עד שנבדוק אותו. */
 export default async function NewCourseReviewPage() {
   const metrics = await getReviewMetrics();
   return (

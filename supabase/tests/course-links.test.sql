@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(67);
+select plan(70);
 
 -- הוספת קורס מקישור (20261116010001_course_links.sql): בוגר ב-/review, ובקשה ב-/request-course.
 -- נתוני בדיקה, כ-postgres. כל שאילתה מוגבלת לנתונים האלה: המסד בפיי משותף, ויכולים להיות בו קישורים אחרים.
@@ -103,7 +103,22 @@ select is(
   (select count(*)::integer from course_submissions where course_id = (select id from d1)),
   2, 'שורה אחת לכל בוגר, ובלי שורה כפולה לאותו בוגר'
 );
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub": "c1c1c1c1-0000-0000-0000-00000000000c", "role": "authenticated"}', true);
+select is(
+  my_course_link((select id from d1)) ->> 'title', 'לק גל',
+  'הבוגר השני רואה את השם שהוא כתב, ולא את מה שהבוגר הראשון כתב'
+);
+reset role;
+set local role service_role;
 select is(course_link_type((select id from d1))::text, 'hobby', 'סוג השאלון: מהבוגר הראשון, כשאין תחום');
+
+select ok(
+  private.is_social_url('https://www.facebook.com./x') and private.is_social_url('https://m.facebook.com/x')
+  and not private.is_social_url('https://notfacebook.com/x'),
+  'רשת חברתית גם עם נקודה בסוף השם, ולא אתר שרק מכיל את השם'
+);
 
 -- ===== בדיקות קלט =====
 
@@ -195,7 +210,14 @@ select is(my_course_link((select id from d1)), null, 'וגם לא בעמוד ה�
 reset role;
 
 -- ===== בקשה ב-/request-course =====
+insert into scrape_pages (institution_id, url, course_id)
+values ('c1c1c1c1-0000-0000-0000-000000000003', 'https://www.cl-inst.example/python-full', 'c1c1c1c1-0000-0000-0000-000000000004');
 set local role service_role;
+
+select is(
+  submit_course_request('http://cl-inst.example/python-full/', null, null, repeat('f', 64)) ->> 'course_slug',
+  'cl-live', 'קישור שהאוסף כבר קורא לקורס באתר: הקורס הזה'
+);
 
 select is(
   submit_course_request('https://cl-inst.example/courses/python', null, null, repeat('a', 64)) ->> 'course_slug',

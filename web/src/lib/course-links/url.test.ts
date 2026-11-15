@@ -36,6 +36,13 @@ describe('normalizeCourseLink', () => {
     );
   });
 
+  it('drops a trailing dot in the host before any check', () => {
+    const url = normalizeCourseLink('https://www.facebook.com./dana');
+    expect(url).toBe('https://www.facebook.com/dana');
+    expect(isSocialUrl(url!)).toBe(true);
+    expect(normalizeCourseLink('http://localhost./')).toBeNull();
+  });
+
   it('refuses what is not a web page', () => {
     for (const bad of [
       '',

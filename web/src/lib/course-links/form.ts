@@ -32,7 +32,12 @@ const field = (form: FormData, name: string) => {
   const value = form.get(name);
   return typeof value === 'string' ? value : '';
 };
-const oneLine = (text: string) => text.replace(/\s+/g, ' ').trim();
+/**
+ * תווים בלתי נראים (כיווניות, רוחב אפס): שם ב-/admin היה נראה אחרת ממה שהוא, ושני שמות זהים לא היו נחשבים כפולים.
+ * סקירת האבטחה של הסשן.
+ */
+const visible = (text: string) => text.replace(/\p{Cf}/gu, '');
+const oneLine = (text: string) => visible(text).replace(/\s+/g, ' ').trim();
 /** אורך כמו char_length במסד: לפי תווים, ולא לפי יחידות של UTF-16. */
 const length = (text: string) => [...text].length;
 
@@ -96,7 +101,7 @@ export function parseCourseRequestForm(form: FormData): RequestParse {
   else if (length(name) > 160) errors.name = 'עד 160 תווים.';
 
   // שורות נשמרות, אבל לא יותר משתי שורות ריקות ברצף.
-  const note = field(form, 'note').replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  const note = visible(field(form, 'note')).replace(/\r\n?/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
   if (length(note) > 500) errors.note = 'עד 500 תווים.';
 
   if (Object.keys(errors).length > 0 || !url) return { ok: false, errors };

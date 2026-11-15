@@ -50,6 +50,13 @@ describe('parseCourseLinkForm', () => {
     });
   });
 
+  it('removes invisible direction and zero-width characters from the names', () => {
+    const result = parseCourseLinkForm(
+      form({ url: 'https://a.example/x', title: 'לק‏ ג׳ל‮', institutionName: 'דנה​', courseKind: 'hobby' }),
+    );
+    expect(result.ok && result.values).toMatchObject({ title: 'לק ג׳ל', institutionName: 'דנה' });
+  });
+
   it('counts characters like the database, and refuses a category that is not a slug', () => {
     const long = parseCourseLinkForm(
       form({ url: 'https://a.example/x', title: 'א'.repeat(161), institutionName: 'ב'.repeat(121), category: '../x' }),

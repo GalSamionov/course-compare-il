@@ -211,6 +211,7 @@ export type SubmitResult =
   | 'incomplete'
   | 'signed_out'
   | 'not_draft'
+  | 'course_closed'
   | 'changed'
   | 'error';
 
@@ -221,6 +222,7 @@ const KNOWN: readonly SubmitResult[] = [
   'incomplete',
   'signed_out',
   'not_draft',
+  'course_closed',
   'changed',
 ];
 
@@ -232,6 +234,7 @@ export const SUBMIT_MESSAGE: Record<Exclude<SubmitResult, 'ok'>, string> = {
   incomplete: 'חסר משהו באחד הצעדים. חזרנו אליו.',
   signed_out: 'ההתחברות פגה. התחברו שוב, והטיוטה תחכה.',
   not_draft: 'הביקורת כבר נשלחה לבדיקה.',
+  course_closed: 'הקורס הזה לא נוסף לאתר, ולכן אי אפשר לשלוח עליו ביקורת.',
   changed: 'הטיוטה השתנתה בזמן השליחה. נסו לשלוח שוב.',
   error: 'לא הצלחנו לשלוח. הטיוטה שמורה. נסו שוב בעוד דקה.',
 };

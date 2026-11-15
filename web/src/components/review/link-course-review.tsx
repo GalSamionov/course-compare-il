@@ -82,7 +82,7 @@ export function LinkCourseReview({ metrics }: { metrics: MetricDef[] }) {
     return (
       <>
         <h1 className={title}>כתיבת ביקורת</h1>
-        <p className={line}>הקורס שהוספתם מחכה לכם. רק אתם רואים אותו עד שנבדוק אותו, ולכן צריך להתחבר.</p>
+        <p className={line}>הקורס שהוספתם מחכה לכם. הוא עוד לא באתר, ולכן צריך להתחבר כדי להמשיך.</p>
         <Link href={`/login?next=${encodeURIComponent(`/review/new?course=${validId}`)}`} className={primary}>
           להתחבר ולהמשיך
         </Link>
@@ -166,7 +166,7 @@ export function LinkCourseReview({ metrics }: { metrics: MetricDef[] }) {
         עוד לא באתר
       </p>
       <p className="mt-1 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:text-base">
-        עד שנבדוק את הקורס, רק אתם רואים אותו. אחרי שנאשר אותו ואת ההוכחה, הוא והביקורת עולים לאתר יחד.
+        עד שנבדוק את הקורס, הוא לא מופיע באתר. אחרי שנאשר אותו ואת ההוכחה, הוא והביקורת עולים לאתר יחד.
       </p>
       <ReviewFlow
         form={{

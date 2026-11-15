@@ -77,6 +77,8 @@ export function normalizeCourseLink(input: string, depth = 0): string | null {
   if (!url) return null;
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
   if (url.username || url.password) return null;
+  // "facebook.com." ו-"localhost." הם אותו מארח: בלי הנקודה, לפני כל בדיקה.
+  url.hostname = url.hostname.replace(/\.+$/, '');
   const host = url.hostname.toLowerCase();
   if (!host.includes('.') || /^[\d.]+$/.test(host) || host.startsWith('[') || host === 'localhost' || host.endsWith('.localhost')) {
     return null;
