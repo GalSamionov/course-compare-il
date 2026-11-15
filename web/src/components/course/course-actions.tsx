@@ -8,6 +8,7 @@ import { TickMark } from '@/components/notebook/tick';
 import { buttonVariants } from '@/components/ui/button';
 import { toggleCompare, useAccount } from '@/lib/account/store';
 import { cn } from '@/lib/utils';
+import { ShareLinks } from './share-links';
 
 type Note = 'added-local' | 'added' | 'full' | 'error' | null;
 
@@ -22,11 +23,14 @@ export function CourseActions({
   courseId,
   slug,
   title,
+  share,
   stacked = false,
 }: {
   courseId: string;
   slug: string;
   title: string;
+  /** "לשלוח בוואטסאפ": ההודעה והכתובת, מהשרת (share-text.ts). */
+  share?: { text: string; url: string };
   /** בעמודה הצדדית במחשב: הכפתורים זה מתחת לזה. */
   stacked?: boolean;
 }) {
@@ -83,6 +87,7 @@ export function CourseActions({
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2">
         <SaveButton courseId={courseId} title={title} />
+        {share && <ShareLinks text={share.text} url={share.url} />}
       </div>
       <div role="status">
         {note === 'added-local' && (

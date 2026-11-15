@@ -16,8 +16,8 @@ import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
 import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
-import { courseShareDescription, courseShareTitle } from '@/lib/og/share-text';
-import { SITE_NAME } from '@/lib/site';
+import { courseShareDescription, courseShareMessage, courseShareTitle } from '@/lib/og/share-text';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 
 /**
  * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
@@ -62,6 +62,8 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
+  // "לשלוח בוואטסאפ": אותו טקסט כמו בתצוגה של קישור משותף, והכתובת המלאה (SITE_URL, כמו בתמונת השיתוף).
+  const share = { text: courseShareMessage(course), url: `${SITE_URL}/courses/${course.slug}` };
   // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג, ומספר הפרקים סופר רק אותם.
   const hasGrads = hasGradsSection(course);
   const hasReviews = course.reviews.length > 0;
@@ -144,7 +146,7 @@ export default async function CoursePage({ params }: Props) {
               <AtAGlance course={course} />
               {/* במחשב הפעולות כאן, תמיד בהישג יד. בנייד הן בסוף העמוד (החוזה של עמוד הקורס). */}
               <div className="hidden lg:block">
-                <CourseActions courseId={course.id} slug={course.slug} title={course.title} stacked />
+                <CourseActions courseId={course.id} slug={course.slug} title={course.title} share={share} stacked />
               </div>
             </div>
           </aside>
@@ -161,7 +163,7 @@ export default async function CoursePage({ params }: Props) {
             {hasGrads && <GradsSection course={course} />}
             <ReviewsSection slug={course.slug} reviews={course.reviews} total={reviewCount} />
             <div className="lg:hidden">
-              <CourseActions courseId={course.id} slug={course.slug} title={course.title} />
+              <CourseActions courseId={course.id} slug={course.slug} title={course.title} share={share} />
             </div>
 
             {course.lastCheckedAt && (
