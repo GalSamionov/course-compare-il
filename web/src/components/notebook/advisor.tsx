@@ -280,7 +280,7 @@ function AnswerSheet({
       </div>
 
       <div className="mt-3.5 grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start">
-        <p className="-rotate-3 pt-0.5 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-[15px]">
+        <p className=" pt-0.5 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-[15px]">
           <PenArrow />
           הצבע הוא המקור
         </p>

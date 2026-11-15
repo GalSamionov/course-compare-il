@@ -54,11 +54,10 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
             <span className="sr-only">ציון בוגרים {value.toFixed(1)} מתוך 10.</span>
             <div className="font-sans text-[13px] leading-snug lg:text-[15px]">
               <p className="font-bold">ציון בוגרים מתוך 10</p>
-              {score?.status === 'scored' && (
-                <p>
-                  {verifiedGraduatesText(score.reviewCount)}
-                  {score.recommendPct !== null && ` · ${Math.round(score.recommendPct)}% ממליצים`}
-                </p>
+              {/* שתי שורות, כמו בתיבת הציון בעמוד הקורס: ב-Plex הרחב שורה אחת נשברה ליד הנקודה. */}
+              {score?.status === 'scored' && <p>{verifiedGraduatesText(score.reviewCount)}</p>}
+              {score?.status === 'scored' && score.recommendPct !== null && (
+                <p>{Math.round(score.recommendPct)}% ממליצים</p>
               )}
             </div>
           </div>

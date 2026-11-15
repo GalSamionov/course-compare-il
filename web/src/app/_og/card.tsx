@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import type { CSSProperties, ReactNode } from 'react';
 import type { CoursePageData } from '@/lib/data/course-page';
+import { logoMarkSvg } from '@/lib/logo';
 import {
   formatIls,
   invoiceCountText,
@@ -21,7 +22,7 @@ import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
  * Satori (next/og) מצייר משמאל לימין ובלי אלגוריתם הכיווניות. לכן כל טקסט עובר דרך <Rtl>:
  * היחידות מ-rtlTokens מונחות בשורה מימין לשמאל (row-reverse), וכל שורה בעיצוב בנויה ככה.
  *
- * הגופנים: IBM Plex Sans Hebrew ו-Playpen Sans Hebrew, אותם גופנים של האתר מ-Google Fonts
+ * הגופנים: IBM Plex Sans Hebrew (הדיו) ו-Rubik (העט), אותם גופנים של האתר מ-Google Fonts
  * (רישיון OFL). Satori לא קורא woff2 ולא גופנים משתנים, ולכן בתיקייה fonts יש עותקים סטטיים ב-TTF,
  * במשקלים שהתמונה צריכה, רק עם עברית ולטינית.
  */
@@ -45,11 +46,11 @@ function loadFonts() {
   fontsPromise ??= Promise.all([
     readFile(join(process.cwd(), 'src/app/_og/fonts/ibm-plex-sans-hebrew-400.ttf')),
     readFile(join(process.cwd(), 'src/app/_og/fonts/ibm-plex-sans-hebrew-700.ttf')),
-    readFile(join(process.cwd(), 'src/app/_og/fonts/playpen-sans-hebrew-500.ttf')),
+    readFile(join(process.cwd(), 'src/app/_og/fonts/rubik-500.ttf')),
   ]).then(([print400, print700, pen500]): OgFonts => [
     { name: 'IBM Plex Sans Hebrew', data: print400, weight: 400, style: 'normal' },
     { name: 'IBM Plex Sans Hebrew', data: print700, weight: 700, style: 'normal' },
-    { name: 'Playpen Sans Hebrew', data: pen500, weight: 500, style: 'normal' },
+    { name: 'Rubik', data: pen500, weight: 500, style: 'normal' },
   ]);
   return fontsPromise;
 }
@@ -72,18 +73,6 @@ const PEN_RULE = svgUri(
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 12" preserveAspectRatio="none"><path fill="${PEN}" d="M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z"/></svg>`,
 );
 
-/** מסגרת בקו אחד עם פינות קעורות, כמו תווית שם האתר (globals.css, --label-frame). */
-function labelFrame(w: number, h: number): string {
-  const frame = (inset: number, r: number, stroke: number) => {
-    const a = inset;
-    const b = w - inset;
-    const c = h - inset;
-    return `<path fill="none" stroke="${INK}" stroke-width="${stroke}" d="M${a + r} ${a}H${b - r}A${r} ${r} 0 0 0 ${b} ${a + r}V${c - r}A${r} ${r} 0 0 0 ${b - r} ${c}H${a + r}A${r} ${r} 0 0 0 ${a} ${c - r}V${a + r}A${r} ${r} 0 0 0 ${a + r} ${a}Z"/>`;
-  };
-  return svgUri(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${frame(2, 11, 2.8)}</svg>`,
-  );
-}
 
 /**
  * שורה עברית: היחידות מ-rtlTokens, מימין לשמאל, עם שבירת שורה שמתחילה מימין.
@@ -140,34 +129,14 @@ function Marked({ text, size, color, style }: { text: string; size: number; colo
   );
 }
 
-/**
- * שם האתר בתווית, כמו בראש כל עמוד (components/site/wordmark.tsx): התווית מודפסת בדיו, והשם כתוב בה בעט כחול.
- * באתר העט של השם במשקל 600. כאן יש רק עותק של 500, ולכן קו מתאר דק באותו צבע מעבה אותו לאותו משקל.
- */
+/** הלוגו, כמו בראש כל עמוד (components/site/wordmark.tsx): ל מוקפת בעט כחול, והשם בדיו מודפסת. */
+const LOGO = svgUri(logoMarkSvg({ size: 160 }));
 function Wordmark() {
-  const size = 46;
-  const w = Math.round(Array.from(SITE_NAME).length * size * 0.62) + 64;
-  const h = 76;
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: w,
-        height: h,
-        backgroundImage: `url(${labelFrame(w, h)})`,
-        backgroundSize: '100% 100%',
-        fontFamily: 'Playpen Sans Hebrew',
-        fontWeight: 500,
-        color: PEN,
-      }}
-    >
-      <Rtl
-        text={SITE_NAME}
-        size={size}
-        style={{ marginTop: -2, transform: 'rotate(-1deg)', WebkitTextStroke: `0.9px ${PEN}` }}
-      />
+    <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+      {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
+      <img src={LOGO} width={68} height={68} />
+      <Rtl text={SITE_NAME} size={52} style={{ fontWeight: 700, color: INK, marginRight: 14, letterSpacing: -0.5 }} />
     </div>
   );
 }
@@ -384,7 +353,7 @@ export async function renderCourseCard(course: CoursePageData): Promise<ImageRes
             <Rtl
               text="את הקורס עצמו עוד לא בדקנו."
               size={26}
-              style={{ fontFamily: 'Playpen Sans Hebrew', fontWeight: 500, color: PEN, marginTop: 14, marginRight: 6, transform: 'rotate(-1.5deg)' }}
+              style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN, marginTop: 14, marginRight: 6 }}
             />
           </div>
         </div>

@@ -51,7 +51,7 @@ function Details({ review }: { review: MyReview }) {
   if (review.status === 'draft') return <p className="mt-1 font-sans text-[15px] leading-normal">עוד לא נשלחה לבדיקה.</p>;
   if (review.status === 'pending') {
     return (
-      <p className="mt-1.5 -rotate-1 font-pen text-[15px] leading-snug font-medium text-pen">
+      <p className="mt-1.5 font-pen text-[15px] leading-snug font-medium text-pen">
         <PenArrow />
         נבדוק תוך 48 שעות
       </p>

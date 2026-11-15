@@ -1,23 +1,25 @@
 import Link from 'next/link';
 import { SITE_NAME } from '@/lib/site';
 import { cn } from '@/lib/utils';
+import { LogoMark } from './logo-mark';
 
 /**
- * שם האתר על תווית של כריכת מחברת. התווית מודפסת בדיו: מסגרת כפולה עם פינות קעורות (globals.css, .label-frame).
- * השם כתוב בה ביד, בעט הכחול של האתר, כמו שתלמיד כותב את שמו על המחברת. "למדתי" הוא מה שאומר מי שכבר למד.
- * העט כאן בולט מעט יותר משאר הערות העט (600 ולא 500), כדי שהשם יחזיק מול המסגרת השחורה גם בגודל של נייד.
+ * הלוגו בראש כל עמוד: הסימן (ל מוקפת בעט כחול, logo-mark.tsx) והשם "למדתי" בדיו מודפסת, ב-Plex מודגש.
+ * החליף ב-14.11.2026 את תווית המחברת עם השם בכתב יד: "הלוגו לא נראה כמו לוגו", וגל בחר בעיגול בעט.
+ * הסימן עומד לבד גם באייקון ובכרטיס השיתוף (lib/logo.ts). "למדתי" הוא מה שאומר מי שכבר למד.
+ * בריחוף השם והאות מתכהים לכחול של קישור, והעט מקיף שוב את ה-ל.
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
     <Link
       href="/"
       className={cn(
-        'label-frame inline-flex min-h-11 items-center bg-white px-2.5 font-pen text-[24px] leading-none font-semibold text-pen',
-        'hover:text-link-hover lg:px-3.5 lg:text-[30px]',
+        'logo inline-flex min-h-11 items-center gap-2 text-ink transition-colors duration-150 hover:text-link-hover lg:gap-2.5',
         className,
       )}
     >
-      <span className="-rotate-1">{SITE_NAME}</span>
+      <LogoMark className="size-[34px] lg:size-10" />
+      <span className="text-[25px] leading-none font-bold tracking-[-0.015em] lg:text-[29px]">{SITE_NAME}</span>
     </Link>
   );
 }

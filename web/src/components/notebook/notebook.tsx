@@ -105,9 +105,9 @@ async function understandText(text: string, categories: KeywordCategory[]): Prom
 const BUDGET_PRESETS = [3000, 5000, 10000, 15000];
 
 const lineText = 'self-stretch pt-4 ps-3 pb-1 pe-1 text-start text-lg leading-normal lg:text-xl';
-/** מה שהמבקר מקליד: עט כחול, מוטה מעט כמו בציור. הדוגמה (placeholder) נשארת ישרה. */
+/** מה שהמבקר מקליד: עט כחול. הדוגמה (placeholder) בגופן המודפס ובאפור. */
 const penInput =
-  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none not-placeholder-shown:-rotate-1 lg:text-[23px]';
+  'bg-transparent font-pen text-[21px] font-medium leading-normal text-pen caret-pen outline-none lg:text-[23px]';
 const inputExample =
   'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft lg:placeholder:text-[17px]';
 /**

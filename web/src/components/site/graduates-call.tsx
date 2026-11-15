@@ -80,7 +80,7 @@ export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
                 <span className="min-w-0 underline underline-offset-[3px]">{course.title}</span>
                 <span className="flex items-center gap-2.5">
                   <ReviewTally have={Math.max(0, MIN_REVIEWS - needed)} />
-                  <span className="inline-block -rotate-1 font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
+                  <span className="inline-block font-pen text-[15px] font-medium whitespace-nowrap text-pen lg:text-base">
                     {moreReviewsText(needed)}
                   </span>
                   <span className="sr-only"> עד לציון</span>

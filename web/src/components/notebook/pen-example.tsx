@@ -37,7 +37,7 @@ export function PenExample({ className }: { className?: string }) {
   return (
     <span ref={ref} aria-hidden="true" className={cn('pen-example pointer-events-none', className)}>
       <span className="font-sans text-[15px] text-ink-soft lg:text-[17px]">למשל:</span>{' '}
-      <span key={index} className="pen-example-word inline-block -rotate-1 font-pen text-[21px] font-medium text-pen/60 lg:text-[23px]">
+      <span key={index} className="pen-example-word inline-block font-pen text-[21px] font-medium text-pen/60 lg:text-[23px]">
         {WHAT_EXAMPLES[index]}
       </span>
     </span>

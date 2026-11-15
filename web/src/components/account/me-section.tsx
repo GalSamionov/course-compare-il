@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 
-/** הערה של האתר בשוליים: עט, עם חץ, מוטה (מסמך העיצוב, סעיף 8). */
-export const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
+/** הערה של האתר בשוליים: עט כחול, עם חץ (מסמך העיצוב, סעיף 8). */
+export const marginNote = ' pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
 /** כפתור שנראה כמו קישור, בגובה 44. */
 export const textButton =
   'inline-flex h-11 items-center px-1 font-sans text-[15px] font-semibold underline underline-offset-[3px] hover:text-link-hover';

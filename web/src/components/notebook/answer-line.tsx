@@ -58,12 +58,12 @@ export function AnswerLine({
   );
 }
 
-/** תשובה של המבקר: עט כחול, מוטה מעט, על הקו. struck: הווי של השורה הוסר, והתשובה מחוקה. */
+/** תשובה של המבקר: עט כחול, על הקו. struck: הווי של השורה הוסר, והתשובה מחוקה. */
 export function PenAnswer({ struck = false, children }: { struck?: boolean; children: React.ReactNode }) {
   return (
     <span
       className={cn(
-        'inline-block -rotate-1 font-pen text-[21px] font-medium text-pen lg:text-[23px]',
+        'inline-block font-pen text-[21px] font-medium text-pen lg:text-[23px]',
         struck && 'line-through decoration-[1.5px] opacity-50',
       )}
     >

@@ -114,7 +114,7 @@ export function FirstVisit() {
             <h2 ref={title} id={titleId} tabIndex={-1} className="pe-10 text-[19px] leading-snug font-bold outline-none lg:text-xl">
               פעם ראשונה בלמדתי?
             </h2>
-            <p className="mt-0.5 -rotate-1 font-pen text-[15px] leading-snug font-medium text-pen">
+            <p className="mt-0.5 font-pen text-[15px] leading-snug font-medium text-pen">
               <PenArrow />
               שלושה דברים, בחצי דקה
             </p>
@@ -170,7 +170,7 @@ function StepOne() {
       <p className="mt-1">
         כל ביקורת כאן נכתבה על ידי בוגר שהעלה הוכחה שלמד בקורס: חשבונית, קבלה או תעודת סיום. ואף מוכר קורסים לא משלם לנו.
       </p>
-      <p className="mt-2 -rotate-1 font-pen text-sm leading-snug font-medium text-pen">
+      <p className="mt-2 font-pen text-sm leading-snug font-medium text-pen">
         <PenArrow />
         כאן הכול נתוני דוגמה, עד ההשקה.
       </p>
@@ -330,7 +330,7 @@ function VideoSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           </video>
         )}
         <figcaption className="flex items-center justify-between gap-4 pt-1.5 ps-1">
-          <p className="-rotate-1 font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
+          <p className=" font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
           <button
             type="button"
             onClick={onClose}

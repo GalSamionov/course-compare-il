@@ -70,7 +70,7 @@ export function Claim({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * הערה קצרה של האתר לקורא, בכתב יד בעט כחול. זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
+ * הערה קצרה של האתר לקורא, בעט הכחול (Rubik). זה הקול היחיד של האתר: פתק דביק הוא קול של בוגר או של המוסד.
  * arrow: חץ בעט לפני ההערה. true: חץ קטן בכיוון הקריאה. 'up': חץ מעוקל שעולה מתחילת ההערה אל מה שמעליה,
  * ולא תופס מקום בשורה. 'back': חץ קטן שמצביע אחורה, אל מה שעומד מימין להערה.
  * נכתבת מימין לשמאל כשהיא נכנסת למסך (data-anim="write").
@@ -92,7 +92,7 @@ export function PenNote({
     <p
       data-anim="write"
       data-delay={delay}
-      className={cn('-rotate-1 font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}
+      className={cn(' font-pen text-[15px] leading-snug text-pen', arrow === 'up' && 'relative ps-6', className)}
     >
       {arrow === true && <PenArrow />}
       {arrow === 'back' && <PenArrow className="-scale-x-100" />}

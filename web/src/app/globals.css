@@ -30,10 +30,10 @@
   --color-paper-under: #f6f7f9;
   --color-ruled: #c3cad3;
   --color-margin-rule: #9ca5b0;
-  /* שתי ידיים: IBM Plex Sans Hebrew היא הדיו המודפסת (כותרות, גוף, תוויות, נתונים), ו-Playpen הוא העט של האתר. */
+  /* שתי ידיים: IBM Plex Sans Hebrew היא הדיו המודפסת (כותרות, גוף, תוויות, נתונים), ו-Rubik בכחול הוא העט של האתר. */
   --font-sans: var(--font-plex), system-ui, sans-serif;
   --font-heading: var(--font-plex), system-ui, sans-serif;
-  --font-pen: var(--font-playpen), cursive;
+  --font-pen: var(--font-rubik), system-ui, sans-serif;
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -87,10 +87,8 @@
 
   --pen-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%231F3FBF' d='M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z'/%3E%3C/svg%3E");
   --tape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E6E9ED' fill-opacity='.74' d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3Cpath fill='%23fff' fill-opacity='.35' d='M4 3.4L76 2.9 76 7.2 4 7.6Z'/%3E%3C/svg%3E");
-  /* תווית השם: קו דיו אחד עם פינות קעורות. המסגרת הכפולה הקודמת נקראה כשלט של ביסטרו. */
   /* צורת הסלוטייפ עם הקצוות הקרועים, כמסכה: לסלוטייפ צבעוני (מסקינג טייפ) על פתק לבן. */
   --tape-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3C/svg%3E");
-  --label-frame: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cpath fill='none' stroke='%231c1c1c' stroke-width='1.8' d='M9 1.5H27A7.5 7.5 0 0 0 34.5 9V27A7.5 7.5 0 0 0 27 34.5H9A7.5 7.5 0 0 0 1.5 27V9A7.5 7.5 0 0 0 9 1.5Z'/%3E%3C/svg%3E");
   --stamp-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
@@ -327,11 +325,6 @@ body {
     pointer-events: none;
   }
 
-  /* ===== תווית המחברת: שם האתר ===== */
-  .label-frame {
-    border: 12px solid transparent;
-    border-image: var(--label-frame) 12 / 12px / 0 stretch;
-  }
 
   /* ===== חותמת המוסד ===== */
   .stamp {
@@ -510,6 +503,22 @@ body {
 }
 
 /* ===== תגובות לריחוף וללחיצה ===== */
+/* הלוגו: בריחוף העט מקיף שוב את ה-ל (logo-mark.tsx). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .logo:hover .logo-loop {
+    animation: loop-redraw 760ms cubic-bezier(0.5, 0, 0.2, 1);
+  }
+}
+@keyframes loop-redraw {
+  from {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+  }
+}
 /* טקסט של קישור שהעט מותח תחתיו קו כשמרחפים או מגיעים אליו במקלדת, מימין לשמאל.
    .pen-under יושב על הטקסט שבתוך הקישור, כדי שהקו יהיה צמוד למילים ולא לתחתית של יעד המגע. */
 @layer components {

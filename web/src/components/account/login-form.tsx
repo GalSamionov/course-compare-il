@@ -25,8 +25,8 @@ const REASONS = [
 ];
 
 const marginLabel = 'font-sans text-[13px] leading-tight text-ink-soft lg:text-[15px]';
-/** הערה של האתר בשוליים: עט, עם חץ, מוטה (מסמך העיצוב, סעיף 8). */
-const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
+/** הערה של האתר בשוליים: עט כחול, עם חץ (מסמך העיצוב, סעיף 8). */
+const marginNote = ' pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
 const smallLink = 'inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover';
 
 type SendError = 'rate' | 'not-allowed' | 'failed';
@@ -135,7 +135,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                 {/* מייל ארוך נשבר לשורה שנייה, ולא נכנס לעמודת הווי. */}
                 <span
                   dir="ltr"
-                  className="inline-block max-w-full -rotate-1 font-pen text-xl font-medium [overflow-wrap:anywhere] text-pen"
+                  className="inline-block max-w-full font-pen text-xl font-medium [overflow-wrap:anywhere] text-pen"
                 >
                   {email.trim()}
                 </span>
@@ -242,7 +242,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
                   onChange={(event) => setEmail(event.target.value)}
                   className={cn(
                     'min-w-0 self-stretch bg-transparent pt-5 pr-3 pb-1 pl-1 text-right outline-none',
-                    'font-pen text-xl font-medium text-pen caret-pen not-placeholder-shown:-rotate-1 lg:text-[23px]',
+                    'font-pen text-xl font-medium text-pen caret-pen lg:text-[23px]',
                     'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft',
                   )}
                 />

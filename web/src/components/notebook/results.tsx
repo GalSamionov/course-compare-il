@@ -124,7 +124,7 @@ export function ResultRow({
             </div>
           )}
         </div>
-        <p className="col-start-1 row-start-1 -rotate-3 pt-1.5 pe-2 font-pen text-sm leading-snug font-medium text-pen @3xl:row-span-3 lg:text-[15px]">
+        <p className="col-start-1 row-start-1 pt-1.5 pe-2 font-pen text-sm leading-snug font-medium text-pen @3xl:row-span-3 lg:text-[15px]">
           {note && (
             <>
               <PenArrow />

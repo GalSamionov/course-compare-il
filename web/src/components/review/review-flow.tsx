@@ -113,8 +113,8 @@ const textLink = 'inline-flex min-h-11 items-center underline underline-offset-[
 const sectionTitle = 'pen-rule text-[21px] leading-snug font-bold outline-none lg:text-[28px]';
 /** דף מחברת: עמודת שוליים עם קו כפול, והתוכן אחריה (globals.css, .margin-rule). */
 const notebookPage = 'margin-rule grid grid-cols-[var(--margin)_minmax(0,1fr)]';
-/** הערה של האתר בשוליים: עט, מוטה (כמו בעמוד ההתחברות). */
-const marginNote = '-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
+/** הערה של האתר בשוליים: עט כחול (כמו בעמוד ההתחברות). */
+const marginNote = ' pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base';
 
 /** לפני הצעד הראשון: מה צריך ובכמה זמן (מסמך העיצוב, סעיף 3). החמישה צעדים כשורות במחברת, ממוספרים בעט. */
 function Intro({ note, children }: { note?: string | null; children: React.ReactNode }) {

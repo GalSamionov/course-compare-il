@@ -115,7 +115,7 @@ export default async function CoursePage({ params }: Props) {
               aria-label="בעמוד הזה"
               className="mt-1.5 flex flex-wrap items-center gap-x-4 font-sans text-[15px] font-semibold lg:mt-4 lg:text-base"
             >
-              <span className="inline-flex min-h-11 -rotate-1 items-center font-pen text-[15px] font-medium text-pen lg:text-base">
+              <span className="inline-flex min-h-11 items-center font-pen text-[15px] font-medium text-pen lg:text-base">
                 {sections.length} פרקים בעמוד
                 <PenArrow className="ms-1.5 me-0" />
               </span>

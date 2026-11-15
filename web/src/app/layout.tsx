@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { IBM_Plex_Sans_Hebrew, Playpen_Sans_Hebrew } from 'next/font/google';
+import { IBM_Plex_Sans_Hebrew, Rubik } from 'next/font/google';
 import { FirstVisit } from '@/components/site/first-visit';
 import { MotionObserver } from '@/components/site/motion-observer';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
@@ -11,10 +11,12 @@ const print = IBM_Plex_Sans_Hebrew({
   weight: ['400', '500', '600', '700'],
   variable: '--font-plex',
 });
-// העט הכחול: הקול של האתר בלבד.
-const pen = Playpen_Sans_Hebrew({
+// העט הכחול: הקול של האתר בלבד. Rubik, עגול וחם יותר מהדיו המודפסת, כדי שהקול של האתר יישמע כיד אחרת.
+// גל בחר ב-14.11.2026, במקום כתב היד של Playpen Sans Hebrew. החיצים, העיגולים וקווי העט נשארים מצוירים ביד.
+const pen = Rubik({
   subsets: ['hebrew', 'latin'],
-  variable: '--font-playpen',
+  weight: ['400', '500', '600'],
+  variable: '--font-rubik',
 });
 
 // תנועה: רק אם המבקר לא ביקש פחות תנועה. בלי הסימון הזה (או בלי JavaScript) הכול גלוי ועומד.

@@ -41,7 +41,7 @@ export function CoursePicker({ courses }: { courses: PickerCourse[] }) {
           onChange={(e) => setQuery(e.target.value)}
           className={cn(
             'min-w-0 self-stretch bg-transparent pt-5 ps-3 pb-1 outline-none',
-            'font-pen text-xl font-medium text-pen caret-pen not-placeholder-shown:-rotate-1 lg:text-[23px]',
+            'font-pen text-xl font-medium text-pen caret-pen lg:text-[23px]',
             'placeholder:font-sans placeholder:text-[15px] placeholder:font-normal placeholder:text-ink-soft',
           )}
         />
@@ -49,7 +49,7 @@ export function CoursePicker({ courses }: { courses: PickerCourse[] }) {
       <div aria-live="polite">
         {shown.length === 0 ? (
           <div className="grid grid-cols-[var(--margin)_minmax(0,1fr)] items-start pt-3">
-            <p className="-rotate-3 pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base">
+            <p className=" pe-1.5 font-pen text-sm leading-snug font-medium text-pen lg:text-base">
               <PenArrow />
               אין כזה
             </p>
