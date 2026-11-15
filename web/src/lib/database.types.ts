@@ -373,6 +373,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"reports": {
+                  Row: {
+                    "client_hash": string | null,"created_at": string,"decided_at": string | null,"decided_by": string | null,"details": string | null,"id": number,"reason": string,"review_id": string,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_hash"?: string | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"details"?: string | null,"id"?: never,"reason": string,"review_id": string,"status"?: string
+                  }
+                  Update: {
+                    "client_hash"?: string | null,"created_at"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"details"?: string | null,"id"?: never,"reason"?: string,"review_id"?: string,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "reports_review_id_fkey"
+      columns: ["review_id"]
+isOneToOne: false
+      referencedRelation: "reviews"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"review_answers": {
                   Row: {
                     "answered_at": string,"metric_key": string,"review_id": string,"value": number
@@ -585,6 +605,9 @@ isOneToOne: false
               "invoice_count": number,"max_ils": number,"min_ils": number
             }[]
                            },
+"decide_review_reports":
+{ Args: { "p_admin_id": string,"p_decision": string,"p_note"?: string,"p_reason"?: string,"p_review_id": string }; Returns: string
+                           },
 "delete_review":
 { Args: { "p_action": string,"p_actor_id"?: string,"p_review_id": string }; Returns: {
               "course_slug": string,"was_published": boolean
@@ -610,6 +633,9 @@ isOneToOne: false
 "purge_institution_requests":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"purge_reports":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "reject_course_change":
 { Args: { "p_admin_id": string,"p_queue_id": number }; Returns: undefined
                            },
@@ -631,11 +657,17 @@ isOneToOne: false
 "scraper_start_run":
 { Args: { "p_model": string,"p_trigger": string }; Returns: number
                            },
+"set_vendor_response":
+{ Args: { "p_admin_id": string,"p_body": string,"p_review_id": string }; Returns: string
+                           },
 "submit_institution_request":
 { Args: { "p_client_hash": string,"p_contact_email": string,"p_course_url": string,"p_institution_name": string }; Returns: string
                            },
 "submit_review":
 { Args: { "p_author_id": string,"p_proofs": Json,"p_review_id": string,"p_validated": Json }; Returns: undefined
+                           },
+"submit_review_report":
+{ Args: { "p_client_hash": string,"p_details"?: string,"p_reason": string,"p_review_id": string }; Returns: string
                            },
 "take_proof_checks":
 { Args: { "p_author_id": string,"p_per_day": number,"p_want": number }; Returns: number
@@ -643,6 +675,11 @@ isOneToOne: false
 "toggle_helpful":
 { Args: { "p_browser_id": string,"p_review_id": string }; Returns: {
               "is_helpful": boolean,"total": number
+            }[]
+                           },
+"transparency_by_month":
+{ Args: { "p_months"?: number }; Returns: {
+              "course_changes_approved": number,"course_changes_rejected": number,"month": string,"proofs_deleted": number,"reported_reviews_kept": number,"reported_reviews_removed": number,"reviews_published": number,"reviews_returned": number
             }[]
                            },
 "undo_course_change":

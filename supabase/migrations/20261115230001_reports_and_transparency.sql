@@ -247,3 +247,63 @@ grant execute on function submit_review_report(uuid, text, text, text) to servic
 grant execute on function decide_review_reports(uuid, uuid, text, text, text) to service_role;
 grant execute on function set_vendor_response(uuid, uuid, text) to service_role;
 grant execute on function purge_reports() to service_role;
+
+-- ===== 7. מספרי השקיפות (סבב 5, פריט 33) =====
+-- מה עשינו בכל חודש שנגמר, לכל האתר יחד. רק ספירות: בלי מזהה, בלי קורס, בלי מוסד ובלי יום.
+-- רק חודשים שנגמרו (בשעון ישראל), כדי שאי אפשר יהיה לראות את המספר זז אחרי פעולה מסוימת.
+-- מהחודש הראשון שיש בו פעולה, ועד p_months אחורה (1 עד 12). בלי שום חודש כזה: בלי שורות.
+-- security definer: היומן וההוכחות סגורים לציבור, והפונקציה מחזירה מהם רק ספירות. כל טבלה בשם הסכמה.
+create function transparency_by_month(p_months integer default 3)
+returns table (
+  month date,
+  reviews_published integer,
+  reviews_returned integer,
+  proofs_deleted integer,
+  course_changes_approved integer,
+  course_changes_rejected integer,
+  reported_reviews_kept integer,
+  reported_reviews_removed integer
+)
+language sql stable security definer
+set search_path = ''
+as $$
+  with events as (
+    select (date_trunc('month', l.created_at at time zone 'Asia/Jerusalem'))::date as month, l.action as kind
+    from public.audit_log l
+    union all
+    select (date_trunc('month', p.file_deleted_at at time zone 'Asia/Jerusalem'))::date, 'proof_deleted'
+    from public.proofs p
+    where p.file_deleted_at is not null
+  ),
+  bounds as (
+    select (date_trunc('month', now() at time zone 'Asia/Jerusalem'))::date as this_month,
+           (select min(e.month) from events e) as first_month
+  ),
+  months as (
+    select g::date as month
+    from bounds b,
+      generate_series(
+        greatest(
+          b.first_month::timestamp,
+          b.this_month - make_interval(months => least(greatest(coalesce(p_months, 3), 1), 12))
+        ),
+        (b.this_month - interval '1 month')::timestamp,
+        interval '1 month'
+      ) g
+    where b.first_month is not null
+  )
+  select m.month,
+         (count(*) filter (where e.kind = 'approve'))::integer,
+         (count(*) filter (where e.kind in ('reject', 'request_more')))::integer,
+         (count(*) filter (where e.kind = 'proof_deleted'))::integer,
+         (count(*) filter (where e.kind in ('course_approve', 'course_edit')))::integer,
+         (count(*) filter (where e.kind = 'course_reject'))::integer,
+         (count(*) filter (where e.kind = 'report_keep'))::integer,
+         (count(*) filter (where e.kind = 'report_remove'))::integer
+  from months m
+  left join events e on e.month = m.month
+  group by m.month
+  order by m.month desc;
+$$;
+revoke execute on function transparency_by_month(integer) from public;
+grant execute on function transparency_by_month(integer) to anon, authenticated;
