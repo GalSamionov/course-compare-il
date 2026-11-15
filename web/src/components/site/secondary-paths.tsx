@@ -3,11 +3,11 @@ import { PenArrow } from '@/components/site/pen';
 import { Soon } from '@/components/site/soon';
 import { cn } from '@/lib/utils';
 
-/** soon: המסלול עוד לא נבנה, ולכן "נפתח בקרוב" על המסגרת. כתיבת ביקורת פתוחה מסבב 3, והוספת קורס מסבב 5. */
+/** soon: המסלול עוד לא נבנה, ולכן "נפתח בקרוב" על המסגרת. כתיבת ביקורת פתוחה מסבב 3, והוספת קורס והפנייה של חברות מסבב 5. */
 const PATHS = [
   { href: '/review', label: 'סיימתי קורס, רוצה לכתוב עליו', soon: false },
   { href: '/institutions/join', label: 'אני מוסד או מרצה, רוצה להוסיף קורס', soon: false },
-  { href: '/companies', label: 'אנחנו חברה, מחפשים קורס או הרצאה לעובדים', soon: true },
+  { href: '/companies', label: 'אנחנו חברה, מחפשים קורס או הרצאה לעובדים', soon: false },
   { href: '/guides', label: 'עוד לא בחרתי, רוצה לדעת מה לבדוק לפני שמשלמים', soon: false },
 ];
 
