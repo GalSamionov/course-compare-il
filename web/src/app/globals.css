@@ -359,6 +359,33 @@ body {
   background-size: calc(100% + 0.2em) 0.42em;
 }
 
+/* ===== עמודי קריאה (text-page.tsx) =====
+   שיטה, מי משלם לנו, פרטיות ותנאים: אותו דף, עמודת קריאה אחת, ובלי מחלקות בתוך התוכן.
+   כותרת פרק בגודל של כותרת פרק באתר, עם קו העט מתחתיה (הקו נמשך בפרק "תנועה").
+   נקודות הרשימה בדיו רכה, כדי שהטקסט יוביל. קישור בתוך טקסט מקבל קו דיו דק גם במנוחה, ולא רק צבע. */
+@layer components {
+  .text-page h2 {
+    @apply pen-rule mt-10 text-[21px] leading-snug font-bold lg:mt-14 lg:text-[28px];
+  }
+  .text-page :is(p, ul, ol, table) {
+    @apply mt-3;
+  }
+  /* טבלאות המשקלות בשיטה, אחת אחרי השנייה: כותרת הטבלה צמודה לשורות שלה ולא לטבלה שמעליה. */
+  .text-page table + table {
+    @apply mt-7;
+  }
+  .text-page ul {
+    @apply list-disc ps-5 marker:text-ink-soft;
+  }
+  /* בפרטיות פריט ברשימה הוא פסקה של שלוש שורות: הרווח צריך להפריד גם בין פריטים ארוכים. */
+  .text-page li + li {
+    @apply mt-2;
+  }
+  .text-page a {
+    @apply underline decoration-1 underline-offset-[3px] hover:text-link-hover;
+  }
+}
+
 @keyframes hang-in {
   0% {
     opacity: 0;
