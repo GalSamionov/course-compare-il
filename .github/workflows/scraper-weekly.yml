@@ -14,6 +14,10 @@ on:
         type: choice
         options: [run, check-fixtures]
         default: run
+      only:
+        description: 'רק המוסדות האלה, slug מופרדים ברווח (ריצת ניסיון). ריק: כל הרשימה.'
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -28,6 +32,7 @@ jobs:
     timeout-minutes: 300
     env:
       MODE: ${{ inputs.mode || 'run' }}
+      ONLY: ${{ inputs.only || '' }}
       # הכתובת של הפרויקט בענן אינה סוד (היא גם ב-docs/STATUS.md). המפתחות רק ב-GitHub Secrets,
       # ו-GitHub מסתיר אותם ביומן. הסקריפט מדפיס רק את הכתובת והמספרים.
       SUPABASE_URL: https://bndxpogjvzhouoljiwrc.supabase.co
@@ -66,7 +71,11 @@ jobs:
       - name: Scrape
         if: steps.gate.outputs.run == 'true' && env.MODE == 'run'
         working-directory: scraper
-        run: uv run python -m lamadti_scraper run --trigger ${{ github.event_name == 'schedule' && 'schedule' || 'manual' }}
+        # 8 מוסדות במקביל. הקצב נשאר בקשה לשנייה לכל אתר, והמודל נקרא לכל דף בתורו בתוך כל מוסד.
+        run: |
+          # ONLY מגיע מהטופס של ההרצה הידנית: רק אותיות, ספרות, מקפים ורווחים.
+          case "$ONLY" in *[!a-z0-9\ -]*) echo "::error::only: slugs separated by spaces"; exit 1 ;; esac
+          uv run python -m lamadti_scraper run --workers 8 --trigger ${{ github.event_name == 'schedule' && 'schedule' || 'manual' }} ${ONLY:+--only $ONLY}
 
       - name: Check extraction against the sample pages
         if: steps.gate.outputs.run == 'true' && env.MODE == 'check-fixtures'

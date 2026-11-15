@@ -20,6 +20,19 @@ LINK = re.compile(r"\]\((https?://[^)\s]+)\)")
 KIND = {"מכללה": "college", "בית ספר": "school", "מרצה עצמאי": "independent"}
 SUFFIXES_2 = {"co.il", "org.il", "ac.il", "gov.il", "net.il", "muni.il", "k12.il"}
 MAX_PAGES = 60
+# מההערות ברשימה המאושרת ומהגילוי היבש של 15.11.2026: מה לסרוק ומה לא, לכל מוסד.
+OVERRIDES: dict[str, dict] = {
+    # "בית הספר נמצא בנתיב /school/ בתוך אתר prog.co.il; לסרוק רק את הנתיב הזה". מפת האתר: מיליון כתובות של פורום.
+    "prog": {"sitemap": "none", "listing_urls": ["https://www.prog.co.il/school/courses/advertising-digital-marketing/"], "include": "/school/"},
+    # "קטלוג כללי: /catalog". "jobs.johnbryce.co.il הוא לוח משרות; לא לסרוק".
+    "johnbryce": {"listing_urls": ["https://www.johnbryce.co.il/catalog"], "include": "/catalog/", "exclude": r"^https?://jobs\."},
+    # "dev.geva.co.il נראה כמו סביבת פיתוח; לא לסרוק".
+    "geva": {"exclude": r"^https?://dev\."},
+    # "old.itsafe.co.il (גרסה ישנה) ו-platform.itsafe.co.il (התחברות); לסרוק רק את www".
+    "itsafe": {"exclude": r"^https?://(old|platform)\."},
+    # "עמוד ארכיון (קורסים לא פעילים)".
+    "hackeru": {"exclude": "/archive-courses"},
+}
 
 
 @dataclass
@@ -131,6 +144,12 @@ def to_yaml(entries: list[Entry], source: str) -> str:
         if entry.course_urls:
             out.append("    course_urls:")
             out += [f"      - {json.dumps(u)}" for u in entry.course_urls]
+        for key, value in OVERRIDES.get(slug, {}).items():
+            if isinstance(value, list):
+                out.append(f"    {key}:")
+                out += [f"      - {json.dumps(v)}" for v in value]
+            else:
+                out.append(f"    {key}: {json.dumps(value)}")
         out.append(f"    max_pages: {MAX_PAGES}")
     return "\n".join(out) + "\n"
 

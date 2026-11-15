@@ -16,6 +16,8 @@ from bs4 import UnicodeDammit
 from .politeness import USER_AGENT, HostLimiter, RobotsCache, host_of
 
 MAX_BYTES = 3_000_000
+# מפת אתר יכולה להגיע ל-50MB לפי התקן. בגילוי היבש שתיים נפלו על 3MB.
+MAX_XML_BYTES = 20_000_000
 TIMEOUT_SECONDS = 20.0
 BROWSER_TIMEOUT_MS = 90_000
 HTML_TYPES = ("text/html", "application/xhtml+xml")
@@ -105,7 +107,7 @@ class Fetcher:
                 size = 0
                 for chunk in response.iter_bytes():
                     size += len(chunk)
-                    if size > MAX_BYTES:
+                    if size > (MAX_XML_BYTES if kind == "xml" else MAX_BYTES):
                         return FetchResult(url, final_url, response.status_code, b"", "", "http", "too_large")
                     chunks.append(chunk)
         except httpx.TimeoutException:

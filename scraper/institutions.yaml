@@ -341,6 +341,7 @@ institutions:
     categories: [psychometric]
     course_urls:
       - "https://www.geva.co.il/psychometry/our_course/"
+    exclude: "^https?://dev\\."
     max_pages: 60
 
   - slug: "golbergpsyhometry"
@@ -363,6 +364,7 @@ institutions:
       - "https://www.hackeru.co.il/course/ux-ui"
       - "https://www.hackeru.co.il/course/marketing"
       - "https://www.hackeru.co.il/course/qa"
+    exclude: "/archive-courses"
     max_pages: 60
 
   - slug: "hamama"
@@ -505,6 +507,7 @@ institutions:
     categories: [cyber]
     course_urls:
       - "https://www.itsafe.co.il/courses"
+    exclude: "^https?://(old|platform)\\."
     max_pages: 60
 
   - slug: "johnbryce"
@@ -520,6 +523,10 @@ institutions:
       - "https://www.johnbryce.co.il/catalog/hi-tech-courses/data-analyst/"
       - "https://www.johnbryce.co.il/catalog/hi-tech-courses/csi-and-cysa-cybersecurity-analyst-new/"
       - "https://www.johnbryce.co.il/catalog/hi-tech-courses/qa-foundation-istqb-new/"
+    listing_urls:
+      - "https://www.johnbryce.co.il/catalog"
+    include: "/catalog/"
+    exclude: "^https?://jobs\\."
     max_pages: 60
 
   - slug: "jolt"
@@ -711,6 +718,10 @@ institutions:
     categories: [digital-marketing]
     course_urls:
       - "https://www.prog.co.il/school/courses/advertising-digital-marketing/"
+    sitemap: "none"
+    listing_urls:
+      - "https://www.prog.co.il/school/courses/advertising-digital-marketing/"
+    include: "/school/"
     max_pages: 60
 
   - slug: "richerschool"

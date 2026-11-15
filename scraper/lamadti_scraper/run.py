@@ -252,11 +252,12 @@ def run_scraper(
                 outcome = db.apply_page(run_id, plan.payload(result.institution_id))
                 inst_counts["changes_auto"] += int(outcome.get("auto", 0))
                 inst_counts["changes_queued"] += int(outcome.get("queued", 0))
-            seen = result.discovery.seen
             known = set(p for p, s in next(w for w in works if w.id == result.institution_id).pages.items() if s.state == "active")
-            # הגנה: גילוי שמצא פחות מחצי מהדפים המוכרים הוא תקלה בגילוי, לא קורסים שנעלמו (ההחלטה 8).
-            if result.discovery.ok and len(known & set(seen)) * 2 >= len(known):
-                inst_counts["courses_missing"] += db.mark_missing(run_id, result.institution_id, seen)
+            # רק הדפים המוכרים שנמצאו: מפת אתר יכולה להכיל מאות אלפי כתובות, והמסד צריך רק את אלה.
+            seen_known = sorted(known & set(result.discovery.seen)) + [p.url for p in result.plans if p.url not in known]
+            # הגנה: גילוי שמצא פחות מחצי מהדפים המוכרים, או שנעצר באמצע, הוא תקלה בגילוי ולא קורסים שנעלמו (ההחלטה 8).
+            if result.discovery.ok and result.discovery.complete and len(known & set(result.discovery.seen)) * 2 >= len(known):
+                inst_counts["courses_missing"] += db.mark_missing(run_id, result.institution_id, seen_known)
             elif known:
                 result.errors.append("discovery incomplete: missing pages were not counted this week")
             summary.counts.update(inst_counts)

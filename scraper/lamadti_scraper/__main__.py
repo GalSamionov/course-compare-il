@@ -33,6 +33,12 @@ def _db_from_env() -> Db:
 
 def cmd_run(args: argparse.Namespace) -> int:
     config = load_config(Path(args.config))
+    if args.only:
+        wanted = set(args.only)
+        unknown = wanted - {i.slug for i in config.institutions}
+        if unknown:
+            sys.exit(f"לא ב-institutions.yaml: {', '.join(sorted(unknown))}")
+        config.institutions = [i for i in config.institutions if i.slug in wanted]
     if not config.institutions:
         print("אין מוסדות מאושרים ב-institutions.yaml. אין מה לאסוף.")
         return 0
@@ -98,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--config", default=str(DEFAULT_CONFIG))
     run.add_argument("--trigger", default="manual", choices=["schedule", "manual", "local"])
     run.add_argument("--workers", type=int, default=4)
+    run.add_argument("--only", nargs="*", help="רק המוסדות האלה (slug), למשל לריצת ניסיון")
     run.add_argument("--replay", help="תיקייה עם חילוץ מוקלט, במקום Claude")
     run.add_argument("--variant")
     run.set_defaults(func=cmd_run)
