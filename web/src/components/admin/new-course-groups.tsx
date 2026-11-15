@@ -39,12 +39,14 @@ function Sample({ sample }: { sample: NewCourseGroup['samples'][number] }) {
         {sample.title}
         {!sample.safe && <span className="font-normal text-ink-soft"> (לא בטוח)</span>}
       </p>
-      <p className="flex flex-wrap items-center gap-x-2 text-[13px] text-ink-soft">
-        <span className="tabular-nums">{sample.price === null ? 'בלי מחיר' : formatIls(sample.price)}</span>
+      <p className="flex min-w-0 items-center gap-x-2 text-[13px] text-ink-soft">
+        <span className="shrink-0 tabular-nums">{sample.price === null ? 'בלי מחיר' : formatIls(sample.price)}</span>
         {sample.url && (
           <>
-            <span aria-hidden>·</span>
-            <PageLink url={sample.url} />
+            <span aria-hidden className="shrink-0">
+              ·
+            </span>
+            <PageLink url={sample.url} className="min-w-0" />
           </>
         )}
       </p>
