@@ -124,14 +124,14 @@ export function QueueItemView({ item }: { item: QueueItem }) {
   return (
     <article aria-labelledby={headingId} className="border-t border-rule py-6 lg:py-8">
       <header>
-        <h2 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
+        <h3 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
           <Link
             href={`/courses/${item.courseSlug}`}
             className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover"
           >
             {item.courseTitle}
           </Link>
-        </h2>
+        </h3>
         <p className="mt-1 font-sans text-[13px] leading-normal text-ink-soft">
           {item.institutionName} · מחזור {monthLabel(item.cohortMonth)}
           {item.finishedMonth && ` עד ${monthLabel(item.finishedMonth)}`}

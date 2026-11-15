@@ -2,19 +2,15 @@
 
 import { useActionState, useId, useState } from 'react';
 import { approveReview, returnReview, type DecisionState } from '@/app/admin/actions';
-import { buttonVariants } from '@/components/ui/button';
 import { REJECT_REASONS } from '@/lib/admin/reasons';
 import { formatIls } from '@/lib/format';
 import { paidBucketFromInput, paidBucketLabel } from '@/lib/reviews/paid-bucket';
 import { PROOF_KIND_LABEL, UPLOAD_KINDS, type ProofKind } from '@/lib/reviews/types';
 import { cn } from '@/lib/utils';
+import { control, fieldLabel as label, outlineButton, primaryButton, textArea } from './controls';
 import { useLogDecision } from './decision-log';
 
 const IDLE: DecisionState = { status: 'idle' };
-const label = 'block font-semibold';
-const control = 'mt-1 block h-11 w-full max-w-[320px] rounded-[4px] border border-ink bg-white px-2.5 text-[15px] text-ink';
-/** מושבת בזמן שפעולה רצה: מסגרת אפורה וטקסט אפור (DESIGN.md, Buttons), כמו בצעד ההוכחה. */
-const disabled = 'disabled:border-[1.5px] disabled:border-line disabled:bg-white disabled:text-ink-soft disabled:opacity-100';
 
 function ErrorLine({ state }: { state: DecisionState }) {
   if (state.status !== 'error') return null;
@@ -90,13 +86,13 @@ export function DecideForm({
   const [approveState, approve, approving] = useActionState(async (previous: DecisionState, form: FormData) => {
     const result = await approveReview(previous, form);
     if (result.status === 'done') {
-      logDecision({ reviewId, courseSlug, courseTitle, message: result.message, warning: result.warning, published: true });
+      logDecision({ id: `review:${reviewId}`, title: courseTitle, message: result.message, warning: result.warning, href: `/courses/${courseSlug}` });
     }
     return result;
   }, IDLE);
   const [returnState, sendBack, returning] = useActionState(async (previous: DecisionState, form: FormData) => {
     const result = await returnReview(previous, form);
-    if (result.status === 'done') logDecision({ reviewId, courseSlug, courseTitle, message: result.message, published: false });
+    if (result.status === 'done') logDecision({ id: `review:${reviewId}`, title: courseTitle, message: result.message });
     return result;
   }, IDLE);
   const [kind, setKind] = useState<ProofKind>(defaultKind);
@@ -163,7 +159,7 @@ export function DecideForm({
           type="submit"
           disabled={busy}
           aria-describedby={hasWarnings ? warningsId : undefined}
-          className={cn(buttonVariants(), 'h-11 rounded-[4px] px-5 text-[15px] font-bold', disabled)}
+          className={primaryButton}
         >
           {approving ? 'מפרסמים…' : 'לאשר ולפרסם'}
         </button>
@@ -218,18 +214,14 @@ export function DecideForm({
             rows={3}
             maxLength={600}
             required={action === 'request_more'}
-            className="mt-1 block w-full max-w-[420px] rounded-[4px] border border-ink bg-white p-2.5 text-[15px] text-ink"
+            className={textArea}
           />
         </label>
         <p className="text-[13px] text-ink-soft">הכותב רואה את ההודעה ב&quot;הביקורות שלי&quot;. הקבצים נמחקים.</p>
         <button
           type="submit"
           disabled={busy}
-          className={cn(
-            buttonVariants({ variant: 'outline' }),
-            'h-11 rounded-[4px] border-[1.5px] border-ink px-5 text-[15px] font-bold',
-            disabled,
-          )}
+          className={outlineButton}
         >
           {returning ? 'מחזירים…' : 'להחזיר לכותב'}
         </button>

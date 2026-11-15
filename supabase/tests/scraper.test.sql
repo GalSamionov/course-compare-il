@@ -25,7 +25,7 @@ select ok(
 );
 select ok(
   not has_function_privilege('authenticated', 'public.scraper_apply_page(bigint, jsonb)', 'EXECUTE')
-  and not has_function_privilege('anon', 'public.approve_course_change(bigint, uuid, jsonb)', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.approve_course_change(bigint, uuid, jsonb, boolean)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.undo_course_change(bigint, uuid)', 'EXECUTE')
   and has_function_privilege('service_role', 'public.scraper_apply_page(bigint, jsonb)', 'EXECUTE'),
   'רק service_role מריץ את פונקציות האוסף והתור'

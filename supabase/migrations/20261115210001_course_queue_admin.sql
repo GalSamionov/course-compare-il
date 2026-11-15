@@ -33,10 +33,12 @@ create index audit_log_course_queue_idx on audit_log (course_queue_id) where cou
 create index audit_log_institution_request_idx on audit_log (institution_request_id) where institution_request_id is not null;
 
 -- ===== 2. ההחלטות בתור של הקורסים: אותה התנהגות, ועכשיו גם ביומן =====
--- create or replace שומר את ההרשאות (רק service_role, מהמיגרציה של האוסף).
 
--- אישור, או תיקון (p_value): השדה נכתב, קורס חדש עולה לאוויר, קורס שנעלם מוסר.
-create or replace function approve_course_change(p_queue_id bigint, p_admin_id uuid, p_value jsonb default null)
+-- אישור, או תיקון של גל (p_edit, והערך ב-p_value): השדה נכתב, קורס חדש עולה לאוויר, קורס שנעלם מוסר.
+-- p_edit נפרד מ-p_value: דרך PostgREST, null של JSON מגיע כ-NULL של SQL, ותיקון לערך ריק היה נקרא כאישור
+-- של הערך מהדף. לכן החתימה מוחלפת (drop ו-create), וההרשאות ניתנות מחדש למטה.
+drop function approve_course_change(bigint, uuid, jsonb);
+create function approve_course_change(p_queue_id bigint, p_admin_id uuid, p_value jsonb default null, p_edit boolean default false)
 returns void
 language plpgsql
 set search_path = ''
@@ -54,13 +56,13 @@ begin
   if not found then
     raise exception 'queue item % is not pending', p_queue_id using errcode = 'P0002';
   end if;
-  if p_value is not null and v_item.kind <> 'field' then
+  if p_edit and v_item.kind <> 'field' then
     raise exception 'only a field change can be edited' using errcode = 'LM020';
   end if;
 
   if v_item.kind = 'field' then
     v_old := private.scraper_course_value(v_item.course_id, v_item.field);
-    v_new := coalesce(p_value, v_item.new_value, 'null'::jsonb);
+    v_new := case when p_edit then coalesce(p_value, 'null'::jsonb) else coalesce(v_item.new_value, 'null'::jsonb) end;
     perform private.scraper_set_course_field(v_item.course_id, v_item.field, v_new);
     insert into public.course_changes (course_id, field, old_value, new_value, source, approved_by, queue_id, run_id, snapshot_id, quote)
     values (v_item.course_id, v_item.field, v_old, v_new, 'approved', p_admin_id, v_item.id, v_item.run_id, v_item.snapshot_id, v_item.quote);
@@ -84,12 +86,15 @@ begin
   update public.course_change_queue set status = 'approved', decided_by = p_admin_id, decided_at = now() where id = p_queue_id;
   -- הערכים עצמם כבר ב-course_changes. ביומן: מה הוחלט, ועל איזה קורס ושדה.
   insert into public.audit_log (actor_id, action, course_queue_id, details)
-  values (p_admin_id, case when p_value is null then 'course_approve' else 'course_edit' end, p_queue_id,
+  values (p_admin_id, case when p_edit then 'course_edit' else 'course_approve' end, p_queue_id,
           jsonb_strip_nulls(jsonb_build_object('kind', v_item.kind, 'field', v_item.field, 'course_id', v_item.course_id)));
 end $$;
 
+revoke execute on function approve_course_change(bigint, uuid, jsonb, boolean) from public, anon, authenticated;
+grant execute on function approve_course_change(bigint, uuid, jsonb, boolean) to service_role;
+
 -- דחייה: השדה נשאר כמו שהוא. קורס חדש שנדחה נשאר טיוטה, והדף שלו לא נקרא יותר.
--- קורס שסומן "ייתכן שאינו פעיל" חוזר לפעיל.
+-- קורס שסומן "ייתכן שאינו פעיל" חוזר לפעיל. create or replace שומר את ההרשאות (רק service_role).
 create or replace function reject_course_change(p_queue_id bigint, p_admin_id uuid)
 returns void
 language plpgsql
@@ -136,7 +141,8 @@ create table institution_requests (
   -- השרת כבר בדק שזו כתובת http(s) תקינה, בלי שם משתמש וסיסמה. הכתובת לא נפתחת עד שגל מאשר.
   course_url text not null check (char_length(course_url) <= 500 and course_url ~ '^https?://[^\s@]+$'),
   -- רק לגל, ב-/admin. נמחק 90 יום אחרי ההחלטה (purge_institution_requests, בניקוי היומי).
-  contact_email text check (char_length(contact_email) <= 254 and contact_email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
+  -- מייל פשוט בלבד, בלי ? & = או #: ב-/admin הוא קישור mailto, ותווים כאלה היו מוסיפים לו נושא וגוף.
+  contact_email text check (char_length(contact_email) <= 254 and contact_email ~ '^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$'),
   -- HMAC-SHA256 של כתובת ה-IP, עם מפתח שיש רק לשרת. רק למגבלת הקצב, ונמחק אחרי יומיים.
   client_hash text check (client_hash ~ '^[0-9a-f]{64}$'),
   status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),

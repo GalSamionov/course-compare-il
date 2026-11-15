@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(33);
+select plan(34);
 
 -- תוכנית 5ב: התור של הקורסים, היומן, ובקשה של מוסד להוסיף קורס (20261115210001_course_queue_admin.sql).
 -- נתוני בדיקה, כ-postgres. כל שאילתה מוגבלת לנתונים האלה: המסד המקומי משותף, ויכולות להיות בו בקשות אחרות.
@@ -23,6 +23,7 @@ insert into course_change_queue (course_id, kind, field, old_value, new_value, q
   ('66666666-0000-0000-0000-000000000003', 'field', 'site_price_ils', '10000', '14500', 'המחיר: 14,500 ₪', 'high', '{price_jump}'),
   ('66666666-0000-0000-0000-000000000003', 'field', 'total_hours', '120', '400', 'סך הכול 400 שעות', 'medium', '{low_confidence}'),
   ('66666666-0000-0000-0000-000000000003', 'field', 'certificate', 'null', '"תעודה"', 'תעודה', 'low', '{low_confidence}'),
+  ('66666666-0000-0000-0000-000000000003', 'field', 'region', '"מרכז"', '"צפון"', 'בצפון', 'low', '{low_confidence}'),
   ('66666666-0000-0000-0000-000000000006', 'new_course', null, null, '{}', null, null, '{new_course}');
 create temp table q as
   select field, kind, id from course_change_queue where course_id in ('66666666-0000-0000-0000-000000000003', '66666666-0000-0000-0000-000000000006');
@@ -45,9 +46,9 @@ select ok(
   and not has_function_privilege('authenticated', 'public.approve_institution_request(bigint, uuid, uuid)', 'EXECUTE')
   and not has_function_privilege('anon', 'public.reject_institution_request(bigint, uuid)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'public.purge_institution_requests()', 'EXECUTE')
-  and not has_function_privilege('authenticated', 'public.approve_course_change(bigint, uuid, jsonb)', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'public.approve_course_change(bigint, uuid, jsonb, boolean)', 'EXECUTE')
   and has_function_privilege('service_role', 'public.submit_institution_request(text, text, text, text)', 'EXECUTE')
-  and has_function_privilege('service_role', 'public.approve_course_change(bigint, uuid, jsonb)', 'EXECUTE'),
+  and has_function_privilege('service_role', 'public.approve_course_change(bigint, uuid, jsonb, boolean)', 'EXECUTE'),
   'רק service_role מריץ את הפונקציות של הטופס ושל התור'
 );
 
@@ -155,25 +156,29 @@ select lives_ok(
   'אישור של שינוי מחיר'
 );
 select lives_ok(
-  $$select approve_course_change((select id from q where field = 'total_hours'), '66666666-0000-0000-0000-00000000000a', '140')$$,
+  $$select approve_course_change((select id from q where field = 'total_hours'), '66666666-0000-0000-0000-00000000000a', '140', true)$$,
   'תיקון ידני של השעות'
 );
 select lives_ok(
   $$select reject_course_change((select id from q where field = 'certificate'), '66666666-0000-0000-0000-00000000000a')$$,
   'דחייה של שינוי בתעודה'
 );
+select lives_ok(
+  $$select approve_course_change((select id from q where field = 'region'), '66666666-0000-0000-0000-00000000000a', null, true)$$,
+  'תיקון ידני לערך ריק'
+);
 select throws_ok(
-  $$select approve_course_change((select id from q where kind = 'new_course'), '66666666-0000-0000-0000-00000000000a', '{"title": "x"}')$$,
+  $$select approve_course_change((select id from q where kind = 'new_course'), '66666666-0000-0000-0000-00000000000a', '{"title": "x"}', true)$$,
   'LM020', null, 'תיקון ידני רק לשדה, לא לקורס חדש'
 );
 select results_eq(
-  $$select site_price_ils, total_hours, certificate from courses where id = '66666666-0000-0000-0000-000000000003'$$,
-  $$values (14500, 140, null::text)$$,
-  'המחיר החדש, השעות של גל, והתעודה לא השתנתה'
+  $$select site_price_ils, total_hours, certificate, region from courses where id = '66666666-0000-0000-0000-000000000003'$$,
+  $$values (14500, 140, null::text, null::text)$$,
+  'המחיר החדש, השעות של גל, התעודה לא השתנתה, והאזור ריק (ולא "צפון" מהדף)'
 );
 select results_eq(
   $$select l.action, l.details ->> 'field' from audit_log l join q on q.id = l.course_queue_id order by q.id$$,
-  $$values ('course_approve', 'site_price_ils'), ('course_edit', 'total_hours'), ('course_reject', 'certificate')$$,
+  $$values ('course_approve', 'site_price_ils'), ('course_edit', 'total_hours'), ('course_reject', 'certificate'), ('course_edit', 'region')$$,
   'כל החלטה בתור של הקורסים ביומן, עם השדה'
 );
 select throws_ok(

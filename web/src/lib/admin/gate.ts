@@ -32,3 +32,15 @@ export async function adminGate({ readOnly = false }: { readOnly?: boolean } = {
   if (adminError) throw new Error(`admins lookup failed: ${adminError.message}`);
   return row ? { kind: 'ok', userId: data.user.id, db } : { kind: 'not-admin' };
 }
+
+export const NO_KEY_MESSAGE = 'חסר SUPABASE_SECRET_KEY בשרת. בלעדיו אי אפשר לפתוח הוכחות או להחליט.';
+
+/**
+ * בכל פעולת שרת מחדש: getUser, ו-admins דרך המפתח הסודי. ה-proxy הוא לא ההגנה היחידה (server-actions.md, Security).
+ * מחזיר את השער, או את ההודעה לגל.
+ */
+export async function requireAdmin(): Promise<Extract<AdminGate, { kind: 'ok' }> | string> {
+  const gate = await adminGate();
+  if (gate.kind === 'ok') return gate;
+  return gate.kind === 'no-key' ? NO_KEY_MESSAGE : 'אין הרשאה.';
+}

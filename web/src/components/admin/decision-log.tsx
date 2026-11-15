@@ -4,18 +4,20 @@ import Link from 'next/link';
 import { createContext, useCallback, useContext, useState } from 'react';
 
 export interface Decision {
-  reviewId: string;
-  courseSlug: string;
-  courseTitle: string;
+  /** ייחודי בכל התורים: review:<id>, course:<id> או request:<id>. */
+  id: string;
+  /** שם הקורס, או שם המוסד בבקשה. */
+  title: string;
   message: string;
   /** פורסם, אבל משהו אחריו נכשל (חישוב הציונים). */
   warning?: string;
-  published: boolean;
+  /** עמוד הקורס, כשמשהו ציבורי השתנה וכדאי לבדוק אותו. */
+  href?: string;
 }
 
 const LogContext = createContext<(decision: Decision) => void>(() => {});
 
-/** הטופס מדווח כאן על החלטה שהצליחה, לפני שהפריט יורד מהרשימה. */
+/** הטופס מדווח כאן על החלטה שהצליחה, לפני שהפריט יורד מהרשימה. משותף לכל התורים בעמוד. */
 export const useLogDecision = () => useContext(LogContext);
 
 /**
@@ -32,11 +34,11 @@ export function DecisionLog({ children }: { children: React.ReactNode }) {
         {decisions.length > 0 && (
           <ul aria-label="מה הוחלט עכשיו" className="mt-5 space-y-1.5 border-y border-rule py-3">
             {decisions.map((d) => (
-              <li key={d.reviewId}>
-                <span className="font-semibold">{d.courseTitle}:</span> {d.message}{' '}
-                {d.published && (
+              <li key={d.id}>
+                <span className="font-semibold">{d.title}:</span> {d.message}{' '}
+                {d.href && (
                   <Link
-                    href={`/courses/${d.courseSlug}`}
+                    href={d.href}
                     className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover"
                   >
                     לעמוד הקורס

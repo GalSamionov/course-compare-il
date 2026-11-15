@@ -572,7 +572,7 @@ isOneToOne: false
           }
           Functions: {
             "approve_course_change":
-{ Args: { "p_admin_id": string,"p_queue_id": number,"p_value"?: Json }; Returns: undefined
+{ Args: { "p_admin_id": string,"p_edit"?: boolean,"p_queue_id": number,"p_value"?: Json }; Returns: undefined
                            },
 "approve_institution_request":
 { Args: { "p_admin_id": string,"p_institution_id": string,"p_request_id": number }; Returns: number
