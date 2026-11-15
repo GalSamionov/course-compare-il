@@ -3,6 +3,8 @@ name: Nightly scores
 # חישוב ציונים לילי (מסמך העיצוב, סעיף 7, "מתי מחושב"): כל הציונים מחדש, כשורות חדשות ב-scores.
 # אותה פונקציה שרצה אחרי כל אישור בתור (web/src/lib/score/recompute.ts).
 # schedule רץ רק מהענף הראשי של המאגר (main). בלי SUPABASE_SECRET_KEY ב-GitHub Secrets: הודעה ודילוג, בלי כישלון.
+# בסוף, הסקריפט מרענן את הדפים באתר דרך /api/revalidate (סבב 5, פריט 36). בלי REVALIDATE_TOKEN: רק הודעה,
+# והדפים מתרעננים לבד תוך שעה.
 on:
   schedule:
     - cron: '15 0 * * *' # 02:15 או 03:15 בישראל
@@ -23,6 +25,9 @@ jobs:
       # הכתובת של הפרויקט בענן אינה סוד. המפתח הסודי רק ב-GitHub Secrets, ו-GitHub מסתיר אותו ביומן.
       NEXT_PUBLIC_SUPABASE_URL: https://bndxpogjvzhouoljiwrc.supabase.co
       SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      # לאן לשלוח את הרענון: הכתובת של האתר באוויר, ולא סוד. הטוקן רק ב-GitHub Secrets.
+      REVALIDATE_URL: https://course-compare-il.vercel.app
+      REVALIDATE_TOKEN: ${{ secrets.REVALIDATE_TOKEN }}
     steps:
       - name: Skip without the secret key
         id: gate
@@ -32,6 +37,9 @@ jobs:
             echo "run=false" >> "$GITHUB_OUTPUT"
           else
             echo "run=true" >> "$GITHUB_OUTPUT"
+            if [ -z "$REVALIDATE_TOKEN" ]; then
+              echo "::notice::REVALIDATE_TOKEN is not in GitHub Secrets yet. Scores are recomputed, and the pages refresh on their own within an hour."
+            fi
           fi
 
       - uses: actions/checkout@v4

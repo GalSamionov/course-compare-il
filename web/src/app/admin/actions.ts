@@ -1,7 +1,8 @@
 'use server';
 
-import { refresh, updateTag } from 'next/cache';
+import { refresh } from 'next/cache';
 import { requireAdmin, type AdminDb } from '@/lib/admin/gate';
+import { refreshCourses } from '@/lib/cache/refresh';
 import { decisionNote, isRejectReason } from '@/lib/admin/reasons';
 import { removeProofFiles } from '@/lib/reviews/files';
 import { paidBucketFromInput } from '@/lib/reviews/paid-bucket';
@@ -72,8 +73,10 @@ export async function approveReview(_previous: DecisionState, form: FormData): P
 
   // ממוצע התחום משתנה, ולכן כל הקורסים, כמו score:recompute.
   let warning: string | undefined;
+  let recomputed: string[] = [];
   try {
-    const { failures } = await recomputeAllScores(gate.db, new Date());
+    const { failures, slugs } = await recomputeAllScores(gate.db, new Date());
+    recomputed = slugs;
     if (failures.length > 0) {
       console.error(`recompute after approve: ${failures.length} course(s) failed`);
       warning = `חישוב הציונים נכשל ב-${failures.length} קורסים. להריץ pnpm --dir web score:recompute.`;
@@ -82,10 +85,9 @@ export async function approveReview(_previous: DecisionState, form: FormData): P
     console.error('recompute after approve failed', recomputeError instanceof Error ? recomputeError.message : 'unknown');
     warning = 'חישוב הציונים נכשל. להריץ pnpm --dir web score:recompute.';
   }
-  // מיד, ולא ברקע: הבקשה הבאה לעמוד הקורס מחכה לנתונים החדשים (updateTag.md). גם מרנדר מחדש את התור
+  // מיד, ולא ברקע: הקורס עצמו, כל קורס שהציון שלו חושב, והקטלוג (updateTag.md). גם מרנדר מחדש את התור
   // באותה תשובה (server-actions.md, "A single response carries data and UI").
-  updateTag(`course:${slug}`);
-  updateTag('catalog');
+  refreshCourses([slug, ...recomputed]);
   return { status: 'done', message: 'פורסם.', warning };
 }
 
