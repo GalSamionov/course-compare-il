@@ -4,10 +4,19 @@
 # 2. שומר את כל השינויים בקומיט גיבוי ודוחף ל-GitHub.
 # לא כותב כלום אם בסשן לא השתנה דבר.
 set -u
-cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
-
 input="$(cat 2>/dev/null || true)"
+
+# כל סשן מגבה רק את התיקייה שבה הוא עבד (cwd מה-hook), ולא את התיקייה הראשית של הפרויקט.
+# סשן שעובד ב-worktree נפרד היה אחרת שומר ודוחף עבודה לא גמורה של סשן אחר בתיקייה הראשית.
+cwd="$(printf '%s' "$input" | sed -n 's/.*"cwd"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1 | sed 's#\\\\#/#g')"
+if [ -n "$cwd" ] && [ -d "$cwd" ]; then
+  cd "$cwd" || exit 0
+else
+  cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
+fi
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
 sid="$(printf '%s' "$input" | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
 [ -n "$sid" ] || sid="unknown"
 

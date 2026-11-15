@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            web/pnpm-lock.yaml
+
+      - name: Install root tools
+        run: pnpm install --frozen-lockfile
+
+      - name: Start Supabase
+        run: pnpm exec supabase start
+
+      - name: Database tests
+        run: pnpm db:test
+
+      - name: Install web
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and types
+        working-directory: web
+        run: |
+          pnpm lint
+          pnpm exec tsc --noEmit
+
+      - name: Unit tests
+        working-directory: web
+        run: pnpm test
+
+      # המפתחות של Supabase המקומי ב-CI. מעדיפים את השמות החדשים (PUBLISHABLE/SECRET),
+      # ונופלים לשמות הישנים (ANON/SERVICE_ROLE) רק אם הם חסרים.
+      - name: Write env
+        working-directory: web
+        run: |
+          pnpm --dir .. exec supabase status -o env > /tmp/sb.env
+          pick() { for k in "$@"; do v=$(grep "^$k=" /tmp/sb.env | head -n1 | cut -d= -f2- | tr -d '"'); if [ -n "$v" ]; then printf '%s' "$v"; return; fi; done; }
+          API_URL=$(pick API_URL)
+          PUBLIC_KEY=$(pick PUBLISHABLE_KEY ANON_KEY)
+          SECRET_KEY=$(pick SECRET_KEY SERVICE_ROLE_KEY)
+          if [ -z "$API_URL" ] || [ -z "$PUBLIC_KEY" ] || [ -z "$SECRET_KEY" ]; then
+            echo "Missing a Supabase value. Names found:"; cut -d= -f1 /tmp/sb.env; exit 1
+          fi
+          printf 'NEXT_PUBLIC_SUPABASE_URL=%s\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\nSUPABASE_SECRET_KEY=%s\n' \
+            "$API_URL" "$PUBLIC_KEY" "$SECRET_KEY" > .env.local
+
+      - name: Recompute scores
+        working-directory: web
+        run: pnpm score:recompute
+
+      - name: End-to-end tests
+        working-directory: web
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm e2e
+
+      # האוסף השבועי: בדיקות היחידה, ושלושה שבועות של אתר הדוגמה מול המסד של ה-CI.
+      # אחרי בדיקות הקצה, כי ההדגמה מוסיפה מוסד דוגמה (שהקורסים שלו מוסתרים בסוף).
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+          enable-cache: true
+          cache-dependency-glob: scraper/uv.lock
+
+      - name: Scraper tests
+        working-directory: scraper
+        run: |
+          set -a; . ../web/.env.local; set +a
+          export SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL"
+          uv sync --frozen
+          uv run playwright install --with-deps chromium
+          uv run pytest

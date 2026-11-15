@@ -1,0 +1,121 @@
+{
+ "is_course_page": true,
+ "category": "programming",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "פיתוח Full Stack בערבים",
+   "quote": "פיתוח Full Stack בערבים",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 24900,
+   "quote": "שכר הלימוד: 24,900 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 600,
+   "quote": "היקף הקורס: 600 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": true,
+   "value": 240,
+   "quote": "240 שעות הרצאה",
+   "confidence": "high"
+  },
+  "hands_on_hours": {
+   "found": true,
+   "value": 360,
+   "quote": "360 שעות תרגול ופרויקטים",
+   "confidence": "high"
+  },
+  "duration_months": {
+   "found": true,
+   "value": 10,
+   "quote": "משך הקורס: 10 חודשים",
+   "confidence": "high"
+  },
+  "schedule": {
+   "found": true,
+   "value": "שני ורביעי, 18:00-22:00",
+   "quote": "המפגשים בימי שני ורביעי בין 18:00 ל-22:00",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person",
+    "online"
+   ],
+   "quote": "אפשר ללמוד בכיתה בתל אביב או בשידור חי בזום",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "תל אביב",
+   "quote": "אפשר ללמוד בכיתה בתל אביב או בשידור חי בזום",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "המפגשים בימי שני ורביעי בין 18:00 ל-22:00",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": true,
+   "value": "2027-01-11",
+   "quote": "המחזור הבא נפתח ב-11.1.2027",
+   "confidence": "high"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "HTML ו-CSS",
+    "JavaScript מודרני",
+    "React",
+    "Node.js ו-Express",
+    "מסדי נתונים SQL",
+    "Git ועבודה בצוות",
+    "פרויקט גמר"
+   ],
+   "quote": "HTML ו-CSS",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": true,
+   "value": "ראיון אישי ומבחן התאמה",
+   "quote": "תנאי קבלה: ראיון אישי ומבחן התאמה",
+   "confidence": "high"
+  },
+  "class_size_note": {
+   "found": true,
+   "value": "עד 24 תלמידים בכיתה",
+   "quote": "עד 24 תלמידים בכל כיתה",
+   "confidence": "high"
+  },
+  "certificate": {
+   "found": true,
+   "value": "תעודת סיום של המכללה",
+   "quote": "בסיום הקורס תקבלו תעודת סיום של מכללת הדגמה",
+   "confidence": "high"
+  },
+  "institution_promises": {
+   "found": true,
+   "value": "ליווי בחיפוש עבודה אחרי הקורס",
+   "quote": "אנחנו מלווים כל בוגר בחיפוש העבודה הראשונה",
+   "confidence": "high"
+  },
+  "video_url": {
+   "found": true,
+   "value": "https://www.youtube.com/embed/demo-fullstack",
+   "quote": "https://www.youtube.com/embed/demo-fullstack",
+   "confidence": "high"
+  }
+ }
+}

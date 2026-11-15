@@ -1,0 +1,118 @@
+{
+ "is_course_page": true,
+ "category": "programming",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "בדיקות תוכנה ואוטומציה",
+   "quote": "בדיקות תוכנה ואוטומציה",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 14500,
+   "quote": "14,500 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 300,
+   "quote": "300 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": true,
+   "value": 6,
+   "quote": "שישה חודשים",
+   "confidence": "high"
+  },
+  "schedule": {
+   "found": true,
+   "value": "ראשון עד חמישי, 9:00-13:00",
+   "quote": "ימים א'-ה', 9:00-13:00",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "כיתה בחיפה",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "חיפה",
+   "quote": "כיתה בחיפה",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "morning"
+   ],
+   "quote": "ימים א'-ה', 9:00-13:00",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": true,
+   "value": "2027-02-15",
+   "quote": "15.2.2027",
+   "confidence": "high"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "עקרונות בדיקות",
+    "כתיבת תסריטי בדיקה",
+    "Selenium",
+    "בדיקות API",
+    "פרויקט מסכם"
+   ],
+   "quote": "עקרונות בדיקות",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": true,
+   "value": "שיחת התאמה, בלי ידע קודם",
+   "quote": "שיחת התאמה. לא נדרש ידע קודם",
+   "confidence": "high"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

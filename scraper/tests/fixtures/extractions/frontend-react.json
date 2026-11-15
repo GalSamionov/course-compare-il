@@ -1,0 +1,112 @@
+{
+ "is_course_page": true,
+ "category": "programming",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "React מעשי",
+   "quote": "React מעשי",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 9800,
+   "quote": "מחיר הקורס: 9,800 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 120,
+   "quote": "120 שעות",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": true,
+   "value": "שלישי בערב",
+   "quote": "בימי שלישי בערב",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "online"
+   ],
+   "quote": "הקורס מתקיים בזום",
+   "confidence": "high"
+  },
+  "region": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "בימי שלישי בערב",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

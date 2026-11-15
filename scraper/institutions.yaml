@@ -1,0 +1,928 @@
+# המוסדות שהאוסף השבועי קורא מהאתרים שלהם.
+#
+# נוצר מהרשימה שגל אישר ב-15.11.2026 (docs/institutions/2026-11-14-proposed-institutions.md), עם tools/approved_to_yaml.py.
+# מותר לערוך ידנית אחרי זה, למשל include או max_pages למוסד מסוים.
+#
+# מוסד שעוד לא בטבלה institutions נוצר בריצה הראשונה, מ-name ו-kind. בלי קורס שאינו טיוטה אין לו עמוד באתר.
+# תחום שעוד אין באתר (למשל ux-ui) מדולג בריצה ומופיע בדוח. מוסד שכל התחומים שלו כאלה מדולג כולו.
+#
+# השדות:
+#   slug          חובה. ה-slug של המוסד בטבלה institutions.
+#   name, kind    השם והסוג (college, school, university, independent, other), ליצירת המוסד.
+#   website       חובה. האתר של המוסד עצמו. האוסף לא יוצא ממנו ומתת-הדומיינים שלו.
+#   categories    חובה. התחומים (slug מ-categories) שהקורסים של המוסד יכולים להיכנס אליהם.
+#   course_urls   דפי קורס ידועים. תמיד נקראים, וכתובות באותה תיקייה קודמות בתור.
+#   sitemap       auto (מ-robots.txt או /sitemap.xml), none, או כתובת של מפת אתר.
+#   listing_urls  עמודים שמקשרים לכל הקורסים, כשאין מפת אתר טובה.
+#   include       ביטוי רגולרי: רק כתובות שמתאימות לו הן דפי קורס. למשל '/courses/'.
+#   exclude       ביטוי רגולרי: כתובות שלא קוראים. בלוג, תגיות, אודות וקבצים מסוננים תמיד.
+#   render        auto (דפדפן רק כשהדף ריק בלי JavaScript) או browser (תמיד דפדפן).
+#   max_pages     כמה דפים לכל היותר בכל ריצה. ברירת מחדל 100, תקרה 500.
+
+institutions:
+
+  - slug: "360-kinneret"
+    name: "האקדמית כנרת – היחידה ללימודי חוץ"
+    kind: college
+    website: "https://360.kinneret.ac.il/"
+    categories: [ai]
+    course_urls:
+      - "https://360.kinneret.ac.il/business/ai-expert/"
+    max_pages: 60
+
+  - slug: "4chef"
+    name: "4Chef"
+    kind: school
+    website: "https://www.4chef.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.4chef.co.il/course_template/%D7%A7%D7%95%D7%A8%D7%A1-%D7%91%D7%99%D7%A9%D7%95%D7%9C-%D7%9B%D7%A9%D7%A8/"
+    max_pages: 60
+
+  - slug: "6bstudio"
+    name: "6B Studio"
+    kind: school
+    website: "https://6bstudio.co.il/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://pro.6bstudio.co.il/ux-ui-2020-2/"
+      - "https://6bstudio.co.il/courses6b/"
+    max_pages: 60
+
+  # ברשימה המוצעת: (לא אומת)
+  - slug: "800"
+    name: "בית ספר לפסיכומטרי 800"
+    kind: school
+    website: "https://www.800.org.il/"
+    categories: [psychometric]
+    max_pages: 60
+
+  - slug: "academy-studio972"
+    name: "Studio 972 Academy"
+    kind: school
+    website: "https://academy.studio972.co.il/"
+    categories: [ux-ui]
+    course_urls:
+      - "https://academy.studio972.co.il/courses/%D7%A7%D7%95%D7%A8%D7%A1-ux-ui-%D7%9B%D7%A8%D7%98%D7%99%D7%A1-%D7%94%D7%9B%D7%A0%D7%99%D7%A1%D7%94-%D7%A9%D7%9C%D7%9B%D7%9D-%D7%9C%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%94%D7%99%D7%99%D7%98%D7%A7/"
+    max_pages: 60
+
+  - slug: "allonkira"
+    name: "אלון קירה – בית ספר לצילום"
+    kind: school
+    website: "https://www.allonkira.com/"
+    categories: [photography]
+    course_urls:
+      - "https://www.allonkira.com/%D7%91%D7%99%D7%AA-%D7%A1%D7%A4%D7%A8-%D7%9C%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%90%D7%9C%D7%95%D7%9F-%D7%A7%D7%99%D7%A8%D7%94/"
+    max_pages: 60
+
+  - slug: "alonshabo"
+    name: "אלון שבו"
+    kind: independent
+    website: "https://alonshabo.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://hands-on.alonshabo.co.il/alon-shabo-online/"
+    max_pages: 60
+
+  - slug: "ani-mator"
+    name: "Ani-mator"
+    kind: college
+    website: "https://www.ani-mator.com/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://www.ani-mator.com/courses/ui-ux-pro/"
+      - "https://www.ani-mator.com/courses/graphic-design/"
+    max_pages: 60
+
+  - slug: "ankori"
+    name: "אנקורי"
+    kind: school
+    website: "https://ankori.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://ankori.co.il/%D7%A4%D7%A1%D7%99%D7%9B%D7%95%D7%9E%D7%98%D7%A8%D7%99-%D7%A8%D7%90%D7%A9%D7%99/"
+    max_pages: 60
+
+  - slug: "attilio"
+    name: "אטיליו"
+    kind: school
+    website: "https://www.attilio.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.attilio.co.il/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D"
+    max_pages: 60
+
+  - slug: "automation"
+    name: "המכללה לאוטומציה"
+    kind: school
+    website: "https://automation.co.il/"
+    categories: [qa]
+    course_urls:
+      - "https://automation.co.il/courses/"
+    max_pages: 60
+
+  - slug: "bdo-academy"
+    name: "BDO Academy"
+    kind: other
+    website: "https://www.bdo-academy.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://www.bdo-academy.co.il/salary/academic_account_manager/"
+    max_pages: 60
+
+  - slug: "be-bezalel"
+    name: "בצלאל"
+    kind: college
+    website: "https://be.bezalel.ac.il/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://be.bezalel.ac.il/ui-ux/"
+      - "https://be.bezalel.ac.il/category/%D7%AA%D7%95%D7%9B%D7%A0%D7%95%D7%AA-%D7%92%D7%A8%D7%A4%D7%99%D7%95%D7%AA/"
+    max_pages: 60
+
+  - slug: "bgu"
+    name: "אוניברסיטת בן-גוריון – המרכז האוניברסיטאי ללימודי חוץ"
+    kind: university
+    website: "https://www.bgu.ac.il/"
+    categories: [ai]
+    course_urls:
+      - "https://in.bgu.ac.il/acadsec/external_studies/Pages/AI.aspx"
+    max_pages: 60
+
+  - slug: "bishulim-school"
+    name: "בישולים – בית הספר לבישול"
+    kind: school
+    website: "https://www.bishulim-school.com/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.bishulim-school.com/course/%D7%A7%D7%95%D7%A8%D7%A1-%D7%91%D7%99%D7%A9%D7%95%D7%9C-%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%99/"
+    max_pages: 60
+
+  - slug: "biu"
+    name: "אוניברסיטת בר-אילן"
+    kind: university
+    website: "https://www.biu.ac.il/"
+    categories: [qa]
+    course_urls:
+      - "https://desigprog.biu.ac.il/certified_qa_course"
+    max_pages: 60
+
+  - slug: "bookkeepers"
+    name: "לשכת מנהלי החשבונות"
+    kind: other
+    website: "https://www.bookkeepers.org.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://www.bookkeepers.org.il/ibacourses/"
+    max_pages: 60
+
+  - slug: "campus"
+    name: "הפסיכומטרי של המדינה (קמפוס IL)"
+    kind: other
+    website: "https://campus.gov.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://campus.gov.il/course/mse-gov-psychometry-he/"
+    max_pages: 60
+
+  - slug: "ce-tcb"
+    name: "המכללה הטכנולוגית באר שבע"
+    kind: college
+    website: "https://ce.tcb.ac.il/"
+    categories: [qa]
+    course_urls:
+      - "https://ce.tcb.ac.il/courses/%D7%91%D7%93%D7%99%D7%A7%D7%95%D7%AA-%D7%AA%D7%95%D7%9B%D7%A0%D7%94-%D7%99%D7%93%D7%A0%D7%99%D7%95%D7%AA-%D7%95%D7%90%D7%95%D7%98%D7%95%D7%9E%D7%A6%D7%99%D7%94-qa/"
+    max_pages: 60
+
+  - slug: "ceu-ono"
+    name: "הקריה האקדמית אונו – לימודי המשך (CEU)"
+    kind: college
+    website: "https://ceu.ono.ac.il/"
+    categories: [ai]
+    course_urls:
+      - "https://ceu.ono.ac.il/%D7%99%D7%99%D7%A9%D7%95%D7%9E%D7%99-%D7%91%D7%99%D7%A0%D7%94-%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA-%D7%9C%D7%9E%D7%A0%D7%94%D7%9C%D7%99%D7%9D/"
+    max_pages: 60
+
+  - slug: "coding-academy"
+    name: "קודינג אקדמי"
+    kind: school
+    website: "https://www.coding-academy.org/"
+    categories: [programming]
+    course_urls:
+      - "https://coding-academy.org/nextCourse.php"
+    max_pages: 60
+
+  - slug: "college"
+    name: "המכללה למינהל"
+    kind: college
+    website: "https://college.org.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://college.org.il/field_of_study/%d7%9c%d7%99%d7%9e%d7%95%d7%93%d7%99-%d7%97%d7%a9%d7%91%d7%95%d7%a0%d7%90%d7%95%d7%aa/"
+    max_pages: 60
+
+  - slug: "cont-edu-technion"
+    name: "הטכניון – בית הספר ללימודי המשך"
+    kind: university
+    website: "https://cont-edu.technion.ac.il/"
+    categories: [ai, data-analysis]
+    course_urls:
+      - "https://cont-edu.technion.ac.il/programs/%D7%94%D7%9B%D7%A9%D7%A8%D7%95%D7%AA-%D7%9C%D7%AA%D7%97%D7%95%D7%9E%D7%99-ai/%D7%9E%D7%A4%D7%AA%D7%97%D7%99-ai/"
+      - "https://cont-edu.technion.ac.il/programs/%D7%9E%D7%97%D7%A9%D7%91%D7%99%D7%9D-%D7%95%D7%94%D7%99%D7%99%D7%98%D7%A7/%D7%94%D7%9E%D7%A1%D7%9C%D7%95%D7%9C-%D7%94%D7%A9%D7%9C%D7%9D-%D7%9C%D7%94%D7%9B%D7%A9%D7%A8%D7%AA-%D7%97%D7%95%D7%A7%D7%A8%D7%99-%D7%A0%D7%AA%D7%95%D7%A0%D7%99%D7%9D-big-data-analyst/"
+    max_pages: 60
+
+  - slug: "culinarycampus"
+    name: "הקמפוס הקולינרי"
+    kind: school
+    website: "https://culinarycampus.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://culinarycampus.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%91%D7%99%D7%A9%D7%95%D7%9C-%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%99-%D7%94%D7%93%D7%A8%D7%9A-%D7%9C%D7%94%D7%A4%D7%95%D7%9A-%D7%90%D7%94%D7%91%D7%94-%D7%9C%D7%90%D7%95%D7%9B/"
+    max_pages: 60
+
+  - slug: "dangourmet"
+    name: "דן גורמה"
+    kind: school
+    website: "https://www.dangourmet.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.dangourmet.co.il/he/company/cookingcourses/courses/"
+    max_pages: 60
+
+  - slug: "danon"
+    name: "דנון – בית הספר למקצועות הקולינריה"
+    kind: school
+    website: "https://www.danon.org.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.danon.org.il/cuisine/"
+    max_pages: 60
+
+  - slug: "developers"
+    name: "Developers.Institute"
+    kind: school
+    website: "https://developers.institute/"
+    categories: [programming, data-analysis]
+    course_urls:
+      - "https://developers.institute/landing/default_HE.html"
+      - "https://developers.institute/data-analytics-bootcamp/"
+    max_pages: 60
+
+  # ברשימה המוצעת: (לא אומת)
+  - slug: "digi-master"
+    name: "המכללה לניו-מדיה (digi-master)"
+    kind: college
+    website: "https://digi-master.co.il/"
+    categories: [digital-marketing]
+    course_urls:
+      - "https://digi-master.co.il/ppc-2025/"
+    max_pages: 60
+
+  # ברשימה המוצעת: (לא אומת)
+  - slug: "dmasters"
+    name: "DMasters"
+    kind: other
+    website: "https://www.dmasters.co.il/"
+    categories: [graphic-design]
+    max_pages: 60
+
+  - slug: "doctorcode"
+    name: "דוקטור קוד"
+    kind: school
+    website: "https://www.doctorcode.org/"
+    categories: [programming]
+    course_urls:
+      - "https://www.doctorcode.org/bootcamp"
+    max_pages: 60
+
+  - slug: "ecomschool"
+    name: "מכללת איקום"
+    kind: college
+    website: "https://www.ecomschool.co.il/"
+    categories: [ux-ui, digital-marketing]
+    course_urls:
+      - "https://www.ecomschool.co.il/course/%D7%A7%D7%95%D7%A8%D7%A1-ux-ui-%D7%9E%D7%9B%D7%9C%D7%9C%D7%AA-%D7%90%D7%99%D7%A7%D7%95%D7%9D/"
+      - "https://www.ecomschool.co.il/course/%D7%A9%D7%99%D7%95%D7%95%D7%A7-%D7%95%D7%A0%D7%99%D7%AA%D7%95%D7%97-%D7%A0%D7%AA%D7%95%D7%A0%D7%99%D7%9D/"
+    max_pages: 60
+
+  # ברשימה המוצעת: (לא אומת)
+  - slug: "experis"
+    name: "Experis Academy"
+    kind: other
+    website: "https://experis.co.il/academy/"
+    categories: [programming, data-analysis]
+    course_urls:
+      - "https://experis.co.il/academy/course/software-development/"
+      - "https://experis.co.il/academy/course-category/%D7%9E%D7%A2%D7%A8%D7%9B%D7%95%D7%AA-%D7%9E%D7%99%D7%93%D7%A2/"
+    max_pages: 60
+
+  - slug: "galia-cakes"
+    name: "גליה – בית ספר לקונדיטוריה"
+    kind: school
+    website: "https://www.galia-cakes.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.galia-cakes.co.il/%D7%A7%D7%95%D7%A8%D7%A1_%D7%98%D7%A2%D7%99%D7%9E%D7%94_%D7%9E%D7%94%D7%A7%D7%95%D7%A0%D7%93%D7%99%D7%98%D7%95%D7%A8%D7%99%D7%94"
+    max_pages: 60
+
+  - slug: "galitz"
+    name: "גליץ"
+    kind: school
+    website: "https://galitz.co.il/"
+    categories: [photography]
+    course_urls:
+      - "https://galitz.co.il/courses/basics/"
+    max_pages: 60
+
+  - slug: "geva"
+    name: "יואל גבע"
+    kind: school
+    website: "https://www.geva.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://www.geva.co.il/psychometry/our_course/"
+    exclude: "^https?://dev\\."
+    max_pages: 60
+
+  - slug: "golbergpsyhometry"
+    name: "גולברג פסיכומטרי"
+    kind: school
+    website: "https://www.golbergpsyhometry.com/"
+    categories: [psychometric]
+    course_urls:
+      - "https://www.golbergpsyhometry.com/product/online-course"
+    max_pages: 60
+
+  - slug: "hackeru"
+    name: "האקריו (HackerU)"
+    kind: college
+    website: "https://www.hackeru.co.il/"
+    categories: [programming, ai, ux-ui, digital-marketing, data-analysis, cyber, qa]
+    course_urls:
+      - "https://www.hackeru.co.il/digital-online-courses"
+      - "https://www.hackeru.co.il/course/ai-x-developer"
+      - "https://www.hackeru.co.il/course/ux-ui"
+      - "https://www.hackeru.co.il/course/marketing"
+      - "https://www.hackeru.co.il/course/qa"
+    exclude: "/archive-courses"
+    max_pages: 60
+
+  - slug: "hamama"
+    name: "החממה לפסיכומטרי"
+    kind: school
+    website: "https://www.hamama.education/"
+    categories: [psychometric]
+    max_pages: 60
+
+  - slug: "handesaim-shenkar"
+    name: "שנקר הנדסאים"
+    kind: college
+    website: "https://handesaim.shenkar.ac.il/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://handesaim.shenkar.ac.il/ux-ui/"
+      - "https://handesaim.shenkar.ac.il/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%AA%D7%A2%D7%95%D7%93%D7%94/%D7%A7%D7%95%D7%A8%D7%A1-%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%92%D7%A8%D7%A4%D7%99-%D7%95%D7%9E%D7%93%D7%99%D7%94-%D7%91%D7%A2%D7%99%D7%93%D7%9F-ai/"
+    max_pages: 60
+
+  - slug: "hasharon-college"
+    name: "מכללת השרון"
+    kind: college
+    website: "https://hasharon-college.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://hasharon-college.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%94%D7%A0%D7%94%D7%9C%D7%AA-%D7%97%D7%A9%D7%91%D7%95%D7%A0%D7%95%D7%AA-1-2/"
+    max_pages: 60
+
+  - slug: "hashef"
+    name: "מכללת השף"
+    kind: college
+    website: "https://www.hashef.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://www.hashef.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%91%D7%99%D7%A9%D7%95%D7%9C/"
+    max_pages: 60
+
+  - slug: "hcba"
+    name: "לשכת המסחר והתעשיה חיפה והצפון (מכללה)"
+    kind: college
+    website: "https://hcba.co.il/"
+    categories: [cyber]
+    course_urls:
+      - "https://hcba.co.il/course/%D7%9E%D7%99%D7%99%D7%A9%D7%9D-%D7%94%D7%92%D7%A0%D7%AA-%D7%A1%D7%99%D7%99%D7%91%D7%A8/"
+    max_pages: 60
+
+  - slug: "heshev-college"
+    name: "Heshev College"
+    kind: college
+    website: "https://heshev-college.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://heshev-college.co.il/%D7%94%D7%A0%D7%94%D7%9C%D7%AA-%D7%97%D7%A9%D7%91%D7%95%D7%A0%D7%95%D7%AA-%D7%A1%D7%95%D7%92-1-2/"
+    max_pages: 60
+
+  - slug: "high-q"
+    name: "היי קיו (HighQ)"
+    kind: school
+    website: "https://www.high-q.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://www.high-q.co.il/%D7%A4%D7%A1%D7%99%D7%9B%D7%95%D7%9E%D7%98%D7%A8%D7%99/%D7%94%D7%A7%D7%95%D7%A8%D7%A1-%D7%A9%D7%9C%D7%A0%D7%95/"
+    max_pages: 60
+
+  - slug: "hit"
+    name: "מכון טכנולוגי חולון (HIT) – לימודי תעודה"
+    kind: college
+    website: "https://www.hit.ac.il/"
+    categories: [programming]
+    course_urls:
+      - "https://www.hit.ac.il/diploma/python/"
+    max_pages: 60
+
+  - slug: "hitech-school-biu"
+    name: "אוניברסיטת בר-אילן – בית הספר להייטק וסייבר"
+    kind: university
+    website: "https://hitech-school.biu.ac.il/"
+    categories: [digital-marketing, data-analysis, cyber]
+    course_urls:
+      - "https://hitech-school.biu.ac.il/course/digital-marketing-course"
+      - "https://hitech-school.biu.ac.il/our-courses"
+      - "https://hitech-school.biu.ac.il/course/cyber-course"
+    max_pages: 60
+
+  - slug: "hodaya-uxui"
+    name: "הודיה קורסים אונליין UX UI"
+    kind: independent
+    website: "https://hodaya-uxui.co.il/"
+    categories: [ux-ui]
+    course_urls:
+      - "https://hodaya-uxui.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%A4%D7%99%D7%92%D7%9E%D7%94/"
+    max_pages: 60
+
+  - slug: "hpix"
+    name: "חשיפה – בית הספר לצילום (אשקלון)"
+    kind: school
+    website: "https://hpix.co.il/"
+    categories: [photography]
+    max_pages: 60
+
+  - slug: "int-college"
+    name: "מכללת iNT"
+    kind: college
+    website: "https://int-college.co.il/"
+    categories: [programming, digital-marketing, cyber, qa]
+    course_urls:
+      - "https://int-college.co.il/dev/%D7%A7%D7%95%D7%A8%D7%A1-full-stack-%D7%90%D7%95%D7%A0%D7%9C%D7%99%D7%99%D7%9F/"
+      - "https://int-college.co.il/courses/digital-marketing-ppc/"
+      - "https://int-college.co.il/courses/"
+      - "https://int-college.co.il/courses/%D7%91%D7%93%D7%99%D7%A7%D7%95%D7%AA-%D7%AA%D7%95%D7%9B%D7%A0%D7%94-qa/"
+    max_pages: 60
+
+  - slug: "ipc"
+    name: "IPC"
+    kind: college
+    website: "https://ipc.co.il/"
+    categories: [ai, bookkeeping, digital-marketing, data-analysis, cyber, qa]
+    course_urls:
+      - "https://ipc.co.il/course/ai-applications-course/"
+      - "https://ipc.co.il/course/bookkeeping-payroll-course/"
+      - "https://ipc.co.il/course/digital-marketing-course/"
+      - "https://ipc.co.il/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%93%D7%90%D7%98%D7%94-%D7%90%D7%A0%D7%9C%D7%99%D7%A1%D7%98/"
+      - "https://ipc.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%A1%D7%99%D7%99%D7%91%D7%A8/"
+      - "https://ipc.co.il/course/qa-course/"
+    max_pages: 60
+
+  - slug: "israelcybercampus"
+    name: "Israel Cyber Campus"
+    kind: school
+    website: "https://www.israelcybercampus.co.il/"
+    categories: [cyber]
+    course_urls:
+      - "https://www.israelcybercampus.co.il/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%A1%D7%99%D7%99%D7%91%D7%A8/soc-analyst"
+    max_pages: 60
+
+  - slug: "itsafe"
+    name: "ITSafe"
+    kind: school
+    website: "https://www.itsafe.co.il/"
+    categories: [cyber]
+    course_urls:
+      - "https://www.itsafe.co.il/courses"
+    exclude: "^https?://(old|platform)\\."
+    max_pages: 60
+
+  - slug: "johnbryce"
+    name: "ג'ון ברייס"
+    kind: college
+    website: "https://www.johnbryce.co.il/"
+    categories: [programming, ai, ux-ui, digital-marketing, data-analysis, cyber, qa]
+    course_urls:
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/python-full-stack-development-new/"
+      - "https://www.johnbryce.co.il/ai-courses/"
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/ai-product-design-ux-ui/"
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/seo-and-social-media-courses/"
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/data-analyst/"
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/csi-and-cysa-cybersecurity-analyst-new/"
+      - "https://www.johnbryce.co.il/catalog/hi-tech-courses/qa-foundation-istqb-new/"
+    listing_urls:
+      - "https://www.johnbryce.co.il/catalog"
+    include: "/catalog/"
+    exclude: "^https?://jobs\\."
+    max_pages: 60
+
+  - slug: "jolt"
+    name: "Jolt"
+    kind: college
+    website: "https://www.jolt.co.il/"
+    categories: [digital-marketing, data-analysis]
+    course_urls:
+      - "https://www.jolt.co.il/course/digital-marketing-course/"
+      - "https://www.jolt.co.il/course/data-analyst"
+    max_pages: 60
+
+  - slug: "kidum"
+    name: "קידום"
+    kind: school
+    website: "https://kidum.com/"
+    categories: [psychometric]
+    course_urls:
+      - "https://kidum.com/%D7%A4%D7%A1%D7%99%D7%9B%D7%95%D7%9E%D7%98%D7%A8%D7%99/"
+    max_pages: 60
+
+  - slug: "kobiyonasi"
+    name: "מכללת קובי יונסי"
+    kind: college
+    website: "https://kobiyonasi.co.il/"
+    categories: [data-analysis, qa]
+    course_urls:
+      - "https://kobiyonasi.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%93%D7%98%D7%90-%D7%90%D7%A0%D7%9C%D7%99%D7%A1%D7%98/"
+    max_pages: 60
+
+  - slug: "lahav"
+    name: "להב – פיתוח מנהלים, אוניברסיטת תל אביב"
+    kind: university
+    website: "https://www.lahav.ac.il/"
+    categories: [ai]
+    course_urls:
+      - "https://www.lahav.ac.il/program/abc/"
+    max_pages: 60
+
+  - slug: "letsai"
+    name: "Let's AI"
+    kind: school
+    website: "https://letsai.co.il/"
+    categories: [ai]
+    course_urls:
+      - "https://letsai.co.il/letsaifullcourse/"
+    max_pages: 60
+
+  - slug: "lifemichael"
+    name: "Life Michael"
+    kind: independent
+    website: "https://lifemichael.com/"
+    categories: [programming]
+    course_urls:
+      - "https://lifemichael.com/courses/python/"
+    max_pages: 60
+
+  - slug: "machon-noam"
+    name: "מכון נועם"
+    kind: school
+    website: "https://www.machon-noam.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://www.machon-noam.co.il/%D7%A4%D7%A1%D7%99%D7%9B%D7%95%D7%9E%D7%98%D7%A8%D7%99-%D7%97%D7%A0%D7%95%D7%AA"
+    max_pages: 60
+
+  - slug: "minshar"
+    name: "מנשר לאמנות"
+    kind: college
+    website: "https://www.minshar.org.il/"
+    categories: [photography, graphic-design]
+    course_urls:
+      - "https://www.minshar.org.il/photography-studies/"
+      - "https://www.minshar.org.il/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%AA%D7%A2%D7%95%D7%93%D7%94-%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%92%D7%A8%D7%A4%D7%99/"
+    max_pages: 60
+
+  - slug: "mishlav"
+    name: "מישלב"
+    kind: college
+    website: "https://mishlav.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://mishlav.co.il/%D7%A7%D7%95%D7%A8%D7%A1-%D7%94%D7%A0%D7%94%D7%9C%D7%AA-%D7%97%D7%A9%D7%91%D7%95%D7%A0%D7%95%D7%AA-%D7%A1%D7%95%D7%92-3-%D7%A8%D7%90%D7%A9%D7%99/"
+    max_pages: 60
+
+  - slug: "mor-koren"
+    name: "מור קורן"
+    kind: school
+    website: "https://mor-koren.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://mor-koren.co.il/courses/%D7%A4%D7%A1%D7%99%D7%9B%D7%95%D7%9E%D7%98%D7%A8%D7%99-%D7%91-live/"
+    max_pages: 60
+
+  - slug: "musrara"
+    name: "מוסררה"
+    kind: school
+    website: "https://musrara.co.il/"
+    categories: [photography]
+    course_urls:
+      - "https://musrara.co.il/photo/about-photo/"
+    max_pages: 60
+
+  - slug: "naya-college"
+    name: "נאיה קולג'"
+    kind: college
+    website: "https://www.naya-college.co.il/"
+    categories: [ai, data-analysis]
+    course_urls:
+      - "https://www.naya-college.co.il/genai-for-ds/"
+      - "https://www.naya-college.co.il/data-analysis/"
+    max_pages: 60
+
+  - slug: "nextcollege"
+    name: "Next College"
+    kind: college
+    website: "https://nextcollege.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://nextcollege.co.il/bookkeeping/"
+    max_pages: 60
+
+  - slug: "omertal-plantbased"
+    name: "עומר טל"
+    kind: independent
+    website: "https://omertal-plantbased.com/"
+    categories: [cooking]
+    course_urls:
+      - "https://omertal-plantbased.com/digi-course/"
+    max_pages: 60
+
+  - slug: "one-eye"
+    name: "בעין אחת"
+    kind: school
+    website: "https://www.one-eye.co.il/"
+    categories: [photography]
+    course_urls:
+      - "https://www.one-eye.co.il/%D7%A7%D7%95%D7%A8%D7%A1%D7%99-%D7%A6%D7%99%D7%9C%D7%95%D7%9D/"
+    max_pages: 60
+
+  - slug: "onlinegraphic"
+    name: "מכללת סולו"
+    kind: college
+    website: "https://onlinegraphic.co.il/"
+    categories: [graphic-design]
+    course_urls:
+      - "https://onlinegraphic.co.il/%D7%94%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D-%D7%A9%D7%9C%D7%A0%D7%95/"
+    max_pages: 60
+
+  - slug: "openu"
+    name: "האוניברסיטה הפתוחה – לימודי חוץ"
+    kind: university
+    website: "https://www.openu.ac.il/"
+    categories: [ai, photography, bookkeeping, graphic-design]
+    course_urls:
+      - "https://www.openu.ac.il/hasifa/ai_center.html"
+      - "https://www.openu.ac.il/hasifa/photoshop.html"
+      - "https://www.openu.ac.il/diploma/diploma-9.html"
+      - "https://www.openu.ac.il/hasifa/communication-2.html"
+    max_pages: 60
+
+  - slug: "osim-bishul"
+    name: "עושים בישול"
+    kind: school
+    website: "https://osim-bishul.co.il/"
+    categories: [cooking]
+    max_pages: 60
+
+  - slug: "photo-workshops"
+    name: "המרכז לצילום אומנותי"
+    kind: school
+    website: "https://photo-workshops.co.il/"
+    categories: [photography]
+    course_urls:
+      - "https://photo-workshops.co.il/shop/%D7%A7%D7%95%D7%A8%D7%A1-%D7%A6%D7%99%D7%9C%D7%95%D7%9D-%D7%9C%D7%9E%D7%AA%D7%97%D7%99%D7%9C%D7%99%D7%9D/"
+    max_pages: 60
+
+  - slug: "pirolita"
+    name: "פירוליטה"
+    kind: school
+    website: "https://pirolita.co.il/"
+    categories: [cooking]
+    max_pages: 60
+
+  - slug: "prog"
+    name: "מכללת פרוג"
+    kind: college
+    website: "https://www.prog.co.il/"
+    categories: [digital-marketing]
+    course_urls:
+      - "https://www.prog.co.il/school/courses/advertising-digital-marketing/"
+    sitemap: "none"
+    listing_urls:
+      - "https://www.prog.co.il/school/courses/advertising-digital-marketing/"
+    include: "/school/"
+    max_pages: 60
+
+  - slug: "richerschool"
+    name: "מכללת ריצ'ר"
+    kind: college
+    website: "https://richerschool.co.il/"
+    categories: [digital-marketing]
+    course_urls:
+      - "https://richerschool.co.il/digital-marketing-course/"
+    max_pages: 60
+
+  - slug: "rt-ed"
+    name: "Real Time (rt-ed)"
+    kind: college
+    website: "https://rt-ed.co.il/"
+    categories: [programming, data-analysis, cyber, qa]
+    course_urls:
+      - "https://rt-ed.co.il/program/full-stack-bootcamp/"
+      - "https://rt-ed.co.il/program/%D7%A7%D7%95%D7%A8%D7%A1-%D7%93%D7%90%D7%98%D7%94-%D7%90%D7%A0%D7%9C%D7%99%D7%A1%D7%98/"
+      - "https://rt-ed.co.il/program/cyber-course/"
+      - "https://rt-ed.co.il/program/automation/"
+    max_pages: 60
+
+  - slug: "sce"
+    name: "SCE – לימודי חוץ"
+    kind: college
+    website: "https://www.sce.ac.il/"
+    categories: [qa]
+    course_urls:
+      - "https://www.sce.ac.il/academic-units1/external-studies/quality/assurance"
+    max_pages: 60
+
+  - slug: "see-security"
+    name: "See-Security"
+    kind: college
+    website: "https://www.see-security.com/"
+    categories: [cyber]
+    course_urls:
+      - "https://see-security.com/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D/%D7%9E%D7%AA%D7%A7%D7%93%D7%9E%D7%99%D7%9D-%D7%9C%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%95%D7%AA-%D7%94%D7%A1%D7%99%D7%99%D7%91%D7%A8/%D7%9E%D7%A0%D7%94%D7%9C%D7%99-%D7%98%D7%9B%D7%A0%D7%95%D7%9C%D7%95%D7%92%D7%99%D7%95%D7%AA-%D7%94%D7%92%D7%A0%D7%AA-%D7%A1%D7%99%D7%99%D7%91%D7%A8-csp"
+    max_pages: 60
+
+  - slug: "sela"
+    name: "מכללת סלע"
+    kind: college
+    website: "https://www.sela.co.il/"
+    categories: [programming, cyber, qa]
+    course_urls:
+      - "https://blog.sela.co.il/sblog/Full-Stack-Developer"
+      - "https://blog.sela.co.il/sblog/%D7%A7%D7%95%D7%A8%D7%A1%20%D7%A1%D7%99%D7%99%D7%91%D7%A8"
+      - "https://blog.sela.co.il/sblog/%D7%A7%D7%95%D7%A8%D7%A1-QA"
+    max_pages: 60
+
+  - slug: "shirstudio"
+    name: "Shir Studio"
+    kind: independent
+    website: "https://shirstudio.co.il/"
+    categories: [ux-ui]
+    course_urls:
+      - "https://shirstudio.co.il/figma/"
+    max_pages: 60
+
+  - slug: "shviro-college"
+    name: "Shviro College"
+    kind: college
+    website: "https://www.shviro-college.co.il/"
+    categories: [bookkeeping]
+    course_urls:
+      - "https://www.shviro-college.co.il/accounting"
+    max_pages: 60
+
+  - slug: "simplex"
+    name: "Simplex"
+    kind: school
+    website: "https://simplex.org.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://online.simplex.org.il/"
+    max_pages: 60
+
+  - slug: "smart-college"
+    name: "מכללת סמארט"
+    kind: college
+    website: "https://www.smart-college.co.il/"
+    categories: [digital-marketing]
+    course_urls:
+      - "https://www.smart-college.co.il/course/seo-ppc-course/"
+    max_pages: 60
+
+  - slug: "studiogavra"
+    name: "סטודיו גברא"
+    kind: school
+    website: "https://studiogavra.co.il/"
+    categories: [photography]
+    max_pages: 60
+
+  - slug: "successcollege"
+    name: "Success College"
+    kind: college
+    website: "https://successcollege.co.il/"
+    categories: [programming, qa]
+    course_urls:
+      - "https://successcollege.co.il/course/tech-python/"
+      - "https://successcollege.co.il/course/tech-qa/"
+    max_pages: 60
+
+  - slug: "svcollege"
+    name: "SVCollege"
+    kind: college
+    website: "https://svcollege.co.il/"
+    categories: [programming, ai, qa]
+    course_urls:
+      - "https://svcollege.co.il/courses/%D7%A4%D7%99%D7%AA%D7%95%D7%97-full-stack/"
+      - "https://svcollege.co.il/courses/%D7%A7%D7%95%D7%A8%D7%A1-ai/"
+      - "https://svcollege.co.il/courses/qa-automation/"
+    max_pages: 60
+
+  - slug: "tafnit1"
+    name: "מכללת תפנית"
+    kind: college
+    website: "https://www.tafnit1.co.il/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://www.tafnit1.co.il/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%A2%D7%99%D7%A6%D7%95%D7%91-UIUX---%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%9E%D7%9E%D7%A9%D7%A7-%D7%95%D7%97%D7%95%D7%95%D7%99%D7%AA-%D7%9E%D7%A9%D7%AA%D7%9E%D7%A9"
+      - "https://www.tafnit1.co.il/%D7%9E%D7%A1%D7%9C%D7%95%D7%9C%D7%99-%D7%9C%D7%99%D7%9E%D7%95%D7%93/%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%92%D7%A8%D7%A4%D7%99-%D7%95%D7%AA%D7%A7%D7%A9%D7%95%D7%A8%D7%AA-%D7%97%D7%96%D7%95%D7%AA%D7%99%D7%AA"
+    max_pages: 60
+
+  - slug: "teamim"
+    name: "טעמים – בית ספר לבישול"
+    kind: school
+    website: "https://www.teamim.cc/"
+    categories: [cooking]
+    max_pages: 60
+
+  - slug: "technionphoto"
+    name: "הטכניון – בית הספר לאמנות הצילום"
+    kind: university
+    website: "https://www.technionphoto.com/"
+    categories: [photography]
+    course_urls:
+      - "https://www.technionphoto.com/category/courses/"
+    max_pages: 60
+
+  # ברשימה המוצעת: (לא אומת)
+  - slug: "techswitch"
+    name: "TechSwitch"
+    kind: school
+    website: "https://techswitch.co.il/"
+    categories: [cyber]
+    course_urls:
+      - "https://techswitch.co.il/cyber/"
+    max_pages: 60
+
+  - slug: "tiltan"
+    name: "תילתן – המכללה לעיצוב ולתקשורת חזותית"
+    kind: college
+    website: "https://www.tiltan.co.il/"
+    categories: [graphic-design]
+    course_urls:
+      - "https://www.tiltan.co.il/department/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%92%D7%A8%D7%A4%D7%99/"
+    max_pages: 60
+
+  - slug: "yanivarad-online"
+    name: "יניב ארד Online"
+    kind: independent
+    website: "https://yanivarad-online.com/"
+    categories: [ai]
+    course_urls:
+      - "https://yanivarad-online.com/gpt-course/"
+    max_pages: 60
+
+  - slug: "yvc"
+    name: "המכללה האקדמית עמק יזרעאל – לימודי חוץ"
+    kind: college
+    website: "https://www.yvc.ac.il/"
+    categories: [ux-ui, graphic-design]
+    course_urls:
+      - "https://www.yvc.ac.il/external-studies/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D-%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%97%D7%95%D7%A5-%D7%95%D7%94%D7%9E%D7%A9%D7%9A/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%97%D7%95%D7%95%D7%99%D7%AA-%D7%9E%D7%A9%D7%AA%D7%9E%D7%A9-ui-ux/"
+      - "https://www.yvc.ac.il/external-studies/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D-%D7%9C%D7%99%D7%9E%D7%95%D7%93%D7%99-%D7%97%D7%95%D7%A5-%D7%95%D7%94%D7%9E%D7%A9%D7%9A/basic_graphic_design/"
+    max_pages: 60
+
+  - slug: "zbdphoto"
+    name: "צבד"
+    kind: school
+    website: "https://zbdphoto.com/"
+    categories: [photography]
+    max_pages: 60
+
+  - slug: "zefat"
+    name: "המכללה האקדמית צפת – היחידה ללימודי חוץ"
+    kind: college
+    website: "https://www.zefat.org.il/"
+    categories: [graphic-design]
+    course_urls:
+      - "https://www.zefat.org.il/course/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%92%D7%A8%D7%A4%D7%99/"
+    max_pages: 60
+
+  - slug: "znk"
+    name: "זינוק"
+    kind: school
+    website: "https://znk.co.il/"
+    categories: [psychometric]
+    course_urls:
+      - "https://znk.co.il/psychometry/"
+    max_pages: 60

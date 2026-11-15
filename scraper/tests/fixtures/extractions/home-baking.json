@@ -1,0 +1,117 @@
+{
+ "is_course_page": true,
+ "category": "cooking",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "אפייה ביתית",
+   "quote": "אפייה ביתית",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 1890,
+   "quote": "מחיר: 1,890 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 20,
+   "quote": "5 מפגשים של 4 שעות",
+   "confidence": "medium"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": true,
+   "value": "רביעי בערב, 18:30-22:30",
+   "quote": "בימי רביעי, 18:30-22:30",
+   "confidence": "high"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "בסטודיו ברמת גן",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "רמת גן",
+   "quote": "בסטודיו ברמת גן",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": true,
+   "value": [
+    "evening"
+   ],
+   "quote": "בימי רביעי, 18:30-22:30",
+   "confidence": "high"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": true,
+   "value": [
+    "לחמים",
+    "בצק שמרים",
+    "עוגות בחושה",
+    "בצק פריך"
+   ],
+   "quote": "לחמים",
+   "confidence": "high"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": true,
+   "value": "עד 10 משתתפים",
+   "quote": "עד 10 משתתפים בקבוצה",
+   "confidence": "high"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

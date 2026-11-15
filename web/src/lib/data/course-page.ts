@@ -1,0 +1,309 @@
+import { cacheLife, cacheTag } from 'next/cache';
+import { createPublicClient } from '@/lib/supabase/public-client';
+import { costPerHandsOnHour, type PaidRange } from '@/lib/format';
+import { yesCount } from '@/lib/score/compute';
+import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
+import { safeHttpUrl } from '@/lib/safe-url';
+import type { Database } from '@/lib/database.types';
+import type { AuthorTitle } from '@/lib/reviews/types';
+import { isProductType, type ProductType } from '@/lib/search/types';
+import { one, queryError, verifiedFactsOf, type VerifiedFact } from './shared';
+
+export interface SyllabusItem {
+  title: string;
+  weak: boolean;
+}
+
+export interface MetricRow {
+  key: string;
+  label: string;
+  mean: number;
+  n: number;
+}
+
+/**
+ * מה קרה לבוגרים, במספרים של אנשים כשהנתונים מאפשרים.
+ * after_3m: שאלת ההמשך של קורס קריירה, בסולם 1 עד 5. נשמרים רק הממוצע ומספר העונים, ולכן אין כאן "כמה עובדים בתחום".
+ *   question: שם השאלה, כמו בטבלת השאלות (metrics.label), כדי שהשורה תגיד על מה הממוצע.
+ * skill_gained, passed_exam: שאלת כן או לא של תחביב או מבחן. מהממוצע יוצא בדיוק כמה ענו "כן".
+ */
+export type OutcomeView =
+  | { kind: 'after_3m'; n: number; mean: number; question: string }
+  | { kind: 'skill_gained' | 'passed_exam'; yes: number; n: number };
+
+export interface ReviewView {
+  id: string;
+  /** null כשהבוגר בחר להישאר אנונימי. */
+  displayName: string | null;
+  cohortMonth: string;
+  body: string;
+  followUp: string | null;
+  vendorResponse: string | null;
+  /** "בוגר", "בוגרת" או בלי: מה שמופיע ליד השם (verifiedLabel). */
+  authorTitle: AuthorTitle;
+  /** "עזר לי". מהמטמון של העמוד, ולכן יכול לפגר בשעה. לא משנה את הסדר. */
+  helpfulCount: number;
+}
+
+export interface LecturerView {
+  slug: string;
+  name: string;
+  role: string | null;
+  /** טענה של המוסד, לא נבדקה. */
+  institutionBio: string | null;
+  /** רק מה שבדקנו בעצמנו, עם קישור למקור. */
+  verifiedFacts: VerifiedFact[];
+  otherCoursesCount: number;
+}
+
+export type ScoreView =
+  | { status: 'scored'; value: number; reviewCount: number; recommendPct: number | null; stale: boolean }
+  | { status: 'not_enough_reviews'; reviewCount: number; reviewsNeeded: number }
+  | { status: 'none' };
+
+export interface CoursePageData {
+  /** המזהה במסד, ל"לשמור" ול"להשוואה". */
+  id: string;
+  slug: string;
+  title: string;
+  status: Exclude<Database['public']['Enums']['course_status'], 'draft'>;
+  /** קורס, סדנה או הרצאה. */
+  productType: ProductType;
+  institutionName: string;
+  /** לקישור לעמוד המוסד (סבב 4). */
+  institutionSlug: string;
+  categoryName: string;
+  categorySlug: string;
+  region: string | null;
+  formats: string[];
+  sitePrice: number | null;
+  totalHours: number | null;
+  handsOnHours: number | null;
+  durationMonths: number | null;
+  schedule: string | null;
+  nextCohortDate: string | null;
+  syllabus: SyllabusItem[];
+  lecturersNote: string | null;
+  admission: string | null;
+  classSizeNote: string | null;
+  certificate: string | null;
+  institutionPromises: string | null;
+  videoUrl: string | null;
+  summaryGood: string | null;
+  summaryWeak: string | null;
+  lecturers: LecturerView[];
+  lecturersSummary: string | null;
+  lastCheckedAt: string | null;
+  score: ScoreView;
+  /** ציונים לפי שאלה בסולם 1 עד 5. שאלות כן או לא לא כאן: הן ב-outcome, כמספר אנשים. */
+  metrics: MetricRow[];
+  outcome: OutcomeView | null;
+  paid: PaidRange | null;
+  costPerHandsOnHour: number | null;
+  /** הביקורות הראשונות שמוצגות בעמוד. */
+  reviews: ReviewView[];
+  /** כל הביקורות שפורסמו לקורס, לא רק אלה שבעמוד. */
+  reviewTotal: number;
+}
+
+const REVIEWS_ON_PAGE = 3;
+
+
+/**
+ * עמוד הקורס, מהמטמון של Next. נשמר לשעה, ו-`revalidateTag('course:<slug>')` מרענן אותו לפני הזמן.
+ * עם `cacheComponents` אין `export const revalidate`, ולכן המטמון מוגדר כאן.
+ */
+export async function getCoursePage(slug: string): Promise<CoursePageData | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(`course:${slug}`);
+  return loadCoursePage(slug);
+}
+
+/** כל הקורסים שאינם טיוטה, לבנייה מראש של העמודים. שאילתה שנכשלה זורקת שגיאה, כדי שהבנייה תיכשל ולא תדלג בשקט. */
+export async function getCourseSlugs(): Promise<string[]> {
+  const { data, error } = await createPublicClient().from('courses').select('slug').neq('status', 'draft').order('slug');
+  if (error) throw queryError('course slugs', error);
+  return data.map((row) => row.slug);
+}
+
+/** הטעינה עצמה, בלי מטמון. סקריפטים מחוץ ל-Next קוראים לה ישירות. */
+export async function loadCoursePage(slug: string): Promise<CoursePageData | null> {
+  const db = createPublicClient();
+
+  const { data: course, error } = await db
+    .from('courses')
+    .select(
+      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, product_type, institutions(name, slug), categories(name, slug)',
+    )
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) throw queryError('course', error);
+  if (!course) return null;
+
+  const [scoreRes, metricsRes, reviewsRes, lecturersRes, paidRes] = await Promise.all([
+    db
+      .from('scores')
+      .select('status, value, review_count, reviews_needed, recommend_pct, stale, per_metric')
+      .eq('course_id', course.id)
+      .eq('kind', 'graduate')
+      .order('computed_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    db.from('metrics').select('key, label, scale, sort_order').order('sort_order'),
+    // רק הביקורות שבעמוד, עם הספירה של כולן. כך לא מושכים מאות שורות כדי להציג חמש.
+    db
+      .from('reviews')
+      .select(
+        'id, display_name, display_mode, author_title, helpful_count, cohort_month, body, follow_up_text, published_at, vendor_responses(body)',
+        { count: 'exact' },
+      )
+      .eq('course_id', course.id)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(REVIEWS_ON_PAGE),
+    db
+      .from('course_lecturers')
+      .select('role, sort_order, lecturers(slug, name, institution_bio, verified_facts, course_lecturers(count))')
+      .eq('course_id', course.id)
+      .order('sort_order')
+      .order('lecturer_id'),
+    // הסכום של כל בוגר לא חשוף. המסד מחזיר רק את החצי האמצעי, רק מ-5 חשבוניות, ואת מספרן בקפיצות של 5.
+    db.rpc('course_paid_range', { p_course_id: course.id }),
+  ]);
+
+  // שאילתה שנכשלה זורקת שגיאה. אחרת העמוד היה מציג בשקט "אין ציון" או "אין ביקורות".
+  if (scoreRes.error) throw queryError('score', scoreRes.error);
+  if (metricsRes.error) throw queryError('metrics', metricsRes.error);
+  if (reviewsRes.error) throw queryError('reviews', reviewsRes.error);
+  if (lecturersRes.error) throw queryError('lecturers', lecturersRes.error);
+  if (paidRes.error) throw queryError('paid range', paidRes.error);
+  const scoreRow = scoreRes.data;
+  const metricDefs = metricsRes.data;
+  const lecturerRows = lecturersRes.data;
+  const paidRows = paidRes.data;
+
+  const institution = one(course.institutions as { name: string; slug: string } | { name: string; slug: string }[] | null);
+  const category = one(course.categories as { name: string; slug: string } | { name: string; slug: string }[] | null);
+
+  type LecturerRef = {
+    slug: string;
+    name: string;
+    institution_bio: string | null;
+    verified_facts: unknown;
+    course_lecturers: { count: number }[];
+  };
+  const lecturers: LecturerView[] = (lecturerRows ?? [])
+    .map((row) => ({ role: row.role, lecturer: one(row.lecturers as unknown as LecturerRef | LecturerRef[] | null) }))
+    .filter((x): x is { role: string | null; lecturer: LecturerRef } => x.lecturer !== null)
+    .map(({ role, lecturer }) => ({
+      slug: lecturer.slug,
+      name: lecturer.name,
+      role,
+      institutionBio: lecturer.institution_bio,
+      verifiedFacts: verifiedFactsOf(lecturer.verified_facts),
+      // ההרשאות סופרות רק קורסים שאינם טיוטה, כולל הקורס הזה. לכן מורידים 1.
+      otherCoursesCount: Math.max(0, (lecturer.course_lecturers[0]?.count ?? 1) - 1),
+    }));
+
+  let score: ScoreView = { status: 'none' };
+  if (scoreRow?.status === 'scored' && scoreRow.value !== null) {
+    score = {
+      status: 'scored',
+      value: Number(scoreRow.value),
+      reviewCount: scoreRow.review_count,
+      recommendPct: scoreRow.recommend_pct,
+      stale: scoreRow.stale,
+    };
+  } else if (scoreRow?.status === 'not_enough_reviews') {
+    score = {
+      status: 'not_enough_reviews',
+      reviewCount: scoreRow.review_count,
+      reviewsNeeded: scoreRow.reviews_needed ?? 0,
+    };
+  }
+
+  const perMetric = (scoreRow?.per_metric ?? {}) as Record<string, { mean: number; n: number }>;
+  const valid = (key: string) => {
+    const m = perMetric[key];
+    return m && Number.isFinite(m.mean) && Number.isFinite(m.n) ? m : null;
+  };
+  const metrics: MetricRow[] = (metricDefs ?? [])
+    .filter((m) => {
+      const entry = valid(m.key);
+      // שאלת כן או לא ("רכשתי את המיומנות") לא מוצגת כממוצע מתוך 5, אלא כמספר אנשים (outcome).
+      if (m.key === 'recommend' || m.scale === 'yes_no' || !entry) return false;
+      // תוצאה אחרי שלושה חודשים מוצגת רק מ-MIN_OUTCOME_ANSWERS תשובות.
+      return m.key !== 'outcome_3m' || entry.n >= MIN_OUTCOME_ANSWERS;
+    })
+    .map((m) => ({ key: m.key, label: m.label, mean: perMetric[m.key].mean, n: perMetric[m.key].n }));
+
+  const after3m = valid('outcome_3m');
+  const yesNo = (['passed_exam', 'skill_gained'] as const).find((key) => valid(key));
+  let outcome: OutcomeView | null = null;
+  if (after3m && after3m.n >= MIN_OUTCOME_ANSWERS) {
+    const question = (metricDefs ?? []).find((m) => m.key === 'outcome_3m')?.label ?? 'אחרי 3 חודשים';
+    outcome = { kind: 'after_3m', n: after3m.n, mean: after3m.mean, question };
+  } else if (yesNo) {
+    const entry = valid(yesNo)!;
+    if (entry.n >= MIN_OUTCOME_ANSWERS) outcome = { kind: yesNo, yes: yesCount(entry.mean, entry.n), n: entry.n };
+  }
+
+  const paidRow = paidRows?.[0];
+  const paid: PaidRange | null = paidRow
+    ? { min: paidRow.min_ils, max: paidRow.max_ils, count: paidRow.invoice_count }
+    : null;
+
+  return {
+    id: course.id,
+    slug: course.slug,
+    title: course.title,
+    status: course.status as CoursePageData['status'],
+    productType: isProductType(course.product_type) ? course.product_type : 'course',
+    institutionName: institution?.name ?? '',
+    institutionSlug: institution?.slug ?? '',
+    categoryName: category?.name ?? '',
+    categorySlug: category?.slug ?? '',
+    region: course.region,
+    formats: course.formats,
+    sitePrice: course.site_price_ils,
+    totalHours: course.total_hours,
+    handsOnHours: course.hands_on_hours,
+    durationMonths: course.duration_months === null ? null : Number(course.duration_months),
+    schedule: course.schedule,
+    nextCohortDate: course.next_cohort_date,
+    syllabus: (Array.isArray(course.syllabus) ? (course.syllabus as unknown as SyllabusItem[]) : [])
+      .filter((i) => typeof i?.title === 'string')
+      .map((i) => ({ title: i.title, weak: i.weak === true })),
+    lecturersNote: course.lecturers_note,
+    admission: course.admission,
+    classSizeNote: course.class_size_note,
+    certificate: course.certificate,
+    institutionPromises: course.institution_promises,
+    videoUrl: safeHttpUrl(course.video_url),
+    summaryGood: course.summary_good,
+    summaryWeak: course.summary_weak,
+    lecturers,
+    lecturersSummary: course.lecturers_summary,
+    lastCheckedAt: course.last_checked_at,
+    score,
+    metrics,
+    outcome,
+    paid,
+    costPerHandsOnHour: costPerHandsOnHour(course.site_price_ils, course.hands_on_hours),
+    reviewTotal: reviewsRes.count ?? 0,
+    reviews: (reviewsRes.data ?? []).map((r) => ({
+      id: r.id,
+      // אנונימי: השם השמור אף פעם לא עובר הלאה.
+      displayName: r.display_mode === 'anonymous' ? null : r.display_name,
+      cohortMonth: r.cohort_month,
+      body: r.body,
+      followUp: r.follow_up_text,
+      vendorResponse: one(r.vendor_responses as { body: string } | { body: string }[] | null)?.body ?? null,
+      authorTitle: r.author_title,
+      helpfulCount: r.helpful_count,
+    })),
+  };
+}

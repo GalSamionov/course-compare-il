@@ -1,0 +1,110 @@
+{
+ "is_course_page": true,
+ "category": "ai",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "מסלול Data ו-Machine Learning",
+   "quote": "מסלול Data ו-Machine Learning",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 18000,
+   "quote": "\"price\": \"18000\"",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": true,
+   "value": 400,
+   "quote": "400 שעות לימוד",
+   "confidence": "high"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": true,
+   "value": 8,
+   "quote": "שמונה חודשים",
+   "confidence": "high"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "בקמפוס ברחובות",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "רחובות",
+   "quote": "בקמפוס ברחובות",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

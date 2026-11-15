@@ -1,0 +1,28 @@
+[project]
+name = "lamadti-scraper"
+version = "0.1.0"
+description = "האוסף השבועי של למדתי: פרטי קורסים מאתרי המוסדות עצמם."
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.0",
+    "beautifulsoup4>=4.12",
+    "httpx>=0.27",
+    "lxml>=5.0",
+    "playwright>=1.48",
+    "pyyaml>=6.0",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-m 'not live'"
+markers = [
+    "db: needs the local Supabase (pnpm db:start) with the scraper migration applied",
+    "live: calls the real Claude API (needs ANTHROPIC_API_KEY). Run with -m live",
+]
