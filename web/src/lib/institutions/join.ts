@@ -15,9 +15,10 @@ export type JoinParse = { ok: true; values: JoinValues } | { ok: false; errors: 
 
 /**
  * מייל פשוט בלבד, בלי ? & = או #: הכתובת הופכת לקישור mailto ב-/admin, ותווים כאלה היו מוסיפים לו נושא
- * וגוף שהשולח בחר (סקירת האבטחה של תוכנית 5ב). אותה בדיקה במסד (institution_requests.contact_email).
+ * וגוף שהשולח בחר (סקירת האבטחה של תוכנית 5ב). אותה בדיקה במסד (institution_requests.contact_email,
+ * ו-company_requests.email).
  */
-const EMAIL = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+export const EMAIL =/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
 
 /** "www.example.co.il/course" הופך ל-https://www.example.co.il/course. null: לא קישור שאפשר לקבל. */
 export function normalizeCourseUrl(input: string): string | null {
