@@ -110,6 +110,13 @@
 - web/e2e/lecturer.spec.ts
 - web/src/app/lecturers/
 - web/src/components/lecturer/
+## 2026-11-15 10:21 (סשן 701e61f9)
+
+קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:
+
+- .claude/launch.json
+- web/src/app/guides/[slug]/opengraph-image.tsx
+- .impeccable/surfaces/web-src-app-guides-slug-page-tsx.md
 
 
 ## 2026-11-15 10:34 (סשן a5587d0a)

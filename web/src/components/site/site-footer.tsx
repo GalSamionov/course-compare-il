@@ -22,6 +22,9 @@ export function SiteFooter() {
           <Link href="/who-pays-us" className={footerLink}>
             מי משלם לנו
           </Link>
+          <Link href="/guides" className={footerLink}>
+            מדריכים לפני שמשלמים
+          </Link>
           <Link href="/privacy" className={footerLink}>
             פרטיות
           </Link>

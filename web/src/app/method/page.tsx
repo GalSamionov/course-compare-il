@@ -100,6 +100,14 @@ export default async function MethodPage() {
       )}
 
       <p>
+        לפני שמשלמים על קורס אפשר גם לבדוק לבד: איך קוראים סילבוס, מה לשאול את המוסד, אילו תעודות מוכרות ואיך
+        מממנים. על זה כתבנו{' '}
+        <Link href="/guides" className="underline decoration-1 underline-offset-[3px] hover:text-link-hover">
+          ארבעה מדריכים קצרים
+        </Link>
+        , וכל עובדה בהם עם המקור שלה.
+      </p>
+      <p>
         <Link href="/who-pays-us">מי משלם לנו</Link>
       </p>
     </TextPage>
