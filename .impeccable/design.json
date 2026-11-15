@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-14T10:31:05.017Z",
+  "generatedAt": "2026-11-15T00:36:21.389Z",
   "title": "Design System: למדתי",
   "extensions": {
     "colorMeta": {
@@ -169,6 +169,51 @@
           "#e9f0f4"
         ]
       },
+      "washi-lilac": {
+        "role": "tertiary",
+        "displayName": "מסקינג טייפ לילך",
+        "canonical": "oklch(79.5% 0.090 298.2)",
+        "tonalRamp": [
+          "#0c0914",
+          "#282037",
+          "#463a5f",
+          "#675789",
+          "#8878ad",
+          "#a99dc7",
+          "#ccc4e2",
+          "#f0ebfd"
+        ]
+      },
+      "washi-teal": {
+        "role": "tertiary",
+        "displayName": "מסקינג טייפ טורקיז",
+        "canonical": "oklch(81.9% 0.071 188.0)",
+        "tonalRamp": [
+          "#030e0d",
+          "#0e2a28",
+          "#1e4a47",
+          "#306d68",
+          "#538f89",
+          "#82afab",
+          "#b1d1cd",
+          "#e1f3f1"
+        ]
+      },
+      "washi-peach": {
+        "role": "tertiary",
+        "displayName": "מסקינג טייפ אפרסק",
+        "canonical": "oklch(86.0% 0.087 53.8)",
+        "tonalRamp": [
+          "#130803",
+          "#351f11",
+          "#5b3922",
+          "#845435",
+          "#a77555",
+          "#c49b82",
+          "#e0c2b0",
+          "#fcebe0"
+        ]
+      },
       "paper": {
         "role": "neutral",
         "displayName": "נייר",
@@ -187,46 +232,46 @@
       "paper-under": {
         "role": "neutral",
         "displayName": "הדף שמתחת",
-        "canonical": "oklch(95.4% 0.003 247.9)",
+        "canonical": "oklch(97.6% 0.003 264.5)",
         "tonalRamp": [
-          "#0b0b0c",
-          "#232425",
-          "#3e4041",
-          "#5c5e5f",
-          "#7f8082",
-          "#a3a5a6",
-          "#c9cacc",
+          "#0b0b0b",
+          "#252526",
+          "#414243",
+          "#606163",
+          "#818284",
+          "#a4a5a6",
+          "#c9c9ca",
           "#eeeeef"
         ]
       },
       "desk": {
         "role": "neutral",
-        "displayName": "לבד גרפיט",
-        "canonical": "oklch(41.1% 0.010 253.9)",
+        "displayName": "שולחן בהיר",
+        "canonical": "oklch(93.9% 0.005 258.3)",
         "tonalRamp": [
-          "#0a0b0d",
-          "#222428",
-          "#3c4045",
-          "#5a5e63",
-          "#7c8186",
-          "#a1a5aa",
-          "#c8cbce",
-          "#edeef0"
+          "#0b0b0c",
+          "#242526",
+          "#414244",
+          "#606164",
+          "#818285",
+          "#a4a5a7",
+          "#c8c9ca",
+          "#eeeeef"
         ]
       },
       "desk-deep": {
         "role": "neutral",
-        "displayName": "לבד כהה",
-        "canonical": "oklch(36.2% 0.009 248.1)",
+        "displayName": "אפור שולחן כהה",
+        "canonical": "oklch(73.2% 0.012 252.1)",
         "tonalRamp": [
           "#0a0b0d",
-          "#222427",
-          "#3c4044",
-          "#5a5e62",
-          "#7c8185",
-          "#a1a5a9",
-          "#c8cbcd",
-          "#edeeef"
+          "#232528",
+          "#3f4246",
+          "#5d6267",
+          "#7e8389",
+          "#a1a5aa",
+          "#c6c9cd",
+          "#edeff1"
         ]
       },
       "rule": {
@@ -291,7 +336,7 @@
       },
       "leader": {
         "role": "neutral",
-        "displayName": "קו מנקד",
+        "displayName": "קו מקווקו",
         "canonical": "oklch(68.6% 0.000 89.9)",
         "tonalRamp": [
           "#0b0b0b",
@@ -308,11 +353,11 @@
     "typographyMeta": {
       "display": {
         "displayName": "כותרת עמוד",
-        "purpose": "שם הקורס או ההבטחה של דף הבית, במחשב."
+        "purpose": "שם הקורס או ההבטחה של דף הבית, במחשב. Plex 700, ריווח מינוס 0.012em."
       },
       "display-mobile": {
         "displayName": "כותרת עמוד בנייד",
-        "purpose": "שם הקורס בנייד (30px); ההבטחה של דף הבית 33px ב-800."
+        "purpose": "שם הקורס בנייד (30px); ההבטחה של דף הבית 33px."
       },
       "headline": {
         "displayName": "כותרת פרק",
@@ -328,57 +373,67 @@
       },
       "score": {
         "displayName": "ציון",
-        "purpose": "המספר בתיבת הציון: 64px במחשב, 52px בנייד."
+        "purpose": "המספר בתיבת הציון, מוקף בעט: 64px במחשב, 52px בנייד."
       },
       "body": {
         "displayName": "גוף",
-        "purpose": "גוף הסיכום במחשב, עד 68ch. גובה השורה בבסיס 1.8."
+        "purpose": "גוף הסיכום במחשב, עד 68ch. גובה השורה בבסיס 1.75."
       },
       "body-mobile": {
         "displayName": "גוף בנייד",
-        "purpose": "גוף הטקסט ברשימות ובפתקים בנייד."
+        "purpose": "גוף הטקסט ברשימות ובפתקים בנייד, וגוף הביקורת על הפתק הצהוב."
       },
       "label": {
         "displayName": "תווית",
-        "purpose": "ניווט, כפתורים, תוויות ונתונים (Assistant)."
+        "purpose": "ניווט, כפתורים, תוויות ונתונים (Plex 600)."
       },
       "label-small": {
         "displayName": "תווית קטנה",
         "purpose": "שורות הבהרה, מיקום בהיררכיה, טקסט הפתקים."
       },
+      "wordmark": {
+        "displayName": "השם ליד הסימן",
+        "purpose": "\"למדתי\" ב-Plex מודגש בדיו, 25px בנייד ו-29px במחשב, ליד ה-ל המוקפת."
+      },
       "pen": {
         "displayName": "עט",
-        "purpose": "קול האתר בלבד: הערות, \"לא בדקנו\", \"נפתח בקרוב\", מוטה מינוס מעלה."
+        "purpose": "קול האתר בלבד, Rubik בכחול, בלי הטיה: הערות, \"לא בדקנו\", \"נפתח בקרוב\"."
       },
       "pen-answer": {
         "displayName": "תשובה בעט",
-        "purpose": "מה שהמבקר כותב על שורת המחברת."
-      },
-      "pen-wordmark": {
-        "displayName": "השם בעט",
-        "purpose": "השם \"למדתי\" על תווית המחברת, בראש כל עמוד ובתמונות השיתוף."
+        "purpose": "מה שהמבקר כותב על שורת המחברת לחיפוש."
       }
     },
     "shadows": [
       {
         "name": "sheet-on-desk",
-        "value": "0 1px 1px rgb(0 0 0 / 0.18), 0 3px 6px -2px rgb(0 0 0 / 0.22), 0 28px 48px -18px rgb(0 0 0 / 0.55)",
-        "purpose": "הדף הראשי על השולחן, רק מ-1024px."
+        "value": "0 1px 1px rgb(30 36 44 / 0.1), 0 3px 8px -3px rgb(30 36 44 / 0.12), 0 24px 44px -20px rgb(30 36 44 / 0.28)",
+        "purpose": "הדף הראשי על השולחן הבהיר, רק מ-1024px. צל קר ובהיר."
       },
       {
         "name": "sheet-under",
-        "value": "0 18px 36px -16px rgb(0 0 0 / 0.5)",
+        "value": "0 1px 1px rgb(30 36 44 / 0.08), 0 16px 30px -18px rgb(30 36 44 / 0.25)",
         "purpose": "הדף מהערימה שמציץ מתחת, מוטה 0.7deg."
       },
       {
         "name": "sticky-note",
         "value": "0 1px 1px rgb(0 0 0 / 0.08), 0 10px 14px -9px rgb(40 40 20 / 0.45)",
-        "purpose": "פתק דביק עם פינה שמתרוממת."
+        "purpose": "פתק צבעוני (צהוב, כחול) עם פינה שמתרוממת."
+      },
+      {
+        "name": "sticky-note-paper",
+        "value": "0 0 0 1px rgb(30 36 44 / 0.07), 0 1px 1px rgb(30 36 44 / 0.08), 0 10px 14px -9px rgb(30 36 44 / 0.4)",
+        "purpose": "פתק לבן (קישור לתחום), בגוון קר ועם קו מתאר דק."
+      },
+      {
+        "name": "sticky-note-paper-hover",
+        "value": "0 0 0 1px rgb(30 36 44 / 0.08), 0 2px 3px rgb(30 36 44 / 0.08), 0 18px 20px -12px rgb(30 36 44 / 0.42)",
+        "purpose": "פתק לבן מתרומם 4px בריחוף. חפץ, ולכן מותר."
       },
       {
         "name": "taped-card",
         "value": "0 1px 2px rgb(0 0 0 / 0.16), 0 10px 18px -12px rgb(0 0 0 / 0.4)",
-        "purpose": "מקרא הצבעים ותמונת הסרטון."
+        "purpose": "מקרא הצבעים, תמונת הסרטון ותצוגת ההוכחה."
       },
       {
         "name": "taped-card-heavy",
@@ -389,28 +444,73 @@
         "name": "tape",
         "value": "drop-shadow(0 1px 0.5px rgb(0 0 0 / 0.12))",
         "purpose": "פס סלוטייפ (filter)."
-      },
-      {
-        "name": "binder-clip",
-        "value": "drop-shadow(0 6px 5px rgb(0 0 0 / 0.35))",
-        "purpose": "התפס בראש הדף (filter), רק במחשב."
       }
     ],
     "motion": [
       {
+        "name": "gate",
+        "value": "html[data-motion] + @media screen and (prefers-reduced-motion: no-preference)",
+        "purpose": "נקבע רק בלי prefers-reduced-motion, ויורד אם התנועה לא התחילה תוך 3s. מצבי התחלה מוסתרים רק על המסך; הדפסה מראה הכול."
+      },
+      {
+        "name": "stagger",
+        "value": "140ms, עד 6",
+        "purpose": "השהיה בין רכיבים שנכנסים למסך יחד (--enter-delay)."
+      },
+      {
         "name": "hl-swipe",
-        "value": "620ms cubic-bezier(0.16, 1, 0.3, 1) both",
-        "purpose": "מריחת מרקר חד-פעמית מימין לשמאל, רק בסיכום לדוגמה, בהשהיות 350ms ו-800ms. לא רצה ב-prefers-reduced-motion."
+        "value": "760ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "purpose": "מרקר נמרח מימין לשמאל. הטקסט גלוי כל הזמן."
+      },
+      {
+        "name": "pen-rule-draw",
+        "value": "780ms cubic-bezier(0.55, 0, 0.25, 1)",
+        "purpose": "קו העט מתחת לכותרת נמשך מימין לשמאל."
+      },
+      {
+        "name": "pen-draw",
+        "value": "680ms cubic-bezier(0.5, 0, 0.2, 1)",
+        "purpose": "עיגולים, מספרים, חיצים, ווים (360ms), קווי ספירה (260ms כל קו) וסימני האימות נמשכים לאורך הקו."
+      },
+      {
+        "name": "pen-write",
+        "value": "1000ms cubic-bezier(0.4, 0, 0.3, 1)",
+        "purpose": "הערה בעט נחשפת מימין לשמאל דרך clip-path."
+      },
+      {
+        "name": "stick-in",
+        "value": "680ms cubic-bezier(0.16, 1, 0.3, 1) backwards",
+        "purpose": "פתק יורד 16px ומתיישר מ-1.5deg לכיוון האפס; הסלוטייפ אחריו (320ms, אחרי 460ms)."
+      },
+      {
+        "name": "ink-in",
+        "value": "720ms cubic-bezier(0.4, 0, 0.3, 1) backwards",
+        "purpose": "שורה ברשימת הקורסים נכתבת אל המחברת מימין לשמאל."
+      },
+      {
+        "name": "page-turn",
+        "value": "420ms cubic-bezier(0.16, 1, 0.3, 1), 28px",
+        "purpose": "צעד בכתיבת ביקורת: קדימה משמאל, אחורה מימין."
+      },
+      {
+        "name": "logo-loop",
+        "value": "900ms בטעינה, 760ms בריחוף",
+        "purpose": "העט מקיף את ה-ל בלוגו."
+      },
+      {
+        "name": "pen-under",
+        "value": "360ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "קו העט נמתח מתחת לקישור בריחוף ובפוקוס."
+      },
+      {
+        "name": "pen-example",
+        "value": "3000ms cubic-bezier(0.4, 0, 0.3, 1)",
+        "purpose": "הדוגמה בשורה הראשונה של המחברת נכתבת, נשארת ונעלמת."
       },
       {
         "name": "press",
         "value": "translateY(1px)",
         "purpose": "כפתור שוקע פיקסל אחד בלחיצה."
-      },
-      {
-        "name": "hover-color",
-        "value": "150ms (ברירת המחדל של Tailwind)",
-        "purpose": "קישור לכחול כהה; מסגרת תיבת הסימון לעט; כפתור הסרטון גדל ב-5%."
       }
     ],
     "breakpoints": [
@@ -435,7 +535,7 @@
       "refersTo": "button-primary",
       "description": "הפעולה שעובדת היום: להשוואה. דיו על נייר, בלי צל.",
       "html": "<button class=\"ds-btn-primary\" role=\"checkbox\" aria-checked=\"false\"><span class=\"ds-box\" aria-hidden=\"true\"></span>להשוואה (עד 3)</button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 16px;background:#1c1c1c;color:#fff;border:1px solid transparent;border-radius:4px;font-family:Assistant,sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}.ds-btn-primary:hover{background:rgb(28 28 28/.8)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-btn-primary .ds-box{width:16px;height:16px;border:1.5px solid rgb(255 255 255/.9);border-radius:2px}"
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 16px;background:#1c1c1c;color:#fff;border:1px solid transparent;border-radius:4px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}.ds-btn-primary:hover{background:rgb(28 28 28/.8)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-btn-primary .ds-box{width:16px;height:16px;border:1.5px solid rgb(255 255 255/.9);border-radius:2px}"
     },
     {
       "name": "כפתור משני עם נפתח בקרוב",
@@ -443,30 +543,46 @@
       "refersTo": "button-outline",
       "description": "פעולה שעוד לא נבנתה: מסגרת דיו, והערה בעט על הקו העליון.",
       "html": "<a class=\"ds-btn-outline\" href=\"#\">כתיבת ביקורת<span class=\"ds-soon\">נפתח בקרוב</span></a>",
-      "css": ".ds-btn-outline{position:relative;display:inline-flex;align-items:center;justify-content:center;height:50px;padding:0 24px;background:#fff;color:#1c1c1c;border:1.5px solid #1c1c1c;border-radius:4px;font-family:Assistant,sans-serif;font-size:16px;font-weight:700;text-decoration:none}.ds-btn-outline:hover{background:#f4f4f4}.ds-btn-outline:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-soon{position:absolute;top:-10px;left:12px;background:#fff;padding:0 4px;font-family:'Playpen Sans Hebrew',cursive;font-size:14px;font-weight:500;line-height:1;color:#1f3fbf;transform:rotate(-2deg);white-space:nowrap}"
+      "css": ".ds-btn-outline{position:relative;display:inline-flex;align-items:center;justify-content:center;height:50px;padding:0 24px;background:#fff;color:#1c1c1c;border:1.5px solid #1c1c1c;border-radius:4px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:16px;font-weight:700;text-decoration:none}.ds-btn-outline:hover{background:#f4f4f4}.ds-btn-outline:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-soon{position:absolute;top:-10px;left:12px;background:#fff;padding:0 4px;font-family:Rubik,system-ui,sans-serif;font-size:14px;font-weight:500;line-height:1;color:#1f3fbf;white-space:nowrap}"
+    },
+    {
+      "name": "מסלול משני",
+      "kind": "button",
+      "refersTo": "secondary-path",
+      "description": "\"או\" ומסלול לבוגרים, למוסדות או לחברות: מסגרת דקה בקו מחברת, ו\"נפתח בקרוב\" בעט על הקו העליון.",
+      "html": "<a class=\"ds-path\" href=\"#\"><span>סיימתי קורס, רוצה לכתוב עליו</span><svg viewBox=\"0 0 28 14\" width=\"20\" height=\"10\" aria-hidden=\"true\"><path d=\"M26.6 5.4C19.4 3.6 11.6 4.4 3.4 8.2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M8.6 3.4 2.8 8.5 9.6 11.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg><span class=\"ds-path-soon\">נפתח בקרוב</span></a>",
+      "css": ".ds-path{position:relative;direction:rtl;display:flex;align-items:center;gap:10px;min-height:44px;width:320px;padding:8px 12px;background:#fff;border:1px solid #c3cad3;border-radius:4px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:15px;line-height:1.375;color:#1c1c1c;text-decoration:none;transition:color .15s,border-color .15s}.ds-path span:first-child{flex:1}.ds-path svg{color:#555;transition:color .2s,translate .2s}.ds-path:hover{border-color:#1f3fbf;color:#132a85}.ds-path:hover svg{color:#1f3fbf;translate:-4px 0}.ds-path:focus-visible{border-color:#1f3fbf;outline:2px solid #2f5fe0;outline-offset:2px}.ds-path:active{transform:translateY(1px)}.ds-path-soon{position:absolute;top:-8px;left:10px;background:#fff;padding:0 4px;font-family:Rubik,system-ui,sans-serif;font-size:13px;font-weight:500;line-height:1;color:#1f3fbf;white-space:nowrap}"
     },
     {
       "name": "שבב בחירה",
       "kind": "chip",
       "refersTo": "choice-chip",
-      "description": "תשובה במחברת: ריבוע קטן שמקבל וי בעט.",
-      "html": "<button class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-chip-box\" aria-hidden=\"true\"><svg viewBox=\"0 0 30 30\"><path d=\"M5 16 C8 19, 10 22, 12 25 C16 15, 21 8, 29 1\" fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>ערבים</button>",
-      "css": ".ds-chip{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;background:#fff;color:#1c1c1c;border:1px solid #1c1c1c;border-radius:4px;font-family:Assistant,sans-serif;font-size:15px;font-weight:600;cursor:pointer}.ds-chip[aria-pressed=true]{font-weight:700}.ds-chip:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-chip-box{position:relative;width:16px;height:16px;border:1.5px solid #1c1c1c;border-radius:2px}.ds-chip-box svg{position:absolute;top:-9px;left:-2px;width:23px;height:23px;overflow:visible}.ds-chip[aria-pressed=false] svg{display:none}"
+      "description": "בחירה מרובה בדף הבית: ריבוע קטן שמקבל וי בעט.",
+      "html": "<button class=\"ds-chip\" role=\"checkbox\" aria-checked=\"true\"><span class=\"ds-chip-box\" aria-hidden=\"true\"><svg viewBox=\"0 0 30 30\"><path d=\"M5 16 C8 19, 10 22, 12 25 C16 15, 21 8, 29 1\" fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>ערבים</button>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 10px;background:#fff;color:#1c1c1c;border:1px solid #1c1c1c;border-radius:4px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:15px;font-weight:600;cursor:pointer}.ds-chip[aria-checked=true]{font-weight:700}.ds-chip:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-chip-box{position:relative;width:16px;height:16px;border:1.5px solid #1c1c1c;border-radius:2px}.ds-chip-box svg{position:absolute;top:-9px;left:-2px;width:23px;height:23px;overflow:visible}.ds-chip[aria-checked=false] svg{display:none}"
+    },
+    {
+      "name": "בחירה אחת בכתיבת ביקורת",
+      "kind": "chip",
+      "refersTo": "choice-radio",
+      "description": "קבוצת רדיו (tabindex נודד, חצים): הבחירה מוקפת בעיגול עט, והטקסט שלה בולט בכחול העט.",
+      "html": "<div class=\"ds-radios\" role=\"radiogroup\" aria-label=\"ממליצים?\"><button role=\"radio\" aria-checked=\"true\" tabindex=\"0\"><span class=\"ds-loop\"><svg viewBox=\"0 0 60 34\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path d=\"M40.6 4.2C30.8 1.6 14.6 2.8 7 9.4 1.4 14.2 2.6 23.6 10.4 28.2 19.6 33.4 41.8 32.6 51.6 26.4 59 21.6 58.4 12.6 50.8 7.8 44.6 3.8 33.2 2.8 24.4 4\" fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"1.7\" stroke-linecap=\"round\" vector-effect=\"non-scaling-stroke\"/></svg><span>כן</span></span></button><button role=\"radio\" aria-checked=\"false\" tabindex=\"-1\">לא</button></div>",
+      "css": ".ds-radios{direction:rtl;display:flex;gap:8px}.ds-radios button{display:inline-flex;align-items:center;justify-content:center;height:44px;min-width:72px;padding:0 12px;background:#fff;border:1px solid #1c1c1c;border-radius:4px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:15px;font-weight:600;line-height:1;color:#1c1c1c;cursor:pointer;transition:border-color .15s}.ds-radios button:hover{border-color:#1f3fbf}.ds-radios button:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-radios [aria-checked=true]{font-weight:700;color:#1f3fbf}.ds-loop{position:relative;display:inline-block}.ds-loop>span{position:relative}.ds-loop svg{position:absolute;top:-5px;left:-9px;width:calc(100% + 18px);height:calc(100% + 10px);overflow:visible}"
     },
     {
       "name": "שורת מחברת",
       "kind": "input",
-      "description": "שדה כשורה במחברת: שאלה בשוליים, תשובה בעט על הקו, הקו מתעבה לדיו בפוקוס.",
+      "description": "שדה כשורה במחברת לחיפוש: שאלה בשוליים, תשובת המבקר בעט על הקו, הקו מתעבה לדיו בפוקוס.",
       "html": "<label class=\"ds-line\"><span class=\"ds-q\"><span class=\"ds-num\">1</span>מה?</span><input placeholder=\"למשל: לבנות אתרים\" value=\"פיתוח אתרים\"></label>",
-      "css": ".ds-line{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:center;min-height:62px;border-bottom:1px solid #c3cad3;direction:rtl}.ds-line:focus-within{border-bottom:2px solid #1c1c1c}.ds-q{display:flex;flex-direction:column;gap:2px;font-family:Assistant,sans-serif;font-size:13px;color:#555}.ds-num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border:1.9px solid #1f3fbf;border-radius:50% 46% 52% 48%;font-family:'Playpen Sans Hebrew',cursive;font-size:17px;font-weight:600;color:#1f3fbf}.ds-line input{border:0;background:transparent;outline:none;font-family:'Playpen Sans Hebrew',cursive;font-size:21px;font-weight:500;color:#1f3fbf;caret-color:#1f3fbf;transform:rotate(-1deg)}.ds-line input::placeholder{font-family:Assistant,sans-serif;font-size:15px;color:#555}"
+      "css": ".ds-line{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:center;min-height:62px;border-bottom:1px solid #c3cad3;direction:rtl}.ds-line:focus-within{border-bottom:2px solid #1c1c1c}.ds-q{display:flex;flex-direction:column;gap:2px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:13px;color:#555}.ds-num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border:1.9px solid #1f3fbf;border-radius:50% 46% 52% 48%;font-family:Rubik,system-ui,sans-serif;font-size:17px;font-weight:600;color:#1f3fbf}.ds-line input{border:0;background:transparent;outline:none;font-family:Rubik,system-ui,sans-serif;font-size:21px;font-weight:500;color:#1f3fbf;caret-color:#1f3fbf}.ds-line input::placeholder{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:15px;color:#555}"
     },
     {
       "name": "ניווט",
       "kind": "nav",
       "refersTo": "nav-link",
-      "description": "כותרת הדף: תווית מחברת מודפסת שהשם \"למדתי\" כתוב בה בעט כחול, שורת אמון ותפריט.",
-      "html": "<header class=\"ds-nav\"><a class=\"ds-wordmark\" href=\"#\"><span>למדתי</span></a><p class=\"ds-trust\">אף מוכר לא משלם לנו</p><nav><a href=\"#\">תחומים</a><a href=\"#\">איך אנחנו מדרגים</a><a href=\"#\">התחברות</a></nav></header>",
-      "css": ".ds-nav{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding-bottom:16px;border-bottom:1px solid #dadada;direction:rtl;font-family:Assistant,sans-serif}.ds-wordmark{display:inline-flex;align-items:center;min-height:54px;padding:0 14px;border:3px double #1c1c1c;border-radius:6px;background:#fff;font-family:'Playpen Sans Hebrew',cursive;font-size:30px;font-weight:600;line-height:1;color:#1f3fbf;text-decoration:none}.ds-wordmark span{transform:rotate(-1deg)}.ds-wordmark:hover{color:#132a85}.ds-trust{margin:0;font-size:14px;font-weight:600;color:#555}.ds-nav nav{margin-inline-start:auto;display:flex;gap:28px}.ds-nav nav a{display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:600;color:#1c1c1c;text-decoration:none;text-underline-offset:5px;text-decoration-color:#1f3fbf;text-decoration-thickness:1.5px}.ds-nav nav a:hover{color:#132a85;text-decoration-line:underline}.ds-nav a:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}"
+      "description": "כותרת הדף: הסימן (ל מוקפת בעט) והשם \"למדתי\" בדיו, שורת אמון ותפריט עם קו עט מצויר בריחוף.",
+      "html": "<header class=\"ds-nav\"><a class=\"ds-logo\" href=\"#\"><svg viewBox=\"0 0 100 100\" width=\"40\" height=\"40\" aria-hidden=\"true\"><path fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"6.5\" stroke-linecap=\"round\" d=\"M68 9C46 1 16 10 9 36 3 60 20 88 50 91 78 94 96 72 93 46 90 22 70 8 44 10\"/><path fill=\"currentColor\" transform=\"translate(30.7 80) scale(0.07838 -0.07838)\" d=\"M338 477H22V740H172V610H496V470L316 0H156Z\"/></svg><span>למדתי</span></a><p class=\"ds-trust\">אף מוכר לא משלם לנו</p><nav><a href=\"#\"><span class=\"ds-u\">תחומים</span></a><a href=\"#\"><span class=\"ds-u\">איך אנחנו מדרגים</span></a><a href=\"#\"><span class=\"ds-u\">התחברות</span></a></nav></header>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding-bottom:16px;border-bottom:1px solid #dadada;direction:rtl;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif}.ds-logo{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:#1c1c1c;text-decoration:none;transition:color .15s}.ds-logo span{font-size:29px;font-weight:700;line-height:1;letter-spacing:-.015em}.ds-logo:hover{color:#132a85}.ds-trust{margin:0;font-size:14px;font-weight:600;color:#555}.ds-nav nav{margin-inline-start:auto;display:flex;gap:28px}.ds-nav nav a{display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:600;color:#1c1c1c;text-decoration:none}.ds-u{background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%231F3FBF' d='M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right bottom;background-size:0 .32em;padding-bottom:.2em;transition:background-size .36s cubic-bezier(.16,1,.3,1)}.ds-nav nav a:hover .ds-u,.ds-nav nav a:focus-visible .ds-u{background-size:calc(100% + .15em) .32em}.ds-nav a:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}"
     },
     {
       "name": "תיבת ציון",
@@ -474,21 +590,29 @@
       "refersTo": "score-box",
       "description": "מסגרת דיו בלי צל, ומתחתיה הערה בעט על הפינה. המספרים לדוגמה.",
       "html": "<section class=\"ds-score\"><div class=\"ds-score-box\"><span class=\"ds-score-n\">7.9</span><div><p><b>ציון בוגרים מתוך 10</b></p><p>23 בוגרים מאומתים</p><p>91% ממליצים</p></div></div><p class=\"ds-pen\"><svg viewBox=\"0 0 22 26\" width=\"18\" height=\"21\" aria-hidden=\"true\"><path d=\"M3.2 24.2C5.4 16.8 9.8 10.4 18.2 3.8\" fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><path d=\"M11.4 3.9 18.7 3.2 17.4 10.3\" fill=\"none\" stroke=\"#1f3fbf\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>את הקורס עצמו עוד לא בדקנו</p></section>",
-      "css": ".ds-score{direction:rtl;width:340px}.ds-score-box{display:flex;align-items:center;gap:20px;padding:16px 20px;background:#fff;border:1.5px solid #1c1c1c}.ds-score-n{font-family:'Noto Serif Hebrew',serif;font-size:64px;font-weight:700;line-height:1;color:#1c1c1c}.ds-score-box p{margin:0;font-family:Assistant,sans-serif;font-size:15px;line-height:1.375}.ds-pen{display:flex;align-items:flex-start;gap:4px;margin:8px 0 0 auto;width:fit-content;font-family:'Playpen Sans Hebrew',cursive;font-size:16px;color:#1f3fbf;transform:rotate(-1deg)}"
+      "css": ".ds-score{direction:rtl;width:340px}.ds-score-box{display:flex;align-items:center;gap:20px;padding:16px 20px;background:#fff;border:1.5px solid #1c1c1c}.ds-score-n{font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:64px;font-weight:700;line-height:1;color:#1c1c1c}.ds-score-box p{margin:0;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:15px;line-height:1.375}.ds-pen{display:flex;align-items:flex-start;gap:4px;margin:8px 0 0 auto;width:fit-content;font-family:Rubik,system-ui,sans-serif;font-size:16px;color:#1f3fbf}"
     },
     {
       "name": "מרקרים לפי מקור",
       "kind": "custom",
       "description": "ארבעת הסימונים: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה, קו כחול לטענת מוסד. המשיכה האמיתית היא SVG עם קצוות משופעים (.hl ב-globals.css); כאן קירוב.",
       "html": "<p class=\"ds-marks\"><mark class=\"ds-hl ds-v\">שילמו בפועל 12,500–15,000 ₪</mark> <mark class=\"ds-hl ds-g\">14 בוגרים ענו 3 חודשים אחרי הסיום</mark> <mark class=\"ds-hl ds-w\">הקצב מהיר מדי</mark> <span class=\"ds-claim\">ליווי השמה במשך 6 חודשים</span></p>",
-      "css": ".ds-marks{direction:rtl;font-family:'Noto Serif Hebrew',serif;font-size:17px;line-height:1.9;color:#1c1c1c}.ds-hl{color:inherit;padding:.04em .32em;-webkit-box-decoration-break:clone;box-decoration-break:clone;border-radius:.35em .1em .4em .12em}.ds-v{background:#9bea8a}.ds-g{background:#ffea3d}.ds-w{background:#ffb0d3}.ds-claim{text-decoration:underline;text-decoration-color:#2f5fe0;text-decoration-thickness:2px;text-underline-offset:5px}"
+      "css": ".ds-marks{direction:rtl;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:17px;line-height:1.9;color:#1c1c1c}.ds-hl{color:inherit;padding:.04em .32em;-webkit-box-decoration-break:clone;box-decoration-break:clone;border-radius:.35em .1em .4em .12em}.ds-v{background:#9bea8a}.ds-g{background:#ffea3d}.ds-w{background:#ffb0d3}.ds-claim{text-decoration:underline;text-decoration-color:#2f5fe0;text-decoration-thickness:2px;text-underline-offset:5px}"
     },
     {
       "name": "פתקים דביקים",
       "kind": "custom",
-      "description": "פתק צהוב לקול של בוגר, ופתק כחול רק לתגובת המוסד, מודבקים בסלוטייפ. הטקסט לדוגמה.",
+      "description": "פתק צהוב לקול של בוגר (השם וגוף הביקורת מודפסים בדיו), ופתק כחול רק לתגובת המוסד, מודבקים בסלוטייפ. הטקסט לדוגמה.",
       "html": "<div class=\"ds-notes\"><div class=\"ds-note ds-grad\"><span class=\"ds-tape\"></span><p><b>נועה ר.</b>, ביקורת מאומתת, מחזור יולי 2025</p><p class=\"ds-body\">הרבה תרגול אמיתי ופרויקט מסכם.</p></div><div class=\"ds-note ds-inst\"><span class=\"ds-tape\"></span><b>תגובת המוסד:</b> פרק הענן עודכן.</div></div>",
-      "css": ".ds-notes{direction:rtl;display:flex;flex-direction:column;gap:36px;padding:16px;width:340px}.ds-note{position:relative;padding:20px 20px 14px;font-family:Assistant,sans-serif;font-size:13px;line-height:1.375;color:#1c1c1c;background-image:linear-gradient(to bottom,transparent 70%,rgb(0 0 0/.035));box-shadow:0 1px 1px rgb(0 0 0/.08),0 10px 14px -9px rgb(40 40 20/.45)}.ds-note p{margin:0}.ds-grad{background-color:#fff27a;transform:rotate(1.4deg)}.ds-inst{background-color:#b9ddf5;transform:rotate(-1.5deg);margin-right:56px;padding:16px 12px 8px}.ds-grad .ds-body{margin-top:6px;font-family:'Noto Serif Hebrew',serif;font-size:16px;line-height:1.625}.ds-tape{position:absolute;top:-10px;left:50%;width:58px;height:20px;transform:translateX(-50%) rotate(-3deg);background:rgb(230 233 237/.74);filter:drop-shadow(0 1px .5px rgb(0 0 0/.12))}"
+      "css": ".ds-notes{direction:rtl;display:flex;flex-direction:column;gap:36px;padding:16px;width:340px}.ds-note{position:relative;padding:20px 20px 14px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:13px;line-height:1.375;color:#1c1c1c;background-image:linear-gradient(to bottom,transparent 70%,rgb(0 0 0/.035));box-shadow:0 1px 1px rgb(0 0 0/.08),0 10px 14px -9px rgb(40 40 20/.45)}.ds-note p{margin:0}.ds-grad{background-color:#fff27a;transform:rotate(1.4deg)}.ds-inst{background-color:#b9ddf5;transform:rotate(-1.5deg);margin-right:56px;padding:16px 12px 8px}.ds-grad .ds-body{margin-top:6px;font-size:16px;line-height:1.625}.ds-tape{position:absolute;top:-10px;left:50%;width:58px;height:20px;transform:translateX(-50%) rotate(-3deg);background:rgb(230 233 237/.74);filter:drop-shadow(0 1px .5px rgb(0 0 0/.12))}"
+    },
+    {
+      "name": "פתק לבן לתחום",
+      "kind": "card",
+      "refersTo": "sticky-note-paper",
+      "description": "קישור לתחום כפתק לבן עם מסקינג טייפ צבעוני: השם, ומתחתיו מאותו צד כמה קורסים וכמה בוגרים. מתרומם בריחוף. המספרים לדוגמה.",
+      "html": "<a class=\"ds-paper\" href=\"#\"><span class=\"ds-washi\"></span><b><span class=\"ds-u\">תכנות</span></b><span class=\"ds-meta\">12 קורסים<br>48 בוגרים</span></a>",
+      "css": ".ds-paper{position:relative;direction:rtl;display:flex;flex-direction:column;width:170px;min-height:84px;padding:14px 12px 10px;background:#fff;color:#1c1c1c;text-decoration:none;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:13px;line-height:1.375;transform:rotate(-1.6deg);box-shadow:0 0 0 1px rgb(30 36 44/.07),0 1px 1px rgb(30 36 44/.08),0 10px 14px -9px rgb(30 36 44/.4);transition:translate .2s ease-out,box-shadow .2s ease-out}.ds-paper b{font-size:17px}.ds-paper:hover{translate:0 -4px;box-shadow:0 0 0 1px rgb(30 36 44/.08),0 2px 3px rgb(30 36 44/.08),0 18px 20px -12px rgb(30 36 44/.42)}.ds-paper:hover b{color:#132a85}.ds-paper:focus-visible{outline:2px solid #2f5fe0;outline-offset:2px}.ds-meta{margin-top:auto;padding-top:8px;color:#555;font-variant-numeric:tabular-nums}.ds-washi{position:absolute;top:-10px;left:50%;width:58px;height:20px;transform:translateX(-50%) rotate(-4deg);background-color:#c3b0ef;background-image:repeating-linear-gradient(-55deg,rgb(255 255 255/.32) 0 2.5px,transparent 2.5px 7px);opacity:.9}.ds-u{background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath fill='%231F3FBF' d='M198.4 3.6C160 5.6 112 6.8 60 6.6 38 6.5 18 6.1 3.4 5.2 1.6 5.1 1.1 7.3 2.8 7.6 18 9.2 40 9.7 62 9.6 114 9.4 162 8.4 198.8 6.4 200.8 6.3 200.5 3.5 198.4 3.6Z'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right bottom;background-size:0 .32em;padding-bottom:.2em;transition:background-size .36s cubic-bezier(.16,1,.3,1)}.ds-paper:hover .ds-u,.ds-paper:focus-visible .ds-u{background-size:calc(100% + .15em) .32em}"
     },
     {
       "name": "חותמת מוסד",
@@ -496,17 +620,17 @@
       "refersTo": "stamp",
       "description": "שם המוסד (בדוי, לדוגמה) כחותמת דיו מוטה. בדיו ולא בכחול של טענה.",
       "html": "<span class=\"ds-stamp\">מכללה לדוגמה</span>",
-      "css": ".ds-stamp{display:inline-block;padding:6px 14px;border:2.5px double rgb(28 28 28/.85);border-radius:3px;font-family:Assistant,sans-serif;font-size:18px;font-weight:800;letter-spacing:.02em;line-height:1;color:rgb(28 28 28/.85);transform:rotate(-2deg)}"
+      "css": ".ds-stamp{display:inline-block;padding:6px 14px;border:2.5px double rgb(28 28 28/.85);border-radius:3px;font-family:'IBM Plex Sans Hebrew',system-ui,sans-serif;font-size:18px;font-weight:800;letter-spacing:.02em;line-height:1;color:rgb(28 28 28/.85)}"
     }
   ],
   "narrative": {
     "northStar": "סיכום של סטודנט",
-    "overview": "כל עמוד באתר הוא דף סיכום מודפס על נייר A4 לבן, שסטודנט עבר עליו עם מרקרים, פתקים דביקים ועט כחול. במחשב הדף מונח על שולחן לבד גרפיט, תפס משרדי שחור מחזיק את הערימה מלמעלה, ודף נוסף מציץ מתחתיו. בנייד הדף ממלא את המסך והשולחן לא נראה. העולם נקבע ב-14.11.2026: נשארים בו, בביצוע עשיר.\n\nהצבע במערכת הזו הוא מידע ולא קישוט. כל סימון אומר מאיפה בא המידע: מרקר ירוק נבדק מול מסמך, מרקר צהוב בא מבוגרים, מרקר ורוד מסמן חולשה, וקו כחול מתחת לטקסט הוא טענה של המוסד שלא נבדקה. פתק צהוב הוא קול של בוגר ופתק כחול הוא קול של המוסד. לאתר עצמו יש קול אחד: עט כחול בכתב יד, שמוסיף הערות, חיצים, מספרים מוקפים ועיגולים. כל השאר בדיו שחורה מודפסת.\n\nהצפיפות של סיכום אמיתי: הרבה טקסט, שורות מחברת, שוליים עם מספרים, בלי כרטיסי חנות, בלי כוכבים ובלי באנר שיווקי. החפצים הפיזיים (דף, פתק, סלוטייפ, חותמת, תפס) הם שכבת העומק היחידה. מה שאינו חפץ נשאר שטוח. דחיות חזותיות מאושרות: אין רקע קרם ואין מבטא טרקוטה.",
+    "overview": "כל עמוד באתר הוא דף סיכום מודפס על נייר A4 לבן, שסטודנט עבר עליו עם מרקרים, פתקים דביקים ועט כחול. במחשב הדף מונח על שולחן בהיר ושטוח, ודף נוסף מהערימה מציץ מתחתיו. בנייד הדף ממלא את המסך והשולחן לא נראה. העולם נקבע ב-14.11.2026: נשארים בו, בביצוע עשיר. באותו יום ירדו לבד הגרפיט והתפס השחור: דף לבן מוחזק בתפס על משטח כהה נקרא כמו תפריט של מסעדה על קליפבורד.\n\nהצבע במערכת הזו הוא מידע ולא קישוט. כל סימון אומר מאיפה בא המידע: מרקר ירוק נבדק מול מסמך, מרקר צהוב בא מבוגרים, מרקר ורוד מסמן חולשה, וקו כחול מתחת לטקסט הוא טענה של המוסד שלא נבדקה. פתק צהוב הוא קול של בוגר ופתק כחול הוא קול של המוסד. לאתר עצמו יש קול אחד: עט כחול, שכותב ב-Rubik ומצייר ביד חיצים, מספרים מוקפים, עיגולים, ווים וקווים. כל השאר בדיו שחורה מודפסת, ב-IBM Plex Sans Hebrew.\n\nהצפיפות של סיכום אמיתי: הרבה טקסט, שורות מחברת, שוליים עם מספרים, בלי כרטיסי חנות, בלי כוכבים ובלי באנר שיווקי. החפצים הפיזיים (דף, פתק, סלוטייפ, חותמת) הם שכבת העומק היחידה. מה שאינו חפץ נשאר שטוח. התנועה היא פעולה של יד על הדף: מרקר שנמרח, עט שכותב או מקיף, פתק שנדבק. דחיות חזותיות מאושרות: אין רקע קרם, אין מבטא טרקוטה, ואין שורה של שם ומספר בקצה השני עם נקודות ביניהם.",
     "keyCharacteristics": [
-      "דף נייר לבן על שולחן לבד גרפיט, מ-1024 פיקסלים ומעלה.",
+      "דף נייר לבן על שולחן בהיר ושטוח, מ-1024 פיקסלים ומעלה. בלי מרקם ובלי תפס.",
       "צבע = מקור המידע, תמיד מלווה בצורה (משיכה, קו, פתק) ובתווית לקורא מסך.",
-      "שלוש ידיים: סריף מודפס לתוכן, סאנס מודפס לתוויות, עט כחול לקול האתר בלבד.",
-      "משיכות מרקר עם קצוות משופעים, קווי עט מצוירים ביד, הטיות קטנות של עד 4 מעלות.",
+      "שתי ידיים: Plex לכל הדיו המודפסת, Rubik בכחול לקול האתר בלבד.",
+      "משיכות מרקר עם קצוות משופעים, קווי עט מצוירים ביד, הטיות של חפצים עד 4 מעלות.",
       "כל נתון באתר הוא לדוגמה עד ההשקה, וזה כתוב."
     ],
     "rules": [
@@ -522,7 +646,7 @@
       },
       {
         "name": "The One Pen Rule",
-        "body": "האתר מדבר רק בעט כחול (pen) בגופן Playpen Sans Hebrew. פתק דביק הוא אף פעם לא קול האתר, ועט הוא אף פעם לא קול של בוגר או מוסד. כשהאתר מצביע על עובדה ברשימה, הוא מקיף אותה בעט (PenLoop) ולא מסמן אותה במרקר.",
+        "body": "האתר מדבר רק בעט כחול (pen), ב-Rubik, וכל סימן שהעט מוסיף מצויר ביד. פתק דביק הוא אף פעם לא קול האתר, ועט הוא אף פעם לא קול של בוגר או מוסד: גוף הביקורת והשם של הבוגר מודפסים בדיו על הפתק הצהוב. כשהאתר מצביע על עובדה ברשימה או על בחירה, הוא מקיף אותה בעט (PenLoop) ולא מסמן אותה במרקר. היוצא מן הכלל היחיד הוא מה שהמבקר עצמו כותב במחברת לחיפוש, שנכתב בעט על הקו.",
         "section": "colors"
       },
       {
@@ -531,53 +655,69 @@
         "section": "colors"
       },
       {
-        "name": "The Fact In Ink Rule",
-        "body": "שם המוסד בדיו שחורה: הוא עובדה ולא טענה, ולכן החותמת בדיו ולא בכחול של טענה. גם התווית של שם האתר מודפסת בדיו. רק השם עצמו כתוב בה בעט, כי זה האתר שכותב את שמו.",
+        "name": "The White Note Rule",
+        "body": "פתק לבן הוא מקום באתר ולא קול של אף אחד: רק קישור (תחום). הוא היחיד שמקבל מסקינג טייפ צבעוני, והוא אף פעם לא נושא ביקורת, תגובה או הערה של האתר.",
         "section": "colors"
       },
       {
-        "name": "The Three Hands Rule",
-        "body": "סריף הוא התוכן המודפס, Assistant הוא התוויות המודפסות, Playpen הוא העט של האתר. Playpen לא משמש לכותרות, לתוכן או לכפתורים.",
+        "name": "The Fact In Ink Rule",
+        "body": "שם המוסד בדיו שחורה: הוא עובדה ולא טענה, ולכן החותמת בדיו ולא בכחול של טענה. גם השם \"למדתי\" מודפס בדיו. רק העיגול סביב ה-ל הוא עט, כי זה האתר שמקיף את מה שחשוב.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Hands Rule",
+        "body": "Plex היא הדיו המודפסת: כותרות, גוף, תוויות, נתונים, גוף הביקורת וכפתורים. Rubik בכחול הוא העט של האתר. Rubik לא משמש לכותרות, לתוכן, לכפתורים או לקול של בוגר, ו-Plex לא נצבעת בכחול של העט כדי להתחזות לקול האתר (חוץ מבחירה שהעט הקיף).",
         "section": "typography"
       },
       {
         "name": "The Tabular Figures Rule",
-        "body": "מספרים בטבלאות ובעמודות (תוכן העניינים, ציונים לפי שאלה, מגש ההשוואה, טיימר השליחה) בספרות ברוחב קבוע (tabular-nums).",
+        "body": "מספרים בטבלאות ובעמודות (ציונים לפי שאלה, מגש ההשוואה, טיימר השליחה, מספרי התחומים) בספרות ברוחב קבוע (tabular-nums).",
         "section": "typography"
       },
       {
         "name": "The Desk At 1024 Rule",
-        "body": "השולחן, התפס, הדף שמתחת וצל הדף מופיעים רק מ-1024 פיקסלים. בנייד אין שולחן: הדף הוא המסך.",
+        "body": "השולחן, הדף שמתחת וצל הדף מופיעים רק מ-1024 פיקסלים. בנייד אין שולחן: הדף הוא המסך.",
+        "section": "layout"
+      },
+      {
+        "name": "The Not A Menu Rule",
+        "body": "רשימה באתר לא נבנית כמו תפריט: אין שורה של שם בצד אחד ומספר בצד השני, ואין נקודות מובילות ביניהם. הנתון עומד מתחת לשם, באותו צד, או מצויר (קווי ספירה, פס מרקר).",
         "section": "layout"
       },
       {
         "name": "The Objects Only Rule",
-        "body": "צל שייך רק לחפץ שאפשר להרים מהשולחן. רכיב ממשק לא מקבל צל, לא במנוחה ולא בריחוף.",
+        "body": "צל שייך רק לחפץ שאפשר להרים מהשולחן. רכיב ממשק לא מקבל צל, לא במנוחה ולא בריחוף. פתק שהוא גם קישור נשאר חפץ, ולכן מותר לו להתרומם בריחוף.",
         "section": "elevation"
       }
     ],
     "dos": [
       "**Do** להשתמש בצבע מקור רק למידע מהמקור הזה: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה, קו כחול של 2 פיקסלים לטענת מוסד.",
-      "**Do** לתת לאתר לדבר רק בעט כחול ב-Playpen Sans Hebrew: הערות, חיצים, מספרים מוקפים, \"לא בדקנו\", \"נפתח בקרוב\".",
-      "**Do** לשים פתק צהוב לקול של בוגר, ופתק כחול רק ל\"תגובת המוסד\".",
+      "**Do** לתת לאתר לדבר רק בעט כחול ב-Rubik, בלי הטיה: הערות, \"לא בדקנו\", \"נפתח בקרוב\". חיצים, עיגולים, מספרים מוקפים, ווים וקווי ספירה נשארים מצוירים ביד.",
+      "**Do** להדפיס כל דבר אחר ב-IBM Plex Sans Hebrew: כותרות, גוף, תוויות, נתונים, כפתורים, וגם גוף הביקורת והשם של הבוגר.",
+      "**Do** לשים פתק צהוב לקול של בוגר, פתק כחול רק ל\"תגובת המוסד\", ופתק לבן עם מסקינג טייפ רק לקישור.",
       "**Do** לסמן כל נתון כנתון לדוגמה: תווית \"לדוגמה\" על הסלוטייפ, הערה בעט \"כאן הכול נתוני דמה\", ושורת הכותרת התחתונה \"עד ההשקה, כל הקורסים, המוסדות והביקורות באתר הם לדוגמה\".",
       "**Do** להשתמש בשמות מוסדות בדויים שמכריזים על עצמם כדוגמה, כמו \"מכללה לדוגמה\".",
       "**Do** לכתוב \"נפתח בקרוב\" בעט על כל קישור או כפתור לחלק שעוד לא נבנה, לפני הלחיצה.",
       "**Do** לשים קו עט כחול מתחת לכל כותרת פרק, במקום קו CSS ישר.",
+      "**Do** לבנות פריט ברשימה מאותו צד: השם, ומתחתיו הנתונים שלו, או נתון מצויר (קווי ספירה, פס מרקר).",
+      "**Do** לבנות בחירה אחת כקבוצת רדיו אמיתית, עם עיגול בעט סביב מה שנבחר.",
       "**Do** לצייר כל סימן כ-SVG בכתב יד, ולתת לכל יעד מגע 44 פיקסלים לפחות.",
-      "**Do** לכבד prefers-reduced-motion: בלי מריחת מרקר כשמבקשים פחות תנועה."
+      "**Do** לכבד prefers-reduced-motion ולהשאיר הכול גלוי כברירת מחדל: תנועה רק מאחורי `html[data-motion]`, ומצבי התחלה מוסתרים רק על המסך."
     ],
     "donts": [
       "**Don't** לשים שורת קיקר או תווית קטנה מעל כותרת. הכותרת פותחת את הבלוק, והחותמת והתחום באים מתחתיה.",
       "**Don't** להציג מספר כאילו הוא אמיתי: כל ציון, מחיר ומספר בוגרים בעיצוב ובנתוני הדמה הוא לדוגמה ומסומן ככזה.",
       "**Don't** להשתמש בשמות של מוסדות אמיתיים, ובוודאי לא עם ציונים.",
-      "**Don't** להשתמש בצבעי המקור או בצבעי הפתקים למותג, לכפתורים או לקישוט.",
+      "**Don't** להשתמש בצבעי המקור, בצבעי הפתקים או במסקינג טייפ למותג, לכפתורים או לקישוט.",
       "**Don't** לשים את קול האתר על פתק דביק, או קול של בוגר או מוסד בעט.",
       "**Don't** לסמן מקור בצבע בלבד, בלי צורה ובלי תווית לקורא מסך.",
       "**Don't** להוסיף צל לרכיב ממשק: צל שייך רק לדף, לפתק ולכרטיס מודבק.",
-      "**Don't** להטות חפץ ביותר מ-4 מעלות.",
+      "**Don't** להטות חפץ ביותר מ-4 מעלות, ולא להטות את העט.",
       "**Don't** להשתמש ברקע קרם או במבטא טרקוטה.",
-      "**Don't** להשתמש ב-Playpen לכותרות, לגוף או לכפתורים.",
+      "**Don't** להחזיר את שולחן הלבד הכהה, את התפס או את מסגרת התווית סביב השם: דף על משטח כהה עם תפס נקרא כמו תפריט על קליפבורד.",
+      "**Don't** להשתמש בגופן סריף או בגופן שמחקה כתב יד, ולא ב-Rubik לכותרות, לגוף או לכפתורים.",
+      "**Don't** לבנות רשימה כשורות של שם, נקודות מובילות ומספר בקצה השני: זה תפריט של מסעדה.",
+      "**Don't** לסמן בחירה אחת ככפתור לחוץ (aria-pressed) או להשתמש בתיבות סימון למשהו שאין מה ללחוץ עליו.",
       "**Don't** להשתמש באייקוני גליף או בספריית אייקונים: כל סימן מצויר ב-SVG."
     ]
   }

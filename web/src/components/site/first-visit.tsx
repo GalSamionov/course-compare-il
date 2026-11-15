@@ -307,9 +307,9 @@ function VideoSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
       onClick={(event) => {
         if (event.target === dialog.current) onClose();
       }}
-      className="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 backdrop:bg-desk-deep/85"
+      className="m-auto max-h-none max-w-none overflow-visible border-0 bg-transparent p-0 backdrop:bg-ink/75"
     >
-      <figure className="bg-white p-2 font-sans shadow-[0_1px_1px_rgb(0_0_0/0.18),0_3px_6px_-2px_rgb(0_0_0/0.22),0_28px_48px_-18px_rgb(0_0_0/0.55)] lg:p-3">
+      <figure className="bg-white p-2 font-sans shadow-[0_1px_1px_rgb(30_36_44/0.1),0_3px_8px_-3px_rgb(30_36_44/0.12),0_24px_44px_-20px_rgb(30_36_44/0.28)] lg:p-3">
         {open && (
           <video
             key={kind}

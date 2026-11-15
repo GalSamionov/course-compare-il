@@ -15,7 +15,7 @@ export default async function ReviewPage() {
   return (
     <Sheet narrow>
       <main className="pt-[22px] pb-10 lg:pt-12 lg:pb-14">
-        <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px] lg:leading-[1.1] lg:font-extrabold">
+        <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px] lg:leading-[1.1]">
           כתיבת ביקורת
         </h1>
         <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">

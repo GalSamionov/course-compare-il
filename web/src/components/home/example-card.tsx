@@ -30,7 +30,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
       <div className="relative -rotate-[1.2deg] bg-white px-5 pt-8 pb-6 shadow-[0_1px_2px_rgb(0_0_0/0.18),0_18px_30px_-16px_rgb(0_0_0/0.45)] ring-1 ring-black/[0.06] lg:px-8 lg:pt-9 lg:pb-8">
         {/* במחשב הפתק של הבוגר מחזיק את הפינה, ולכן הסלוטייפ באמצע רק בנייד. */}
         <Tape width={92} tilt={-2} className="lg:hidden" />
-        <Tape side="top-start" width={96} tilt={-24} className="font-sans text-[14px] font-extrabold tracking-wide text-ink">
+        <Tape side="top-start" width={96} tilt={-24} className="font-sans text-[14px] font-bold tracking-wide text-ink">
           לדוגמה
         </Tape>
 

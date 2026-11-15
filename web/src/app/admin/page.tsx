@@ -45,7 +45,7 @@ async function AdminQueue() {
   return (
     <Sheet>
       <main className="pb-10 lg:pb-14">
-        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px] lg:font-extrabold">
+        <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px]">
           תור האימות
         </h1>
         {gate.kind === 'no-key' ? (

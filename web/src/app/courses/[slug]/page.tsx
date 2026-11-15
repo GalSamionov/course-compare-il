@@ -98,7 +98,7 @@ export default async function CoursePage({ params }: Props) {
         */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-20">
           <header className="lg:col-start-1 lg:row-start-1">
-            <h1 className="mt-0.5 text-[30px] leading-tight font-bold text-balance lg:text-[54px] lg:leading-[1.06] lg:font-extrabold">
+            <h1 className="mt-0.5 text-[30px] leading-tight font-bold text-balance lg:text-[54px] lg:leading-[1.06]">
               {course.title}
             </h1>
             <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-sans text-[15px] text-ink-soft lg:mt-4 lg:text-base">

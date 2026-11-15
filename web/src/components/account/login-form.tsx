@@ -106,7 +106,7 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
       <h1
         ref={heading}
         tabIndex={-1}
-        className="mt-[22px] text-[30px] leading-tight font-bold text-balance outline-none lg:mt-12 lg:text-[54px] lg:font-extrabold"
+        className="mt-[22px] text-[30px] leading-tight font-bold text-balance outline-none lg:mt-12 lg:text-[54px]"
       >
         {sent ? 'עכשיו לתיבת המייל' : 'להתחבר בלי סיסמה'}
       </h1>
