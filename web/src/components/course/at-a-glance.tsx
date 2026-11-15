@@ -1,18 +1,9 @@
-import type { CoursePageData, OutcomeView } from '@/lib/data/course-page';
-import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText } from '@/lib/format';
+import type { CoursePageData } from '@/lib/data/course-page';
+import { PAID_RANGE_LEAD, formatIls, formatPaidRange, invoiceCountText, outcomeHeadline } from '@/lib/format';
 import { Mark } from './marks';
 
-/** מה קרה לבוגרים, במילים של אנשים. אותו ניסוח ב"בקצרה" ובפתק של "על הקורס". */
-export function outcomeHeadline(outcome: OutcomeView): string {
-  switch (outcome.kind) {
-    case 'after_3m':
-      return `${outcome.n} בוגרים ענו 3 חודשים אחרי הסיום`;
-    case 'skill_gained':
-      return `${outcome.yes} מתוך ${outcome.n} אומרים שרכשו את המיומנות`;
-    case 'passed_exam':
-      return `${outcome.yes} מתוך ${outcome.n} אומרים שעברו את המבחן`;
-  }
-}
+/** עבר ל-lib/format.ts, כי גם ההשוואה משתמשת בו. מיוצא מכאן בשביל about-section.tsx. */
+export { outcomeHeadline };
 
 /** החולשה הבולטת: הסיכום של הבוגרים, ואם אין, פרק שסומן כחלש בסילבוס. */
 function topWeakness(course: CoursePageData): { label: string; text: string } | null {

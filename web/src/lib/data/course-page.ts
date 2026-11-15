@@ -6,7 +6,8 @@ import { MIN_OUTCOME_ANSWERS } from '@/lib/score/constants';
 import { safeHttpUrl } from '@/lib/safe-url';
 import type { Database } from '@/lib/database.types';
 import type { AuthorTitle } from '@/lib/reviews/types';
-import { one, queryError } from './shared';
+import { isProductType, type ProductType } from '@/lib/search/types';
+import { one, queryError, verifiedFactsOf, type VerifiedFact } from './shared';
 
 export interface SyllabusItem {
   title: string;
@@ -50,7 +51,7 @@ export interface LecturerView {
   /** טענה של המוסד, לא נבדקה. */
   institutionBio: string | null;
   /** רק מה שבדקנו בעצמנו, עם קישור למקור. */
-  verifiedFacts: { text: string; sourceUrl: string }[];
+  verifiedFacts: VerifiedFact[];
   otherCoursesCount: number;
 }
 
@@ -65,7 +66,11 @@ export interface CoursePageData {
   slug: string;
   title: string;
   status: Exclude<Database['public']['Enums']['course_status'], 'draft'>;
+  /** קורס, סדנה או הרצאה. */
+  productType: ProductType;
   institutionName: string;
+  /** לקישור לעמוד המוסד (סבב 4). */
+  institutionSlug: string;
   categoryName: string;
   categorySlug: string;
   region: string | null;
@@ -128,7 +133,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const { data: course, error } = await db
     .from('courses')
     .select(
-      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, institutions(name), categories(name, slug)',
+      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, product_type, institutions(name, slug), categories(name, slug)',
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -179,7 +184,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const lecturerRows = lecturersRes.data;
   const paidRows = paidRes.data;
 
-  const institution = one(course.institutions as { name: string } | { name: string }[] | null);
+  const institution = one(course.institutions as { name: string; slug: string } | { name: string; slug: string }[] | null);
   const category = one(course.categories as { name: string; slug: string } | { name: string; slug: string }[] | null);
 
   type LecturerRef = {
@@ -197,16 +202,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
       name: lecturer.name,
       role,
       institutionBio: lecturer.institution_bio,
-      // עובדה בלי טקסט או בלי קישור תקין למקור לא מוצגת: ההבטחה היא שלכל עובדה שנבדקה יש מקור.
-      verifiedFacts: (Array.isArray(lecturer.verified_facts) ? (lecturer.verified_facts as unknown[]) : []).flatMap(
-        (f) => {
-          const fact = f as { text?: unknown; source_url?: unknown } | null;
-          const sourceUrl = safeHttpUrl(fact?.source_url);
-          return typeof fact?.text === 'string' && fact.text !== '' && sourceUrl
-            ? [{ text: fact.text, sourceUrl }]
-            : [];
-        },
-      ),
+      verifiedFacts: verifiedFactsOf(lecturer.verified_facts),
       // ההרשאות סופרות רק קורסים שאינם טיוטה, כולל הקורס הזה. לכן מורידים 1.
       otherCoursesCount: Math.max(0, (lecturer.course_lecturers[0]?.count ?? 1) - 1),
     }));
@@ -263,7 +259,9 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     slug: course.slug,
     title: course.title,
     status: course.status as CoursePageData['status'],
+    productType: isProductType(course.product_type) ? course.product_type : 'course',
     institutionName: institution?.name ?? '',
+    institutionSlug: institution?.slug ?? '',
     categoryName: category?.name ?? '',
     categorySlug: category?.slug ?? '',
     region: course.region,
