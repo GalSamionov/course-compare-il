@@ -91,14 +91,14 @@ function Reasons({ reasons, confidence }: { reasons: string[]; confidence: strin
 
 /**
  * ברשימה המסוננת של קורסים חדשים: חשד לכפילות, וקורס שכבר אינו טיוטה (מהמסד, private.new_course_queue).
- * בחשד לכפילות, הפריטים של אותה קבוצה עומדים ברשימה זה ליד זה.
+ * בחשד לכפילות, הפריטים של אותה קבוצה עומדים ברשימה זה ליד זה. בראש הפריט, כי זה מה שגל בא לבדוק.
  */
 function Suspicions({ causes }: { causes: string[] }) {
   const duplicates = causes.flatMap((c) => (DUPLICATE_LABEL[c] ? [DUPLICATE_LABEL[c]] : []));
   const notDraft = causes.includes('not_draft');
   if (duplicates.length === 0 && !notDraft) return null;
   return (
-    <div className="mt-4 space-y-2 text-[15px] leading-normal font-bold">
+    <div className="mb-4 space-y-2 text-[15px] leading-normal font-bold">
       {duplicates.length > 0 && (
         <div>
           <p>חשד לכפילות:</p>
@@ -275,6 +275,7 @@ export function CourseQueueItemView({ item }: { item: CourseQueueItem }) {
       </header>
       <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
         <section aria-label="מה השתנה" className="min-w-0 font-sans">
+          <Suspicions causes={item.causes} />
           {item.kind === 'field' && <FieldChange item={item} />}
           {item.kind === 'new_course' && <NewCourse item={item} />}
           {item.kind === 'maybe_inactive' && (
@@ -300,7 +301,6 @@ export function CourseQueueItemView({ item }: { item: CourseQueueItem }) {
             </>
           )}
           <Reasons reasons={item.kind === 'fetch_failed' ? item.reasons.slice(0, 1) : item.reasons} confidence={item.confidence} />
-          <Suspicions causes={item.causes} />
         </section>
         <section aria-label="ההחלטה" className="min-w-0">
           <CourseDecideForm

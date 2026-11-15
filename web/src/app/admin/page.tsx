@@ -93,14 +93,14 @@ function coursesLine(total: number, groups: NewCourseGroup[], others: number): s
 
 /** מעל הרשימה המסוננת: כמה, של מי, ומה בעמוד. */
 function filteredLine(view: CourseQueueView, total: number, shown: number, institution: string | null): string {
-  const of = institution ? ` של ${institution}` : '';
+  const of = institution ? `${institution}: ` : '';
   if (total === 0) {
-    return view.filter === 'duplicates' ? `אין קורסים חדשים${of} בחשד לכפילות.` : `אין קורסים חדשים${of} שאינם בטוחים.`;
+    return view.filter === 'duplicates' ? `${of}אין קורסים חדשים בחשד לכפילות.` : `${of}אין קורסים חדשים שאינם בטוחים.`;
   }
   const head =
     view.filter === 'duplicates'
-      ? `${counted(total, 'קורס חדש אחד', 'קורסים חדשים')}${of} בחשד לכפילות. הכפילויות של אותו קורס עומדות זו ליד זו.`
-      : `${total === 1 ? 'קורס חדש אחד' : `${fmt(total)} קורסים חדשים`}${of} ${total === 1 ? 'לא בטוח' : 'לא בטוחים'}, הישן ראשון.`;
+      ? `${of}${counted(total, 'קורס חדש אחד', 'קורסים חדשים')} בחשד לכפילות. הכפילויות של אותו קורס עומדות זו ליד זו.`
+      : `${of}${total === 1 ? 'קורס חדש אחד לא בטוח' : `${fmt(total)} קורסים חדשים לא בטוחים`}, הישן ראשון.`;
   return shown < total ? `${head} כאן ${shown} הראשונים, ואחרי כל החלטה עולה הבא.` : head;
 }
 
@@ -261,17 +261,16 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
                   </>
                 ) : (
                   <>
-                    <p className={countText}>
+                    <p className={`${countText} max-w-[68ch]`}>
                       {filteredLine(view, filtered.total, Math.min(filtered.items.length, COURSE_QUEUE_PAGE), filteredInstitution)}
-                      {filteredInstitution && (
-                        <>
-                          {' '}
-                          <Link href={queueHref({ filter: view.filter, institutionId: null })} className={textLink}>
-                            של כל המוסדות
-                          </Link>
-                        </>
-                      )}
                     </p>
+                    {filteredInstitution && (
+                      <p className="font-sans text-[15px]">
+                        <Link href={queueHref({ filter: view.filter, institutionId: null })} className={textLink}>
+                          {view.filter === 'duplicates' ? 'כל החשד לכפילות, מכל המוסדות' : 'כל הלא בטוחים, מכל המוסדות'}
+                        </Link>
+                      </p>
+                    )}
                     <div className="mt-6">
                       {filtered.items.map((item) => (
                         <CourseQueueItemView key={item.id} item={item} />
