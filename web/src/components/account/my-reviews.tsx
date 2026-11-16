@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { PenArrow } from '@/components/site/pen';
-import { deleteReview, loadMyReviews, writeAttached, type MyReview } from '@/lib/reviews/browser';
+import { loadMyBadges, type MyBadge } from '@/lib/badges/browser';
+import { deleteReview, loadMyCourseLinks, loadMyReviews, writeAttached, type MyCourseLink, type MyReview } from '@/lib/reviews/browser';
 import { verifiedLabel } from '@/lib/reviews/types';
 import type { Catalog, CourseSummary } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
+import { BadgeShare } from './badge-share';
 import { MeSection, textButton } from './me-section';
 
 type Load = { status: 'loading' } | { status: 'error' } | { status: 'ready'; reviews: MyReview[] };
@@ -29,8 +31,16 @@ function statusWord(review: MyReview): string {
 
 const link = 'inline-flex min-h-11 items-center font-semibold underline underline-offset-[3px] hover:text-link-hover';
 
-/** מה אפשר לעשות עכשיו עם הביקורת, אם בכלל. */
-function nextStep(review: MyReview, course: CourseSummary | undefined): { href: string; label: string } | null {
+/** מה אפשר לעשות עכשיו עם הביקורת, אם בכלל. קורס שהבוגר הוסיף מקישור, ועוד לא באתר: עמוד הכתיבה שלו. */
+function nextStep(
+  review: MyReview,
+  course: CourseSummary | undefined,
+  linked: MyCourseLink | undefined,
+): { href: string; label: string } | null {
+  if (!course && linked?.status === 'pending' && review.status === 'draft') {
+    const href = `/review/new?course=${linked.courseId}`;
+    return { href, label: isReturned(review) ? 'להעלות הוכחה אחרת' : 'להמשיך לכתוב' };
+  }
   if (!course) return null;
   if (isReturned(review)) return { href: `/courses/${course.slug}/review`, label: 'להעלות הוכחה אחרת' };
   if (review.status === 'draft') return { href: `/courses/${course.slug}/review`, label: 'להמשיך לכתוב' };
@@ -71,6 +81,7 @@ function Details({ review }: { review: MyReview }) {
 function ReviewRow({
   review,
   course,
+  linked,
   confirming,
   busy,
   error,
@@ -78,9 +89,15 @@ function ReviewRow({
   onCancel,
   onDelete,
   leaving = false,
+  badge,
+  sharing,
+  onShare,
+  onBadge,
 }: {
   review: MyReview;
   course: CourseSummary | undefined;
+  /** קורס שהבוגר הוסיף מקישור, ועדיין לא באתר. */
+  linked: MyCourseLink | undefined;
   confirming: boolean;
   busy: boolean;
   /** למה המחיקה נכשלה, בתוך שלב האישור, ליד הכפתור שנלחץ. */
@@ -88,12 +105,18 @@ function ReviewRow({
   onAsk: () => void;
   onCancel: () => void;
   onDelete: () => void;
-  /** נמחקה עכשיו: העט מוחק את השם בקו, והשורה נעלמת (globals.css, data-leaving). */
+  /** נמחקה עכשיו: השורה דוהה החוצה לפני שהיא יוצאת מהרשימה (globals.css, data-leaving). */
   leaving?: boolean;
+  /** קישור "בוגר מאומת" של הביקורת, אם כבר נוצר. */
+  badge: MyBadge | undefined;
+  /** החלק "לשתף ב-LinkedIn" פתוח. */
+  sharing: boolean;
+  onShare: (open: boolean) => void;
+  onBadge: (badge: MyBadge | null) => void;
 }) {
   const question = useRef<HTMLParagraphElement>(null);
-  const title = course?.title ?? 'קורס שכבר לא באתר';
-  const step = nextStep(review, course);
+  const title = course?.title ?? linked?.title ?? 'קורס שכבר לא באתר';
+  const step = nextStep(review, course, linked);
 
   // שלב האישור נפתח: הפוקוס עובר לשאלה, כדי שקורא מסך יקרא אותה.
   useEffect(() => {
@@ -101,7 +124,7 @@ function ReviewRow({
   }, [confirming]);
 
   return (
-    <li data-anim="ink" data-leaving={leaving ? '' : undefined} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
+    <li data-leaving={leaving ? '' : undefined} className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-3.5 pb-2">
       {/* השם ראשון בקוד, כדי שקורא מסך יקרא את הקורס לפני המצב. הרשת קובעת את המיקום. */}
       <h3 className="col-start-2 row-start-1 ps-3 text-[19px] leading-snug font-bold">
         {course ? (
@@ -121,6 +144,13 @@ function ReviewRow({
       </p>
       <div className="col-start-2 row-start-2 ps-3">
         <p className="mt-0.5 font-sans text-sm leading-normal text-ink-soft">מחזור {monthLabel(review.cohortMonth)}</p>
+        {!course && linked && (
+          <p className="mt-0.5 font-sans text-sm leading-normal">
+            {linked.status === 'rejected'
+              ? `הקורס שהוספתם לא נוסף לאתר${linked.decisionReason ? `: ${linked.decisionReason}` : '.'}`
+              : 'קורס שהוספתם מקישור. עוד לא באתר: נבדוק אותו יחד עם הביקורת.'}
+          </p>
+        )}
         <Details review={review} />
         {confirming ? (
           <div role="group" aria-labelledby={`delete-${review.id}`} className="mt-2.5 mb-1 border-t-2 border-ink pt-2.5 font-sans">
@@ -144,13 +174,32 @@ function ReviewRow({
               </p>
             )}
           </div>
+        ) : sharing && course && isPublished(review) ? (
+          <BadgeShare
+            review={review}
+            courseTitle={course.title}
+            badge={badge}
+            onChange={onBadge}
+            onClose={() => onShare(false)}
+          />
         ) : (
-          // הצעד הבא והמחיקה בשורה אחת. המחיקה שקטה יותר: אפור, בלי הדגשה.
+          // הצעד הבא, השיתוף והמחיקה בשורה אחת. המחיקה שקטה יותר: אפור, בלי הדגשה.
           <div className="flex flex-wrap items-center gap-x-5">
             {step && (
               <Link href={step.href} className={cn(link, 'font-sans text-[15px]')}>
                 {step.label}
               </Link>
+            )}
+            {/* רק ביקורת שמוצגת באתר. ביקורת שהוסתרה בזמן בירור לא מקבלת קישור (share_review_badge). */}
+            {course && review.status === 'published' && (
+              <button
+                type="button"
+                onClick={() => onShare(true)}
+                className={cn(link, 'cursor-pointer font-sans text-[15px]')}
+              >
+                {badge ? 'השיתוף ב-LinkedIn' : 'לשתף ב-LinkedIn'}
+                <span className="sr-only"> את הביקורת על {title}</span>
+              </button>
             )}
             <button type="button" onClick={onAsk} className={cn(textButton, 'px-0 text-sm font-normal text-ink-soft')}>
               למחוק<span className="sr-only"> את הביקורת על {title}</span>
@@ -173,8 +222,14 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  /** הביקורת שנמחקה עכשיו, בזמן שהעט מוחק אותה מהרשימה. */
+  /** הביקורת שנמחקה עכשיו, בזמן שהיא דוהה החוצה. */
   const [leaving, setLeaving] = useState<string | null>(null);
+  /** קישורי "בוגר מאומת", לפי הביקורת. בלי טעינה מוצלחת: אין קישורים, והביקורות עצמן עדיין מוצגות. */
+  const [badges, setBadges] = useState<ReadonlyMap<string, MyBadge>>(new Map());
+  /** הביקורת שהחלק "לשתף ב-LinkedIn" שלה פתוח. */
+  const [sharing, setSharing] = useState<string | null>(null);
+  /** קורסים שהבוגר הוסיף מקישור ועוד לא באתר, לפי הקורס. בלי טעינה מוצלחת: "קורס שכבר לא באתר", כמו קודם. */
+  const [links, setLinks] = useState<ReadonlyMap<string, MyCourseLink>>(new Map());
 
   useEffect(() => {
     let alive = true;
@@ -185,6 +240,19 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
       () => {
         if (alive) setLoad({ status: 'error' });
       },
+    );
+    loadMyCourseLinks().then(
+      (list) => {
+        if (alive) setLinks(new Map(list.map((l) => [l.courseId, l])));
+      },
+      () => {},
+    );
+    // מסד שהמיגרציה של הקישורים עוד לא עלתה אליו: אין קישורים, וזה לא שגיאה שהכותב צריך לראות.
+    loadMyBadges().then(
+      (list) => {
+        if (alive) setBadges(new Map(list.map((b) => [b.reviewId, b])));
+      },
+      () => {},
     );
     return () => {
       alive = false;
@@ -206,18 +274,24 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
       return;
     }
     setConfirming(null);
+    // הקישור לשיתוף נמחק במסד יחד עם הביקורת (on delete cascade).
+    setBadges((current) => {
+      const next = new Map(current);
+      next.delete(review.id);
+      return next;
+    });
     // הקבצים שהועלו ולא נשלחו כבר נמחקו בשרת. גם הרשימה שלהם בדפדפן כבר לא צריכה להישמר.
     writeAttached(review.id, []);
-    // העט מוחק את השורה בקו לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
+    // השורה דוהה החוצה לפני שהיא יוצאת, כדי שיהיה ברור מה נמחק. בלי תנועה, היא יוצאת מיד.
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setLeaving(review.id);
-      await new Promise((resolve) => window.setTimeout(resolve, 620));
+      await new Promise((resolve) => window.setTimeout(resolve, 200));
       setLeaving(null);
     }
     setLoad((current) =>
       current.status === 'ready' ? { status: 'ready', reviews: current.reviews.filter((r) => r.id !== review.id) } : current,
     );
-    setNotice(`הביקורת על ${byId.get(review.courseId)?.title ?? 'הקורס'} נמחקה.`);
+    setNotice(`הביקורת על ${byId.get(review.courseId)?.title ?? links.get(review.courseId)?.title ?? 'הקורס'} נמחקה.`);
   }
 
   const emptyRows = (
@@ -270,11 +344,13 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 key={review.id}
                 review={review}
                 course={byId.get(review.courseId)}
+                linked={links.get(review.courseId)}
                 confirming={confirming === review.id}
                 busy={busy}
                 error={confirming === review.id ? error : null}
                 onAsk={() => {
                   setError(null);
+                  setSharing(null);
                   setConfirming(review.id);
                 }}
                 onCancel={() => {
@@ -283,6 +359,20 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
                 }}
                 onDelete={() => void remove(review)}
                 leaving={leaving === review.id}
+                badge={badges.get(review.id)}
+                sharing={sharing === review.id}
+                onShare={(open) => {
+                  setConfirming(null);
+                  setSharing(open ? review.id : null);
+                }}
+                onBadge={(badge) =>
+                  setBadges((current) => {
+                    const next = new Map(current);
+                    if (badge) next.set(review.id, badge);
+                    else next.delete(review.id);
+                    return next;
+                  })
+                }
               />
             ))}
           </ul>
@@ -310,7 +400,7 @@ export function MyReviews({ catalog, userId }: { catalog: Catalog; userId: strin
               return (
                 <li
                   key={review.id}
-                  data-anim="ink"
+                 
                   className="ruled-row grid min-h-[54px] grid-cols-[var(--margin)_minmax(0,1fr)] items-center py-1"
                 >
                   <p className="col-start-2 flex flex-wrap items-baseline gap-x-2.5 ps-3">

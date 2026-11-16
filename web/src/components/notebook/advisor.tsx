@@ -546,6 +546,13 @@ export function Advisor({ courses, api }: { courses: readonly CourseSummary[]; a
             {status}
           </p>
           {(error === 'limit' || noneLeft) && account.status === 'signed-out' && <MoreQuestions />}
+          {/* הודעה בנקודת האיסוף: לאן השאלה הולכת, ושהיא לא נשמרת (מדיניות הפרטיות, #advisor). */}
+          <p className="mt-1 max-w-[60ch] font-sans text-[13px] leading-normal text-ink-soft">
+            השאלה עוברת ל-Anthropic רק כדי לכתוב את התשובה, ולא נשמרת אצלנו.{' '}
+            <Link href="/privacy#advisor" className="underline underline-offset-[3px] hover:text-link-hover">
+              פרטיות
+            </Link>
+          </p>
         </div>
       </form>
 

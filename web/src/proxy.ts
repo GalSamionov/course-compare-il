@@ -1,16 +1,19 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { BADGE_PREFIX, tokenFromPath } from '@/lib/badges/badge';
 import type { Database } from '@/lib/database.types';
+import { createPublicClient } from '@/lib/supabase/public-client';
 
 /**
- * רק /admin, וכל מה שיהיה מתחתיו (/admin/...). כל עמוד אחר נשאר בלי proxy (תוכנית 2ב, החלטה 2): proxy שרץ בכל צפייה היה עולה בכל עמוד, בשביל כלום.
+ * רק /admin וכל מה שמתחתיו, ו-/verified (הכרטיס "בוגר מאומת"). כל עמוד אחר נשאר בלי proxy (תוכנית 2ב, החלטה 2):
+ * proxy שרץ בכל צפייה היה עולה בכל עמוד, בשביל כלום.
  * למה כאן כן: עם Cache Components, notFound() שרץ בבקשה בתוך העמוד משאיר סטטוס 200
- * (loading.md, "Status codes"). מי שאינו מנהל צריך לקבל 404 אמיתי, בלי לדעת שיש כאן משהו.
- * ה-proxy גם מרענן את ההתחברות וכותב את העוגיות (proxy.md, "Using Cookies"), כדי שהעמוד, שמוצג בשרת, לא יצטרך.
+ * (loading.md, "Status codes"). מי שאינו מנהל, וקישור לכרטיס שכבר לא עובד, צריכים לקבל 404 אמיתי.
+ * ב-/admin ה-proxy גם מרענן את ההתחברות וכותב את העוגיות (proxy.md, "Using Cookies"), כדי שהעמוד, שמוצג בשרת, לא יצטרך.
  * הוא לא ההגנה היחידה: העמוד וכל Server Action בודקים שוב (server-actions.md, Security).
  * Server Actions של התור הן POST ל-/admin, ולכן גם הן עוברות כאן (proxy.md, "Execution order").
  */
-export const config = { matcher: ['/admin', '/admin/:path*'] };
+export const config = { matcher: ['/admin', '/admin/:path*', '/verified/:path*'] };
 
 /**
  * כתובת שאין לה עמוד: Next מחזיר את עמוד ה-404 שלו, כמו לכל כתובת שלא קיימת.
@@ -22,7 +25,35 @@ function notFound(request: NextRequest, refreshed?: NextResponse) {
   return response;
 }
 
+/** הכרטיס לא בתוצאות חיפוש, גם אחרי ההשקה: מה שבתוך העמוד יכול להגיע בזרימה, והכותרת הזו מגיעה תמיד. */
+function noindex(response: NextResponse): NextResponse {
+  response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return response;
+}
+
+/**
+ * /verified/<token> וכל מה שמתחתיו (התמונה): הטוקן נבדק מול המסד, עם המפתח הציבורי ובלי עוגיות, לפני שהתשובה
+ * מתחילה. כרטיס שלא קיים, שהכותב הפסיק לשתף או שהביקורת שלו כבר לא באתר: 404 אמיתי, עם הדף "הקישור כבר לא פעיל".
+ * כשהמסד לא עונה, העמוד ממשיך כרגיל ובודק בעצמו: לא מסתירים כרטיס תקין בגלל תקלה רגעית.
+ */
+async function badgeGate(request: NextRequest): Promise<NextResponse> {
+  const gone = () => noindex(NextResponse.rewrite(new URL(`${BADGE_PREFIX}gone`, request.url), { status: 404 }));
+  const token = tokenFromPath(request.nextUrl.pathname);
+  if (!token) return gone();
+  try {
+    const { data, error } = await createPublicClient().rpc('review_badge', { p_token: token });
+    if (error) return noindex(NextResponse.next());
+    return data && data.length > 0 ? noindex(NextResponse.next()) : gone();
+  } catch {
+    return noindex(NextResponse.next());
+  }
+}
+
 export async function proxy(request: NextRequest) {
+  if (request.nextUrl.pathname.startsWith(BADGE_PREFIX) || request.nextUrl.pathname === '/verified') {
+    return badgeGate(request);
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) return notFound(request);

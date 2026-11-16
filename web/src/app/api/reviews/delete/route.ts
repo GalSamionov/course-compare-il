@@ -75,14 +75,17 @@ export async function POST(request: NextRequest) {
   const row = deleted?.[0];
   if (row?.was_published) {
     // הביקורת כבר נמחקה. חישוב שנכשל לא מחזיר שגיאה לכותב: נרשם ביומן, ו-`pnpm score:recompute` משלים.
+    let recomputed: string[] = [];
     try {
-      const { failures } = await recomputeAllScores(admin, new Date());
+      const { failures, slugs } = await recomputeAllScores(admin, new Date());
+      recomputed = slugs;
       if (failures.length > 0) console.error(`recompute after delete: ${failures.length} course(s) failed`);
     } catch (error) {
       console.error('recompute after delete failed', error instanceof Error ? error.message : 'unknown error');
     }
     // { expire: 0 }: הבקשה הבאה מחכה לנתונים חדשים (revalidateTag.md). הצורה בלי פרופיל היא deprecated.
-    revalidateTag(`course:${row.course_slug}`, { expire: 0 });
+    // כל קורס שחושב, כי ממוצע התחום משותף (סבב 5, פריט 36).
+    for (const slug of new Set([row.course_slug, ...recomputed])) revalidateTag(`course:${slug}`, { expire: 0 });
     revalidateTag('catalog', { expire: 0 });
   }
   return Response.json({ ok: true });

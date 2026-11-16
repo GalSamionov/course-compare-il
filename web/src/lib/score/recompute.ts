@@ -11,6 +11,8 @@ export type ScoreDb = SupabaseClient<Database>;
 export interface RecomputeResult {
   /** שורה לכל קורס שחושב, כמו "full-stack-sample: scored 7.9 (23 reviews)". */
   lines: string[];
+  /** הכתובות של הקורסים שהציון שלהם נשמר. מי שמחשב מרענן את כולם (סבב 5, פריט 36). */
+  slugs: string[];
   failures: { slug: string; error: unknown }[];
 }
 
@@ -40,6 +42,7 @@ async function fetchAll<T>(
 export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): Promise<RecomputeResult> {
   const computedAt = now.toISOString();
   const lines: string[] = [];
+  const slugs: string[] = [];
   const failures: RecomputeResult['failures'] = [];
 
   const courses = await fetchAll((from, to) =>
@@ -81,7 +84,8 @@ export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): P
   for (const course of courses) {
     const ref = course.categories as { course_type: CourseType } | { course_type: CourseType }[] | null;
     const category = Array.isArray(ref) ? ref[0] : ref;
-    if (!category) {
+    // רק טיוטה יכולה להיות בלי תחום (courses_category_unless_draft), וטיוטות לא נטענות כאן.
+    if (!category || course.category_id === null) {
       failures.push({ slug: course.slug, error: new Error(`course ${course.slug} has no category`) });
       continue;
     }
@@ -96,7 +100,7 @@ export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): P
   for (const course of courses) {
     try {
       const type = typeOf.get(course.id);
-      if (!type) continue; // כבר נרשם ככשל למעלה
+      if (!type || course.category_id === null) continue; // כבר נרשם ככשל למעלה
       const categoryReviews = byCategory.get(course.category_id) ?? [];
       const result = computeGraduateScore({
         courseType: type,
@@ -137,10 +141,11 @@ export async function recomputeAllScores(db: ScoreDb, now: Date = new Date()): P
       if (error) throw error;
       const shown = result.status === 'scored' ? result.value : `need ${result.reviewsNeeded} more`;
       lines.push(`${course.slug}: ${result.status} ${shown} (${result.reviewCount} reviews)`);
+      slugs.push(course.slug);
     } catch (error) {
       failures.push({ slug: course.slug, error });
     }
   }
 
-  return { lines, failures };
+  return { lines, slugs, failures };
 }

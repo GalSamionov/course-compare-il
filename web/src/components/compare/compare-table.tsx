@@ -130,13 +130,18 @@ export function CompareTable({
           </span>
           {courses.map((course) => (
             <div role="cell" key={course.id} className="flex min-w-0 flex-col items-start justify-between">
-              <Link href={`/institutions/${course.institutionSlug}`} className={cn('text-sm leading-snug', smallLink)}>
+              {/* לפחות 24 פיקסלים לגובה: הקישור צמוד ל"להוציא", ושני יעדים קטנים וצמודים קשים ללחיצה (WCAG 2.5.8). */}
+              <Link
+                href={`/institutions/${course.institutionSlug}`}
+                className={cn('inline-flex min-h-6 items-center text-sm leading-snug', smallLink)}
+              >
                 {course.institutionName}
               </Link>
               <button
                 type="button"
                 disabled={busy === course.id}
                 onClick={() => onRemove(course)}
+                data-compare-remove={course.id}
                 aria-label={`להוציא את ${course.title} מההשוואה`}
                 className="flex h-11 cursor-pointer items-center text-sm font-semibold underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover disabled:cursor-wait disabled:text-ink-soft"
               >

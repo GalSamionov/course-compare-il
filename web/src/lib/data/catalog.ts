@@ -64,7 +64,8 @@ export async function loadCatalog(): Promise<Catalog> {
   const byId = new Map(categoryRows.map((c) => [c.id, c]));
 
   const courses: CourseSummary[] = coursesRes.data.flatMap((row) => {
-    const category = byId.get(row.category_id);
+    // רק טיוטה יכולה להיות בלי תחום (courses_category_unless_draft), וכאן אין טיוטות.
+    const category = row.category_id ? byId.get(row.category_id) : undefined;
     if (!category) return [];
     const parent = category.parent_id ? byId.get(category.parent_id) : undefined;
     const latest = row.scores[0];

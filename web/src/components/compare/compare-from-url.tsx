@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PenNote } from '@/components/course/marks';
 import { ShareLinks } from '@/components/course/share-links';
 import { SourceLegend } from '@/components/course/source-legend';
@@ -94,6 +94,18 @@ function CompareView({
   const [removed, setRemoved] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<Note>(null);
+  /**
+   * הכפתור שלחצו עליו נעלם עם הקורס, והפוקוס היה נופל לראש העמוד. במקום זה הוא עובר לכפתור ההפוך של אותו קורס:
+   * אחרי "להוציא" ל"להחזיר" בתחתית, ואחרי "להחזיר" ל"להוציא" בטבלה. כך מי שעובד במקלדת יודע מה קרה ונשאר במקום.
+   */
+  const focusNext = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusNext.current) return;
+    const target = document.querySelector<HTMLElement>(focusNext.current);
+    if (!target) return;
+    focusNext.current = null;
+    target.focus();
+  });
 
   const chosenIds = new Set(chosen.map((c) => c.id));
   const removedCourses = removed.flatMap((slug) => courses.find((c) => c.slug === slug && !chosenIds.has(c.id)) ?? []);
@@ -123,6 +135,7 @@ function CompareView({
         return;
       }
     }
+    focusNext.current = `[data-compare-add="${course.id}"]`;
     setRemoved((list) => [course.slug, ...list.filter((slug) => slug !== course.slug)]);
   }
 
@@ -143,6 +156,7 @@ function CompareView({
         return;
       }
     }
+    focusNext.current = `[data-compare-remove="${course.id}"]`;
     setRemoved((list) => list.filter((slug) => slug !== course.slug));
   }
 

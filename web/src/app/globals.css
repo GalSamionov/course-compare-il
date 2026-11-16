@@ -150,6 +150,31 @@ body {
   color: inherit;
 }
 
+@layer components {
+  /* "דלגו לתוכן" (layout.tsx): מחוץ למסך עד שמגיעים אליו במקלדת. אז הוא יורד לפינה הימנית העליונה,
+     ככפתור הראשי של האתר: דיו על נייר, בלי צל, עם טבעת הפוקוס הרגילה. */
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    inset-inline-start: 12px;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 18px;
+    border-radius: 4px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    transform: translateY(calc(-100% - 24px));
+  }
+  .skip-link:focus {
+    transform: none;
+  }
+}
+
 @layer base {
   /* טבעת פוקוס בצבע של המערכת, גם במקומות שלא עיצבנו במפורש.
      בשכבת base, כדי ש-outline-none של רכיב שמסמן פוקוס בדרך אחרת (שורות המחברת) עדיין יגבר. */
@@ -372,8 +397,16 @@ body {
   .text-page h2 {
     @apply pen-rule mt-10 text-[21px] leading-snug font-bold lg:mt-14 lg:text-[28px];
   }
-  .text-page :is(p, ul, ol, table) {
+  .text-page :is(p, ul, ol, table, dl) {
     @apply mt-3;
+  }
+  /* בפרטיות, בראש כל פרק: למה, חובה ומי מקבל. שתי עמודות, התווית בדיו מודגשת והתשובה לידה,
+     כמו שורה בטופס מודפס. בלי מסגרת ובלי רקע: עדיין טקסט רץ באותו דף. */
+  .text-page dl {
+    @apply grid grid-cols-[max-content_minmax(0,1fr)] gap-x-4 gap-y-1;
+  }
+  .text-page dt {
+    @apply font-bold;
   }
   /* טבלאות המשקלות בשיטה, אחת אחרי השנייה: כותרת הטבלה צמודה לשורות שלה ולא לטבלה שמעליה. */
   .text-page table + table {
@@ -391,45 +424,6 @@ body {
   }
 }
 
-@keyframes hang-in {
-  0% {
-    opacity: 0;
-    rotate: 7deg;
-  }
-  20% {
-    opacity: 1;
-  }
-  55% {
-    rotate: 0deg;
-  }
-  76% {
-    rotate: 1.6deg;
-  }
-}
-@keyframes clip-on {
-  from {
-    opacity: 0;
-    translate: 0 -10px;
-  }
-}
-@keyframes stick-in {
-  from {
-    opacity: 0;
-    translate: 0 -16px;
-    scale: 1.05;
-    rotate: var(--stick-from, 1.5deg);
-  }
-  30% {
-    opacity: 1;
-  }
-}
-@keyframes tape-in {
-  from {
-    opacity: 0;
-    scale: 1.25;
-  }
-}
-
 @keyframes hl-swipe {
   from {
     background-size: 0 100%, 0 100%, 0 100%;
@@ -440,101 +434,54 @@ body {
 }
 
 /* ===== תנועה =====
+   מעט, קצר ושקט (גל, 15.11.2026: "קצת הגזמנו עם האנימציות... זה כבר נראה קצת ילדותי").
+   זז רק מה שאומר משהו: סימון של מקור שנמרח פעם אחת כשהעובדה נכנסת למסך, קו העט מתחת לכותרת,
+   ווי שמאשר פעולה של המבקר. 200 עד 250 מילישניות, האטה רכה (ease-out-quart), בלי קפיצה ובלי דירוג ארוך.
    הכול גלוי ועומד כברירת מחדל. data-motion על <html> רק כשהמבקר לא ביקש פחות תנועה (layout.tsx),
-   ו-data-inview על רכיב כשהוא נכנס למסך, פעם אחת (motion-observer.tsx). --enter-delay: התור באותה כניסה.
-   כל תנועה היא פעולה של יד על הדף: מרקר שנמרח, עט שכותב או מקיף, פתק שנדבק. */
+   ו-data-inview על רכיב כשהוא נכנס למסך, פעם אחת (motion-observer.tsx). --enter-delay: עד שני רכיבים באותה כניסה. */
 @media screen and (prefers-reduced-motion: no-preference) {
   /* רכיב שהיה על המסך כשהתנועה התחילה באיחור (motion-observer.tsx): נשאר כמו שהוא, בלי תנועה. */
-  html[data-motion] :is([data-still], [data-still] path, [data-still] > .tape, [data-still] .proof-clip) {
+  html[data-motion] :is([data-still], [data-still] path) {
     animation: none !important;
     transition: none !important;
   }
 
-  /* המרקר נמרח על העובדה מימין לשמאל. הטקסט גלוי כל הזמן. */
+  /* המרקר נמרח על העובדה מימין לשמאל, פעם אחת. הטקסט גלוי כל הזמן. */
   html[data-motion] .hl:not([data-inview]) {
     background-size: 0 100%, 0 100%, 0 100%;
   }
   html[data-motion] .hl[data-inview] {
-    animation: hl-swipe 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay, 0ms) both;
+    animation: hl-swipe 240ms cubic-bezier(0.25, 1, 0.5, 1) var(--enter-delay, 0ms) both;
   }
 
-  /* קו העט מתחת לכותרת נמשך מימין לשמאל. */
-  /* גם כותרות של עמודי קריאה: שם הקו בא מ-@apply pen-rule ולא מהמחלקה. */
-  html[data-motion] :is(.pen-rule, .text-page h2) {
-    transition: background-size 780ms cubic-bezier(0.55, 0, 0.25, 1) var(--enter-delay, 0ms);
-  }
-  html[data-motion] :is(.pen-rule, .text-page h2):not([data-inview]) {
-    background-size: 0 0.42em;
-  }
-
-  /* קו הטענה של המוסד נמתח מימין לשמאל, כמו המרקר: גם הוא סימון של מקור. */
+  /* קו הטענה של המוסד נמתח כמו המרקר: גם הוא סימון של מקור. */
   html[data-motion] .claim {
-    transition: background-size 640ms cubic-bezier(0.55, 0, 0.25, 1) var(--enter-delay, 0ms);
+    transition: background-size 240ms cubic-bezier(0.25, 1, 0.5, 1) var(--enter-delay, 0ms);
   }
   html[data-motion] .claim:not([data-inview]) {
     background-size: 0 2px;
   }
 
-  /* פתק תלוי (אחרי 3 חודשים): נתלה מהקצה העליון ומתנדנד עד שהוא נח, אחרי שהפתק שמעליו נדבק. */
-  html[data-motion] [data-anim~='hang']:not([data-inview]) {
-    opacity: 0;
+  /* קו העט מתחת לכותרת נמשך מימין לשמאל. גם בעמודי קריאה, שבהם הקו בא מ-@apply pen-rule. */
+  html[data-motion] :is(.pen-rule, .text-page h2) {
+    transition: background-size 250ms cubic-bezier(0.25, 1, 0.5, 1) var(--enter-delay, 0ms);
   }
-  html[data-motion] [data-anim~='hang'][data-inview] {
-    transform-origin: 50% 0;
-    animation: hang-in 1100ms cubic-bezier(0.3, 0, 0.2, 1) var(--enter-delay, 0ms) backwards;
-  }
-
-  /* שורה בטבלה של עמוד קריאה: מופיעה בעדינות, בלי תזוזה. */
-  html[data-motion] .text-page tbody tr:not([data-inview]) {
-    opacity: 0;
-  }
-  html[data-motion] .text-page tbody tr[data-inview] {
-    transition: opacity 500ms ease-out var(--enter-delay, 0ms);
+  html[data-motion] :is(.pen-rule, .text-page h2):not([data-inview]) {
+    background-size: 0 0.42em;
   }
 
-  /* מסמך שהוצמד לביקורת: אחרי שהוא נח על הדף, המהדק נסגר עליו מלמעלה. */
-  html[data-motion] [data-anim~='stick'][data-inview] .proof-clip {
-    animation: clip-on 380ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-delay, 0ms) + 480ms) backwards;
-  }
-
-  /* העט מצייר: עיגול סביב מספר, חץ, וי. לכל path יש pathLength="1". --d: השהיה נוספת בתוך הציור. */
-  html[data-motion] [data-anim~='draw'] path {
+  /* וי בעט שמופיע כשהמבקר מסמן משהו (נשמר, נוסף להשוואה, נשלח): נמשך בתנועה אחת. */
+  html[data-motion] [data-anim~='tick'] path {
     stroke-dasharray: 1 1;
-    transition: stroke-dashoffset var(--draw-ms, 680ms) cubic-bezier(0.5, 0, 0.2, 1)
-      calc(var(--enter-delay, 0ms) + var(--d, 0ms));
+    transition: stroke-dashoffset 200ms cubic-bezier(0.25, 1, 0.5, 1);
   }
-  html[data-motion] [data-anim~='draw']:not([data-inview]) path {
+  html[data-motion] [data-anim~='tick']:not([data-inview]) path {
     stroke-dashoffset: 1;
   }
-
-  /* העט כותב: ההערה נחשפת מימין לשמאל, בקצב של כתיבה. */
-  html[data-motion] [data-anim~='write'] {
-    clip-path: inset(-40px -40px -40px -40px);
-    transition: clip-path var(--write-ms, 1000ms) cubic-bezier(0.4, 0, 0.3, 1) calc(var(--enter-delay, 0ms) + var(--d, 0ms));
-  }
-  html[data-motion] [data-anim~='write']:not([data-inview]) {
-    clip-path: inset(-40px -40px -40px 100%);
-  }
-
-  /* פתק נדבק: יורד על הדף, מתיישר ונלחץ. הסלוטייפ מונח אחריו.
-     אנימציה ולא מעבר, ורק backwards: אחרי שהפתק נדבק, translate פנוי לריחוף של פתק שהוא קישור. */
-  html[data-motion] [data-anim~='stick']:not([data-inview]) {
-    opacity: 0;
-  }
-  html[data-motion] [data-anim~='stick'][data-inview] {
-    animation: stick-in 680ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay, 0ms) backwards;
-  }
-  html[data-motion] [data-anim~='stick']:not([data-inview]) > .tape {
-    opacity: 0;
-  }
-  html[data-motion] [data-anim~='stick'][data-inview] > .tape {
-    animation: tape-in 320ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--enter-delay, 0ms) + 460ms) backwards;
-  }
-
 }
 
 /* ===== הדוגמה בשורה הראשונה של המחברת (pen-example.tsx) =====
-   גלויה רק כשהשורה ריקה ולא בפוקוס. כל דוגמה נכתבת מימין לשמאל, נשארת רגע ונעלמת. */
+   גלויה רק כשהשורה ריקה ולא בפוקוס. הדוגמאות מתחלפות בעמעום קצר. */
 .pen-example {
   visibility: hidden;
 }
@@ -543,65 +490,31 @@ body {
 }
 @media screen and (prefers-reduced-motion: no-preference) {
   .pen-example-word {
-    animation: pen-example 3000ms cubic-bezier(0.4, 0, 0.3, 1) both;
+    animation: pen-example 3000ms linear both;
   }
 }
 @keyframes pen-example {
   0% {
-    clip-path: inset(-12px -12px -12px 100%);
+    opacity: 0;
   }
-  34% {
-    clip-path: inset(-12px -12px -12px -12px);
-    opacity: 1;
-  }
-  86% {
+  7%,
+  93% {
     opacity: 1;
   }
   100% {
-    clip-path: inset(-12px -12px -12px -12px);
     opacity: 0;
   }
 }
 
-/* ===== שורה ברשימה נכתבת אל המחברת (results.tsx) =====
-   אנימציה עם backwards בלבד: בסוף אין clip-path, כי קו המחברת של השורה נמשך עד קצה הנייר. */
-@media screen and (prefers-reduced-motion: no-preference) {
-  html[data-motion] [data-anim~='ink']:not([data-inview]) {
-    opacity: 0;
-  }
-  html[data-motion] [data-anim~='ink'][data-inview] {
-    animation: ink-in 720ms cubic-bezier(0.4, 0, 0.3, 1) var(--enter-delay, 0ms) backwards;
-  }
-}
-@keyframes ink-in {
-  from {
-    clip-path: inset(-200px -200px -200px 100%);
-  }
-  to {
-    clip-path: inset(-200px -200px -200px -200px);
-  }
-}
-
-/* ===== דפדוף בין צעדים בכתיבת ביקורת (review-flow.tsx) =====
-   קדימה הדף נכנס משמאל, אחורה מימין. קצר, כדי שלא יעכב את מי שממלא. */
+/* ===== מעבר בין צעדים בכתיבת ביקורת (review-flow.tsx): עמעום קצר, בלי תזוזה ===== */
 @media screen and (prefers-reduced-motion: no-preference) {
   .page-turn {
-    animation: page-next 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .page-turn[data-turn='back'] {
-    animation-name: page-back;
+    animation: page-fade 180ms cubic-bezier(0.25, 1, 0.5, 1) both;
   }
 }
-@keyframes page-next {
+@keyframes page-fade {
   from {
     opacity: 0;
-    translate: -28px 0;
-  }
-}
-@keyframes page-back {
-  from {
-    opacity: 0;
-    translate: 28px 0;
   }
 }
 
@@ -616,82 +529,23 @@ body {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  /* "עזר לי": המספר קופץ, ו-+1 בעט עולה ממנו ונעלם. */
-  .helpful-count {
-    animation: count-bump 380ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .helpful-plus {
-    animation: plus-float 950ms cubic-bezier(0.2, 0.6, 0.3, 1) forwards;
-  }
-  /* ביקורת שנמחקה מהרשימה: העט מוחק את השם בקו, והשורה דוהה החוצה. */
-  [data-leaving] h3 > * {
-    background-image: linear-gradient(var(--color-pen), var(--color-pen));
-    background-repeat: no-repeat;
-    background-position: right 0 top 55%;
-    background-size: 100% 2px;
-    animation: strike-through 300ms cubic-bezier(0.4, 0, 0.3, 1) backwards;
-  }
+  /* ביקורת שנמחקה מהרשימה: דוהה החוצה. */
   [data-leaving] {
-    animation: row-leave 260ms ease-in 340ms forwards;
+    animation: row-leave 200ms ease-out forwards;
   }
-  /* קפיצה לפרק (#): העט מותח שוב את הקו מתחת לכותרת שלו (motion-observer.tsx). */
+  /* קפיצה לפרק (#): קו העט מתחת לכותרת שלו נמשך שוב, כדי שיהיה ברור לאן הגענו (motion-observer.tsx). */
   .pen-rule-replay {
-    animation: pen-rule-replay 780ms cubic-bezier(0.55, 0, 0.25, 1);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .helpful-plus {
-    display: none;
-  }
-}
-@keyframes count-bump {
-  40% {
-    scale: 1.3;
-  }
-}
-@keyframes plus-float {
-  from {
-    opacity: 0;
-    translate: 0 6px;
-  }
-  25% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    translate: 0 -14px;
-  }
-}
-@keyframes strike-through {
-  from {
-    background-size: 0 2px;
+    animation: pen-rule-replay 250ms cubic-bezier(0.25, 1, 0.5, 1);
   }
 }
 @keyframes row-leave {
   to {
     opacity: 0;
-    translate: 0 -4px;
   }
 }
 @keyframes pen-rule-replay {
   from {
     background-size: 0 0.42em;
-  }
-}
-/* הלוגו: בריחוף העט מקיף שוב את ה-ל (logo-mark.tsx). */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .logo:hover .logo-loop {
-    animation: loop-redraw 760ms cubic-bezier(0.5, 0, 0.2, 1);
-  }
-}
-@keyframes loop-redraw {
-  from {
-    stroke-dasharray: 1 1;
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dasharray: 1 1;
-    stroke-dashoffset: 0;
   }
 }
 /* טקסט של קישור שהעט מותח תחתיו קו כשמרחפים או מגיעים אליו במקלדת, מימין לשמאל.
@@ -718,7 +572,7 @@ body {
   }
   @media (prefers-reduced-motion: no-preference) {
     .pen-under {
-      transition: background-size 360ms cubic-bezier(0.16, 1, 0.3, 1);
+      transition: background-size 200ms cubic-bezier(0.25, 1, 0.5, 1);
     }
   }
 }

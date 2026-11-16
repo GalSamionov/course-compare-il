@@ -48,6 +48,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: MOTION_SCRIPT }} />
       </head>
       <body className="antialiased">
+        {/* הקישור הראשון בכל עמוד, למקלדת ולקורא מסך: מדלג על הכותרת ועל התפריט. כל <main> נושא id="main". */}
+        <a href="#main" className="skip-link">
+          דלגו לתוכן
+        </a>
         {children}
         <MotionObserver />
         {/* ההיכרות למבקר ראשון: בכל עמוד ציבורי, כי רוב המבקרים נכנסים ישר לעמוד קורס מקישור. */}

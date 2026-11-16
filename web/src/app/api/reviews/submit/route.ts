@@ -28,6 +28,7 @@ type SubmitError =
   | 'not_configured'
   | 'bad_request'
   | 'not_draft'
+  | 'course_closed'
   | 'changed'
   | 'incomplete'
   | 'file_missing'
@@ -56,6 +57,8 @@ interface Check {
 }
 
 type CourseRef = {
+  id: string;
+  status: string;
   title: string;
   site_price_ils: number | null;
   institutions: { name: string; business_number: string | null } | { name: string; business_number: string | null }[] | null;
@@ -185,7 +188,7 @@ export async function POST(request: NextRequest) {
     admin
       .from('reviews')
       .select(
-        'id, author_id, status, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(title, site_price_ils, institutions(name, business_number), categories(course_type))',
+        'id, author_id, status, cohort_month, finished_month, body, display_name, display_mode, author_title, review_answers(metric_key, value), courses(id, status, title, site_price_ils, institutions(name, business_number), categories(course_type))',
       )
       .eq('id', input.reviewId)
       .maybeSingle(),
@@ -200,8 +203,26 @@ export async function POST(request: NextRequest) {
 
   const course = one(review.courses as unknown as CourseRef | CourseRef[] | null);
   const institution = one(course?.institutions ?? null);
-  const category = one(course?.categories ?? null);
-  if (!course || !institution || !category) return fail('failed', 500);
+  // קורס שבוגר הוסיף מקישור יכול להיות טיוטה בלי תחום. אז השאלון לפי הסוג שהבוגר בחר (course_link_type).
+  let courseType = one(course?.categories ?? null)?.course_type ?? null;
+  if (course && !courseType) {
+    const { data: linked } = await admin.rpc('course_link_type', { p_course_id: course.id });
+    courseType = linked ?? null;
+  }
+  if (!course || !institution || !courseType) return fail('failed', 500);
+  // קורס טיוטה: רק קורס שהכותב הוסיף מקישור, ורק כל עוד הוא ממתין (כמו private.is_own_link_draft, שחוסמת
+  // טיוטה חדשה). טיוטה שנפתחה לפני שגל דחה את הקורס לא נשלחת לתור.
+  if (course.status === 'draft') {
+    const { data: link, error: linkError } = await admin
+      .from('course_submissions')
+      .select('id')
+      .eq('course_id', course.id)
+      .eq('submitted_by', userId)
+      .eq('status', 'pending')
+      .limit(1);
+    if (linkError) return fail('failed', 500);
+    if (link.length === 0) return fail('course_closed', 409);
+  }
 
   // אותה בדיקה של הצעדים שהדפדפן הריץ, על מה שבאמת שמור במסד.
   const draft: DraftFields = {
@@ -214,7 +235,7 @@ export async function POST(request: NextRequest) {
     authorTitle: review.author_title,
   };
   const ctx = {
-    questions: questionsFor(category.course_type, metricsRes.data as MetricDef[]),
+    questions: questionsFor(courseType, metricsRes.data as MetricDef[]),
     thisMonth: thisMonthOf(new Date()),
   };
   for (const step of ['when', 'questions', 'words', 'name'] as const) {

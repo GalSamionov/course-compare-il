@@ -108,7 +108,7 @@ export default async function GuidePage({ params }: Props) {
 
   return (
     <Sheet>
-      <main>
+      <main id="main">
         <nav aria-label="מיקום" className="mt-2 font-sans text-[13px] text-ink-soft lg:mt-6 lg:text-sm">
           <Link href="/guides" className={`inline-flex min-h-11 items-center ${textLink}`}>
             מדריכים לפני שמשלמים

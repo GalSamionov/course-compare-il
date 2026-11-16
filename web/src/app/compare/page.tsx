@@ -20,7 +20,7 @@ export default async function ComparePage() {
   const courses = await getCompareCourses();
   return (
     <Sheet>
-      <main>
+      <main id="main">
         <h1 className="mt-[22px] text-[30px] leading-tight font-bold text-balance lg:mt-12 lg:text-[54px] lg:leading-[1.06]">
           השוואה
         </h1>

@@ -20,6 +20,7 @@ from .extract import Extractor, ExtractionFailed, ModelUnavailable, PageInput
 from .fetch import Fetcher
 from .pagetext import extract_page, needs_browser
 from .politeness import HostLimiter
+from .series import NewPage, group_new_pages, merge_group, series_info, split_title, title_key
 
 DEFAULT_WORKERS = 4
 
@@ -91,6 +92,7 @@ def process_institution(
         errors=list(discovery.errors),
         known_active=sum(1 for p in work.pages.values() if p.state == "active"),
     )
+    deferred: list[NewPage] = []
     for url in discovery.urls:
         if stop.is_set():
             raise ModelUnavailable("stopped: another institution hit the model outage")
@@ -127,6 +129,11 @@ def process_institution(
             result.plans.append(PagePlan(url=url, outcome="failed", fetched_at=fetched_at, course_id=course_id, error=f"extract: {error}"))
             continue
         result.counts["pages_new" if page is None else "pages_changed"] += 1
+        course = work.courses.get(course_id) if course_id else None
+        if course is None and extraction.is_course_page and extraction.category is not None:
+            # דף חדש שהוא קורס: ההחלטה אחרי שכל הדפים של המוסד נקראו, כדי לאחד מפגשים, מחזורים ומסלולים.
+            deferred.append(NewPage(url, fetched_at, content_hash, text, content.title, response.method, extraction, page))
+            continue
         plan = PagePlan(
             url=url,
             outcome="changed",
@@ -146,17 +153,78 @@ def process_institution(
             page_text=text,
             page_title=content.title,
             page=page,
-            course=work.courses.get(course_id) if course_id else None,
+            course=course,
             today=today,
             institution_slug=cfg.slug,
             category_ids=work.category_ids,
             institution_categories=cfg.categories,
+            skip_fields=grouped_fields(extraction, content.title, course),
         )
         if plan.outcome == "not_course":
             # דף שאינו קורס: רק הטביעה נשמרת, כדי לדלג עליו בשבוע הבא. הטקסט לא נחוץ ותופס מקום במסד.
             plan.snapshot["page_text"] = ""
         result.plans.append(plan)
+    result.plans += decide_new_pages(deferred, work, today, extractor.model)
     return result
+
+
+# בקורס שאוחד מכמה דפים, השדות האלה באו מכל הדפים. הדף המוביל לבדו לא משנה אותם.
+GROUPED_FIELDS = frozenset({"title", "syllabus", "schedule", "time_slots"})
+
+
+def grouped_fields(extraction: Any, page_title: str, course: dict[str, Any] | None) -> frozenset[str]:
+    """הדף מקושר לקורס שהשם שלו הוא שם הבסיס של הדף ("בצק פריך (מפגש 1 מתוך 3)" מול "יסודות האפייה")."""
+    if not course or not course.get("title"):
+        return frozenset()
+    fv = extraction.fields.get("title")
+    parts = split_title((fv.value if fv and fv.found and fv.value else None) or page_title)
+    return GROUPED_FIELDS if parts.marked and parts.key == title_key(course["title"]) else frozenset()
+
+
+def decide_new_pages(pages: list[NewPage], work: InstitutionWork, today: date, model: str) -> list[PagePlan]:
+    """דפים חדשים של המוסד: קורס אחד לכל קבוצה של אותו שם בסיס (series.py), ואירוע שעבר לא נהיה טיוטה."""
+    existing = {title_key(c["title"]): cid for cid, c in work.courses.items() if c.get("title")}
+    plans: list[PagePlan] = []
+    for item in group_new_pages(pages, existing, today):
+        page = item.page
+        extracted = page.extraction.to_json()
+        info = series_info(item)
+        if info:
+            extracted["series"] = info
+        plan = PagePlan(
+            url=page.url,
+            outcome="changed",
+            fetched_at=page.fetched_at,
+            snapshot={"fetch_method": page.method, "content_hash": page.content_hash, "page_text": page.text, "extracted": extracted, "model": model},
+        )
+        if item.role == "past_event":
+            plan.outcome = "not_course"
+            plan.snapshot["page_text"] = ""
+        elif item.role == "member":
+            # עוד דף של קורס: העותק נשמר, בלי טיוטה ובלי פריט בתור משלו.
+            plan.outcome = "not_course"
+        else:
+            grouped = len(item.group) > 1
+            extraction = merge_group(item.group, page, today) if grouped or (page.parts and page.parts.marked) else page.extraction
+            decide_changed(
+                plan=plan,
+                extraction=extraction,
+                # המשפטים של השדות המאוחדים באים מכל הדפים, ולכן הבדיקה שהמשפט בדף רצה על כולם.
+                page_text="\n\n".join(p.text for p in item.group),
+                page_title=page.page_title,
+                page=page.page,
+                course=None,
+                today=today,
+                institution_slug=work.config.slug,
+                category_ids=work.category_ids,
+                institution_categories=work.config.categories,
+            )
+            if grouped:
+                for queued in plan.queue:
+                    if queued["kind"] == "new_course":
+                        queued["reasons"].append("grouped_pages")
+        plans.append(plan)
+    return plans
 
 
 def _counts_payload(counts: Counter) -> dict[str, int]:

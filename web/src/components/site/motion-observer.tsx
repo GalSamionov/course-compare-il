@@ -7,9 +7,9 @@ import { useEffect } from 'react';
  * (גם בעמודי הקריאה, שבהם הקו בא מ-@apply), שורות בטבלאות של עמודי הקריאה, וכל רכיב עם data-anim.
  */
 const SELECTOR = '.hl, .claim, .pen-rule, .text-page h2, .text-page tbody tr, [data-anim]';
-/** כמה רכיבים לכל היותר נכנסים בזה אחר זה באותו רגע, לפני שההשהיה מפסיקה לגדול. */
-const STAGGER_CAP = 6;
-const STAGGER_MS = 140;
+/** באותה כניסה למסך: רק השני מחכה קצת, ומהשלישי כולם יחד. בלי דירוג ארוך. */
+const STAGGER_CAP = 1;
+const STAGGER_MS = 80;
 
 /**
  * מסמן כל רכיב שזז ברגע שהוא נכנס למסך (data-inview), פעם אחת. ה-CSS עושה את השאר.

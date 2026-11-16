@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 test('מהרשימה אל מדריך, ומעובדה ירוקה אל המקור שלה', async ({ page }) => {
   await page.goto('/guides');
   const guides = page.locator('main ol > li');
-  await expect(guides).toHaveCount(4);
+  await expect(guides).toHaveCount(5);
 
   await page.getByRole('link', { name: 'מה לשאול את המוסד לפני שנרשמים' }).click();
   await expect(page).toHaveURL(/\/guides\/questions-before-signing-up$/);

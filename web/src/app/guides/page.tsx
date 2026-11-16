@@ -11,12 +11,12 @@ export const ensureStatic = 'navigation';
 export const metadata: Metadata = {
   title: `מדריכים לפני שמשלמים על קורס | ${SITE_NAME}`,
   description:
-    'ארבעה מדריכים לפני שמשלמים על קורס: איך קוראים סילבוס, מה לשאול את המוסד, אילו תעודות מוכרות, ואיך מממנים. כל עובדה עם המקור שלה.',
+    'חמישה מדריכים לפני שמשלמים על קורס: סילבוס, שאלות למוסד, תעודות מוכרות, מימון, ודגלים אדומים במודעות. כל עובדה עם המקור שלה.',
   openGraph: { type: 'website', locale: 'he_IL', siteName: SITE_NAME, url: '/guides' },
 };
 
 /**
- * הסדרה "לפני שמשלמים": ארבעה מדריכים לפי הסדר, כמו תוכן עניינים של חוברת.
+ * הסדרה "לפני שמשלמים": חמישה מדריכים לפי הסדר, כמו תוכן עניינים של חוברת.
  * כל מדריך על שורה של מחברת שנמשכת עד קצה הנייר, והמספר שלו בסדרה מוקף בעט.
  * מתחת לשם, מאותו צד, מה יש בו וכמה עובדות בו נבדקו (DESIGN.md, The Not A Menu Rule).
  */
@@ -26,7 +26,7 @@ export default function GuidesPage() {
   const needsLegal = guides.some((g) => g.legalReview);
   return (
     <Sheet narrow>
-      <main className="pt-[22px] lg:pt-12">
+      <main id="main" className="pt-[22px] lg:pt-12">
         <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px]">לפני שמשלמים על קורס</h1>
         {needsLegal && (
           <p className="mt-2 inline-block border border-ink px-2 py-0.5 font-sans text-[13px] font-bold">
@@ -35,8 +35,8 @@ export default function GuidesPage() {
         )}
         <div className="mt-5 max-w-[62ch] text-[16px] leading-[1.75] lg:mt-7 lg:text-[18px]">
           <p>
-            ארבעה מדריכים למי שעומד לשלם על קורס: איך קוראים סילבוס, מה לשאול את המוסד, אילו תעודות מוכרות, ואיך
-            אפשר לממן את הלימודים.
+            חמישה מדריכים למי שעומד לשלם על קורס: איך קוראים סילבוס, מה לשאול את המוסד, אילו תעודות מוכרות, איך
+            אפשר לממן את הלימודים, ואיך מזהים דגלים אדומים במודעה לקורס.
           </p>
           <p className="mt-4">
             כל עובדה בהם מסומנת לפי המקור שלה. <Mark source="verified">ירוק</Mark> נבדק מול מסמך רשמי, כמו חוק,

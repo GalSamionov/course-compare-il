@@ -10,6 +10,7 @@ import {
   syllabusTitles,
 } from '@/lib/admin/course-fields';
 import type { CourseQueueItem } from '@/lib/admin/course-queue';
+import { DUPLICATE_LABEL } from '@/lib/admin/new-course-groups';
 import type { Json } from '@/lib/database.types';
 import { CourseDecideForm, type EditSpec } from './course-decide-form';
 import { textLink } from './controls';
@@ -84,6 +85,31 @@ function Reasons({ reasons, confidence }: { reasons: string[]; confidence: strin
           <li key={line}>{line}</li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/**
+ * ברשימה המסוננת של קורסים חדשים: חשד לכפילות, וקורס שכבר אינו טיוטה (מהמסד, private.new_course_queue).
+ * בחשד לכפילות, הפריטים של אותה קבוצה עומדים ברשימה זה ליד זה. בראש הפריט, כי זה מה שגל בא לבדוק.
+ */
+function Suspicions({ causes }: { causes: string[] }) {
+  const duplicates = causes.flatMap((c) => (DUPLICATE_LABEL[c] ? [DUPLICATE_LABEL[c]] : []));
+  const notDraft = causes.includes('not_draft');
+  if (duplicates.length === 0 && !notDraft) return null;
+  return (
+    <div className="mb-4 space-y-2 text-[15px] leading-normal font-bold">
+      {duplicates.length > 0 && (
+        <div>
+          <p>חשד לכפילות:</p>
+          <ul className="mt-1 list-disc space-y-0.5 ps-5">
+            {duplicates.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {notDraft && <p>הקורס כבר לא טיוטה, ולכן פרסום ייכשל. אפשר לדחות את הפריט.</p>}
     </div>
   );
 }
@@ -249,6 +275,7 @@ export function CourseQueueItemView({ item }: { item: CourseQueueItem }) {
       </header>
       <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-14">
         <section aria-label="מה השתנה" className="min-w-0 font-sans">
+          <Suspicions causes={item.causes} />
           {item.kind === 'field' && <FieldChange item={item} />}
           {item.kind === 'new_course' && <NewCourse item={item} />}
           {item.kind === 'maybe_inactive' && (

@@ -1,0 +1,110 @@
+{
+ "is_course_page": true,
+ "category": "cooking",
+ "fields": {
+  "title": {
+   "found": true,
+   "value": "יסודות האפייה | בצק רבוך (מפגש 3 מתוך 3) מחזור 4",
+   "quote": "יסודות האפייה | בצק רבוך (מפגש 3 מתוך 3) מחזור 4",
+   "confidence": "high"
+  },
+  "site_price_ils": {
+   "found": true,
+   "value": 1200,
+   "quote": "מחיר הסדנה המלאה, 3 מפגשים: 1,200 ש\"ח",
+   "confidence": "high"
+  },
+  "total_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "lecture_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "hands_on_hours": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "duration_months": {
+   "found": false,
+   "value": 0,
+   "quote": "",
+   "confidence": "low"
+  },
+  "schedule": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "formats": {
+   "found": true,
+   "value": [
+    "in_person"
+   ],
+   "quote": "במטבח שלנו בחולון",
+   "confidence": "high"
+  },
+  "region": {
+   "found": true,
+   "value": "חולון",
+   "quote": "במטבח שלנו בחולון",
+   "confidence": "high"
+  },
+  "time_slots": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "next_cohort_date": {
+   "found": true,
+   "value": "2027-01-19",
+   "quote": "המפגש מתקיים ב-19.1.2027",
+   "confidence": "high"
+  },
+  "syllabus": {
+   "found": false,
+   "value": [],
+   "quote": "",
+   "confidence": "low"
+  },
+  "admission": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "class_size_note": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "certificate": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "institution_promises": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  },
+  "video_url": {
+   "found": false,
+   "value": "",
+   "quote": "",
+   "confidence": "low"
+  }
+ }
+}

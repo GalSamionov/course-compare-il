@@ -5,7 +5,7 @@ import { SITE_NAME } from '@/lib/site';
 export default function LecturerNotFound() {
   return (
     <Sheet narrow>
-      <main className="py-16">
+      <main id="main" className="py-16">
         <title>{`לא מצאנו את המרצה | ${SITE_NAME}`}</title>
         <h1 className="text-2xl font-bold lg:text-[40px]">לא מצאנו את המרצה</h1>
         <p className="mt-2 font-sans text-ink-soft">

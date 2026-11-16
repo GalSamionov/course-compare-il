@@ -80,18 +80,6 @@ def quote_in_page(quote: str, page_text: str) -> bool:
     return norm_text(quote).casefold() in norm_text(page_text).casefold()
 
 
-def value_schema(field: Field) -> dict[str, Any]:
-    if field.kind == "int":
-        return {"type": "integer"}
-    if field.kind == "number":
-        return {"type": "number"}
-    if field.kind == "choices":
-        return {"type": "array", "items": {"type": "string", "enum": list(field.choices)}}
-    if field.kind == "syllabus":
-        return {"type": "array", "items": {"type": "string"}}
-    return {"type": "string"}
-
-
 def clean_value(field: Field, raw: Any) -> tuple[Any, list[str]]:
     """ערך מהמודל לערך שנשמר. מחזיר (ערך או None כשאין ערך, בעיות)."""
     if field.kind == "text":

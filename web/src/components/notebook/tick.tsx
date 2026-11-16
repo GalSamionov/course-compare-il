@@ -1,16 +1,10 @@
 import { PenBox } from '@/components/site/pen';
 import { cn } from '@/lib/utils';
 
-/** וי בכתב יד, בעט כחול. הקו מהציור. כשהוא מופיע, העט מסמן אותו בתנועה אחת מהירה. */
+/** וי בכתב יד, בעט כחול. הקו מהציור. כשהוא מופיע, הוא נמשך בתנועה אחת קצרה (200 מילישניות): אישור שהסימון נקלט. */
 export function TickMark({ className, strokeWidth = 2.4 }: { className?: string; strokeWidth?: number }) {
   return (
-    <svg
-      data-anim="draw"
-      aria-hidden="true"
-      viewBox="0 0 30 30"
-      className={cn('overflow-visible text-pen', className)}
-      style={{ '--draw-ms': '360ms' } as React.CSSProperties}
-    >
+    <svg data-anim="tick" aria-hidden="true" viewBox="0 0 30 30" className={cn('overflow-visible text-pen', className)}>
       <path
         d="M5 16 C8 19, 10 22, 12 25 C16 15, 21 8, 29 1"
         pathLength={1}

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useId, useRef } from 'react';
 import { PenNote, StickyNote } from '@/components/course/marks';
 import { PenLoop } from '@/components/site/pen';
@@ -134,7 +135,7 @@ export function WhenStep({
   );
 }
 
-interface RadioOption<T> {
+export interface RadioOption<T> {
   value: T;
   text: string;
   /** שם אחר לקורא מסך, כמו "4 מתוך 5" לספרה 4. */
@@ -146,7 +147,7 @@ interface RadioOption<T> {
  * קבוצת רדיו אמיתית (WAI-ARIA, Radio Group): רק התשובה הנבחרת נכנסת לסדר הטאב, והחצים עוברים ובוחרים.
  * מימין לשמאל, חץ שמאלה הוא התשובה הבאה. data-value לבדיקת הקצה.
  */
-function RadioGroup<T extends string | number>({
+export function RadioGroup<T extends string | number>({
   options,
   value,
   onChange,
@@ -223,7 +224,7 @@ function RadioGroup<T extends string | number>({
               itemClassName,
             )}
           >
-            {on ? <PenLoop>{option.text}</PenLoop> : option.text}
+            {on ? <PenLoop draw>{option.text}</PenLoop> : option.text}
           </button>
         );
       })}
@@ -470,6 +471,13 @@ export function NameStep({
           cohortMonth={cohortMonth}
           body={body}
         />
+        {/* הודעה בנקודת האיסוף: השם גלוי לכולם, והוא לא חובה. */}
+        <p className="mt-3 max-w-[60ch] font-sans text-[13px] leading-normal text-ink-soft">
+          כל מי שנכנס לעמוד הקורס רואה את מה שכאן. השם לא חובה, ונשמר רק בצורה שבחרתם.{' '}
+          <Link href="/privacy#reviews" className="underline underline-offset-[3px] hover:text-link-hover">
+            מה נשמר, למה ולכמה זמן
+          </Link>
+        </p>
       </div>
     </div>
   );

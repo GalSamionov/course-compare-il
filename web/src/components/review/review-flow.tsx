@@ -165,8 +165,6 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   /** הודעה שאינה של שדה אחד: שמירה שנכשלה, ביקורת כפולה, שליחה שנכשלה. */
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  /** לאיזה כיוון מדפדפים לצעד הבא. */
-  const [turn, setTurn] = useState<'next' | 'back'>('next');
   const [uploading, setUploading] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusAfterErrors = useRef<ErrorField | null>(null);
@@ -242,8 +240,6 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   function go(step: StepId) {
     setFieldErrors([]);
     setFormError(null);
-    // קדימה הדף החדש נכנס משמאל, אחורה מימין: כמו לדפדף במחברת בעברית (globals.css, page-turn).
-    setTurn(phase.kind === 'step' && STEPS.indexOf(step) < STEPS.indexOf(phase.step) ? 'back' : 'next');
     setPhase({ kind: 'step', step });
   }
 
@@ -349,7 +345,7 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   if (account.status === 'signed-out' || !userId) {
     return (
       <Intro>
-        <Link href={`/login?next=${encodeURIComponent(`/courses/${form.slug}/review`)}`} className={primaryButton}>
+        <Link href={`/login?next=${encodeURIComponent(form.writePath ?? `/courses/${form.slug}/review`)}`} className={primaryButton}>
           להתחבר ולהתחיל
         </Link>
         <p className="mt-3 font-sans text-[13px] text-ink-soft">ההתחברות בקישור למייל, בלי סיסמה.</p>
@@ -467,12 +463,11 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   return (
     <section aria-labelledby="step-h" className={cn(notebookPage, 'mt-8 lg:mt-12')}>
       {/* ההתקדמות בעט, בשוליים (מסמך העיצוב, סעיף 9). */}
-      {/* key: בכל צעד העט כותב את המספר מחדש בשוליים. */}
-      <p key={step} data-anim="write" className={cn(marginNote, 'pt-1.5')}>
+      <p className={cn(marginNote, 'pt-1.5')}>
         צעד {index + 1} מתוך {STEPS.length}
       </p>
-      {/* key: כל צעד הוא דף חדש, והוא נכנס בדפדוף (globals.css, page-turn). */}
-      <div key={step} data-turn={turn} className="page-turn min-w-0 ps-3">
+      {/* key: כל צעד הוא דף חדש, שנכנס בעמעום קצר (globals.css, page-turn). */}
+      <div key={step} className="page-turn min-w-0 ps-3">
         <h2 id="step-h" ref={heading} tabIndex={-1} className={sectionTitle}>
           {STEP_TITLE[step]}
         </h2>

@@ -64,6 +64,33 @@ export async function loadMyReviews(): Promise<MyReview[]> {
   }));
 }
 
+/** קורס שהמשתמש הוסיף מקישור, ועדיין טיוטה (my_course_links). קורס שאושר כבר בקטלוג. */
+export interface MyCourseLink {
+  courseId: string;
+  title: string;
+  institutionName: string;
+  status: 'pending' | 'rejected';
+  decisionReason: string | null;
+}
+
+export async function loadMyCourseLinks(): Promise<MyCourseLink[]> {
+  const { data, error } = await createBrowserSupabase().rpc('my_course_links');
+  if (error) throw error;
+  return (data ?? []).flatMap((row) =>
+    row.status === 'pending' || row.status === 'rejected'
+      ? [
+          {
+            courseId: row.course_id,
+            title: row.course_title,
+            institutionName: row.institution_name,
+            status: row.status,
+            decisionReason: row.decision_reason ?? null,
+          },
+        ]
+      : [],
+  );
+}
+
 /** 'duplicate': כבר יש ביקורת של המשתמש על אותו קורס ומחזור (reviews_one_per_cohort). */
 export type SaveResult = 'ok' | 'duplicate' | 'error';
 
@@ -184,6 +211,7 @@ export type SubmitResult =
   | 'incomplete'
   | 'signed_out'
   | 'not_draft'
+  | 'course_closed'
   | 'changed'
   | 'error';
 
@@ -194,6 +222,7 @@ const KNOWN: readonly SubmitResult[] = [
   'incomplete',
   'signed_out',
   'not_draft',
+  'course_closed',
   'changed',
 ];
 
@@ -205,6 +234,7 @@ export const SUBMIT_MESSAGE: Record<Exclude<SubmitResult, 'ok'>, string> = {
   incomplete: 'חסר משהו באחד הצעדים. חזרנו אליו.',
   signed_out: 'ההתחברות פגה. התחברו שוב, והטיוטה תחכה.',
   not_draft: 'הביקורת כבר נשלחה לבדיקה.',
+  course_closed: 'הקורס הזה לא נוסף לאתר, ולכן אי אפשר לשלוח עליו ביקורת.',
   changed: 'הטיוטה השתנתה בזמן השליחה. נסו לשלוח שוב.',
   error: 'לא הצלחנו לשלוח. הטיוטה שמורה. נסו שוב בעוד דקה.',
 };

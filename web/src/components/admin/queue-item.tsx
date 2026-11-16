@@ -125,13 +125,25 @@ export function QueueItemView({ item }: { item: QueueItem }) {
     <article aria-labelledby={headingId} data-anim="ink" className="border-t border-rule py-6 lg:py-8">
       <header>
         <h3 id={headingId} className="text-[21px] leading-snug font-bold text-balance">
-          <Link
-            href={`/courses/${item.courseSlug}`}
-            className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover"
-          >
-            {item.courseTitle}
-          </Link>
+          {item.courseIsDraft ? (
+            item.courseTitle
+          ) : (
+            <Link
+              href={`/courses/${item.courseSlug}`}
+              className="inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover"
+            >
+              {item.courseTitle}
+            </Link>
+          )}
         </h3>
+        {item.courseIsDraft && (
+          <p className="mt-1 font-sans text-[15px] leading-normal font-bold">
+            הקורס עוד לא באתר: בוגר הוסיף אותו מקישור.{' '}
+            <a href="#links" className="inline-flex min-h-11 items-center font-semibold underline decoration-1 underline-offset-[3px] hover:text-link-hover">
+              לקורסים מקישורים
+            </a>
+          </p>
+        )}
         <p className="mt-1 font-sans text-[13px] leading-normal text-ink-soft">
           {item.institutionName} · מחזור {monthLabel(item.cohortMonth)}
           {item.finishedMonth && ` עד ${monthLabel(item.finishedMonth)}`}
@@ -180,7 +192,7 @@ export function QueueItemView({ item }: { item: QueueItem }) {
           <div className="mt-7 border-t border-rule pt-5">
             <DecideForm
               reviewId={item.reviewId}
-              courseSlug={item.courseSlug}
+              courseSlug={item.courseIsDraft ? null : item.courseSlug}
               courseTitle={item.courseTitle}
               defaultKind={defaultKind}
               modelAmount={modelAmount}

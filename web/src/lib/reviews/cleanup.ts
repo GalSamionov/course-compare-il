@@ -17,6 +17,14 @@ export interface CleanupResult {
   checkUsageDeleted: number;
   /** מיילים של בקשות ממוסדות שנמחקו (90 יום אחרי ההחלטה). null: הפונקציה עוד לא במסד הזה. */
   requestEmailsDeleted: number | null;
+  /** פניות של חברות שנסגרו לפני יותר מ-12 חודשים, ונמחקו. null: הפונקציה עוד לא במסד הזה. */
+  companyRequestsDeleted: number | null;
+  /** דיווחים שהוחלט עליהם לפני יותר מ-90 יום, ומה שהמדווח כתב בהם נמחק. null: הפונקציה עוד לא במסד הזה. */
+  reportDetailsDeleted: number | null;
+  /** הערות בבקשות "בקשו שנבדוק קורס" שנמחקו (90 יום אחרי ההחלטה). null: הפונקציה עוד לא במסד הזה. */
+  courseRequestNotesDeleted: number | null;
+  /** תוצאות של בדיקת קישור שנמחקו (7 ימים אחרי הבדיקה). null: הפונקציה עוד לא במסד הזה. */
+  adChecksDeleted: number | null;
   failures: string[];
 }
 
@@ -30,6 +38,14 @@ const hoursAgo = (now: Date, hours: number) => new Date(now.getTime() - hours * 
  * 3. שורות של מכסת הבדיקות בנות יותר מיומיים.
  * 4. בקשות ממוסדות (/institutions/join): המייל 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
  *    (purge_institution_requests, ומדיניות הפרטיות).
+ * 5. פניות של חברות (/companies): פנייה שנסגרה נמחקת כולה 12 חודשים אחרי הסגירה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_company_requests, ומדיניות הפרטיות).
+ * 6. דיווחים על ביקורות: מה שהמדווח כתב נמחק 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_reports, סבב 5). הדיווח עצמו נשאר, בלי הטקסט.
+ * 7. קורסים מקישור (/review ו-/request-course): ההערה 90 יום אחרי ההחלטה, והטביעה של ה-IP אחרי יומיים
+ *    (purge_course_submissions, ומדיניות הפרטיות).
+ * 8. בדיקת קישור (/request-course): התוצאה 7 ימים אחרי הבדיקה, והמונים של המכסה אחרי יומיים (purge_ad_checks).
+ *    טקסט הדף לא נשמר בכלל.
  * המחיקה מהאחסון דרך ה-API של Storage בלבד (protect_delete חוסם מחיקה ב-SQL).
  */
 export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Promise<CleanupResult> {
@@ -69,5 +85,39 @@ export async function cleanupProofs(db: SupabaseClient<Database>, now: Date): Pr
   if (purgeError && purgeError.code !== 'PGRST202') failures.push(`institution_requests: ${purgeError.message}`);
   else if (!purgeError) requestEmailsDeleted = purged ?? 0;
 
-  return { reviewsDeleted, filesDeleted, checkUsageDeleted: count ?? 0, requestEmailsDeleted, failures };
+  // אותו דבר למסד שהמיגרציה של הפניות מחברות (20261115233001) עוד לא עלתה אליו.
+  let companyRequestsDeleted: number | null = null;
+  const { data: companies, error: companiesError } = await db.rpc('purge_company_requests');
+  if (companiesError && companiesError.code !== 'PGRST202') failures.push(`company_requests: ${companiesError.message}`);
+  else if (!companiesError) companyRequestsDeleted = companies ?? 0;
+
+  // ואותו דבר למסד שהמיגרציה של הדיווחים (20261115230001) עוד לא עלתה אליו.
+  let reportDetailsDeleted: number | null = null;
+  const { data: reports, error: reportsError } = await db.rpc('purge_reports');
+  if (reportsError && reportsError.code !== 'PGRST202') failures.push(`reports: ${reportsError.message}`);
+  else if (!reportsError) reportDetailsDeleted = reports ?? 0;
+
+  // ואותו דבר למסד שהמיגרציה של הקורסים מקישור (20261116010001) עוד לא עלתה אליו.
+  let courseRequestNotesDeleted: number | null = null;
+  const { data: notes, error: notesError } = await db.rpc('purge_course_submissions');
+  if (notesError && notesError.code !== 'PGRST202') failures.push(`course_submissions: ${notesError.message}`);
+  else if (!notesError) courseRequestNotesDeleted = notes ?? 0;
+
+  // ואותו דבר למסד שהמיגרציה של בדיקת הקישור (20261116020001) עוד לא עלתה אליו.
+  let adChecksDeleted: number | null = null;
+  const { data: adChecks, error: adChecksError } = await db.rpc('purge_ad_checks');
+  if (adChecksError && adChecksError.code !== 'PGRST202') failures.push(`ad_checks: ${adChecksError.message}`);
+  else if (!adChecksError) adChecksDeleted = adChecks ?? 0;
+
+  return {
+    reviewsDeleted,
+    filesDeleted,
+    checkUsageDeleted: count ?? 0,
+    requestEmailsDeleted,
+    companyRequestsDeleted,
+    reportDetailsDeleted,
+    courseRequestNotesDeleted,
+    adChecksDeleted,
+    failures,
+  };
 }
