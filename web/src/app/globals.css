@@ -89,6 +89,10 @@
   --tape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E6E9ED' fill-opacity='.74' d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3Cpath fill='%23fff' fill-opacity='.35' d='M4 3.4L76 2.9 76 7.2 4 7.6Z'/%3E%3C/svg%3E");
   /* צורת הסלוטייפ עם הקצוות הקרועים, כמסכה: לסלוטייפ צבעוני (מסקינג טייפ) על פתק לבן. */
   --tape-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3C/svg%3E");
+  /* הסימנים בעט בתחילת מרקר המקור, כמסכה (lib/mark-cues.ts הוא המקור, ו-mark-cues.test.ts בודק שהם זהים). */
+  --cue-verified: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round' d='M3.2 10.9C4.9 12.5 6.3 14.4 7.5 16.7 9.8 11.1 13 6.5 17.2 3'/%3E%3C/svg%3E");
+  --cue-grads: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round' d='M13.6 3.3C11 2.4 7.3 2.6 5 3.9 2.5 5.3 2 8.5 3.7 10.7 5.3 12.8 8.7 13.5 11.7 12.9L15.9 16.1 14.7 11.9C16.9 10.7 18 8.6 17.5 6.4 17.1 4.9 15.8 3.9 13.2 3.2'/%3E%3C/svg%3E");
+  --cue-weak: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round' stroke-linejoin='round' d='M5.6 2.6C5.8 6.4 5.5 9.8 4.9 13'/%3E%3Ccircle fill='%23000' cx='4.7' cy='17.4' r='2'/%3E%3C/svg%3E");
   --stamp-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
@@ -272,6 +276,47 @@ body {
     --hl-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 2.3C20 2.8 40 2.4 58 3.1S88 3.3 100 3.7L100 17.9C84 17.5 66 18.1 46 17.4S16 17.6 0 17.1Z'/%3E%3C/svg%3E");
     --hl-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M10 2.6L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L10 17.8Z'/%3E%3Cpath fill='%23FF9DC7' d='M5.6 2.9L4.4 3C3.2 5.6 2.3 8.8 1.6 11.8 1 14.4.7 16.2 1.1 17.9L2.9 17.9C2.7 15.6 3.1 12.6 3.8 9.9 4.3 7.4 5 5 5.6 2.9Z'/%3E%3C/svg%3E");
     --hl-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20' preserveAspectRatio='none'%3E%3Cpath fill='%23FFB0D3' d='M0 2.5L9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L0 17.9Z'/%3E%3Cpath fill='%23FF9DC7' d='M9.3 2.3C9.7 5.4 9.3 8.9 8.7 12 8.1 14.6 7.4 16.5 6.2 17.9L4.8 17.9C5.9 16.2 6.6 14.2 7.1 11.8 7.6 8.9 7.9 5.5 7.6 2.4Z'/%3E%3C/svg%3E");
+  }
+
+  /* ===== הסימן בעט בתחילת מרקר המקור (WCAG 1.4.1) =====
+     הצבע הוא לא הסימן היחיד: וי לנבדק מול מסמך, בועת דיבור למה שבוגרים אמרו, קריאה לנקודת חולשה.
+     העט מוסיף אותו פעם אחת, בתחילת הסימון (::before הוא רק בשורה הראשונה, גם כשהמשיכה נשברת).
+     התוכן הוא WORD JOINER באורך אפס, כדי שהסימן לא יישאר לבד בסוף שורה בלי המילה שאחריו.
+     מסכה בצבע העט ולא תמונה: בניגודיות גבוהה של Windows הוא מקבל את צבע הטקסט, ובהדפסה הוא נשאר
+     גם כשהדפדפן משמיט את המרקר עצמו. במקרא (MarkSample) אותו סימן על שם הצבע. */
+  .hl[data-cue]::before {
+    content: '\2060';
+    padding-inline: calc(var(--cue-w) / 2);
+    margin-inline-end: 0.2em;
+    background-color: var(--color-pen);
+    -webkit-mask: var(--cue) no-repeat center var(--cue-y) / var(--cue-w) var(--cue-h);
+    mask: var(--cue) no-repeat center var(--cue-y) / var(--cue-w) var(--cue-h);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .hl[data-cue='verified'] {
+    --cue: var(--cue-verified);
+    --cue-w: 0.72em;
+    --cue-h: 0.72em;
+    --cue-y: 0.36em;
+  }
+  .hl[data-cue='grads'] {
+    --cue: var(--cue-grads);
+    --cue-w: 0.8em;
+    --cue-h: 0.8em;
+    --cue-y: 0.4em;
+  }
+  .hl[data-cue='weak'] {
+    --cue: var(--cue-weak);
+    --cue-w: 0.42em;
+    --cue-h: 0.84em;
+    --cue-y: 0.26em;
+  }
+  @media (forced-colors: active) {
+    .hl[data-cue]::before {
+      forced-color-adjust: none;
+      background-color: CanvasText;
+    }
   }
 
   /* ===== טענה של המוסד =====

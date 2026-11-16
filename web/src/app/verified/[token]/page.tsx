@@ -69,7 +69,10 @@ function BadgeContent({ badge }: { badge: Badge }) {
           <h1 className="text-[28px] leading-tight font-bold text-balance lg:text-[48px] lg:leading-[1.08]">
             {badge.shownName && <span className="mb-1 block text-[21px] lg:text-[30px]">{badge.shownName},</span>}
             <span className="inline-flex flex-wrap items-center gap-x-2.5">
-              <Mark source="verified">{title}</Mark>
+              {/* הווי הגדול בעט שליד הכותרת הוא כבר הסימן של "נבדק", ולכן בלי הווי הקטן בתחילת המרקר. */}
+              <Mark source="verified" cue={false}>
+                {title}
+              </Mark>
               <TickMark className="size-7 lg:size-10" strokeWidth={2.6} />
             </span>
             <span className="mt-1 block">של {badge.courseTitle}</span>

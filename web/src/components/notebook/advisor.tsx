@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
-import { Claim, Mark, PenNote } from '@/components/course/marks';
+import { Claim, Mark, MarkSample, PenNote } from '@/components/course/marks';
 import { PenArrow, PenArrowDown } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { loginHref, useAccount } from '@/lib/account/store';
@@ -289,10 +289,10 @@ function AnswerSheet({
           className="grid gap-y-1 ps-3 font-sans text-[13px] leading-normal lg:flex lg:flex-wrap lg:gap-x-5 lg:text-sm"
         >
           <span>
-            <span className="hl hl-verified font-semibold">ירוק</span> נבדק מול מסמך
+            <MarkSample source="verified">ירוק</MarkSample> נבדק מול מסמך
           </span>
           <span>
-            <span className="hl hl-grads font-semibold">צהוב</span> מה שבוגרים אמרו
+            <MarkSample source="grads">צהוב</MarkSample> מה שבוגרים אמרו
           </span>
           <span>
             <Claim>קו כחול</Claim> המוסד אומר, לא נבדק

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
-import { Claim, Tape } from '@/components/course/marks';
+import { Claim, MarkSample, Tape } from '@/components/course/marks';
 import { PEN_LOOPS, PenArrow } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { INTRO_OPEN_EVENT, WALKTHROUGH, hasSeenIntro, introAllowedOn, markIntroSeen } from '@/lib/intro';
@@ -180,19 +180,18 @@ function StepOne() {
 
 /** אותו מקרא כמו בעמוד הקורס (course/source-legend.tsx), גדול יותר. */
 function StepTwo() {
-  const swatch = 'hl font-semibold';
   return (
     <>
       <StepTitle>הצבע אומר מאיפה המידע</StepTitle>
       <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm leading-normal lg:text-[15px]">
         <li>
-          <span className={cn(swatch, 'hl-verified')}>ירוק</span> נבדק מול מסמך
+          <MarkSample source="verified">ירוק</MarkSample> נבדק מול מסמך
         </li>
         <li>
-          <span className={cn(swatch, 'hl-grads')}>צהוב</span> מה שבוגרים אמרו
+          <MarkSample source="grads">צהוב</MarkSample> מה שבוגרים אמרו
         </li>
         <li>
-          <span className={cn(swatch, 'hl-weak')}>ורוד</span> נקודת חולשה
+          <MarkSample source="weak">ורוד</MarkSample> נקודת חולשה
         </li>
         <li>
           <Claim>קו כחול</Claim> המוסד אומר, לא נבדק

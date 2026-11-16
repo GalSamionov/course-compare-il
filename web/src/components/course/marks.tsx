@@ -35,17 +35,42 @@ function tiltFor(children: React.ReactNode): (typeof TILTS)[number] {
  * מרקר בצבע המקור: ירוק נבדק מול מסמך, צהוב בוגרים, ורוד חולשה.
  * משיכה עם קצוות משופעים (globals.css, .hl), וכל שורה מקבלת משיכה משלה.
  * המשיכה נמרחת פעם אחת, קצרה, כשהיא נכנסת למסך (globals.css, "תנועה").
+ *
+ * הצבע הוא לא הסימן היחיד (WCAG 1.4.1): בתחילת כל סימון העט מוסיף סימן קטן, וי לנבדק, בועת דיבור לבוגרים
+ * וקריאה לחולשה (globals.css, data-cue; הציור ב-lib/mark-cues.ts). כך גם מי שלא מבחין בין הצבעים יודע מה המקור.
+ * cue={false}: רק כשממש ליד הסימון כבר יש סימן גדול באותה משמעות, כמו הווי בכרטיס "בוגר מאומת".
  */
-export function Mark({ source, children }: { source: MarkSource; children: React.ReactNode }) {
+export function Mark({
+  source,
+  cue = true,
+  children,
+}: {
+  source: MarkSource;
+  cue?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <mark
       data-source={source}
+      data-cue={cue ? source : undefined}
       data-tilt={tiltFor(children)}
       className={cn('hl', `hl-${source}`)}
     >
       <span className="sr-only">{markLabel[source]}: </span>
       {children}
     </mark>
+  );
+}
+
+/**
+ * דוגמה של סימון במקרא: אותה משיכה ואותו סימן בעט כמו בטקסט, על שם הצבע.
+ * בלי תווית לקורא מסך: במקרא המשמעות כתובה ממש לידה.
+ */
+export function MarkSample({ source, children }: { source: MarkSource; children: React.ReactNode }) {
+  return (
+    <span data-cue={source} className={cn('hl font-semibold', `hl-${source}`)}>
+      {children}
+    </span>
   );
 }
 
