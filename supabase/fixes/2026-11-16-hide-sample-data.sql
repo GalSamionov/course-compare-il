@@ -23,13 +23,14 @@
 -- בטוח להריץ שוב: בהרצה השנייה אין קורס או מוסד לעדכן.
 --
 -- אחרי ההרצה:
---   1. בדיקה לקריאה בלבד (צריך לצאת 0 בכל העמודות):
---      pnpm exec supabase db query --remote --read-only "set local role anon; select
---        (select count(id) from courses where id::text like 'eeeeeeee-%') as courses,
---        (select count(id) from institutions where id::text like 'dddddddd-%') as institutions,
---        (select count(id) from reviews where course_id::text like 'eeeeeeee-%') as reviews,
---        (select count(id) from scores where course_id::text like 'eeeeeeee-%') as scores,
---        (select count(id) from lecturers where id::text like 'ffffffff-%') as lecturers"
+--   1. בדיקה לקריאה בלבד: מה שהציבור רואה, לפי אותם תנאים של ההרשאות. צריך לצאת 0 בכל העמודות
+--      (ב-16.11.2026, לפני ההרצה: 15, 6, 70, 30, 4). --read-only לא מקבל set role, ולכן התנאים כתובים כאן:
+--      pnpm exec supabase db query --remote --read-only "select
+--        (select count(*) from courses where id::text like 'eeeeeeee-%' and status <> 'draft') as courses,
+--        (select count(*) from institutions where id::text like 'dddddddd-%' and status = 'active') as institutions,
+--        (select count(*) from reviews r join courses c on c.id = r.course_id where r.status = 'published' and c.status <> 'draft' and c.id::text like 'eeeeeeee-%') as reviews,
+--        (select count(*) from scores s join courses c on c.id = s.course_id where c.status <> 'draft' and c.id::text like 'eeeeeeee-%') as scores,
+--        (select count(*) from lecturers l where l.id::text like 'ffffffff-%' and exists (select 1 from course_lecturers cl join courses c on c.id = cl.course_id where cl.lecturer_id = l.id and c.status <> 'draft')) as lecturers"
 --   2. הציונים מחדש, ורענון של הקטלוג ושל עמודי הקורסים באתר. אי אפשר ב-SQL: החישוב ב-TypeScript
 --      (web/src/lib/score/recompute.ts). הדרך הקצרה היא החישוב הלילי, שרץ גם בהפעלה ידנית:
 --        gh workflow run scores-nightly.yml --ref main
