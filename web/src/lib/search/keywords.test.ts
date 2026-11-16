@@ -5,7 +5,14 @@ import type { CourseSummary } from './types';
 const CATEGORIES = [
   { slug: 'technology', name: 'טכנולוגיה' },
   { slug: 'programming', name: 'תכנות' },
-  { slug: 'ai', name: 'בינה מלאכותית' },
+  { slug: 'ai-at-work', name: 'AI בעבודה ולפי מקצוע' },
+  { slug: 'ai-automation', name: 'אוטומציות וסוכני AI' },
+  { slug: 'ai-no-code', name: 'בניית אפליקציות בלי קוד' },
+  { slug: 'ai-content', name: 'AI ליצירת תוכן ווידאו' },
+  { slug: 'data-analysis', name: 'דאטה' },
+  { slug: 'cyber', name: 'סייבר' },
+  { slug: 'digital-marketing', name: 'שיווק דיגיטלי' },
+  { slug: 'nails', name: 'ציפורניים ולק ג׳ל' },
   { slug: 'cooking', name: 'בישול' },
   { slug: 'photography', name: 'צילום' },
   { slug: 'psychometric', name: 'פסיכומטרי' },
@@ -33,6 +40,20 @@ describe('matchKeywords', () => {
 
   it('ignores niqqud and matches a category name after a prefix', () => {
     expect(matchKeywords('לְהִתְכּוֹנֵן לַפְּסִיכוֹמֶטְרִי', CATEGORIES).categories).toEqual(['psychometric']);
+  });
+
+  it('tells the four AI categories apart, and plain "AI" goes to the general one', () => {
+    expect(matchKeywords('קורס AI לעבודה', CATEGORIES).categories).toEqual(['ai-at-work']);
+    expect(matchKeywords('לבנות סוכנים עם n8n', CATEGORIES).categories).toEqual(['ai-automation']);
+    expect(matchKeywords('אפליקציה בלי קוד עם Lovable', CATEGORIES).categories).toEqual(['ai-no-code']);
+    expect(matchKeywords('יצירת וידאו עם AI', CATEGORIES).categories).toEqual(['ai-at-work', 'ai-content']);
+  });
+
+  it('finds the new career categories by name and by common words', () => {
+    expect(matchKeywords('להיות אנליסטית דאטה', CATEGORIES).categories).toEqual(['data-analysis']);
+    expect(matchKeywords('קורס סייבר בערבים', CATEGORIES).categories).toEqual(['cyber']);
+    expect(matchKeywords('קמפיינים בפייסבוק', CATEGORIES).categories).toEqual(['digital-marketing']);
+    expect(matchKeywords("קורס לק ג'ל", CATEGORIES).categories).toEqual(['nails']);
   });
 
   it('does not match inside longer words', () => {

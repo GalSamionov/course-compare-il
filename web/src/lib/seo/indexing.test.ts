@@ -7,6 +7,7 @@ const SITE = 'https://lamadti.example';
 const category = (slug: string, courseCount: number, parentSlug: string | null = null): CategoryEntry => ({
   slug,
   name: slug,
+  description: null,
   parentSlug,
   isLeaf: true,
   courseCount,

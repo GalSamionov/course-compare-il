@@ -3,6 +3,8 @@ import type { CourseFormat, CourseSummary, TimeSlot, Understanding } from './typ
 export interface KeywordCategory {
   slug: string;
   name: string;
+  /** התיאור הקצר של התחום. רק ה-AI משתמש בו, כדי להבחין בין תחומים קרובים. */
+  description?: string | null;
 }
 
 /**
@@ -12,7 +14,16 @@ export interface KeywordCategory {
 export const CATEGORY_SYNONYMS: Readonly<Record<string, readonly string[]>> = {
   technology: ['הייטק', 'מחשבים'],
   programming: ['פיתוח', 'מתכנת', 'מתכנתת', 'לתכנת', 'אתר', 'אתרים', 'קוד', 'full stack', 'פולסטאק', 'react', 'ריאקט', 'javascript', 'ג׳אווהסקריפט', 'web'],
-  ai: ['ai', 'בינה', 'צ׳אט', 'chatgpt', 'דאטה', 'נתונים', 'python', 'פייתון', 'למידת מכונה'],
+  // ai יצא משימוש ב-16.11.2026. "AI" סתם מוביל לתחום הכללי מבין הארבעה, והמילים המדויקות לשאר.
+  'ai-at-work': ['ai', 'בינה', 'בינה מלאכותית', 'צ׳אט', 'chatgpt', 'צ׳אט gpt', 'gpt', 'פרומפט', 'פרומפטים', 'prompt'],
+  'ai-automation': ['אוטומציה', 'אוטומציות', 'סוכן', 'סוכנים', 'סוכני ai', 'agents', 'n8n', 'make', 'zapier'],
+  'ai-no-code': ['בלי קוד', 'no code', 'nocode', 'no-code', 'lovable', 'base44', 'cursor', 'vibe coding', 'וייב קודינג'],
+  'ai-content': ['יצירת תוכן', 'וידאו', 'סרטונים', 'מוזיקה', 'midjourney', 'מידג׳רני', 'תמונות ai'],
+  'data-analysis': ['נתונים', 'ניתוח נתונים', 'אנליסט', 'אנליסטית', 'data', 'sql', 'power bi', 'python', 'פייתון', 'למידת מכונה'],
+  cyber: ['אבטחת מידע', 'האקינג', 'האקר', 'soc', 'cyber'],
+  'digital-marketing': ['שיווק', 'פרסום', 'קמפיינים', 'קמפיין', 'סושיאל', 'רשתות חברתיות', 'seo', 'ppc'],
+  beauty: ['יופי', 'טיפוח', 'קוסמטיקה', 'קוסמטיקאית'],
+  nails: ['ציפורניים', 'מניקור', 'פדיקור', 'לק', 'לק ג׳ל', 'בניית ציפורניים'],
   cooking: ['אפייה', 'אפיה', 'לאפות', 'לבשל', 'מטבח', 'שף', 'קונדיטוריה', 'עוגות', 'לחם', 'פסטה'],
   photography: ['מצלמה', 'צלם', 'צלמת', 'לצלם', 'פוטושופ', 'לייטרום'],
   psychometric: ['פסיכומטרית', 'מבחן כניסה'],
@@ -51,13 +62,34 @@ function hasTerm(padded: string, term: string): boolean {
   return normalized !== '' && PREFIXES.some((p) => padded.includes(` ${p}${normalized} `));
 }
 
+/**
+ * התחומים שהטקסט מזכיר. מונח ארוך קודם, והמילים שלו לא נספרות שוב למונח קצר יותר:
+ * "בלי קוד" הוא בניית אפליקציות בלי קוד, וה"קוד" שבתוכו לא מוסיף גם את תכנות.
+ */
+function matchCategories(padded: string, categories: readonly KeywordCategory[]): Set<string> {
+  const terms = categories
+    .flatMap((c) => [c.name, ...(CATEGORY_SYNONYMS[c.slug] ?? [])].map((term) => ({ slug: c.slug, term: normalize(term) })))
+    .filter(({ term }) => term !== '')
+    .sort((a, b) => b.term.length - a.term.length);
+  const found = new Set<string>();
+  let rest = padded;
+  for (const { slug, term } of terms) {
+    const hit = PREFIXES.map((p) => ` ${p}${term} `).find((t) => rest.includes(t));
+    if (!hit) continue;
+    found.add(slug);
+    rest = rest.replace(hit, ' ');
+  }
+  return found;
+}
+
 /** הגיבוי כשאין AI: תחומים לפי שם ומילים נרדפות, וזמן ופורמט לפי מילים קבועות. */
 export function matchKeywords(text: string, categories: readonly KeywordCategory[]): Understanding {
   const padded = ` ${normalize(text)} `;
   const found = (terms: readonly string[]) => terms.some((term) => hasTerm(padded, term));
+  const inText = matchCategories(padded, categories);
   return {
     categories: categories
-      .filter((c) => found([c.name, ...(CATEGORY_SYNONYMS[c.slug] ?? [])]))
+      .filter((c) => inText.has(c.slug))
       .map((c) => c.slug)
       .slice(0, 3),
     when: TIME_WORDS.filter(([, words]) => found(words)).map(([slot]) => slot),

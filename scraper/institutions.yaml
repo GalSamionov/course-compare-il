@@ -25,7 +25,7 @@ institutions:
     name: "האקדמית כנרת – היחידה ללימודי חוץ"
     kind: college
     website: "https://360.kinneret.ac.il/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://360.kinneret.ac.il/business/ai-expert/"
     max_pages: 60
@@ -144,7 +144,7 @@ institutions:
     name: "אוניברסיטת בן-גוריון – המרכז האוניברסיטאי ללימודי חוץ"
     kind: university
     website: "https://www.bgu.ac.il/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://in.bgu.ac.il/acadsec/external_studies/Pages/AI.aspx"
     max_pages: 60
@@ -198,7 +198,7 @@ institutions:
     name: "הקריה האקדמית אונו – לימודי המשך (CEU)"
     kind: college
     website: "https://ceu.ono.ac.il/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://ceu.ono.ac.il/%D7%99%D7%99%D7%A9%D7%95%D7%9E%D7%99-%D7%91%D7%99%D7%A0%D7%94-%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA-%D7%9C%D7%9E%D7%A0%D7%94%D7%9C%D7%99%D7%9D/"
     max_pages: 60
@@ -225,7 +225,7 @@ institutions:
     name: "הטכניון – בית הספר ללימודי המשך"
     kind: university
     website: "https://cont-edu.technion.ac.il/"
-    categories: [ai, data-analysis]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content, data-analysis]
     course_urls:
       - "https://cont-edu.technion.ac.il/programs/%D7%94%D7%9B%D7%A9%D7%A8%D7%95%D7%AA-%D7%9C%D7%AA%D7%97%D7%95%D7%9E%D7%99-ai/%D7%9E%D7%A4%D7%AA%D7%97%D7%99-ai/"
       - "https://cont-edu.technion.ac.il/programs/%D7%9E%D7%97%D7%A9%D7%91%D7%99%D7%9D-%D7%95%D7%94%D7%99%D7%99%D7%98%D7%A7/%D7%94%D7%9E%D7%A1%D7%9C%D7%95%D7%9C-%D7%94%D7%A9%D7%9C%D7%9D-%D7%9C%D7%94%D7%9B%D7%A9%D7%A8%D7%AA-%D7%97%D7%95%D7%A7%D7%A8%D7%99-%D7%A0%D7%AA%D7%95%D7%A0%D7%99%D7%9D-big-data-analyst/"
@@ -357,7 +357,7 @@ institutions:
     name: "האקריו (HackerU)"
     kind: college
     website: "https://www.hackeru.co.il/"
-    categories: [programming, ai, ux-ui, digital-marketing, data-analysis, cyber, qa]
+    categories: [programming, ai-at-work, ai-automation, ai-no-code, ai-content, ux-ui, digital-marketing, data-analysis, cyber, qa]
     course_urls:
       - "https://www.hackeru.co.il/digital-online-courses"
       - "https://www.hackeru.co.il/course/ai-x-developer"
@@ -481,7 +481,7 @@ institutions:
     name: "IPC"
     kind: college
     website: "https://ipc.co.il/"
-    categories: [ai, bookkeeping, digital-marketing, data-analysis, cyber, qa]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content, bookkeeping, digital-marketing, data-analysis, cyber, qa]
     course_urls:
       - "https://ipc.co.il/course/ai-applications-course/"
       - "https://ipc.co.il/course/bookkeeping-payroll-course/"
@@ -514,7 +514,7 @@ institutions:
     name: "ג'ון ברייס"
     kind: college
     website: "https://www.johnbryce.co.il/"
-    categories: [programming, ai, ux-ui, digital-marketing, data-analysis, cyber, qa]
+    categories: [programming, ai-at-work, ai-automation, ai-no-code, ai-content, ux-ui, digital-marketing, data-analysis, cyber, qa]
     course_urls:
       - "https://www.johnbryce.co.il/catalog/hi-tech-courses/python-full-stack-development-new/"
       - "https://www.johnbryce.co.il/ai-courses/"
@@ -561,7 +561,7 @@ institutions:
     name: "להב – פיתוח מנהלים, אוניברסיטת תל אביב"
     kind: university
     website: "https://www.lahav.ac.il/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://www.lahav.ac.il/program/abc/"
     max_pages: 60
@@ -570,7 +570,7 @@ institutions:
     name: "Let's AI"
     kind: school
     website: "https://letsai.co.il/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://letsai.co.il/letsaifullcourse/"
     max_pages: 60
@@ -634,7 +634,7 @@ institutions:
     name: "נאיה קולג'"
     kind: college
     website: "https://www.naya-college.co.il/"
-    categories: [ai, data-analysis]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content, data-analysis]
     course_urls:
       - "https://www.naya-college.co.il/genai-for-ds/"
       - "https://www.naya-college.co.il/data-analysis/"
@@ -680,7 +680,7 @@ institutions:
     name: "האוניברסיטה הפתוחה – לימודי חוץ"
     kind: university
     website: "https://www.openu.ac.il/"
-    categories: [ai, photography, bookkeeping, graphic-design]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content, photography, bookkeeping, graphic-design]
     course_urls:
       - "https://www.openu.ac.il/hasifa/ai_center.html"
       - "https://www.openu.ac.il/hasifa/photoshop.html"
@@ -831,7 +831,7 @@ institutions:
     name: "SVCollege"
     kind: college
     website: "https://svcollege.co.il/"
-    categories: [programming, ai, qa]
+    categories: [programming, ai-at-work, ai-automation, ai-no-code, ai-content, qa]
     course_urls:
       - "https://svcollege.co.il/courses/%D7%A4%D7%99%D7%AA%D7%95%D7%97-full-stack/"
       - "https://svcollege.co.il/courses/%D7%A7%D7%95%D7%A8%D7%A1-ai/"
@@ -887,7 +887,7 @@ institutions:
     name: "יניב ארד Online"
     kind: independent
     website: "https://yanivarad-online.com/"
-    categories: [ai]
+    categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://yanivarad-online.com/gpt-course/"
     max_pages: 60

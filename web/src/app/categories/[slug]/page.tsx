@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { CareerChangeLink } from '@/components/category/career-change-link';
 import { EmptyCategory } from '@/components/category/empty-category';
 import { TopByGraduates } from '@/components/category/top-by-graduates';
@@ -9,6 +9,7 @@ import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
 import { isTechCategory } from '@/lib/data/career-change';
 import { getCatalog } from '@/lib/data/catalog';
+import { movedCategoryHref } from '@/lib/search/query';
 import { EMPTY_QUERY } from '@/lib/search/types';
 import { hasCourses } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!category) return {};
   return {
     title: `${category.name}: כל הקורסים | ${SITE_NAME}`,
-    description: `קורסים ב${category.name}, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
+    description: `${category.description ? `${category.description} ` : ''}קורסים ב${category.name}, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
     alternates: { canonical: `/categories/${category.slug}` },
     // תחום בלי קורסים: לא במנועי חיפוש (ולא במפת האתר), אבל הקישורים ממנו לתחומים האחרים כן נסרקים.
     ...(hasCourses(category) ? {} : { robots: { index: false, follow: true } }),
@@ -49,9 +50,13 @@ const gradsText = (n: number) =>
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const catalog = await getCatalog();
+  // תחום שיצא משימוש (ai, מ-16.11.2026): קישור ישן עובר לתחומים שהחליפו אותו.
+  const replacements = catalog.moved[slug];
+  if (replacements) permanentRedirect(movedCategoryHref(replacements));
   const category = catalog.categories.find((c) => c.slug === slug);
   if (!category) notFound();
   const parent = catalog.categories.find((c) => c.slug === category.parentSlug);
+  const empty = category.courseCount === 0;
   // תחום בהייטק ("טכנולוגיה" וכל מה שמתחתיו) מקשר לעמוד ההסבה. תחום מסוג תחביב או מבחן לא, גם אם הוא שם.
   const parentOf = (s: string) => catalog.categories.find((c) => c.slug === s)?.parentSlug ?? null;
   const careerLink = isTechCategory(category.slug, parentOf) && catalog.courses.some(
@@ -86,16 +91,31 @@ export default async function CategoryPage({ params }: Props) {
       fixedWhat
       alwaysShowResults
       heading={category.name}
-      intro="כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4."
+      intro={
+        // התיאור של התחום בדיו, ואחריו איך משתמשים בעמוד. בתחום בלי קורסים אין עוד מה לצמצם.
+        <>
+          {category.description && <span className="text-ink">{category.description} </span>}
+          {empty ? 'עוד אין בו קורסים באתר.' : 'כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4.'}
+        </>
+      }
       headSideAlign="start"
       headSide={
         // במחשב העמודה גבוהה מהכותרת, ולכן היא מיושרת לראש ולא לתחתית. 32 פיקסלים מלמעלה:
         // השורה הראשונה בעט עומדת מול פירורי הלחם (mt-6 ויעד מגע של 44), ולא צמודה לקו של כותרת האתר.
         <div className="lg:pt-8">
-          <PenNote arrow className="text-base font-medium lg:text-lg">
-            בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
-          </PenNote>
-          <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
+          {empty ? (
+            // תחום בלי קורסים: בלי "המובילים לפי בוגרים", שאין בו עוד מה לדרג.
+            <PenNote arrow className="text-base font-medium lg:text-lg">
+              כשנוסיף קורס בתחום, הוא יופיע כאן עם ציון הבוגרים שלו.
+            </PenNote>
+          ) : (
+            <>
+              <PenNote arrow className="text-base font-medium lg:text-lg">
+                בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
+              </PenNote>
+              <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
+            </>
+          )}
           {careerLink && <CareerChangeLink className="mt-6 lg:mt-7" />}
         </div>
       }

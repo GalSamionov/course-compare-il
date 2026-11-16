@@ -13,12 +13,14 @@ insert into metrics (key, label, scale, course_types, in_score, sort_order) valu
 insert into method_changes (version, summary, reason) values
   ('2026-11-13.1', 'גרסה ראשונה של ציון הבוגרים', 'עלייה לאוויר');
 
+-- מאז 20261116040001_new_categories.sql המיגרציה כבר יוצרת את התחומים האלה, עם אותם מזהים. נשאר כאן בשביל הסדר.
 insert into categories (id, slug, name, parent_id, course_type) values
   ('cccccccc-0000-0000-0000-000000000001', 'technology', 'טכנולוגיה', null, 'career'),
   ('cccccccc-0000-0000-0000-000000000002', 'programming', 'תכנות', 'cccccccc-0000-0000-0000-000000000001', 'career'),
   ('cccccccc-0000-0000-0000-000000000003', 'ai', 'בינה מלאכותית', 'cccccccc-0000-0000-0000-000000000001', 'career'),
   ('cccccccc-0000-0000-0000-000000000004', 'cooking', 'בישול', null, 'hobby'),
-  ('cccccccc-0000-0000-0000-000000000005', 'psychometric', 'פסיכומטרי', null, 'exam');
+  ('cccccccc-0000-0000-0000-000000000005', 'psychometric', 'פסיכומטרי', null, 'exam')
+on conflict do nothing;
 
 insert into institutions (id, slug, name, website, kind) values
   ('dddddddd-0000-0000-0000-000000000001', 'sample-college', 'מכללה לדוגמה', 'https://example.com', 'college'),

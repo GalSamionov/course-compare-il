@@ -25,6 +25,6 @@ export async function POST(request: Request) {
   }
 
   const { categories } = await getCatalog();
-  const options = categories.filter((c) => c.courseCount > 0).map(({ slug, name }) => ({ slug, name }));
+  const options = categories.filter((c) => c.courseCount > 0).map(({ slug, name, description }) => ({ slug, name, description }));
   return Response.json(await understand(text.trim(), options));
 }

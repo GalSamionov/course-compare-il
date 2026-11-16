@@ -16,7 +16,7 @@ export function EmptyCategory({
   categories,
   before,
 }: {
-  category: Pick<CategoryEntry, 'slug' | 'name'>;
+  category: Pick<CategoryEntry, 'slug' | 'name' | 'description'>;
   categories: CategoryEntry[];
   /** פירורי הלחם, כמו בעמוד תחום עם קורסים. */
   before?: React.ReactNode;
@@ -30,6 +30,7 @@ export function EmptyCategory({
             {category.name}
           </h1>
           <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
+            {category.description && <span className="text-ink">{category.description} </span>}
             עוד אין בתחום קורס באתר.
           </p>
         </div>

@@ -52,7 +52,7 @@ export async function understandWithClaude(
     messages: [
       {
         role: 'user',
-        content: `Categories (slug: name):\n${categories.map((c) => `${c.slug}: ${c.name}`).join('\n')}\n\nVisitor text:\n<visitor_text>\n${safeText}\n</visitor_text>`,
+        content: `Categories (slug: name, and a short description when there is one):\n${categories.map((c) => `${c.slug}: ${c.name}${c.description ? ` (${c.description})` : ''}`).join('\n')}\n\nVisitor text:\n<visitor_text>\n${safeText}\n</visitor_text>`,
       },
     ],
   });

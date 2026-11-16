@@ -32,7 +32,7 @@ class InstitutionWork:
     id: str
     pages: dict[str, PageState]
     courses: dict[str, dict[str, Any]]
-    categories: tuple[tuple[str, str], ...]  # (slug, name)
+    categories: tuple[tuple[str, str], ...]  # (slug, השם והתיאור: db.active_categories)
     category_ids: dict[str, str]
 
     def course_for(self, url: str, page: PageState | None) -> str | None:

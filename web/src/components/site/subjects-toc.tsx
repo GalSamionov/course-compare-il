@@ -32,9 +32,10 @@ export function SubjectsToc({
   exclude?: string;
   className?: string;
 }) {
-  // רק תחומים בלי תחומי משנה, כדי שקורס לא ייספר פעמיים ברשימה.
+  // רק תחומים בלי תחומי משנה, כדי שקורס לא ייספר פעמיים ברשימה. גם תחום שעוד אין בו קורסים: הוא כבר מקום באתר,
+  // עם עמוד ותיאור, ובא אחרי התחומים שיש בהם קורסים.
   const rows = categories
-    .filter((c) => c.isLeaf && c.courseCount > 0 && c.slug !== exclude)
+    .filter((c) => c.isLeaf && c.slug !== exclude)
     .sort((a, b) => b.courseCount - a.courseCount || a.name.localeCompare(b.name, 'he'));
   if (rows.length === 0) return null;
   // התחום עם הכי הרבה בוגרים מאומתים. בתיקו, הראשון ברשימה. בלי בוגרים בכלל, אין עיגול.
@@ -66,22 +67,37 @@ export function SubjectsToc({
                 <span className="text-[16px] leading-snug font-bold group-hover:text-link-hover lg:text-[17px]">
                   <span className="pen-under">{c.name}</span>
                 </span>
-                <span className="mt-auto flex items-end justify-between gap-1.5 pt-2 font-sans leading-tight text-ink-soft lg:text-sm">
-                  {/* שתי שורות קבועות: קורסים, ומתחתם בוגרים. כך גם פתק צר בנייד לא שובר באמצע. */}
-                  <span className="flex flex-col gap-0.5">
-                    <span>
-                      {coursesText(c.courseCount)}
-                      <span className="sr-only">,</span>
-                    </span>
-                    <span>
-                      {c === busiest ? (
-                        <PenLoop className="font-bold text-ink">{gradsText(c.gradCount)}</PenLoop>
-                      ) : (
-                        gradsText(c.gradCount)
-                      )}
-                      <span className="sr-only"> מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}</span>
-                    </span>
+                {/* התיאור בדיו מודפסת, מתחת לשם. בנייד הפתק צר מדי לשלוש שורות של תיאור, והוא בעמוד התחום. */}
+                {c.description && (
+                  <span className="mt-1 hidden text-[13px] leading-snug text-ink-soft sm:block lg:text-sm">
+                    <span className="sr-only">. </span>
+                    {c.description}
                   </span>
+                )}
+                <span className="mt-auto flex items-end justify-between gap-1.5 pt-2 font-sans leading-tight text-ink-soft lg:text-sm">
+                  {c.courseCount === 0 ? (
+                    // תחום חדש בלי קורסים: שורה אחת במקום "0 קורסים, 0 בוגרים".
+                    <span>
+                      <span className="sr-only">, </span>
+                      עוד אין קורסים
+                    </span>
+                  ) : (
+                    // שתי שורות קבועות: קורסים, ומתחתם בוגרים. כך גם פתק צר בנייד לא שובר באמצע.
+                    <span className="flex flex-col gap-0.5">
+                      <span>
+                        {coursesText(c.courseCount)}
+                        <span className="sr-only">,</span>
+                      </span>
+                      <span>
+                        {c === busiest ? (
+                          <PenLoop className="font-bold text-ink">{gradsText(c.gradCount)}</PenLoop>
+                        ) : (
+                          gradsText(c.gradCount)
+                        )}
+                        <span className="sr-only"> מאומתים{c === busiest ? ', הכי הרבה בוגרים ברשימה' : ''}</span>
+                      </span>
+                    </span>
+                  )}
                 </span>
               </StickyNote>
             </Link>
