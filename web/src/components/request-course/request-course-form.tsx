@@ -64,6 +64,7 @@ export function RequestCourseForm({ checkEnabled = false }: { checkEnabled?: boo
     <RequestRound
       key={round}
       checkEnabled={checkEnabled && !quotaUsed}
+      focusLink={round > 0}
       onAnother={(afterQuota) => {
         if (afterQuota) setQuotaUsed(true);
         setRound((r) => r + 1);
@@ -98,9 +99,12 @@ function headingFor(state: RequestState, checkEnabled: boolean): { title: string
 
 function RequestRound({
   checkEnabled,
+  focusLink,
   onAnother,
 }: {
   checkEnabled: boolean;
+  /** אחרי "לבדוק קישור נוסף": הכפתור נעלם עם התוצאה, והפוקוס עובר לשדה הקישור במקום ליפול לראש העמוד. */
+  focusLink: boolean;
   onAnother: (afterQuota: boolean) => void;
 }) {
   const [state, dispatch, pending] = useActionState(submitCourseRequest, IDLE);
@@ -124,6 +128,18 @@ function RequestRound({
   useEffect(() => {
     if (done) heading.current?.focus();
   }, [done]);
+
+  useEffect(() => {
+    if (focusLink) document.getElementById(ids.url)?.focus();
+  }, [focusLink, ids.url]);
+
+  // כמו בכתיבת ביקורת: אחרי שגיאה מהשרת, הפוקוס עובר לשדה הראשון שיש בו בעיה, וקורא המסך קורא את ההודעה ממנו.
+  useEffect(() => {
+    if (state.status !== 'invalid') return;
+    const first = (['url', 'name', 'note'] as const).find((field) => state.errors[field]);
+    const fieldIds = { url: ids.url, name: ids.name, note: ids.note };
+    if (first) document.getElementById(fieldIds[first])?.focus();
+  }, [state, ids.url, ids.name, ids.note]);
 
   return (
     <>

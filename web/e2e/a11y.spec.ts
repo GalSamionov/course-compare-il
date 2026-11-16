@@ -108,4 +108,26 @@ test.describe('keyboard', () => {
     const inMain = await page.evaluate(() => !!document.activeElement?.closest('main'));
     expect(inMain).toBe(true);
   });
+
+  test('taking a course out of the comparison and back keeps the focus on the same course', async ({ page }) => {
+    await open(page, '/compare?c=full-stack-sample,baking-sample');
+    await page.getByRole('button', { name: 'להוציא את אפייה ביתית: לחמים ועוגות מההשוואה' }).focus();
+    await page.keyboard.press('Enter');
+    // הכפתור נעלם עם הקורס. הפוקוס לא נופל לראש העמוד, אלא עובר ל"להחזיר" של אותו קורס.
+    const back = page.getByRole('button', { name: 'להחזיר את אפייה ביתית: לחמים ועוגות להשוואה' });
+    await expect(back).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'להוציא את אפייה ביתית: לחמים ועוגות מההשוואה' })).toBeFocused();
+  });
+
+  test('an error from the server moves the focus to the field, with the message attached', async ({ page }) => {
+    await open(page, '/request-course');
+    const link = page.getByLabel('הקישור');
+    // הדפדפן מקבל ftp כקישור, והשרת לא: כך מגיעים לשגיאה של השרת. שום דבר לא נשמר.
+    await link.fill('ftp://example.com/course');
+    await link.press('Enter');
+    await expect(link).toHaveAttribute('aria-invalid', 'true');
+    await expect(link).toBeFocused();
+    await expect(link).toHaveAccessibleDescription(/זה לא נראה כמו קישור לדף/);
+  });
 });

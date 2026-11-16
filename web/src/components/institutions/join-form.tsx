@@ -59,6 +59,14 @@ function JoinFormRound({ onAnother }: { onAnother: () => void }) {
     if (sent) heading.current?.focus();
   }, [sent]);
 
+  // אחרי שגיאה מהשרת, הפוקוס עובר לשדה הראשון שיש בו בעיה, וקורא המסך קורא את ההודעה ממנו.
+  useEffect(() => {
+    if (state.status !== 'invalid') return;
+    const first = (['institutionName', 'courseUrl', 'contactEmail'] as const).find((field) => state.errors[field]);
+    const fieldIds = { institutionName: ids.institutionName, courseUrl: ids.courseUrl, contactEmail: ids.contactEmail };
+    if (first) document.getElementById(fieldIds[first])?.focus();
+  }, [state, ids.institutionName, ids.courseUrl, ids.contactEmail]);
+
   return (
     <>
       <h1
