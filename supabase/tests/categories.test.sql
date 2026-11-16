@@ -155,10 +155,11 @@ select is(
   'the sample full stack course is still in programming'
 );
 
-select is(
-  (select c.slug from courses x join categories c on c.id = x.category_id where x.slug = 'ai-tools-sample'),
-  'ai',
-  'the sample AI course stays in ai until it is moved (the fix file is for the cloud only)'
+-- ב-ai אחרי seed.sql, וב-ai-at-work אחרי קובץ התיקון (גם הוא נבדק על המסד בפיי).
+select ok(
+  (select c.slug from courses x join categories c on c.id = x.category_id where x.slug = 'ai-tools-sample')
+    in ('ai', 'ai-at-work'),
+  'the sample AI course is in ai, or in ai-at-work after the fix file'
 );
 
 select is(
