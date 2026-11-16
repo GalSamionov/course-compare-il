@@ -71,17 +71,18 @@ export function NotebookFromUrl(props: NotebookProps) {
   const params = useSearchParams();
   const pathname = usePathname();
   const { base } = props;
-  const query = useMemo(() => parseQuery(params, base), [params, base]);
+  const { moved } = props.catalog;
+  const query = useMemo(() => parseQuery(params, base, moved), [params, base, moved]);
   const update = useCallback<Update>(
     (change) => {
       // הכתובת היא מקור האמת. קוראים אותה מחדש בכל שינוי, כדי שתשובה שמגיעה אחרי המתנה (ה-AI)
       // לא תדרוס שינוי שהמבקר עשה בינתיים.
-      const current = parseQuery(new URLSearchParams(window.location.search), base);
+      const current = parseQuery(new URLSearchParams(window.location.search), base, moved);
       const search = serializeQuery(change(current), base);
       // replaceState משתלב בנתב של Next: useSearchParams מתעדכן בלי בקשה לשרת.
       window.history.replaceState(null, '', search ? `${pathname}?${search}` : pathname);
     },
-    [base, pathname],
+    [base, pathname, moved],
   );
   return <Notebook {...props} query={query} update={update} />;
 }
@@ -262,7 +263,7 @@ export function Notebook({
   function askIfQuestion(text: string) {
     if (!advisor || fixedWhat || !isQuestion(text)) return;
     // התשובות כמו שהן עכשיו בכתובת, אחרי מה שהבנו מהשורה. הרשימה עוד לא צוירה מחדש.
-    const now = parseQuery(new URLSearchParams(window.location.search), base);
+    const now = parseQuery(new URLSearchParams(window.location.search), base, catalog.moved);
     // בזמן שחיכינו להבנה, המבקר כתב בשורה משהו אחר.
     if (now.q !== text) return;
     if (!alwaysShowResults && activeLines(now).length === 0) return;
@@ -302,7 +303,7 @@ export function Notebook({
 
   useEffect(() => {
     if (!pendingScroll.current) return;
-    const fromUrl = serializeQuery(parseQuery(new URLSearchParams(window.location.search), base), base);
+    const fromUrl = serializeQuery(parseQuery(new URLSearchParams(window.location.search), base, catalog.moved), base);
     // כשהיועץ עונה על השאלה מהשורה הראשונה, התשובה שלו מעל הרשימה, ולשם גוללים.
     const target = document.getElementById(FIRST_ANSWER_ID) ?? document.getElementById('results');
     // עוד לא: רינדור נוסף (כשהכתובת מגיעה ל-useSearchParams) יריץ את זה שוב.
@@ -312,7 +313,7 @@ export function Notebook({
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     });
-  }, [query, base, scrollRequest]);
+  }, [query, base, scrollRequest, catalog.moved]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

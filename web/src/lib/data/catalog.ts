@@ -36,7 +36,7 @@ type PerMetric = Partial<Record<MetricKey, { mean: number; n: number }>>;
 export async function loadCatalog(): Promise<Catalog> {
   const db = createPublicClient();
   const [categoriesRes, coursesRes, reviewsRes] = await Promise.all([
-    db.from('categories').select('id, slug, name, parent_id, course_type').order('name'),
+    db.from('categories').select('id, slug, name, description, parent_id, course_type, replaced_by').order('name'),
     // הציון האחרון של כל קורס מגיע באותה שאילתה: סינון, מיון והגבלה על הטבלה המקושרת.
     // קורס שהוסר (removed) לא מופיע ברשימות. העמוד שלו נשאר.
     db
@@ -102,17 +102,25 @@ export async function loadCatalog(): Promise<Catalog> {
   });
 
   const parentIds = new Set(categoryRows.flatMap((c) => (c.parent_id ? [c.parent_id] : [])));
-  const categories: CategoryEntry[] = categoryRows.map((c) => {
-    const inside = courses.filter((course) => course.categorySlug === c.slug || course.categoryParentSlug === c.slug);
-    return {
-      slug: c.slug,
-      name: c.name,
-      parentSlug: c.parent_id ? (byId.get(c.parent_id)?.slug ?? null) : null,
-      isLeaf: !parentIds.has(c.id),
-      courseCount: inside.length,
-      gradCount: inside.reduce((sum, course) => sum + course.verifiedCount, 0),
-    };
-  });
+  // תחום שיצא משימוש (replaced_by, למשל ai) לא נכנס לרשימות, ולא למפת האתר. הקורסים שעוד בו נשארים בקטלוג,
+  // תחת תחום האב שלו, וקישורים אליו עוברים לתחומים שהחליפו אותו (moved).
+  const moved: Record<string, string[]> = Object.fromEntries(
+    categoryRows.filter((c) => c.replaced_by.length > 0).map((c) => [c.slug, c.replaced_by]),
+  );
+  const categories: CategoryEntry[] = categoryRows
+    .filter((c) => c.replaced_by.length === 0)
+    .map((c) => {
+      const inside = courses.filter((course) => course.categorySlug === c.slug || course.categoryParentSlug === c.slug);
+      return {
+        slug: c.slug,
+        name: c.name,
+        description: c.description,
+        parentSlug: c.parent_id ? (byId.get(c.parent_id)?.slug ?? null) : null,
+        isLeaf: !parentIds.has(c.id),
+        courseCount: inside.length,
+        gradCount: inside.reduce((sum, course) => sum + course.verifiedCount, 0),
+      };
+    });
 
-  return { categories, courses };
+  return { categories, courses, moved };
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { CareerChangeLink } from '@/components/category/career-change-link';
 import { TopByGraduates } from '@/components/category/top-by-graduates';
 import { PenNote } from '@/components/course/marks';
@@ -8,6 +8,7 @@ import { NotebookPage } from '@/components/notebook/notebook-page';
 import { SubjectsToc } from '@/components/site/subjects-toc';
 import { isTechCategory } from '@/lib/data/career-change';
 import { getCatalog } from '@/lib/data/catalog';
+import { movedCategoryHref } from '@/lib/search/query';
 import { EMPTY_QUERY } from '@/lib/search/types';
 import { SITE_NAME } from '@/lib/site';
 
@@ -44,6 +45,9 @@ const gradsText = (n: number) =>
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
   const catalog = await getCatalog();
+  // תחום שיצא משימוש (ai, מ-16.11.2026): קישור ישן עובר לתחומים שהחליפו אותו.
+  const replacements = catalog.moved[slug];
+  if (replacements) permanentRedirect(movedCategoryHref(replacements));
   const category = catalog.categories.find((c) => c.slug === slug);
   if (!category) notFound();
   const parent = catalog.categories.find((c) => c.slug === category.parentSlug);

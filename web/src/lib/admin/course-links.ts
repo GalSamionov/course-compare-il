@@ -69,7 +69,8 @@ export async function loadCourseLinks(db: AdminDb): Promise<{ items: CourseLinkI
   const [queueRes, institutionsRes, categoriesRes] = await Promise.all([
     db.rpc('course_link_queue', { p_limit: COURSE_LINKS_PAGE }),
     db.from('institutions').select('id, name').eq('status', 'active').order('name'),
-    db.from('categories').select('id, name, course_type').order('name'),
+    // רק תחומים פעילים: תחום שיצא משימוש (replaced_by, למשל ai) לא מקבל קורסים חדשים.
+    db.from('categories').select('id, name, course_type').filter('replaced_by', 'eq', '{}').order('name'),
   ]);
   if (queueRes.error) throw new Error(`course links: ${queueRes.error.message}`);
   if (institutionsRes.error) throw new Error(`institutions: ${institutionsRes.error.message}`);

@@ -76,6 +76,8 @@ export interface CourseSummary {
 export interface CategoryEntry {
   slug: string;
   name: string;
+  /** תיאור קצר, מתחת לשם (categories.description). אולי חסר בתחום שנוסף אחר כך. */
+  description: string | null;
   parentSlug: string | null;
   /** אין תחום אחר שהוא האב שלו. */
   isLeaf: boolean;
@@ -86,8 +88,11 @@ export interface CategoryEntry {
 }
 
 export interface Catalog {
+  /** התחומים הפעילים. תחום שיצא משימוש לא כאן, אלא ב-moved. */
   categories: CategoryEntry[];
   courses: CourseSummary[];
+  /** תחום שיצא משימוש (categories.replaced_by): slug -> התחומים שהחליפו אותו. כך קישורים ישנים ממשיכים לעבוד. */
+  moved: Readonly<Record<string, readonly string[]>>;
 }
 
 /** מה שהבנו מהמילים בשורה 1. אף פעם לא טקסט חופשי: רק תחומים וערכים שקיימים. */

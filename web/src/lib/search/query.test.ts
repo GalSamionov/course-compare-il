@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseQuery, serializeQuery, whenHowWords } from './query';
+import { movedCategoryHref, parseQuery, resolveMoved, serializeQuery, whenHowWords } from './query';
 import { EMPTY_QUERY, type SearchQuery } from './types';
 
 describe('parseQuery and serializeQuery', () => {
@@ -26,6 +26,33 @@ describe('parseQuery and serializeQuery', () => {
     expect(parseQuery(new URLSearchParams('when=weekend'), base)).toEqual({ ...base, when: ['weekend'] });
     expect(serializeQuery({ ...base, when: ['weekend'] }, base)).toBe('when=weekend');
     expect(serializeQuery(base, base)).toBe('');
+  });
+});
+
+describe('retired categories (Catalog.moved)', () => {
+  const AI = ['ai-at-work', 'ai-automation', 'ai-no-code', 'ai-content'];
+  const moved = { ai: AI };
+
+  it('an old link with cat=ai filters by the four AI categories, without duplicates', () => {
+    expect(parseQuery(new URLSearchParams('cat=ai'), EMPTY_QUERY, moved).cats).toEqual(AI);
+    expect(parseQuery(new URLSearchParams('cat=ai-content,ai,cooking'), EMPTY_QUERY, moved).cats).toEqual([
+      'ai-content',
+      'ai-at-work',
+      'ai-automation',
+      'ai-no-code',
+      'cooking',
+    ]);
+  });
+
+  it('leaves the categories alone when nothing moved', () => {
+    expect(resolveMoved(['ai', 'cooking'], {})).toEqual(['ai', 'cooking']);
+  });
+
+  it('sends the old category page to the replacement, or to all the courses in the replacements', () => {
+    expect(movedCategoryHref(['data-analysis'])).toBe('/categories/data-analysis');
+    expect(movedCategoryHref(AI)).toBe('/courses?cat=ai-at-work%2Cai-automation%2Cai-no-code%2Cai-content');
+    // הכתובת נקראת בחזרה לאותם תחומים.
+    expect(parseQuery(new URLSearchParams(movedCategoryHref(AI).split('?')[1])).cats).toEqual(AI);
   });
 });
 
