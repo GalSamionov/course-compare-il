@@ -6,6 +6,7 @@ import { ReviewFlow } from '@/components/review/review-flow';
 import { Sheet } from '@/components/site/sheet';
 import { getCourseSlugs } from '@/lib/data/course-page';
 import { getReviewForm } from '@/lib/reviews/review-form';
+import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
 
 /**
@@ -25,7 +26,8 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const form = await getReviewForm(slug);
-  return { title: form ? `ביקורת על ${form.title} | ${SITE_NAME}` : `כתיבת ביקורת | ${SITE_NAME}` };
+  // טופס, עמוד לכל קורס: לא במנועי חיפוש. עמוד הקורס עצמו כן.
+  return { title: form ? `ביקורת על ${form.title} | ${SITE_NAME}` : `כתיבת ביקורת | ${SITE_NAME}`, robots: NOINDEX };
 }
 
 export default async function CourseReviewPage({ params }: Props) {

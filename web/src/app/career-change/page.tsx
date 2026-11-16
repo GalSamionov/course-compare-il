@@ -20,7 +20,7 @@ import {
   careerChangeShareMessage,
 } from '@/lib/og/share-text';
 import { MIN_REVIEWS } from '@/lib/score/constants';
-import { SAMPLE_DATA, SITE_NAME, SITE_URL } from '@/lib/site';
+import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { cn } from '@/lib/utils';
 
 /** העמוד כולו סטטי: הקורסים מהמטמון של הקטלוג, והמדריכים מהדיסק בזמן הבנייה. */
@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${CAREER_CHANGE_TITLE} | ${SITE_NAME}`,
     description: careerChangeDescription(page),
+    alternates: { canonical: '/career-change' },
     openGraph: { type: 'website', locale: 'he_IL', siteName: SITE_NAME, url: '/career-change' },
   };
 }
@@ -203,11 +204,6 @@ export default async function CareerChangePage() {
                 שעות. קודם קורסים עם ציון, מהגבוה לנמוך, ואחריהם מי שהכי קרוב לציון. ציון מוצג רק מ-{MIN_REVIEWS} ביקורות
                 מאומתות.
               </p>
-              {SAMPLE_DATA && page.courses.length > 0 && (
-                <PenNote arrow className="mt-1.5">
-                  עד ההשקה, הקורסים והמספרים כאן לדוגמה.
-                </PenNote>
-              )}
               {page.courses.length === 0 ? (
                 <>
                   <p className="mt-4 max-w-[60ch] text-base leading-relaxed text-pretty">

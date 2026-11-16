@@ -107,4 +107,14 @@ describe('closestToScore', () => {
     ];
     expect(closestToScore(courses, 3).map((c) => c.slug)).toEqual(['needs-1', 'a-needs-2', 'b-needs-2']);
   });
+
+  it('leaves out courses that no counted review has started, so a launch with no reviews lists nothing', () => {
+    const courses = [
+      course({ slug: 'a-none-yet', score: { status: 'not_enough_reviews', reviewsNeeded: 5 } }),
+      course({ slug: 'b-old-reviews-only', score: { status: 'not_enough_reviews', reviewsNeeded: 5 }, verifiedCount: 2 }),
+      course({ slug: 'needs-4', score: { status: 'not_enough_reviews', reviewsNeeded: 4 }, verifiedCount: 1 }),
+    ];
+    expect(closestToScore(courses, 3).map((c) => c.slug)).toEqual(['needs-4']);
+    expect(closestToScore(courses.slice(0, 2), 3)).toEqual([]);
+  });
 });

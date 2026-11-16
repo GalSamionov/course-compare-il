@@ -5,13 +5,14 @@ import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `מי משלם לנו | ${SITE_NAME}`,
+  alternates: { canonical: '/who-pays-us' },
   description: 'כל מקור הכנסה של האתר, והכללים שמונעים ממוכר קורסים לשלם על תוצאה.',
 };
 
 export default function WhoPaysUsPage() {
   return (
     <TextPage title="מי משלם לנו">
-      <p>היום אף אחד. האתר בבנייה, וכל הנתונים בו לדוגמה.</p>
+      <p>היום אף אחד.</p>
 
       <h2>מאיפה יבוא הכסף</h2>
       <p>

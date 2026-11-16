@@ -1,3 +1,4 @@
+import { MIN_REVIEWS } from '@/lib/score/constants';
 import { activeLines } from './query';
 import { FORMAT_LABEL, TIME_SLOT_LABEL, type CourseSummary, type SearchQuery, type TimeSlot } from './types';
 import { courseTypeForWhy } from './why';
@@ -94,11 +95,15 @@ export function matchCourses(courses: readonly CourseSummary[], query: SearchQue
   );
 }
 
-/** "סיימתם קורס?": הקורסים שהכי קרובים לציון. קודם הכי מעט ביקורות חסרות, אחר כך יותר בוגרים, ואז slug. */
+/**
+ * "סיימתם קורס?": הקורסים שהכי קרובים לציון. קודם הכי מעט ביקורות חסרות, אחר כך יותר בוגרים, ואז slug.
+ * רק קורס שכבר יש לו ביקורת שנספרת: כשלאף קורס עוד אין, כולם רחוקים באותה מידה, ושלושה מהם לפי האלף-בית
+ * לא היו "הכי קרובים" (כך ביום העלייה לאוויר). אז הרשימה ריקה, ו-GraduatesCall מזמין לבחור קורס.
+ */
 export function closestToScore(courses: readonly CourseSummary[], limit: number): CourseSummary[] {
   const missing = (c: CourseSummary) => (c.score.status === 'not_enough_reviews' ? c.score.reviewsNeeded : 0);
   return courses
-    .filter((c) => missing(c) > 0)
+    .filter((c) => missing(c) > 0 && missing(c) < MIN_REVIEWS)
     .sort(
       (a, b) =>
         missing(a) - missing(b) ||

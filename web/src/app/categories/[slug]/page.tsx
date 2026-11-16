@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CareerChangeLink } from '@/components/category/career-change-link';
+import { EmptyCategory } from '@/components/category/empty-category';
 import { TopByGraduates } from '@/components/category/top-by-graduates';
 import { PenNote } from '@/components/course/marks';
 import { NotebookPage } from '@/components/notebook/notebook-page';
@@ -9,6 +10,7 @@ import { SubjectsToc } from '@/components/site/subjects-toc';
 import { isTechCategory } from '@/lib/data/career-change';
 import { getCatalog } from '@/lib/data/catalog';
 import { EMPTY_QUERY } from '@/lib/search/types';
+import { hasCourses } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
 
 /**
@@ -31,6 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${category.name}: כל הקורסים | ${SITE_NAME}`,
     description: `קורסים ב${category.name}, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
+    alternates: { canonical: `/categories/${category.slug}` },
+    // תחום בלי קורסים: לא במנועי חיפוש (ולא במפת האתר), אבל הקישורים ממנו לתחומים האחרים כן נסרקים.
+    ...(hasCourses(category) ? {} : { robots: { index: false, follow: true } }),
   };
 }
 
@@ -52,6 +57,27 @@ export default async function CategoryPage({ params }: Props) {
   const careerLink = isTechCategory(category.slug, parentOf) && catalog.courses.some(
     (c) => (c.categorySlug === category.slug || c.categoryParentSlug === category.slug) && c.courseType === 'career',
   );
+
+  const crumbs = (
+    <nav aria-label="מיקום" className="mt-2 font-sans text-[13px] text-ink-soft lg:mt-6 lg:text-sm">
+      <Link href="/courses" className={crumb}>
+        קורסים
+      </Link>
+      {parent && (
+        <>
+          {' › '}
+          <Link href={`/categories/${parent.slug}`} className={crumb}>
+            {parent.name}
+          </Link>
+        </>
+      )}
+    </nav>
+  );
+
+  // אין קורס בתחום: בלי המחברת, שהייתה מסננת רשימה ריקה. דף ריק שאומר למה, ומה אפשר לעשות.
+  if (!hasCourses(category)) {
+    return <EmptyCategory category={category} categories={catalog.categories} before={crumbs} />;
+  }
 
   return (
     <NotebookPage
@@ -81,21 +107,7 @@ export default async function CategoryPage({ params }: Props) {
           className="lg:max-w-[620px]"
         />
       }
-      before={
-        <nav aria-label="מיקום" className="mt-2 font-sans text-[13px] text-ink-soft lg:mt-6 lg:text-sm">
-          <Link href="/courses" className={crumb}>
-            קורסים
-          </Link>
-          {parent && (
-            <>
-              {' › '}
-              <Link href={`/categories/${parent.slug}`} className={crumb}>
-                {parent.name}
-              </Link>
-            </>
-          )}
-        </nav>
-      }
+      before={crumbs}
     />
   );
 }

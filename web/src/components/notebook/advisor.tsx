@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
-import { Claim, Mark, PenNote } from '@/components/course/marks';
+import { Claim, Mark } from '@/components/course/marks';
 import { PenArrow, PenArrowDown } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { loginHref, useAccount } from '@/lib/account/store';
@@ -304,9 +304,6 @@ function AnswerSheet({
         <p className="max-w-[70ch] font-sans text-[13px] leading-normal text-pretty text-ink-soft lg:text-sm">
           התשובה נכתבה רק ממה שיש באתר על הקורסים ברשימה, בלי מידע מבחוץ. היא לא ממליצה איפה להירשם.
         </p>
-        <PenNote arrow className="mt-1.5 font-medium">
-          נתוני דוגמה: הקורסים, המספרים והביקורות כאן לדוגמה.
-        </PenNote>
       </div>
     </section>
   );

@@ -5,6 +5,7 @@ import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `הוספת קורס | ${SITE_NAME}`,
+  alternates: { canonical: '/institutions/join' },
   description: 'מוסד או מרצה? שולחים קישור לדף הקורס. אנחנו בודקים את הפרטים מול הדף לפני שהקורס עולה, ואף אחד לא משלם על מקום.',
 };
 
