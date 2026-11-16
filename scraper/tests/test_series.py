@@ -74,7 +74,7 @@ def work(courses: dict | None = None) -> InstitutionWork:
 
 
 def test_series_becomes_one_draft_with_sessions_and_nearest_cohort():
-    plans = decide_new_pages(series_pages(), work(), TODAY, "test")
+    plans, _ = decide_new_pages(series_pages(), work(), TODAY, "test")
     drafts = [p for p in plans if p.new_course]
     assert len(drafts) == 1
     draft = drafts[0].new_course
@@ -96,7 +96,7 @@ def test_morning_and_evening_tracks_are_one_course():
         page("https://a.example/pasta-am", "קורס פסטה טרייה - בוקר", time_slots=(["morning"], "בבקרים")),
         page("https://a.example/pasta-pm", "קורס פסטה טרייה - ערב", time_slots=(["evening"], "בערבים")),
     ]
-    [draft] = [p for p in decide_new_pages(pages, work(), TODAY, "test") if p.new_course]
+    [draft] = [p for p in decide_new_pages(pages, work(), TODAY, "test")[0] if p.new_course]
     assert draft.new_course["title"] == "קורס פסטה טרייה"
     assert draft.new_course["fields"]["time_slots"] == ["evening", "morning"]
 
@@ -106,7 +106,8 @@ def test_past_event_and_existing_course():
         page("https://a.example/tasting", "ערב טעימות - 1 מאי 2024"),
         page("https://a.example/c9-1", f"{BASE} | בצק פריך (מפגש 1 מתוך 3) מחזור 9", "2027-04-06"),
     ]
-    plans = decide_new_pages(pages, work({"course-1": {"title": BASE, "status": "active"}}), TODAY, "test")
+    plans, joined = decide_new_pages(pages, work({"course-1": {"title": BASE, "status": "active"}}), TODAY, "test")
+    assert list(joined) == ["course-1"]
     assert [p.outcome for p in plans] == ["not_course", "not_course"]
     assert not any(p.new_course or p.queue for p in plans)
     assert plans[0].snapshot["extracted"]["series"]["past_event"] is True
