@@ -4,6 +4,7 @@ import { CONTACT_EMAIL, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `הצהרת נגישות | ${SITE_NAME}`,
+  alternates: { canonical: '/accessibility' },
   description: 'מה עשינו כדי שהאתר יהיה נגיש, איך בדקנו, מה עוד לא נגיש, ואיך פונים לרכז הנגישות.',
 };
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default function AccessibilityPage() {
   return (
     <TextPage title="הצהרת נגישות">
-      <p>האתר עוד לא עלה לציבור, ומציג נתוני דוגמה. ההצהרה מתארת את מה שבדקנו עד היום.</p>
+      <p>ההצהרה מתארת את מה שבדקנו עד היום.</p>
 
       <h2 id="commitment">המחויבות שלנו</h2>
       <p>

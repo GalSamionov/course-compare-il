@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { SaveButton } from '@/components/account/save-button';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
-import { Soon } from '@/components/site/soon';
 import { formatIls, missingReviewsText, verifiedGraduatesText } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
@@ -227,14 +226,13 @@ export function Results({
             </div>
           </>
         )}
-        {/* למי שלא מצא (מסמך העיצוב, 3א.6). הבקשה עוד לא נבנתה, וההערה בעט אומרת את זה לפני הלחיצה. */}
+        {/* למי שלא מצא (מסמך העיצוב, 3א.6): הבקשה ב-/request-course פתוחה מסבב 5. */}
         <p className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-semibold">
           <Link
             href="/request-course"
-            className="inline-flex min-h-11 flex-wrap items-center gap-x-2.5 hover:text-link-hover"
+            className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
           >
-            <span className="underline underline-offset-[3px]">לא מצאתם? בקשו שנבדוק קורס</span>
-            <Soon />
+            לא מצאתם? בקשו שנבדוק קורס
           </Link>
         </p>
       </section>

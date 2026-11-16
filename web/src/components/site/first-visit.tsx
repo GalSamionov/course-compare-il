@@ -90,7 +90,7 @@ export function FirstVisit() {
             if (event.key === 'Escape') close();
           }}
           className={cn(
-            // במחשב בפינה הימנית: בצד שמאל של עמוד הקורס עומדים הציון והכפתורים, ובדף הבית הסיכום לדוגמה.
+            // במחשב בפינה הימנית: בצד שמאל של עמוד הקורס עומדים הציון והכפתורים, ובדף הבית הסיכום של קורס.
             'fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 lg:inset-x-auto lg:start-7 lg:bottom-7 lg:w-[380px]',
             'animate-in fade-in slide-in-from-bottom-3 duration-300 ease-out motion-reduce:animate-none',
           )}
@@ -172,7 +172,7 @@ function StepOne() {
       </p>
       <p className="mt-2 font-pen text-sm leading-snug font-medium text-pen">
         <PenArrow />
-        כאן הכול נתוני דוגמה, עד ההשקה.
+        פרטי הקורסים לקוחים מהאתרים של המוסדות.
       </p>
     </>
   );

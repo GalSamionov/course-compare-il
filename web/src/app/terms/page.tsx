@@ -4,14 +4,13 @@ import { CONTACT_EMAIL, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `תנאי שימוש (טיוטה) | ${SITE_NAME}`,
+  alternates: { canonical: '/terms' },
   description: 'מה האתר אומר ומה לא, וכללי השימוש. טיוטה, לפני בדיקה של עורך דין.',
 };
 
 export default function TermsPage() {
   return (
     <TextPage title="תנאי שימוש" draft>
-      <p>האתר בבנייה. כל הקורסים, המוסדות, הציונים והביקורות שמופיעים בו הם לדוגמה, ולא מתארים קורסים אמיתיים.</p>
-
       <h2>מה האתר אומר, ומה לא</h2>
       <ul>
         <li>האתר לא ממליץ להירשם לקורס, ולא מקבל כסף ממי שמוכר קורסים.</li>
