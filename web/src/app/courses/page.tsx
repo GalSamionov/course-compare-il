@@ -17,6 +17,7 @@ function scoredText(n: number): string {
 
 export const metadata: Metadata = {
   title: `כל הקורסים | ${SITE_NAME}`,
+  alternates: { canonical: '/courses' },
   description: 'כל הקורסים באתר, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.',
 };
 

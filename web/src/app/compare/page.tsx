@@ -13,6 +13,7 @@ export const ensureStatic = 'navigation';
 
 export const metadata: Metadata = {
   title: `השוואה | ${SITE_NAME}`,
+  alternates: { canonical: '/compare' },
   description: 'עד שלושה קורסים זה לצד זה, באותו סימון מקור כמו בעמוד הקורס. אף מוכר לא משלם לנו.',
 };
 

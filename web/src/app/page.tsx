@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { HomeHero } from '@/components/home/home-hero';
 import { NotebookPage } from '@/components/notebook/notebook-page';
 import { GraduatesCall } from '@/components/site/graduates-call';
@@ -8,6 +9,9 @@ import { getCatalog } from '@/lib/data/catalog';
 import { getCoursePage } from '@/lib/data/course-page';
 import { compareCourses } from '@/lib/search/match';
 import { EMPTY_QUERY } from '@/lib/search/types';
+
+/** הכותרת והתיאור מ-layout.tsx. הכתובת הקנונית בלי התשובות שבכתובת (?cat=...), שמשתנות לכל מבקר. */
+export const metadata: Metadata = { alternates: { canonical: '/' } };
 
 /** הדף כולו סטטי. התשובות מהכתובת נקראות בדפדפן, ולכן הדף לא נבנה מחדש לכל בקשה. */
 export const ensureStatic = 'navigation';

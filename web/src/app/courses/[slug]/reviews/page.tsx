@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ComingSoon } from '@/components/site/coming-soon';
 import { getCourseSlugs } from '@/lib/data/course-page';
+import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
 
 /**
@@ -14,7 +15,8 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export const metadata: Metadata = { title: `כל הביקורות | ${SITE_NAME}` };
+/** העמוד עוד לא נבנה (ComingSoon): לא במנועי חיפוש עד שיהיה בו תוכן. */
+export const metadata: Metadata = { title: `כל הביקורות | ${SITE_NAME}`, robots: NOINDEX };
 
 export default function CourseReviewsPage() {
   return <ComingSoon title="כל הביקורות" line="כל הביקורות המאומתות על הקורס, מהחדשה לישנה." />;

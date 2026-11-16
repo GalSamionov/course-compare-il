@@ -10,6 +10,7 @@ export const ensureStatic = 'navigation';
 
 export const metadata: Metadata = {
   title: `מדריכים לפני שמשלמים על קורס | ${SITE_NAME}`,
+  alternates: { canonical: '/guides' },
   description:
     'חמישה מדריכים לפני שמשלמים על קורס: סילבוס, שאלות למוסד, תעודות מוכרות, מימון, ודגלים אדומים במודעות. כל עובדה עם המקור שלה.',
   openGraph: { type: 'website', locale: 'he_IL', siteName: SITE_NAME, url: '/guides' },

@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { LinkCourseReview } from '@/components/review/link-course-review';
 import { Sheet } from '@/components/site/sheet';
 import { getReviewMetrics } from '@/lib/reviews/review-form';
+import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
 
 /** סטטי, כמו /review: הקורס, ההתחברות והטיוטה נטענים בדפדפן (LinkCourseReview). */
@@ -11,7 +12,7 @@ export const ensureStatic = 'navigation';
 export const metadata: Metadata = {
   title: `ביקורת על קורס חדש | ${SITE_NAME}`,
   // עמוד של משתמש אחד, על קורס שעוד לא באתר.
-  robots: { index: false, follow: false },
+  robots: NOINDEX,
 };
 
 /** כתיבת ביקורת על קורס שהבוגר הוסיף מקישור (/review/new?course=<id>). הקורס לא באתר עד שנבדוק אותו. */

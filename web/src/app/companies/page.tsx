@@ -8,6 +8,7 @@ import { SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `לחברות | ${SITE_NAME}`,
+  alternates: { canonical: '/companies' },
   description:
     'עוזרים לחברות לבחור קורס, הרצאה או סדנה לעובדים: עם המחיר ששילמו בפועל וביקורות של מי שהשתתפו והוכיחו. אף מוסד או מרצה לא משלם לנו.',
 };

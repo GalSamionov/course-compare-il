@@ -20,6 +20,7 @@ export const ensureStatic = 'navigation';
 
 export const metadata: Metadata = {
   title: `איך אנחנו מדרגים | ${SITE_NAME}`,
+  alternates: { canonical: '/method' },
   description: 'איך מחושב ציון הבוגרים: מי נספר, המשקלות לפי סוג קורס, ויומן השינויים בשיטה.',
 };
 

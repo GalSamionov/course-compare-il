@@ -9,6 +9,7 @@ export const maxDuration = 60;
 
 export const metadata: Metadata = {
   title: `בקשו שנבדוק קורס | ${SITE_NAME}`,
+  alternates: { canonical: '/request-course' },
   description: 'ראיתם קורס במודעה או בדף נחיתה, והוא לא באתר? שולחים קישור, ואנחנו בודקים את הקורס לפני שהוא עולה.',
 };
 
