@@ -23,8 +23,20 @@ export async function clearMail(email: string): Promise<void> {
 export async function signIn(page: Page, email: string): Promise<void> {
   await clearMail(email);
   await page.getByLabel('לאן לשלוח?').fill(email);
-  await page.getByRole('button', { name: 'לשלוח לי קישור' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'עכשיו לתיבת המייל' })).toBeVisible();
+  // ב-CI, עם שני workers, השליחה נכשלה פעמיים בלי סיבה שנראתה בלוג (PR 2). עד שלושה ניסיונות, ובכישלון
+  // האחרון ההודעה מהטופס נכנסת לשגיאה, כדי שיהיה ברור מה Supabase החזיר.
+  const sent = page.getByRole('heading', { level: 1, name: 'עכשיו לתיבת המייל' });
+  for (let attempt = 1; ; attempt++) {
+    await page.getByRole('button', { name: 'לשלוח לי קישור' }).click();
+    try {
+      await expect(sent).toBeVisible({ timeout: 5_000 });
+      break;
+    } catch (error) {
+      const alert = (await page.getByRole('alert').allInnerTexts()).join(' | ');
+      if (attempt >= 3) throw new Error(`sign-in link not sent after ${attempt} attempts: ${alert || 'no alert on the page'}`, { cause: error });
+      await page.waitForTimeout(3_000 * attempt);
+    }
+  }
   let link = '';
   await expect.poll(async () => (link = await magicLink(email)), { timeout: 15_000 }).not.toBe('');
   await page.goto(link);
