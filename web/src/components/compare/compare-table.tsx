@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Claim, Mark } from '@/components/course/marks';
 import { PenNumber } from '@/components/site/pen';
 import type { CompareCell, CompareCourse, CompareSection } from '@/lib/compare/rows';
+import { keepShekelWithAmount } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
@@ -45,11 +46,12 @@ function CellView({ cell }: { cell: CompareCell }) {
       ))}
     </span>
   ) : cell.source === 'claim' ? (
-    <Claim>{cell.text}</Claim>
+    <Claim>{keepShekelWithAmount(cell.text)}</Claim>
   ) : cell.source ? (
-    <Mark source={cell.source}>{cell.text}</Mark>
+    // ₪ צמוד לסכום: בעמודה צרה (שני קורסים ב-375) הוא לא יורד לבד לשורה, גם עם הסימן בעט בתחילת המרקר.
+    <Mark source={cell.source}>{keepShekelWithAmount(cell.text)}</Mark>
   ) : (
-    cell.text
+    keepShekelWithAmount(cell.text)
   );
   return (
     <span className="block">

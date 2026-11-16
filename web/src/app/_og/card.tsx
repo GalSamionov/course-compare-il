@@ -12,6 +12,7 @@ import {
   verifiedGraduatesText,
   verifiedReviewsText,
 } from '@/lib/format';
+import { cueSvg, type CueSource } from '@/lib/mark-cues';
 import { rtlTokens } from '@/lib/og/bidi';
 import { SITE_NAME } from '@/lib/site';
 
@@ -111,19 +112,60 @@ function Rtl({
   );
 }
 
-/** מרקר בצבע המקור מאחורי שורה אחת. */
-function Marked({ text, size, color, style }: { text: string; size: number; color: string; style?: CSSProperties }) {
+const MARK_COLOR: Record<CueSource, string> = { verified: MARK_VERIFIED, grads: MARK_GRADS, weak: MARK_WEAK };
+
+/** הסימן בעט בתחילת המרקר, כמו באתר (lib/mark-cues.ts): וי, בועת דיבור או קריאה. רוחב וגובה ביחס לגודל הטקסט. */
+const CUE_BOX: Record<CueSource, { w: number; h: number; y: number }> = {
+  verified: { w: 0.72, h: 0.72, y: 0.04 },
+  grads: { w: 0.95, h: 0.95, y: 0.06 },
+  weak: { w: 0.42, h: 0.84, y: -0.04 },
+};
+const CUE_IMG: Record<CueSource, string> = {
+  verified: svgUri(cueSvg('verified', PEN)),
+  grads: svgUri(cueSvg('grads', PEN)),
+  weak: svgUri(cueSvg('weak', PEN)),
+};
+
+/**
+ * מרקר בצבע המקור מאחורי שורה אחת, ובתחילתו הסימן בעט של המקור: הצבע הוא לא הסימן היחיד.
+ * cue={false}: רק כשממש לידו כבר יש סימן גדול באותה משמעות (הווי בכרטיס "בוגר מאומת").
+ */
+function Marked({
+  text,
+  size,
+  source,
+  cue = true,
+  style,
+}: {
+  text: string;
+  size: number;
+  source: CueSource;
+  cue?: boolean;
+  style?: CSSProperties;
+}) {
+  const box = CUE_BOX[source];
   return (
     <div
       style={{
         display: 'flex',
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
         padding: `${Math.round(size * 0.08)}px ${Math.round(size * 0.36)}px`,
-        backgroundImage: `url(${marker(color)})`,
+        backgroundImage: `url(${marker(MARK_COLOR[source])})`,
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
         ...style,
       }}
     >
+      {cue && (
+        // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+        <img
+          src={CUE_IMG[source]}
+          width={Math.round(size * box.w)}
+          height={Math.round(size * box.h)}
+          style={{ marginLeft: Math.round(size * 0.2), marginTop: Math.round(size * box.y) }}
+        />
+      )}
       <Rtl text={text} size={size} style={{ flexWrap: 'nowrap' }} />
     </div>
   );
@@ -302,7 +344,7 @@ function PriceLine({ course }: { course: CoursePageData }) {
         <Marked
           text={paidRangeSentence(course.paid)}
           size={36}
-          color={MARK_VERIFIED}
+          source="verified"
           style={{ fontFamily: 'IBM Plex Sans Hebrew', fontWeight: 700 }}
         />
         <Rtl text={`${invoiceCountText(course.paid)}${site}`} size={24} style={{ color: INK_SOFT, marginTop: 4, marginRight: 12 }} />
@@ -371,8 +413,8 @@ function LegendRow({ swatch, text }: { swatch: ReactNode; text: string }) {
 
 /** הכרטיס של האתר כולו: דף הבית, עמודי התחומים וכל עמוד בלי תמונה משלו. */
 export async function renderSiteCard(): Promise<ImageResponse> {
-  const swatch = (label: string, color: string) => (
-    <Marked text={label} size={26} color={color} style={{ fontWeight: 700 }} />
+  const swatch = (label: string, source: CueSource) => (
+    <Marked text={label} size={26} source={source} style={{ fontWeight: 700 }} />
   );
   return new ImageResponse(
     (
@@ -409,13 +451,13 @@ export async function renderSiteCard(): Promise<ImageResponse> {
           >
             <Tape width={108} rotate={-3} style={{ left: 126, top: -16 }} />
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-              <Rtl text="מה אומר כל צבע" size={30} style={{ fontWeight: 700 }} />
+              <Rtl text="מה אומר כל סימון" size={30} style={{ fontWeight: 700 }} />
               {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
               <img src={PEN_RULE} width={196} height={12} style={{ marginTop: 2 }} />
             </div>
-            <LegendRow swatch={swatch('ירוק', MARK_VERIFIED)} text="נבדק מול מסמך" />
-            <LegendRow swatch={swatch('צהוב', MARK_GRADS)} text="מה שבוגרים אמרו" />
-            <LegendRow swatch={swatch('ורוד', MARK_WEAK)} text="נקודת חולשה" />
+            <LegendRow swatch={swatch('ירוק', 'verified')} text="נבדק מול מסמך" />
+            <LegendRow swatch={swatch('צהוב', 'grads')} text="מה שבוגרים אמרו" />
+            <LegendRow swatch={swatch('ורוד', 'weak')} text="נקודת חולשה" />
             <LegendRow
               swatch={
                 <div style={{ display: 'flex', borderBottom: `3px solid ${CLAIM}`, paddingBottom: 2, fontWeight: 700 }}>
@@ -470,7 +512,7 @@ export async function renderGuideCard(guide: {
         </div>
         <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
-            <Marked text="ירוק" size={28} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+            <Marked text="ירוק" size={28} source="verified" style={{ fontWeight: 700 }} />
             <Rtl text={`${guide.verifiedCount} עובדות נבדקו מול מסמך, כל אחת עם המקור שלה`} size={26} style={{ marginRight: 12 }} />
           </div>
           <Rtl
@@ -577,7 +619,7 @@ export async function renderBadgeCard(badge: {
             >
               {badge.name && <Rtl text={badge.name} size={30} style={{ fontWeight: 700, marginBottom: 4 }} />}
               <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
-                <Marked text={badge.title} size={42} color={MARK_VERIFIED} style={{ fontWeight: 700 }} />
+                <Marked text={badge.title} size={42} source="verified" cue={false} style={{ fontWeight: 700 }} />
                 {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text */}
                 <img src={PEN_TICK} width={58} height={58} style={{ marginRight: 14, marginTop: -10 }} />
               </div>
