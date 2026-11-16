@@ -205,3 +205,23 @@
 - docs/superpowers/plans/2026-11-15-plan-5-reports-transparency.md
 - docs/superpowers/specs/2026-11-15-round-5-reports-transparency-design.md
 
+
+## 2026-11-16 10:06 (סשן 97f31df0)
+
+קומיטים בסשן:
+
+- b3994fd docs: יומן: ה-CI של PR 2 עבר, ונגישות ופרטיות לפי המחמיר
+- f49564c docs: יומן: שתי ההערות של Codex על PR 2
+- d139c31 fix(db): קורס מקישור שמוזג: הבוגר עובר לקורס שאליו מוזג, גם אחרי שהטיוטה נמחקה
+- 3114ce7 docs: יומן: שתי בדיקות הקצה שנכשלו ב-PR 2
+- 2135f00 fix(e2e): חמישה מדריכים ברשימה, ומגבלת המיילים המקומית לבדיקות הקצה
+- 75213e7 docs: יומן: PR מספר 2 ל-main
+- 5305486 docs: הבדיקה עם AI עובדת באוויר, המצב ומה לבדוק בסשן הבא
+
+קבצים שלא נשמרו בקומיט עד סוף הסשן, ונשמרו עכשיו בגיבוי:
+
+- web/package.json
+- web/pnpm-lock.yaml
+- docs/sessions/2026-11-16-accessibility-privacy.md
+- web/e2e/a11y.spec.ts
+
