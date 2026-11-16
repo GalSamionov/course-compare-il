@@ -9,6 +9,8 @@ import { expect, test, type Page } from '@playwright/test';
  */
 const PAGES = [
   '/',
+  // דף הבית עם תשובות: הרשימה מתחת למחברת.
+  '/?cat=cooking&when=evening',
   '/categories/cooking',
   '/courses/full-stack-sample',
   '/compare?c=full-stack-sample,baking-sample',
@@ -38,11 +40,27 @@ const SIZES = [
   { name: 'desktop', viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false },
 ] as const;
 
-async function scan(page: Page, path: string) {
+// בלי תנועה: מרקר באמצע המריחה או דוגמה באמצע העמעום נמדדים אחרת בכל ריצה. המצב הסופי של כל תנועה
+// זהה למצב בלי תנועה (layout.tsx), ולכן זה מה שנבדק.
+test.use({ reducedMotion: 'reduce' });
+
+async function axe(page: Page, label: string) {
+  const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+  const lines = results.violations.map(
+    (v) => `${v.impact ?? 'unknown'} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`,
+  );
+  // שורה אחת לעמוד בפלט: כך רואים גם את מה שלא חוסם.
+  console.log(`[axe] ${label}: ${lines.length === 0 ? 'clean' : `\n  ${lines.join('\n  ')}`}`);
+  const blocking = results.violations
+    .filter((v) => BLOCKING.has(v.impact ?? ''))
+    .map((v) => `${v.impact} ${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+  expect(blocking, label).toEqual([]);
+}
+
+async function open(page: Page, path: string) {
   const response = await page.goto(path);
   expect(response?.status(), `${path} should load`).toBeLessThan(400);
   await page.waitForLoadState('networkidle');
-  return new AxeBuilder({ page }).withTags(TAGS).analyze();
 }
 
 for (const size of SIZES) {
@@ -50,23 +68,44 @@ for (const size of SIZES) {
     test.use({ viewport: size.viewport, isMobile: size.isMobile, hasTouch: size.hasTouch });
 
     for (const path of PAGES) {
-      test(`${path} has no critical or serious violations`, async ({ page }, testInfo) => {
-        const results = await scan(page, path);
-        const lines = results.violations.map(
-          (v) => `${v.impact ?? 'unknown'} ${v.id} (${v.nodes.length}): ${v.nodes[0]?.target.join(' ')}`,
-        );
-        // שורה אחת לעמוד בפלט: כך רואים גם את מה שלא חוסם.
-        console.log(`[axe ${size.name}] ${path}: ${lines.length === 0 ? 'clean' : `\n  ${lines.join('\n  ')}`}`);
-        await testInfo.attach('axe-violations', {
-          body: JSON.stringify(results.violations, null, 2),
-          contentType: 'application/json',
-        });
-
-        const blocking = results.violations
-          .filter((v) => BLOCKING.has(v.impact ?? ''))
-          .map((v) => `${v.impact} ${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
-        expect(blocking, `${path} at ${size.name}`).toEqual([]);
+      test(`${path} has no critical or serious violations`, async ({ page }) => {
+        await open(page, path);
+        await axe(page, `${size.name} ${path}`);
       });
     }
+
+    // ההיכרות למבקר ראשון: רק בדפדפן נקי. שאר הבדיקות רצות כמי שכבר ראה אותה.
+    test('the first-visit card has no critical or serious violations', async ({ browser }) => {
+      const context = await browser.newContext({
+        viewport: size.viewport,
+        isMobile: size.isMobile,
+        hasTouch: size.hasTouch,
+        reducedMotion: 'reduce',
+        storageState: { cookies: [], origins: [] },
+      });
+      const page = await context.newPage();
+      await page.goto('/');
+      await expect(page.getByRole('dialog', { name: 'פעם ראשונה בלמדתי?' })).toBeVisible();
+      await axe(page, `${size.name} first-visit card`);
+      await context.close();
+    });
   });
 }
+
+test.describe('keyboard', () => {
+  test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false });
+
+  test('the first Tab reaches "דלגו לתוכן", and it moves past the header to the content', async ({ page }) => {
+    await open(page, '/courses/full-stack-sample');
+    await page.keyboard.press('Tab');
+    const skip = page.getByRole('link', { name: 'דלגו לתוכן' });
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeInViewport();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#main$/);
+    // הטאב הבא כבר בתוך התוכן, ולא בתפריט.
+    await page.keyboard.press('Tab');
+    const inMain = await page.evaluate(() => !!document.activeElement?.closest('main'));
+    expect(inMain).toBe(true);
+  });
+});

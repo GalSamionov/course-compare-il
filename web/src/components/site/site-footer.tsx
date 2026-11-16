@@ -31,6 +31,9 @@ export function SiteFooter() {
           <Link href="/privacy" className={footerLink}>
             פרטיות
           </Link>
+          <Link href="/accessibility" className={footerLink}>
+            נגישות
+          </Link>
           <Link href="/terms" className={footerLink}>
             תנאי שימוש
           </Link>

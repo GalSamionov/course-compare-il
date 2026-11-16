@@ -238,7 +238,8 @@ function StepNumber({ n, current, onClick }: { n: number; current: boolean; onCl
       aria-label={`צעד ${n} מתוך ${STEPS}`}
       className={cn(
         'relative inline-flex size-11 items-center justify-center font-pen text-[17px] leading-none font-semibold text-pen',
-        !current && 'opacity-60 hover:opacity-100',
+        // צעד שאינו הנוכחי: בהיר יותר, אבל בניגודיות של 5.2:1 (ב-60% היא הייתה 3.2:1, מתחת ל-WCAG AA).
+        !current && 'opacity-80 hover:opacity-100',
       )}
     >
       <svg aria-hidden="true" viewBox="0 0 40 40" className="absolute inset-[7px] overflow-visible">
@@ -279,6 +280,14 @@ function PlayMark() {
     </svg>
   );
 }
+
+/** מה רואים בסרטון, צעד אחרי צעד (video/README.md). הסרטון בלי קול, ולכן זה התחליף שלו בטקסט. */
+const WALKTHROUGH_STEPS = [
+  'שואלים במילים שלכם: ממלאים את ארבע השורות במחברת, מה, למה, מתי ואיך וכמה, ורואים רשימה של קורסים שמתאימים.',
+  'ציון רק מבוגרים מאומתים: נכנסים לקורס הראשון ברשימה, ורק בעמוד שלו מופיע הציון.',
+  'שואלים שאלה, והיועץ עונה: שאלה בשורה הראשונה, והתשובה מעל הרשימה. כל משפט בה מסומן בצבע של המקור שלו.',
+  'הצבע אומר מה המקור: ירוק נבדק מול מסמך, צהוב מה שבוגרים אמרו, ורוד נקודת חולשה, וקו כחול מה שהמוסד אומר ולא בדקנו.',
+];
 
 /**
  * סרטון ההדרכה בדף נייר על השולחן. <dialog> מודאלי: Esc ולחיצה על הרקע סוגרים, והפוקוס נשאר בתוכו.
@@ -329,15 +338,28 @@ function VideoSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             <source src={file.src} type="video/mp4" />
           </video>
         )}
-        <figcaption className="flex items-center justify-between gap-4 pt-1.5 ps-1">
-          <p className=" font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex min-h-11 items-center px-1 text-[15px] font-semibold underline underline-offset-[3px] hover:text-link-hover"
-          >
-            לסגור
-          </button>
+        <figcaption className="pt-1.5 ps-1">
+          <div className="flex items-center justify-between gap-4">
+            <p className=" font-pen text-sm leading-snug font-medium text-pen">כל הנתונים בסרטון לדוגמה.</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex min-h-11 items-center px-1 text-[15px] font-semibold underline underline-offset-[3px] hover:text-link-hover"
+            >
+              לסגור
+            </button>
+          </div>
+          {/* לסרטון אין קול: מי שלא רואה אותו מקבל את אותם ארבעה צעדים בטקסט (WCAG 1.2.1). video/README.md */}
+          <details className="max-w-[60ch] pb-1 text-sm leading-normal">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold underline underline-offset-[3px] hover:text-link-hover">
+              הסרטון בטקסט
+            </summary>
+            <ol className="list-decimal space-y-1 ps-5 pb-1 marker:text-ink-soft">
+              {WALKTHROUGH_STEPS.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </details>
         </figcaption>
       </figure>
     </dialog>

@@ -215,7 +215,7 @@ async function AdminQueues({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <Sheet className="sheet-long">
-      <main className="pb-10 lg:pb-14">
+      <main id="main" className="pb-10 lg:pb-14">
         <h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px]">מה מחכה להחלטה</h1>
         {gate.kind === 'no-key' || gate.kind === 'bad-key' ? (
           <div role="alert" className="mt-4 max-w-[60ch] space-y-2 font-sans text-[15px] leading-normal">

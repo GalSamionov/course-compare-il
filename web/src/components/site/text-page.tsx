@@ -13,7 +13,7 @@ export function TextPage({
 }) {
   return (
     <Sheet narrow>
-      <main className="text-page pt-[22px] lg:pt-12">
+      <main id="main" className="text-page pt-[22px] lg:pt-12">
         <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px]">{title}</h1>
         {draft && (
           <p className="mt-2 inline-block border border-ink px-2 py-0.5 font-sans text-[13px] font-bold">

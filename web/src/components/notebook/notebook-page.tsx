@@ -43,7 +43,7 @@ export function NotebookPage({
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
   return (
     <Sheet>
-      <main>
+      <main id="main">
         {hero}
         <div
           className={cn(

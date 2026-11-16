@@ -19,7 +19,7 @@ export default async function NewCourseReviewPage() {
   const metrics = await getReviewMetrics();
   return (
     <Sheet narrow>
-      <main className="pb-10 lg:pb-14">
+      <main id="main" className="pb-10 lg:pb-14">
         {/* useSearchParams: בלי Suspense כל העמוד היה עובר לדפדפן (use-search-params.md). */}
         <Suspense fallback={<h1 className="mt-[22px] text-[30px] leading-tight font-bold lg:mt-12 lg:text-[48px]">כתיבת ביקורת</h1>}>
           <LinkCourseReview metrics={metrics} />

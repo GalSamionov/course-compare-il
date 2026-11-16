@@ -34,7 +34,7 @@ export default async function CourseReviewPage({ params }: Props) {
   if (!form) notFound();
   return (
     <Sheet narrow>
-      <main className="pb-10 lg:pb-14">
+      <main id="main" className="pb-10 lg:pb-14">
         <nav aria-label="מיקום" className="mt-2 font-sans text-[13px] text-ink-soft lg:mt-6 lg:text-sm">
           <Link
             href={`/courses/${form.slug}`}

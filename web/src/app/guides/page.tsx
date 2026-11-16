@@ -26,7 +26,7 @@ export default function GuidesPage() {
   const needsLegal = guides.some((g) => g.legalReview);
   return (
     <Sheet narrow>
-      <main className="pt-[22px] lg:pt-12">
+      <main id="main" className="pt-[22px] lg:pt-12">
         <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px]">לפני שמשלמים על קורס</h1>
         {needsLegal && (
           <p className="mt-2 inline-block border border-ink px-2 py-0.5 font-sans text-[13px] font-bold">

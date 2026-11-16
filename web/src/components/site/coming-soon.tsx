@@ -6,7 +6,7 @@ import { Sheet } from './sheet';
 export function ComingSoon({ title, line }: { title: string; line: string }) {
   return (
     <Sheet narrow>
-      <main className="pt-[22px] pb-6 lg:pt-12">
+      <main id="main" className="pt-[22px] pb-6 lg:pt-12">
         <h1 className="text-[30px] leading-tight font-bold text-balance lg:text-[48px]">{title}</h1>
         <PenNote arrow className="mt-4 max-w-[34ch] text-lg lg:text-xl">
           בקרוב: {line}

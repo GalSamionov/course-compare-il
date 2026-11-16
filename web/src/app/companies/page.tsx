@@ -36,7 +36,7 @@ const OFFER: { label: string; text: string }[] = [
 export default function CompaniesPage() {
   return (
     <Sheet>
-      <main className="pb-6">
+      <main id="main" className="pb-6">
         <h1 className="mt-[22px] max-w-[30ch] text-[30px] leading-tight font-bold text-balance lg:mt-12 lg:text-[54px] lg:leading-[1.06]">
           לבחור קורס, הרצאה או סדנה לעובדים, לפי מי שכבר היה שם
         </h1>

@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default function BadgePage({ params }: Props) {
   return (
     <Sheet narrow>
-      <main className="pb-4">
+      <main id="main" className="pb-4">
         <Suspense fallback={<div aria-hidden="true" className="h-[420px] lg:h-[520px]" />}>
           <BadgeView params={params} />
         </Suspense>

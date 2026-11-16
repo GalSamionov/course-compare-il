@@ -11,7 +11,7 @@ import { SITE_URL } from '@/lib/site';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const catalog = await getCatalog();
   const url = (path: string) => `${SITE_URL}${path}`;
-  const pages = ['/', '/career-change', '/courses', '/guides', '/companies', '/method', '/who-pays-us', '/privacy', '/terms'];
+  const pages = ['/', '/career-change', '/courses', '/guides', '/companies', '/method', '/who-pays-us', '/privacy', '/accessibility', '/terms'];
   return [
     ...pages.map((path) => ({ url: url(path) })),
     ...getGuides().map((g) => ({ url: url(`/guides/${g.slug}`), lastModified: g.checked })),

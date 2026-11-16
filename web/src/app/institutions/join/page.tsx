@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function InstitutionJoinPage() {
   return (
     <Sheet>
-      <main className="pb-6">
+      <main id="main" className="pb-6">
         <JoinForm />
       </main>
     </Sheet>

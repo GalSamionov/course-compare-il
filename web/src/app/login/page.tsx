@@ -16,7 +16,7 @@ export default function LoginPage() {
   return (
     <Sheet>
       {/* בלי ריווח תחתון: בציור הכותרת התחתונה 26 פיקסלים מתחת לטופס, ו-SiteFooter כבר מוסיף 32. */}
-      <main>
+      <main id="main">
         <Suspense fallback={<LoginForm next="/" linkFailed={false} />}>
           <LoginFromUrl />
         </Suspense>

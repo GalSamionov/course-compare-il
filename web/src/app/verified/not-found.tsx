@@ -6,7 +6,7 @@ import { SITE_NAME } from '@/lib/site';
 export default function BadgeNotFound() {
   return (
     <Sheet narrow>
-      <main className="py-16">
+      <main id="main" className="py-16">
         <title>{`הקישור כבר לא פעיל | ${SITE_NAME}`}</title>
         <meta name="robots" content="noindex, nofollow" />
         <h1 className="text-2xl font-bold lg:text-[40px]">הקישור הזה כבר לא פעיל</h1>

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function RequestCoursePage() {
   return (
     <Sheet>
-      <main className="pb-6">
+      <main id="main" className="pb-6">
         <RequestCourseForm checkEnabled={adCheckEnabled()} />
       </main>
     </Sheet>

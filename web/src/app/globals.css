@@ -150,6 +150,31 @@ body {
   color: inherit;
 }
 
+@layer components {
+  /* "דלגו לתוכן" (layout.tsx): מחוץ למסך עד שמגיעים אליו במקלדת. אז הוא יורד לפינה הימנית העליונה,
+     ככפתור הראשי של האתר: דיו על נייר, בלי צל, עם טבעת הפוקוס הרגילה. */
+  .skip-link {
+    position: fixed;
+    top: 12px;
+    inset-inline-start: 12px;
+    z-index: 60;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 18px;
+    border-radius: 4px;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    transform: translateY(calc(-100% - 24px));
+  }
+  .skip-link:focus {
+    transform: none;
+  }
+}
+
 @layer base {
   /* טבעת פוקוס בצבע של המערכת, גם במקומות שלא עיצבנו במפורש.
      בשכבת base, כדי ש-outline-none של רכיב שמסמן פוקוס בדרך אחרת (שורות המחברת) עדיין יגבר. */

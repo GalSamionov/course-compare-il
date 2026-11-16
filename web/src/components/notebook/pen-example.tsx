@@ -10,7 +10,8 @@ const CYCLE_MS = 3000;
 
 /**
  * הדוגמה בשורה הראשונה, כשהשורה ריקה: "למשל:" מודפס באפור, ואחריו דוגמה שנכתבת בעט בהיר ומתחלפת,
- * כאילו מישהו כותב בשוליים. העט בהיר, כדי שלא תיראה כמו תשובה שכבר נכתבה.
+ * כאילו מישהו כותב בשוליים. העט בהיר, כדי שלא תיראה כמו תשובה שכבר נכתבה, אבל לא בהיר מדי:
+ * בשקיפות 80% הניגודיות 5.2:1, מעל 4.5:1 של WCAG AA (ב-60% היא הייתה 3.2:1).
  * מוסתרת מקורא מסך: השדה עצמו נושא את הדוגמה המלאה ב-placeholder.
  * נעלמת כשכותבים או כשהשדה בפוקוס (globals.css, .pen-example). לא מתחלפת כשהיא מחוץ למסך,
  * כשהלשונית מוסתרת, או כשהמבקר ביקש פחות תנועה: אז נשארת הדוגמה הראשונה.
@@ -37,7 +38,7 @@ export function PenExample({ className }: { className?: string }) {
   return (
     <span ref={ref} aria-hidden="true" className={cn('pen-example pointer-events-none', className)}>
       <span className="font-sans text-[15px] text-ink-soft lg:text-[17px]">למשל:</span>{' '}
-      <span key={index} className="pen-example-word inline-block font-pen text-[21px] font-medium text-pen/60 lg:text-[23px]">
+      <span key={index} className="pen-example-word inline-block font-pen text-[21px] font-medium text-pen/80 lg:text-[23px]">
         {WHAT_EXAMPLES[index]}
       </span>
     </span>
