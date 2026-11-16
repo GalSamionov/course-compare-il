@@ -53,14 +53,14 @@ export type Database = {
                   ]
                 },"categories": {
                   Row: {
-                    "course_type": Database["public"]['Enums']["course_type"],"created_at": string,"id": string,"name": string,"parent_id": string | null,"slug": string
+                    "course_type": Database["public"]['Enums']["course_type"],"created_at": string,"description": string | null,"id": string,"name": string,"parent_id": string | null,"replaced_by": (string)[],"slug": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "course_type": Database["public"]['Enums']["course_type"],"created_at"?: string,"id"?: string,"name": string,"parent_id"?: string | null,"slug": string
+                    "course_type": Database["public"]['Enums']["course_type"],"created_at"?: string,"description"?: string | null,"id"?: string,"name": string,"parent_id"?: string | null,"replaced_by"?: (string)[],"slug": string
                   }
                   Update: {
-                    "course_type"?: Database["public"]['Enums']["course_type"],"created_at"?: string,"id"?: string,"name"?: string,"parent_id"?: string | null,"slug"?: string
+                    "course_type"?: Database["public"]['Enums']["course_type"],"created_at"?: string,"description"?: string | null,"id"?: string,"name"?: string,"parent_id"?: string | null,"replaced_by"?: (string)[],"slug"?: string
                   }
                   Relationships: [
                     {
