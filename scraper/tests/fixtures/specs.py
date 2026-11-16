@@ -1,4 +1,4 @@
-"""מפרט אתר הדוגמה: 20 קורסים מומצאים של מוסד מומצא ("מכללת הדגמה"), בשישה תחומים.
+"""מפרט אתר הדוגמה: 20 קורסים מומצאים של מוסד מומצא ("מכללת הדגמה"), בשבעה תחומים.
 
 כל המספרים והשמות כאן לדוגמה בלבד. אין כאן שום מוסד אמיתי (CLAUDE.md, "נתונים").
 מכל קורס נבנים דף HTML (build.py) והחילוץ הצפוי, בפורמט של תשובת המודל.
@@ -10,7 +10,7 @@
 from __future__ import annotations
 
 INSTITUTION = {"slug": "scraper-demo", "name": "מכללת הדגמה (נתוני דוגמה של האוסף)", "kind": "college"}
-CATEGORIES = ["programming", "ai", "cooking", "photography", "psychometric", "bookkeeping"]
+CATEGORIES = ["programming", "ai-at-work", "data-analysis", "cooking", "photography", "psychometric", "bookkeeping"]
 
 FULLSTACK_SYLLABUS = ["HTML ו-CSS", "JavaScript מודרני", "React", "Node.js ו-Express", "מסדי נתונים SQL", "Git ועבודה בצוות", "פרויקט גמר"]
 
@@ -78,11 +78,11 @@ COURSES: list[dict] = [
         "time_slots": (["evening"], "בימי שלישי בערב"),
         "schedule": ("שלישי בערב", "בימי שלישי בערב"),
     },
-    # ===== בינה מלאכותית =====
+    # ===== AI בעבודה, ודאטה =====
     {
         "key": "ai-for-managers",
         "layout": "landing",
-        "category": "ai",
+        "category": "ai-at-work",
         "title": ("בינה מלאכותית למנהלים", "בינה מלאכותית למנהלים"),
         "site_price_ils": (4200, 'השקעה: 4,200 ש"ח'),
         "total_hours": (24, "6 מפגשים של 4 שעות, 24 שעות בסך הכול"),
@@ -95,7 +95,7 @@ COURSES: list[dict] = [
         "key": "ai-prompt-engineering-en",
         "layout": "classic",
         "lang": "en",
-        "category": "ai",
+        "category": "ai-at-work",
         "title": ("Prompt Engineering Workshop", "Prompt Engineering Workshop"),
         "site_price_ils": (1450, "Price: NIS 1,450"),
         "total_hours": (12, "Four evenings, 12 hours in total"),
@@ -106,7 +106,7 @@ COURSES: list[dict] = [
     {
         "key": "data-ml-track",
         "layout": "jsonld",
-        "category": "ai",
+        "category": "data-analysis",
         "title": ("מסלול Data ו-Machine Learning", "מסלול Data ו-Machine Learning"),
         "site_price_ils": (18000, '"price": "18000"'),
         "total_hours": (400, "400 שעות לימוד"),

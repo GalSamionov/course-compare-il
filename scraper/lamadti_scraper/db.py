@@ -20,6 +20,22 @@ class DbError(RuntimeError):
     pass
 
 
+def active_categories(rows: list[dict[str, Any]]) -> dict[str, tuple[str, str]]:
+    """שורות של categories -> { slug: (id, תווית) }.
+
+    תחום שיצא משימוש (replaced_by לא ריק, למשל ai מ-16.11.2026) לא נכנס: קורס חדש לא נכנס אליו, ומוסד
+    שעוד מופיע איתו ב-institutions.yaml מקבל אותו בדוח, כמו תחום שלא קיים.
+    התווית היא השם, ואחריו התיאור אם יש. לפיה המודל מבחין, למשל, בין ארבעת תחומי ה-AI.
+    """
+    result: dict[str, tuple[str, str]] = {}
+    for row in rows:
+        if row.get("replaced_by"):
+            continue
+        description = (row.get("description") or "").strip()
+        result[row["slug"]] = (row["id"], f"{row['name']}: {description}" if description else row["name"])
+    return result
+
+
 class SchemaMissing(DbError):
     """המיגרציה של האוסף עוד לא הוחלה על המסד הזה."""
 
@@ -95,7 +111,8 @@ class Db:
         return added
 
     def categories(self) -> dict[str, tuple[str, str]]:
-        return {r["slug"]: (r["id"], r["name"]) for r in self.select("categories", {"select": "id,slug,name"})}
+        """התחומים הפעילים: slug -> (מזהה, השם והתיאור כמו שהמודל רואה אותם)."""
+        return active_categories(self.select("categories", {"select": "id,slug,name,description,replaced_by"}))
 
     def pages(self, institution_id: str) -> dict[str, PageState]:
         rows = self.select(

@@ -68,7 +68,7 @@ class Extraction:
 class PageInput:
     url: str
     text: str  # PageContent.for_model()
-    categories: tuple[tuple[str, str], ...]  # (slug, name)
+    categories: tuple[tuple[str, str], ...]  # (slug, השם והתיאור: db.active_categories)
     today: date
 
 
@@ -88,6 +88,10 @@ SYSTEM = "\n".join(
         "Text values (schedule, region, admission, class_size_note, certificate, institution_promises) are written in Hebrew, in your own words, as one short factual statement of at most 25 words. No marketing language and no praise. Never copy promotional sentences into a value; the quote is where the original text goes.",
         "is_course_page is true only when the page describes one specific course, workshop or lecture series that people can sign up for. A list of many courses, a blog post, an about page or a contact page is false; then fields is empty.",
         'category is the slug of the given category that fits the course best, or "none" when the course belongs to none of them.',
+        "Each category comes with its name and a short description. Choose by what most of the course teaches, not by a word in its title. "
+        "A course that uses AI tools inside another subject belongs to that subject: a digital-marketing course with AI tools is digital marketing, a data-analyst course with AI is data. "
+        "When several AI categories are given, tell them apart by the description: using AI tools at work or in one profession, building automations and AI agents, "
+        "building apps or sites without writing code, or creating content such as images, music and video.",
         "Field rules:",
         *[f"- {f.name}: {f.rule}" for f in FIELDS],
     ]
