@@ -10,7 +10,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { isQuestion } from '@/lib/advisor/question';
 import { formatAmount, formatIls } from '@/lib/format';
 import { matchKeywords, matchNames, type KeywordCategory } from '@/lib/search/keywords';
-import { matchCourses, similarTo } from '@/lib/search/match';
+import { inCategories, matchCourses, similarTo } from '@/lib/search/match';
 import {
   MAX_Q_LENGTH,
   activeLines,
@@ -196,6 +196,8 @@ export function Notebook({
     [catalog.categories],
   );
   const nameOf = (slug: string) => catalog.categories.find((c) => c.slug === slug)?.name ?? slug;
+  // עמוד של תחום שעוד אין בו קורסים: הרשימה ריקה כי התחום ריק, לא כי השורות מסננות הכול.
+  const emptyCategory = fixedWhat && !catalog.courses.some((course) => inCategories(course, base.cats));
   const shownWhat = query.q || query.cats.map(nameOf).join(', ');
   const named = query.q ? matchNames(query.q, catalog.courses) : null;
   const similar = named ? similarTo(named.courses, catalog.courses) : [];
@@ -213,7 +215,9 @@ export function Notebook({
   const buttonLabel = !showResults
     ? 'לראות קורסים'
     : results.length === 0
-      ? 'אין קורסים מתאימים'
+      ? emptyCategory
+        ? 'עוד אין קורסים בתחום'
+        : 'אין קורסים מתאימים'
       : results.length === 1
         ? 'לראות קורס אחד'
         : `לראות ${results.length} קורסים`;
@@ -692,7 +696,14 @@ export function Notebook({
 
       {showResults && (
         <Results
-          heading={active.length > 0 ? coursesTitle(results.length) : allCoursesTitle(results.length)}
+          heading={
+            emptyCategory
+              ? 'עוד אין קורסים בתחום'
+              : active.length > 0
+                ? coursesTitle(results.length)
+                : allCoursesTitle(results.length)
+          }
+          emptyCategory={emptyCategory}
           results={results}
           typeFirst={typeFirst}
           advisor={advisor ? adviser : null}

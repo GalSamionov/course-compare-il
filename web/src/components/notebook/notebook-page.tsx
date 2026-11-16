@@ -25,7 +25,7 @@ export function NotebookPage({
   heading: string;
   /** בדף הבית הכותרת הראשית היא ההבטחה, והמחברת מקבלת כותרת משנה. */
   headingLevel?: 1 | 2;
-  intro: string;
+  intro: React.ReactNode;
   /** לפני הכותרת. בעמוד תחום: פירורי הלחם. */
   before?: React.ReactNode;
   /** בדף הבית: ההבטחה, הסיכום לדוגמה ושלושת הצעדים, לפני המחברת. */
