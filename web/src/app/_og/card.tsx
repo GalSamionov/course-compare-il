@@ -117,7 +117,7 @@ const MARK_COLOR: Record<CueSource, string> = { verified: MARK_VERIFIED, grads: 
 /** הסימן בעט בתחילת המרקר, כמו באתר (lib/mark-cues.ts): וי, בועת דיבור או קריאה. רוחב וגובה ביחס לגודל הטקסט. */
 const CUE_BOX: Record<CueSource, { w: number; h: number; y: number }> = {
   verified: { w: 0.72, h: 0.72, y: 0.04 },
-  grads: { w: 0.8, h: 0.8, y: 0.06 },
+  grads: { w: 0.95, h: 0.95, y: 0.06 },
   weak: { w: 0.42, h: 0.84, y: -0.04 },
 };
 const CUE_IMG: Record<CueSource, string> = {

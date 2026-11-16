@@ -182,13 +182,18 @@ export function useAdvisor(): AdvisorApi {
  */
 const MAX_UNBROKEN_TITLE = 28;
 
-/** משפט אחד בתשובה, בסימון של המקור שלו. שם הקורס לפניו, כשהוא עובר לקורס אחר. */
-function Sentence({ sentence, title }: { sentence: AdviceSentence; title: string | null }) {
+/**
+ * משפט אחד בתשובה, בסימון של המקור שלו. שם הקורס לפניו, כשהוא עובר לקורס אחר.
+ * continues: אותו מקור כמו המשפט הקודם, על אותו קורס. הסימן בעט עומד רק בתחילת הרצף, ולא בכל משפט.
+ */
+function Sentence({ sentence, title, continues }: { sentence: AdviceSentence; title: string | null; continues: boolean }) {
   const text =
     sentence.source === 'institution' ? (
       <Claim>{sentence.text}</Claim>
     ) : (
-      <Mark source={sentence.source === 'verified' ? 'verified' : 'grads'}>{sentence.text}</Mark>
+      <Mark source={sentence.source === 'verified' ? 'verified' : 'grads'} cue={!continues}>
+        {sentence.text}
+      </Mark>
     );
   if (!title || !sentence.courseSlug) return text;
   return (
@@ -256,19 +261,21 @@ function AnswerSheet({
         <div className="ps-3">
           {sentences.length > 0 && (
             <p className="max-w-[68ch] text-base leading-[1.85] text-pretty lg:text-[17px]">
-              {sentences.map((sentence, i) => (
-                <Fragment key={i}>
-                  {i > 0 && ' '}
-                  <Sentence
-                    sentence={sentence}
-                    title={
-                      sentence.courseSlug && sentence.courseSlug !== sentences[i - 1]?.courseSlug
-                        ? titleOf(sentence.courseSlug)
-                        : null
-                    }
-                  />
-                </Fragment>
-              ))}
+              {sentences.map((sentence, i) => {
+                const previous = sentences[i - 1];
+                const title =
+                  sentence.courseSlug && sentence.courseSlug !== previous?.courseSlug ? titleOf(sentence.courseSlug) : null;
+                return (
+                  <Fragment key={i}>
+                    {i > 0 && ' '}
+                    <Sentence
+                      sentence={sentence}
+                      title={title}
+                      continues={!title && previous?.source === sentence.source}
+                    />
+                  </Fragment>
+                );
+              })}
             </p>
           )}
           {missing && (
@@ -295,7 +302,7 @@ function AnswerSheet({
             <MarkSample source="grads">צהוב</MarkSample> מה שבוגרים אמרו
           </span>
           <span>
-            <Claim>קו כחול</Claim> המוסד אומר, לא נבדק
+            <Claim>קו כחול</Claim> המוסד אומר, לא&nbsp;נבדק
           </span>
         </section>
       </div>

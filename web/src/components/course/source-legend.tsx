@@ -19,7 +19,8 @@ export function SourceLegend({ variant = 'card' }: { variant?: 'card' | 'inline'
         <MarkSample source="weak">ורוד</MarkSample> נקודת חולשה
       </span>
       <span>
-        <Claim>קו כחול</Claim> המוסד אומר, לא נבדק
+        {/* "לא נבדק" בשורה אחת: ב-375 "נבדק" ירד לבד לשורה. */}
+        <Claim>קו כחול</Claim> המוסד אומר, לא&nbsp;נבדק
       </span>
     </>
   );
@@ -40,7 +41,8 @@ export function SourceLegend({ variant = 'card' }: { variant?: 'card' | 'inline'
     >
       <Tape width={70} tilt={-3} />
       <p className="mb-2 font-bold">מה אומר כל סימון</p>
-      <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 lg:gap-x-6">{items}</div>
+      {/* העמודה הימנית ברוחב התוכן שלה, והשמאלית (הארוכות) מקבלת את השאר: ב-375 כל שורה נכנסת בשורה אחת. */}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-balance lg:gap-x-6">{items}</div>
       <p className="mt-2 text-ink-soft">פתקים באותם צבעים: פתק צהוב הוא בוגר, פתק כחול הוא המוסד.</p>
     </section>
   );

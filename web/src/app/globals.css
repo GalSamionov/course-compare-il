@@ -89,10 +89,10 @@
   --tape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath fill='%23E6E9ED' fill-opacity='.74' d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3Cpath fill='%23fff' fill-opacity='.35' d='M4 3.4L76 2.9 76 7.2 4 7.6Z'/%3E%3C/svg%3E");
   /* צורת הסלוטייפ עם הקצוות הקרועים, כמסכה: לסלוטייפ צבעוני (מסקינג טייפ) על פתק לבן. */
   --tape-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 24' preserveAspectRatio='none'%3E%3Cpath d='M2.2 1.2L78 0.6 76.6 3.4 78.6 6 76.9 8.9 78.8 12.2 76.7 15 78.5 18.4 76.8 21 78.2 23.6 1.6 23.2 3.3 20.6 1.2 17.5 3.1 14.6 1.1 11.4 3.2 8.6 1.4 5.4 3.4 3.2Z'/%3E%3C/svg%3E");
-  /* הסימנים בעט בתחילת מרקר המקור, כמסכה (lib/mark-cues.ts הוא המקור, ו-mark-cues.test.ts בודק שהם זהים). */
+  /* הסימנים בעט בתחילת מרקר המקור, כמסכה. lib/mark-cues.ts הוא המקור, ו-mark-cues.test.ts בודק שהם זהים. */
   --cue-verified: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round' d='M3.2 10.9C4.9 12.5 6.3 14.4 7.5 16.7 9.8 11.1 13 6.5 17.2 3'/%3E%3C/svg%3E");
-  --cue-grads: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round' d='M13.6 3.3C11 2.4 7.3 2.6 5 3.9 2.5 5.3 2 8.5 3.7 10.7 5.3 12.8 8.7 13.5 11.7 12.9L15.9 16.1 14.7 11.9C16.9 10.7 18 8.6 17.5 6.4 17.1 4.9 15.8 3.9 13.2 3.2'/%3E%3C/svg%3E");
-  --cue-weak: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='3.1' stroke-linecap='round' stroke-linejoin='round' d='M5.6 2.6C5.8 6.4 5.5 9.8 4.9 13'/%3E%3Ccircle fill='%23000' cx='4.7' cy='17.4' r='2'/%3E%3C/svg%3E");
+  --cue-grads: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round' d='M10 3.2C14.6 3.1 18 5 18 7.8 18 10.4 15.4 12.1 13.8 12.4L14.8 16.4 10.6 12.6C5.6 12.8 2 10.8 2 7.8 2 5 5.4 3.3 10.6 3.2'/%3E%3C/svg%3E");
+  --cue-weak: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 20'%3E%3Cpath fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round' d='M5.6 2.6C5.8 6.4 5.5 9.8 4.9 13'/%3E%3Ccircle fill='%23000' cx='4.7' cy='17.3' r='1.8'/%3E%3C/svg%3E");
   --stamp-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 2.05'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23s)'/%3E%3C/svg%3E");
 }
 
@@ -302,9 +302,9 @@ body {
   }
   .hl[data-cue='grads'] {
     --cue: var(--cue-grads);
-    --cue-w: 0.8em;
-    --cue-h: 0.8em;
-    --cue-y: 0.4em;
+    --cue-w: 0.95em;
+    --cue-h: 0.95em;
+    --cue-y: 0.3em;
   }
   .hl[data-cue='weak'] {
     --cue: var(--cue-weak);

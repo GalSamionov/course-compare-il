@@ -183,7 +183,7 @@ function StepTwo() {
   return (
     <>
       <StepTitle>הצבע אומר מאיפה המידע</StepTitle>
-      <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm leading-normal lg:text-[15px]">
+      <ul className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-sm leading-normal text-balance lg:text-[15px]">
         <li>
           <MarkSample source="verified">ירוק</MarkSample> נבדק מול מסמך
         </li>
@@ -194,7 +194,7 @@ function StepTwo() {
           <MarkSample source="weak">ורוד</MarkSample> נקודת חולשה
         </li>
         <li>
-          <Claim>קו כחול</Claim> המוסד אומר, לא נבדק
+          <Claim>קו כחול</Claim> המוסד אומר, לא&nbsp;נבדק
         </li>
       </ul>
       <p className="mt-2.5 text-[13px] leading-normal text-ink-soft lg:text-sm">פתק צהוב הוא בוגר. פתק כחול הוא המוסד.</p>
