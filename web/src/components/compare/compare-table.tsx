@@ -137,6 +137,7 @@ export function CompareTable({
                 type="button"
                 disabled={busy === course.id}
                 onClick={() => onRemove(course)}
+                data-compare-remove={course.id}
                 aria-label={`להוציא את ${course.title} מההשוואה`}
                 className="flex h-11 cursor-pointer items-center text-sm font-semibold underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover disabled:cursor-wait disabled:text-ink-soft"
               >

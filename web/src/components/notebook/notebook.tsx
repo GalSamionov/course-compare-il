@@ -335,7 +335,14 @@ export function Notebook({
       {/* קו השוליים של המחברת מצויר ב-NotebookPage, כדי שימשיך לאורך הרשימה והחלקים שאחריה, כמו בציור.
           במחשב, מה שאחרי הטופס (בדף הבית: "או" והמסלולים) עומד לצדו. */}
       <div className={afterForm ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,300px)] lg:items-start lg:gap-x-16' : undefined}>
-        <form aria-label="אני מחפש קורס" onSubmit={(event) => void submit(event)}>
+        <form
+          aria-label="אני מחפש קורס"
+          onSubmit={(event) => void submit(event)}
+          // Esc סוגר את הבחירות שנפתחו מתחת לשורה, כשהפוקוס על השורה עצמה. מתוך הבחירות לא: הפוקוס היה נעלם איתן.
+          onKeyDown={(event) => {
+            if (event.key === 'Escape' && open && !(event.target as HTMLElement).closest('[role=group]')) setOpen(null);
+          }}
+        >
           <p className="ms-(--margin) pt-1 ps-3 pb-1.5 text-lg leading-normal lg:text-xl">אני רוצה ללמוד</p>
           <ol className="ruled-top">
             <li>

@@ -189,7 +189,7 @@ function JoinFormRound({ onAnother }: { onAnother: () => void }) {
           </ul>
           <div className="ms-(--margin) mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
             <p className="text-pretty">
-              שומרים רק את מה שבטופס. המייל נמחק 90 יום אחרי שהחלטנו על הבקשה.
+              שומרים רק את מה שבטופס. המייל רק כדי לחזור אליכם, והוא נמחק 90 יום אחרי שהחלטנו על הבקשה.
             </p>
             <Link href="/privacy#institutions" className={smallLink}>
               מדיניות הפרטיות

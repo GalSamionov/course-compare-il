@@ -271,8 +271,11 @@ export function LoginForm({ next, linkFailed }: { next: string; linkFailed: bool
               </div>
             </form>
             <div className="ms-(--margin) mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
-              <p className="text-pretty">שומרים אצלנו רק שלושה דברים: המייל, הקורסים ששמרתם והתשובות שלכם.</p>
-              <Link href="/privacy" className={smallLink}>
+              <p className="text-pretty">
+                המייל משמש רק כדי לשלוח לכם קישור להתחברות. שומרים אצלנו רק שלושה דברים: המייל, הקורסים ששמרתם והתשובות
+                שלכם.
+              </p>
+              <Link href="/privacy#account" className={smallLink}>
                 מדיניות הפרטיות
               </Link>
             </div>

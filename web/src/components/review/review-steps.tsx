@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useId, useRef } from 'react';
 import { PenNote, StickyNote } from '@/components/course/marks';
 import { PenLoop } from '@/components/site/pen';
@@ -470,6 +471,13 @@ export function NameStep({
           cohortMonth={cohortMonth}
           body={body}
         />
+        {/* הודעה בנקודת האיסוף: השם גלוי לכולם, והוא לא חובה. */}
+        <p className="mt-3 max-w-[60ch] font-sans text-[13px] leading-normal text-ink-soft">
+          כל מי שנכנס לעמוד הקורס רואה את מה שכאן. השם לא חובה, ונשמר רק בצורה שבחרתם.{' '}
+          <Link href="/privacy#reviews" className="underline underline-offset-[3px] hover:text-link-hover">
+            מה נשמר, למה ולכמה זמן
+          </Link>
+        </p>
       </div>
     </div>
   );

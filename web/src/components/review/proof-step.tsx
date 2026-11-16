@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useId, useState } from 'react';
 import { PenNote } from '@/components/course/marks';
 import { buttonVariants } from '@/components/ui/button';
@@ -65,6 +66,8 @@ export function ProofStep({
     proofs.some((p) => SUFFICIENT_KINDS.includes(p.kind)) ? 'screenshot' : 'invoice',
   );
   const [error, setError] = useState<string | null>(null);
+  /** לקורא מסך: מה קרה לקובץ, בלי להזיז את הפוקוס. */
+  const [announce, setAnnounce] = useState('');
   const kindId = useId();
   const hintId = useId();
   // עם שני קבצים אין בחירת קובץ: ההודעה והפוקוס עוברים לרשימה.
@@ -75,8 +78,10 @@ export function ProofStep({
     const file = input.files?.[0];
     // אותו קובץ אפשר לבחור שוב אחרי שגיאה.
     input.value = '';
-    if (!file) return;
+    // בזמן העלאה הקלט לא מושבת (disabled היה מפיל את הפוקוס לראש העמוד), ולכן הבחירה נבלעת כאן.
+    if (!file || uploading) return;
     setError(null);
+    setAnnounce('');
     onUploading(true);
     const result = await uploadProof(userId, reviewId, file, kind);
     onUploading(false);
@@ -87,14 +92,21 @@ export function ProofStep({
     const next = [...proofs, result.proof];
     writeAttached(reviewId, next);
     onChange(next);
+    setAnnounce(`הקובץ ${file.name} צורף.`);
     if (SUFFICIENT_KINDS.includes(kind)) setKind('screenshot');
+    // עם הקובץ השני בחירת הקובץ נעלמת, והפוקוס עובר לרשימת הקבצים.
+    if (next.length >= MAX_PROOF_FILES) focusProofs();
   }
 
   function remove(path: string) {
+    const removed = proofs.find((p) => p.path === path);
     const next = proofs.filter((p) => p.path !== path);
     writeAttached(reviewId, next);
     onChange(next);
+    setAnnounce(removed ? `הקובץ ${removed.name} הוסר.` : '');
     if (!next.some((p) => SUFFICIENT_KINDS.includes(p.kind))) setKind('invoice');
+    // הכפתור שנלחץ נעלם עם הקובץ: הפוקוס עובר לבחירת הקובץ.
+    focusProofs();
   }
 
   return (
@@ -113,6 +125,19 @@ export function ProofStep({
         רק אנחנו רואים את הקובץ, והוא נמחק מיד אחרי ההחלטה. אחרי אישור נשארים סוג ההוכחה, תאריך האימות והסכום,
         מעוגל למטה ל-500 ₪. הסכום מוצג רק בטווח של כמה בוגרים יחד.
       </PenNote>
+      {/* הודעה בנקודת האיסוף (חוק הגנת הפרטיות, סעיף 11): מה, למה, אם חובה, ולמי עובר. */}
+      <div className="mt-3 max-w-[60ch] font-sans text-[13px] leading-normal text-ink-soft">
+        <p className="text-pretty">
+          בלי הוכחה הביקורת לא מתפרסמת. כדי לעזור לנו לבדוק, קובץ שאינו גדול מדי נשלח פעם אחת ל-Anthropic, שקוראת
+          ממנו את שם המוסד, התאריך, הסכום והשם שעליו. את ההחלטה מקבל אדם.
+        </p>
+        <Link
+          href="/privacy#reviews"
+          className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
+        >
+          מה נשמר, למה ולכמה זמן
+        </Link>
+      </div>
 
       {proofs.length > 0 && (
         <ul
@@ -179,7 +204,7 @@ export function ProofStep({
               type="file"
               accept="application/pdf,image/jpeg,image/png,.pdf,.jpg,.jpeg,.png"
               className="sr-only"
-              disabled={uploading}
+              aria-disabled={uploading || undefined}
               {...invalidProps(errors, 'proofs', hintId)}
               onChange={(e) => void onFile(e)}
             />
@@ -198,6 +223,14 @@ export function ProofStep({
         </div>
       )}
       {!canAdd && <FieldError errors={errors} field="proofs" className="mt-6" />}
+      <p role="status" className="sr-only">
+        {announce}
+      </p>
     </div>
   );
+}
+
+/** אחרי הרינדור: לבחירת הקובץ, או לרשימה כשאין בחירה (שניהם נושאים את אותו id). */
+function focusProofs() {
+  window.setTimeout(() => document.getElementById(fieldId('proofs'))?.focus(), 0);
 }

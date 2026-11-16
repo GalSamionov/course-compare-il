@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { TextPage } from '@/components/site/text-page';
-import { SITE_NAME } from '@/lib/site';
+import { CONTACT_EMAIL, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `תנאי שימוש (טיוטה) | ${SITE_NAME}`,
@@ -25,6 +25,11 @@ export default function TermsPage() {
         <li>אסור לפרסם ביקורת מזויפת, או ביקורת על קורס שלא למדתם בו.</li>
         <li>מוסד יכול להגיב לביקורת בפומבי, אבל לא למחוק אותה.</li>
       </ul>
+
+      <h2 id="contact">יצירת קשר</h2>
+      <p>
+        את האתר מפעיל גל. שאלות, בקשות ותלונות: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+      </p>
 
       <p>התנאים המלאים ייכתבו לפני ההשקה, אחרי בדיקה של עורך דין.</p>
     </TextPage>

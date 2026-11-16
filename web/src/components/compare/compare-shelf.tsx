@@ -57,6 +57,7 @@ export function CompareShelf({
                   type="button"
                   disabled={full || busy === course.id}
                   onClick={() => onAdd(course)}
+                  data-compare-add={course.id}
                   aria-label={`${group.verb} את ${course.title} להשוואה`}
                   className={cn(
                     buttonVariants({ variant: 'outline' }),

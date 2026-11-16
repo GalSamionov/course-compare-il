@@ -298,7 +298,7 @@ function RequestRound({
           <div className="ms-(--margin) mt-4 ps-3 font-sans text-[13px] leading-normal text-ink-soft">
             <p className="text-pretty">
               {checkEnabled
-                ? 'שומרים רק את מה שבטופס, ואת תוצאת הבדיקה לשבוע. את הטקסט של הדף לא שומרים. בלי מייל ובלי שם שלכם.'
+                ? 'שומרים רק את מה שבטופס, ואת תוצאת הבדיקה לשבוע. הטקסט של הדף עובר ל-Anthropic לבדיקה, ואותו לא שומרים. בלי מייל ובלי שם שלכם.'
                 : 'שומרים רק את מה שבטופס. בלי מייל ובלי שם שלכם.'}
             </p>
             <Link href="/privacy#course-links" className={smallLink}>

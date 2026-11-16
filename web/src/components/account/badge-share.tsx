@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { TickMark } from '@/components/notebook/tick';
 import { buttonVariants } from '@/components/ui/button';
@@ -98,7 +99,10 @@ export function BadgeShare({
         הכרטיס יראה: <strong>{preview}</strong>, ואת שם המוסד. לא את מה שכתבתם.
       </p>
       <p className="mt-0.5 text-[13px] leading-normal text-pretty text-ink-soft">
-        מי שיראה אותו יידע שכתבתם ביקורת על הקורס. אפשר להפסיק לשתף מתי שרוצים, והקישור יפסיק לעבוד מיד.
+        מי שיראה אותו יידע שכתבתם ביקורת על הקורס. אפשר להפסיק לשתף מתי שרוצים, והקישור יפסיק לעבוד מיד.{' '}
+        <Link href="/privacy#badges" className="underline underline-offset-[3px] hover:text-link-hover">
+          מה נשמר
+        </Link>
       </p>
 
       {canName ? (
