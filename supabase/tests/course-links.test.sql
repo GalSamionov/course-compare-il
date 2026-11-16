@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(70);
+select plan(71);
 
 -- הוספת קורס מקישור (20261116010001_course_links.sql): בוגר ב-/review, ובקשה ב-/request-course.
 -- נתוני בדיקה, כ-postgres. כל שאילתה מוגבלת לנתונים האלה: המסד בפיי משותף, ויכולים להיות בו קישורים אחרים.
@@ -336,6 +336,15 @@ select results_eq(
   $$values (1, 0, 'merged:c1c1c1c1-0000-0000-0000-000000000004')$$,
   'הביקורת עברה לקורס הקיים, והטיוטה נמחקה'
 );
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub": "c1c1c1c1-0000-0000-0000-00000000000d", "role": "authenticated"}', true);
+select is(
+  my_course_link((select id from dup)) ->> 'merged_slug', 'cl-live',
+  'הבוגר שחוזר לעמוד הכתיבה של הטיוטה שנמחקה עובר לקורס שאליו היא מוזגה'
+);
+reset role;
+set local role service_role;
 
 -- ===== דחייה =====
 
