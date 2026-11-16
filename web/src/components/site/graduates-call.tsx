@@ -46,13 +46,33 @@ export function ReviewTally({ have }: { have: number }) {
 }
 
 /**
- * "סיימתם קורס?" (מסמך העיצוב, 3א.5): שלושת הקורסים שהכי קרובים לציון.
- * כתיבת ביקורת נפתחת בסבב 3, וההערה בעט אומרת את זה. עד אז כל קישור מוביל לעמוד הקורס עצמו,
- * שעובד היום ומראה כמה ביקורות חסרות. מתחת לכל קורס: קווי ספירה בעט, קו לכל ביקורת שיש.
+ * "סיימתם קורס?" (מסמך העיצוב, 3א.5): שלושת הקורסים שהכי קרובים לציון, וכל קישור מוביל לכתיבת ביקורת עליו.
+ * מתחת לכל קורס: קווי ספירה בעט, קו לכל ביקורת שיש.
+ * כשאף קורס עוד לא התחיל לאסוף ביקורות (closestToScore ריקה, כמו ביום העלייה לאוויר): אותה הזמנה, עם קישור
+ * לבחירת הקורס ב-/review, ולא שלושה קורסים שרחוקים מציון בדיוק כמו כל השאר.
  */
 export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
   const closest = closestToScore(courses, 3);
-  if (closest.length === 0) return null;
+  if (closest.length === 0) {
+    return (
+      <section aria-labelledby="graduates-title" className="mt-10 ms-(--margin) ps-3 lg:ms-0 lg:mt-16 lg:ps-0">
+        <h2 id="graduates-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
+          סיימתם קורס?
+        </h2>
+        <p className="mt-2 font-sans text-[15px] leading-normal lg:text-[17px]">
+          ביקורת שלכם יכולה לתת לקורס ציון. מספיקות {MIN_REVIEWS} ביקורות מאומתות.
+        </p>
+        <p className="mt-2 font-sans text-[15px] font-semibold lg:mt-3 lg:text-base">
+          <Link
+            href="/review"
+            className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
+          >
+            לבחור את הקורס ולכתוב ביקורת
+          </Link>
+        </p>
+      </section>
+    );
+  }
   return (
     <section aria-labelledby="graduates-title" className="mt-10 ms-(--margin) ps-3 lg:ms-0 lg:mt-16 lg:ps-0">
       <h2 id="graduates-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
