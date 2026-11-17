@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
+import { AskBeforePaying } from '@/components/course/ask-before-paying';
 import { AtAGlance } from '@/components/course/at-a-glance';
 import { CourseActions } from '@/components/course/course-actions';
+import { FactsBox } from '@/components/course/facts-box';
 import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
@@ -14,11 +16,14 @@ import { Stamp } from '@/components/course/stamp';
 import { VideoSection } from '@/components/course/video-section';
 import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
+import { askBeforePaying } from '@/lib/course/ask-before-paying';
+import { showsScore } from '@/lib/course/score-shown';
 import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
 import { courseShareDescription, courseShareMessage, courseShareTitle } from '@/lib/og/share-text';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
 import { slugParams } from '@/lib/data/static-params';
+import { cn } from '@/lib/utils';
 
 /**
  * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
@@ -64,6 +69,10 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
+  // אין ציון בלי ביקורות (מסמך העיצוב 2026-11-17): בלי ביקורת מפורסמת, "העובדות" במקום תיבת הציון,
+  // וגם בלי ההערה בעט "את הקורס עצמו עוד לא בדקנו", שתלויה על התיבה.
+  const reviewed = showsScore(reviewCount);
+  const questions = askBeforePaying(course);
   // "לשלוח בוואטסאפ": אותו טקסט כמו בתצוגה של קישור משותף, והכתובת המלאה (SITE_URL, כמו בתמונת השיתוף).
   const share = { text: courseShareMessage(course), url: `${SITE_URL}/courses/${course.slug}` };
   // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג, ומספר הפרקים סופר רק אותם.
@@ -155,12 +164,15 @@ export default async function CoursePage({ params }: Props) {
           </header>
 
           <aside
-            aria-label="הציון ובקצרה"
+            aria-label={reviewed ? 'הציון ובקצרה' : 'העובדות ומה לשאול'}
             className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:pt-3"
           >
-            <div className="lg:sticky lg:top-8 lg:pb-10">
-              <ScoreBox score={course.score} />
+            {/* בלי ביקורות העמודה ארוכה יותר (שש עובדות ושלוש שאלות), ובמסך של מחשב נייד היא לא נכנסת כולה.
+                לכן היא נשארת במקום בגלילה רק כשיש ציון. */}
+            <div className={cn('lg:pb-10', reviewed && 'lg:sticky lg:top-8')}>
+              {reviewed ? <ScoreBox score={course.score} /> : <FactsBox course={course} />}
               <AtAGlance course={course} />
+              <AskBeforePaying questions={questions} />
               {/* במחשב הפעולות כאן, תמיד בהישג יד. בנייד הן בסוף העמוד (החוזה של עמוד הקורס). */}
               <div className="hidden lg:block">
                 <CourseActions courseId={course.id} slug={course.slug} title={course.title} share={share} stacked />
