@@ -456,6 +456,10 @@ body {
   .text-page h2 {
     @apply pen-rule mt-10 text-[21px] leading-snug font-bold lg:mt-14 lg:text-[28px];
   }
+  /* כותרת בתוך פרק: בשיטה, החלקים של חישוב הציון תחת "כשיהיו ביקורות". */
+  .text-page h3 {
+    @apply mt-8 text-[17px] leading-snug font-bold lg:mt-10 lg:text-[19px];
+  }
   .text-page :is(p, ul, ol, table, dl) {
     @apply mt-3;
   }

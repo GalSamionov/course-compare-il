@@ -20,7 +20,7 @@ export function SiteHeader() {
           <span className="pen-under">תחומים</span>
         </Link>
         <Link href="/method" className={navLink}>
-          <span className="pen-under">איך אנחנו מדרגים</span>
+          <span className="pen-under">איך אנחנו משווים</span>
         </Link>
         <AccountLink className={navLink} />
       </nav>

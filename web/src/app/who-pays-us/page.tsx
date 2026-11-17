@@ -38,7 +38,7 @@ export default function WhoPaysUsPage() {
       </ul>
 
       <p>
-        <Link href="/method">איך אנחנו מדרגים</Link>
+        <Link href="/method">איך אנחנו משווים</Link>
       </p>
     </TextPage>
   );
