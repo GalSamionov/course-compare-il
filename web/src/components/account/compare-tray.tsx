@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { MAX_COMPARE } from '@/lib/account/lists';
 import { slotsLeftText } from '@/lib/compare/param';
+import { showsScore } from '@/lib/course/score-shown';
 import { toggleCompare } from '@/lib/account/store';
 import { formatIls } from '@/lib/format';
 import type { CourseSummary } from '@/lib/search/types';
@@ -76,9 +77,9 @@ export function CompareTray({ slots }: { slots: { position: number; course: Cour
                   </span>
                   ציון בוגרים
                 </p>
-              ) : (
+              ) : showsScore(course.verifiedCount) ? (
                 <p className="mt-1 font-sans text-[13px] leading-tight text-ink-soft">עוד אין ציון</p>
-              )}
+              ) : null}
               <p className="mt-1 font-sans text-[15px] leading-snug font-bold tabular-nums">
                 {course.sitePrice !== null ? (
                   <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi>

@@ -6,6 +6,24 @@ const rowOf = (sections: CompareSection[], key: string) => sections.flatMap((s) 
 const course = (overrides: Parameters<typeof sampleCourse>[0] = {}) => toCompareCourse(sampleCourse(overrides));
 
 describe('buildCompareRows', () => {
+  it('leaves out the score when no course in the comparison has a published review', () => {
+    const a = course({ reviewTotal: 0, score: { status: 'none' }, outcome: null });
+    const b = course({
+      id: 'b',
+      slug: 'b-sample',
+      reviewTotal: 0,
+      score: { status: 'not_enough_reviews', reviewCount: 0, reviewsNeeded: 5 },
+      outcome: null,
+    });
+    expect(buildCompareRows([a, b]).map((s) => s.key)).not.toContain('score');
+  });
+
+  it('says a course has no reviews yet, next to a course with a score', () => {
+    const scored = course({ score: { status: 'scored', value: 7.9, reviewCount: 23, recommendPct: 91, stale: false } });
+    const none = course({ id: 'b', slug: 'b-sample', reviewTotal: 0, score: { status: 'none' } });
+    expect(rowOf(buildCompareRows([scored, none]), 'score')?.cells[1]).toEqual({ text: null, missing: 'עוד אין ביקורות' });
+  });
+
   it('marks each cell with the same source as the course page', () => {
     const sections = buildCompareRows([course()]);
     expect(rowOf(sections, 'paid')?.cells[0]).toEqual({
