@@ -13,6 +13,7 @@ import { movedCategoryHref } from '@/lib/search/query';
 import { EMPTY_QUERY } from '@/lib/search/types';
 import { hasCourses } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * כמו עמוד הקורס: העמוד כולו סטטי, ותחום שלא נבנה מראש נבנה בבקשה הראשונה.
@@ -22,7 +23,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const { categories } = await getCatalog();
-  return categories.map((c) => ({ slug: c.slug }));
+  return slugParams(categories.map((c) => c.slug));
 }
 
 type Props = { params: Promise<{ slug: string }> };

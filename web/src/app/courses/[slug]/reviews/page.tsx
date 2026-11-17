@@ -3,6 +3,7 @@ import { ComingSoon } from '@/components/site/coming-soon';
 import { getCourseSlugs } from '@/lib/data/course-page';
 import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * תמונת השיתוף של הקורס (../opengraph-image.tsx) חלה גם על העמוד הזה, והכתובת שלה תלויה בקורס.
@@ -12,7 +13,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getCourseSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 /** העמוד עוד לא נבנה (ComingSoon): לא במנועי חיפוש עד שיהיה בו תוכן. */

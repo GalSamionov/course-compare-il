@@ -10,6 +10,7 @@ import { getCoursePage, type CoursePageData } from '@/lib/data/course-page';
 import { INSTITUTION_KIND_LABEL, getInstitutionPage, getInstitutionSlugs } from '@/lib/data/institution-page';
 import { verifiedGraduatesText } from '@/lib/format';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * כמו עמוד הקורס: העמוד כולו סטטי, ומוסד שלא נבנה מראש נבנה בבקשה הראשונה.
@@ -20,7 +21,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getInstitutionSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };

@@ -18,6 +18,7 @@ import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
 import { courseShareDescription, courseShareMessage, courseShareTitle } from '@/lib/og/share-text';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
@@ -28,7 +29,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getCourseSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };

@@ -8,6 +8,7 @@ import { getCourseSlugs } from '@/lib/data/course-page';
 import { getReviewForm } from '@/lib/reviews/review-form';
 import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * כמו עמוד הקורס: נבנה מראש לכל קורס, וקורס שלא נבנה מראש נבנה במלואו בבקשה הראשונה, כך ש-notFound()
@@ -18,7 +19,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getCourseSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };
