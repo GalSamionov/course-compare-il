@@ -126,16 +126,16 @@ export default async function CoursePage({ params }: Props) {
             {/* איך הקורס הגיע לאתר (גל, 17.11.2026). בעט, כי זה האתר שמדבר, ומיד מתחת לשם המוסד: לפני הציון ולפני הפרטים. */}
             {course.pageUrl && (
               <PenNote className="mt-2 max-w-[56ch] lg:mt-3 lg:text-base">
-                את הפרטים בעמוד אספנו אוטומטית{" "}
+                הפרטים כאן הם מה שהמוסד כותב על עצמו{" "}
                 <a
                   href={course.pageUrl}
                   rel="nofollow noopener"
                   className="underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover"
                 >
-                  מהדף של הקורס באתר המוסד
+                  בדף של הקורס באתר שלו
                 </a>
-                , ואנחנו קוראים אותו שוב כל שבוע.
-                {course.lastCheckedAt && <> בפעם האחרונה: {formatHebrewDate(course.lastCheckedAt)}.</>}
+                , ולא בדקנו אותם מעבר לזה.
+                {course.lastCheckedAt && <> הדף נקרא ב-{formatHebrewDate(course.lastCheckedAt)}.</>}
               </PenNote>
             )}
             {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
