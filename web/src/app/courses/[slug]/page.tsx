@@ -104,9 +104,13 @@ export default async function CoursePage({ params }: Props) {
           )}
         </nav>
         {/*
-          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל שנשארת במקום בגלילה: הציון, "בקצרה" (מה ששולם בפועל,
-          מה קרה לבוגרים והחולשה הבולטת) ושתי הפעולות. היא נכנסת גם במסך של מחשב נייד.
-          מקרא הצבעים בעמודת הסיכום, מעל "על הקורס". בנייד: הציון, "בקצרה" והמקרא מיד אחרי הכותרת, והפעולות בסוף העמוד.
+          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל.
+          - עם ציון: בעמודה הצדדית הציון, "בקצרה" (מה ששולם בפועל, מה קרה לבוגרים והחולשה הבולטת) ושתי הפעולות,
+            והיא נשארת במקום בגלילה. כדי שהיא תיכנס כולה גם במסך של מחשב נייד (1366 על 768),
+            "מה לשאול לפני שמשלמים" לא בה, אלא בעמודת הסיכום, מתחת למקרא.
+          - בלי ביקורות: "העובדות", "בקצרה", "מה לשאול" והפעולות. העמודה ארוכה מדי למסך נמוך, ולכן היא לא נשארת במקום.
+          מקרא הצבעים בעמודת הסיכום, מעל "על הקורס".
+          בנייד, לפי הסדר בקוד: הציון או "העובדות", "בקצרה", "מה לשאול" (עם ציון: אחרי המקרא), והפעולות בסוף העמוד.
           הסרטון של המוסד קטן, ובא אחרי "על הקורס": הוא שיווק, ולא אמור להיות כבד מהציון.
         */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-20">
@@ -168,11 +172,11 @@ export default async function CoursePage({ params }: Props) {
             className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:pt-3"
           >
             {/* בלי ביקורות העמודה ארוכה יותר (שש עובדות ושלוש שאלות), ובמסך של מחשב נייד היא לא נכנסת כולה.
-                לכן היא נשארת במקום בגלילה רק כשיש ציון. */}
+                לכן היא נשארת במקום בגלילה רק כשיש ציון, ואז "מה לשאול" בעמודת הסיכום. */}
             <div className={cn('lg:pb-10', reviewed && 'lg:sticky lg:top-8')}>
               {reviewed ? <ScoreBox score={course.score} /> : <FactsBox course={course} />}
               <AtAGlance course={course} />
-              <AskBeforePaying questions={questions} />
+              {!reviewed && <AskBeforePaying questions={questions} />}
               {/* במחשב הפעולות כאן, תמיד בהישג יד. בנייד הן בסוף העמוד (החוזה של עמוד הקורס). */}
               <div className="hidden lg:block">
                 <CourseActions courseId={course.id} slug={course.slug} title={course.title} share={share} stacked />
@@ -182,6 +186,7 @@ export default async function CoursePage({ params }: Props) {
 
           <div className="lg:col-start-1 lg:row-start-2 lg:max-w-[560px]">
             <SourceLegend />
+            {reviewed && <AskBeforePaying questions={questions} />}
           </div>
 
           <div className="lg:col-start-1 lg:row-start-3 lg:max-w-[68ch] lg:text-[17px]">

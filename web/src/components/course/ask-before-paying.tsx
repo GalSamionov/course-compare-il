@@ -19,7 +19,10 @@ export function AskList({ questions, className }: { questions: readonly string[]
   );
 }
 
-/** החלק בעמוד הקורס (מסמך העיצוב 2026-11-17): מתחת ל"העובדות", או מתחת ל"בקצרה" כשיש ציון. */
+/**
+ * החלק בעמוד הקורס (מסמך העיצוב 2026-11-17): בלי ביקורות בעמודה הצדדית, מתחת ל"העובדות" ו"בקצרה".
+ * עם ציון בעמודת הסיכום, מתחת למקרא, כדי שהעמודה הצדדית שנשארת במקום תיכנס במסך של מחשב נייד.
+ */
 export function AskBeforePaying({ questions }: { questions: readonly string[] }) {
   return (
     <section aria-labelledby="before-paying-title" className="mt-6 font-sans lg:mt-8">
