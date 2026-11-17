@@ -4,7 +4,7 @@ import { slugParams } from '@/lib/data/static-params';
 import { OG_SIZE, renderCourseCard } from '../../_og/card';
 
 /** התמונה שמופיעה כששולחים קישור לקורס בוואטסאפ או בפייסבוק. אותם נתונים מהמטמון כמו העמוד עצמו. */
-export const alt = 'סיכום הקורס על דף מודפס: ציון הבוגרים, כמה בוגרים מאומתים, וכמה שילמו בפועל.';
+export const alt = 'סיכום הקורס על דף מודפס: העובדות שהמוסד מפרסם, או ציון הבוגרים וכמה שילמו בפועל כשיש ביקורות.';
 export const size = OG_SIZE;
 export const contentType = 'image/png';
 

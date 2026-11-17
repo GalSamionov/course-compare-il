@@ -2,6 +2,8 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ImageResponse } from 'next/og';
 import type { CSSProperties, ReactNode } from 'react';
+import { courseFacts, type FactSource } from '@/lib/course/facts';
+import { showsScore } from '@/lib/course/score-shown';
 import type { CoursePageData } from '@/lib/data/course-page';
 import { logoMarkSvg } from '@/lib/logo';
 import {
@@ -299,7 +301,7 @@ function titleSize(title: string): number {
   return 44;
 }
 
-/** הציון בתיבה, כמו בעמוד הקורס. בלי ציון: כמה ביקורות יש וכמה חסרות. */
+/** הציון בתיבה, כמו בעמוד הקורס. רק מביקורת מפורסמת אחת: כמה ביקורות יש וכמה חסרות. */
 function ScoreBox({ score }: { score: CoursePageData['score'] }) {
   const box: CSSProperties = {
     display: 'flex',
@@ -331,6 +333,42 @@ function ScoreBox({ score }: { score: CoursePageData['score'] }) {
       <Rtl text="עוד אין ציון בוגרים" size={36} style={{ fontWeight: 700 }} />
       <Rtl text={count > 0 ? verifiedReviewsText(count) : 'עוד אין ביקורות מאומתות'} size={26} style={{ marginTop: 6 }} />
       {needed > 0 && <Rtl text={reviewsToScoreText(needed)} size={26} />}
+    </div>
+  );
+}
+
+/**
+ * "העובדות", כמו בעמוד הקורס כשאין ביקורת מפורסמת (components/course/facts-box.tsx): אותה מסגרת כמו תיבת הציון.
+ * ערך ידוע עם קו כחול (המוסד אומר), המשך במרקר ירוק, ומה שחסר בעט.
+ */
+function FactsCard({ course }: { course: FactSource }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        border: `3px solid ${INK}`,
+        backgroundColor: '#ffffff',
+        padding: '16px 24px 18px',
+        minWidth: 380,
+      }}
+    >
+      <Rtl text="העובדות" size={30} style={{ fontWeight: 700 }} />
+      {courseFacts(course).map((fact) => (
+        <div key={fact.key} style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center', marginTop: 8 }}>
+          <Rtl text={`${fact.label}:`} size={24} style={{ color: INK_SOFT, marginLeft: 10 }} />
+          {!fact.known ? (
+            <Rtl text={fact.missing} size={24} style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN }} />
+          ) : fact.source === 'verified' ? (
+            <Marked text={clip(fact.text, 22)} size={24} source="verified" />
+          ) : (
+            <div style={{ display: 'flex', borderBottom: `3px solid ${CLAIM}`, paddingBottom: 1 }}>
+              <Rtl text={clip(fact.text, 22)} size={24} style={{ flexWrap: 'nowrap' }} />
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
@@ -386,15 +424,23 @@ export async function renderCourseCard(course: CoursePageData): Promise<ImageRes
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: 420, marginRight: 36, marginTop: 6 }}>
-            <ScoreBox score={course.score} />
-            <Rtl
-              text="את הקורס עצמו עוד לא בדקנו."
-              size={26}
-              style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN, marginTop: 14, marginRight: 6 }}
-            />
+            {showsScore(course.reviewTotal) ? (
+              // עמודה ולא Fragment: ב-Satori ה-Fragment נפרש כשורה, וההערה בעט עלתה לצד התיבה.
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+                <ScoreBox score={course.score} />
+                <Rtl
+                  text="את הקורס עצמו עוד לא בדקנו."
+                  size={26}
+                  style={{ fontFamily: 'Rubik', fontWeight: 500, color: PEN, marginTop: 14, marginRight: 6 }}
+                />
+              </div>
+            ) : (
+              <FactsCard course={course} />
+            )}
           </div>
         </div>
-        <PriceLine course={course} />
+        {/* בלי ביקורות, המחיר כבר בתיבה. */}
+        {showsScore(course.reviewTotal) && <PriceLine course={course} />}
       </Desk>
     ),
     { ...OG_SIZE, fonts: await loadFonts() },

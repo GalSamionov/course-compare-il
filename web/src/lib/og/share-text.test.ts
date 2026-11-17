@@ -8,12 +8,25 @@ import {
   whatsappHref,
 } from './share-text';
 
+/** העובדות של קורס לדוגמה (lib/course/facts.ts). */
+const FACTS = {
+  sitePrice: 2600,
+  totalHours: 30,
+  durationMonths: 2,
+  formats: ['in_person'],
+  region: 'חיפה',
+  certificate: null,
+  nextCohortDate: null,
+};
+
 describe('courseShareDescription', () => {
   it('leads with the score and the verified count, then what people paid', () => {
     expect(
       courseShareDescription({
         score: { status: 'scored', value: 7.9, reviewCount: 23, recommendPct: 91, stale: false },
         paid: { min: 12000, max: 16000, count: 5 },
+        reviewTotal: 23,
+        ...FACTS,
       }),
     ).toBe(
       'ציון בוגרים 7.9 מתוך 10, לפי 23 בוגרים מאומתים. חצי מהבוגרים שילמו בין 12,000 ל-16,000 ₪, לפי 5 חשבוניות ומעלה. אף מוכר לא משלם לנו.',
@@ -22,16 +35,34 @@ describe('courseShareDescription', () => {
 
   it('says how many reviews are missing when there is no score yet', () => {
     expect(
-      courseShareDescription({ score: { status: 'not_enough_reviews', reviewCount: 3, reviewsNeeded: 2 }, paid: null }),
+      courseShareDescription({
+        score: { status: 'not_enough_reviews', reviewCount: 3, reviewsNeeded: 2 },
+        paid: null,
+        reviewTotal: 3,
+        ...FACTS,
+      }),
     ).toBe('עוד אין ציון בוגרים: 3 ביקורות מאומתות, עוד 2 ביקורות עד לציון. אף מוכר לא משלם לנו.');
+  });
+
+  it('lists the facts the institution publishes when there is no review yet, and says when there is no price', () => {
+    expect(
+      courseShareDescription({ score: { status: 'none' }, paid: null, reviewTotal: 0, ...FACTS, sitePrice: null }),
+    ).toBe('מחיר לא מפורסם · 2 חודשים, 30 שעות · בכיתה · חיפה. אף מוכר לא משלם לנו.');
   });
 });
 
 describe('courseShareMessage', () => {
   it('puts the title of the link above its description', () => {
-    expect(courseShareMessage({ title: 'אפייה', institutionName: 'סדנה לדוגמה', score: { status: 'none' }, paid: null })).toBe(
-      'אפייה, סדנה לדוגמה\nעוד אין ביקורות מאומתות על הקורס. אף מוכר לא משלם לנו.',
-    );
+    expect(
+      courseShareMessage({
+        title: 'אפייה',
+        institutionName: 'סדנה לדוגמה',
+        score: { status: 'none' },
+        paid: null,
+        reviewTotal: 0,
+        ...FACTS,
+      }),
+    ).toBe('אפייה, סדנה לדוגמה\n2,600 ₪ · 2 חודשים, 30 שעות · בכיתה · חיפה. אף מוכר לא משלם לנו.');
   });
 });
 
