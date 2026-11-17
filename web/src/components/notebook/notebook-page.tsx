@@ -9,7 +9,7 @@ import { Notebook, NotebookFromUrl, type NotebookProps } from './notebook';
  * עד אז מוצגת אותה מחברת עם מה שממולא מראש, כך שבכתובת בלי תשובות אין קפיצה.
  *
  * במחשב: הכותרת מימין והערה בעט משמאלה, המחברת על שורות שנמשכות עד קצה הנייר,
- * והרשימה רחבה, בעמודות.
+ * והרשימה רחבה, בעמודות. בדף הבית אין כותרת למחברת: ההבטחה ב-hero היא השאלה, והתיבה מיד אחריה.
  */
 export function NotebookPage({
   heading,
@@ -22,13 +22,14 @@ export function NotebookPage({
   after,
   ...props
 }: NotebookProps & {
-  heading: string;
+  /** בלי כותרת (דף הבית, מסמך העיצוב 2026-11-17): אז גם intro, before ו-headSide לא מוצגים. */
+  heading?: string;
   /** בדף הבית הכותרת הראשית היא ההבטחה, והמחברת מקבלת כותרת משנה. */
   headingLevel?: 1 | 2;
-  intro: React.ReactNode;
+  intro?: React.ReactNode;
   /** לפני הכותרת. בעמוד תחום: פירורי הלחם. */
   before?: React.ReactNode;
-  /** בדף הבית: ההבטחה, הסיכום לדוגמה ושלושת הצעדים, לפני המחברת. */
+  /** בדף הבית: ההבטחה, לפני המחברת. */
   hero?: React.ReactNode;
   /** ליד הכותרת, משמאל במחשב ומתחתיה בנייד: הערה קצרה בעט על מה שברשימה. */
   headSide?: React.ReactNode;
@@ -37,7 +38,7 @@ export function NotebookPage({
    * start: מול ראש העמודה, כשהוא גבוה מהכותרת, כדי שלא יעלה מעל פירורי הלחם (עמוד תחום עם המובילים).
    */
   headSideAlign?: 'end' | 'start';
-  /** אחרי הרשימה. בדף הבית: הבוגרים והתחומים. */
+  /** אחרי הרשימה. בדף הבית: "מה רואים כאן", הבוגרים והתחומים. */
   after?: React.ReactNode;
 }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2';
@@ -45,34 +46,38 @@ export function NotebookPage({
     <Sheet>
       <main id="main">
         {hero}
-        <div
-          className={cn(
-            'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:gap-x-16',
-            headSideAlign === 'start' ? 'lg:items-start' : 'lg:items-end',
-            hero ? 'mt-12 lg:mt-11' : 'lg:mt-4',
-          )}
-        >
-          <div>
-            {before}
-            <Heading
-              id="notebook-title"
-              className={cn(
-                'leading-tight font-bold text-balance',
-                headingLevel === 1
-                  ? 'mt-[22px] text-[30px] lg:mt-8 lg:text-[54px] lg:leading-[1.08] lg:font-bold'
-                  : 'pen-rule text-[26px] lg:text-[38px]',
+        {heading !== undefined && (
+          <div
+            className={cn(
+              'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:gap-x-16',
+              headSideAlign === 'start' ? 'lg:items-start' : 'lg:items-end',
+              hero ? 'mt-12 lg:mt-11' : 'lg:mt-4',
+            )}
+          >
+            <div>
+              {before}
+              <Heading
+                id="notebook-title"
+                className={cn(
+                  'leading-tight font-bold text-balance',
+                  headingLevel === 1
+                    ? 'mt-[22px] text-[30px] lg:mt-8 lg:text-[54px] lg:leading-[1.08] lg:font-bold'
+                    : 'pen-rule text-[26px] lg:text-[38px]',
+                )}
+              >
+                {heading}
+              </Heading>
+              {intro && (
+                <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
+                  {intro}
+                </p>
               )}
-            >
-              {heading}
-            </Heading>
-            <p className="mt-2 max-w-[60ch] font-sans text-[15px] leading-normal text-ink-soft lg:mt-3 lg:text-lg">
-              {intro}
-            </p>
+            </div>
+            {headSide && <div className="mt-3 lg:mt-0 lg:pb-1">{headSide}</div>}
           </div>
-          {headSide && <div className="mt-3 lg:mt-0 lg:pb-1">{headSide}</div>}
-        </div>
+        )}
         {/* קו השוליים: לאורך המחברת, הרשימה והחלקים שאחריה, כמו בציור (HomeB). */}
-        <div className="margin-rule mt-4 lg:mt-8">
+        <div className={cn('margin-rule', heading === undefined ? 'mt-7 lg:mt-10' : 'mt-4 lg:mt-8')}>
           <Suspense fallback={<Notebook {...props} query={props.base} />}>
             <NotebookFromUrl {...props} />
           </Suspense>

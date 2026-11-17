@@ -61,6 +61,12 @@ export interface NotebookProps {
    * הערה בעט ליד השורה הראשונה, ותשובה מעל הרשימה כשבשורה הראשונה נכתבה שאלה.
    */
   advisor?: boolean;
+  /**
+   * דף הבית (מסמך העיצוב 2026-11-17): שורה 1 היא תיבה גדולה מעל השורות, ומעליה "בשבילי" או "בשביל העובדים".
+   * הטקסט בתיבה עובר דרך /api/understand, כמו בשורה. השורות, עם התחומים לבחירה בשורה 1, מתחת לתיבה,
+   * תחת "או בחרו בעצמכם".
+   */
+  whatBox?: boolean;
 }
 
 /**
@@ -123,6 +129,8 @@ const growCopy =
  * ולכן היא קצרה, באורך הדוגמה שנכתבת בעט (pen-example.tsx), כדי שהווי יעמוד ממש אחריה.
  */
 const WHAT_EXAMPLE = 'למשל: אקסל לעבודה, עוגות';
+/** הדוגמה ליד הקו של התיבה הגדולה בדף הבית, במילים של מסמך העיצוב. */
+const BOX_EXAMPLE = 'אני בעלת עסק, רוצה ללמוד לבנות סוכני AI לעסק שלי';
 /** ההערה בעט מתחת לשורה הראשונה, כשהיועץ פועל. */
 const WHAT_NOTE_ID = 'what-advisor-note';
 /** הדוגמה לשורה 4 מוצגת ליד הקו הריק ולא בתוכו, כדי שלא תיראה כמו תקציב שכבר נקבע. */
@@ -168,6 +176,7 @@ export function Notebook({
   afterForm,
   saveAnswers = false,
   advisor = false,
+  whatBox = false,
   query,
   update,
 }: NotebookProps & { query: SearchQuery; update?: Update }) {
@@ -177,6 +186,9 @@ export function Notebook({
   // מה שמוקלד עכשיו בשורת התקציב, לפני שנשמר בכתובת. כך הספירה על הכפתור חיה.
   const [budgetTyping, setBudgetTyping] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  // "בשבילי" או "בשביל העובדים", רק בדף הבית. בשלב 1 היא רק מוסיפה את "רוצים שנכין לכם רשימה?" מתחת לרשימה.
+  // ברירת המחדל: בשבילי. לא נשמרת בכתובת: החיפוש לחברות, עם ברירות מחדל משלו, בא בשלב 2.
+  const [forTeam, setForTeam] = useState(false);
   // הטקסט האחרון שנשלח להבנה. כך יציאה מהשדה ולחיצה על הכפתור לא שולחות אותו פעמיים.
   const lastCommitted = useRef<string | null>(null);
   // גלילה לרשימה שמחכה לרינדור שבו התשובות מהכתובת כבר מוצגות (ראו scrollToResults).
@@ -198,7 +210,8 @@ export function Notebook({
   const nameOf = (slug: string) => catalog.categories.find((c) => c.slug === slug)?.name ?? slug;
   // עמוד של תחום שעוד אין בו קורסים: הרשימה ריקה כי התחום ריק, לא כי השורות מסננות הכול.
   const emptyCategory = fixedWhat && !catalog.courses.some((course) => inCategories(course, base.cats));
-  const shownWhat = query.q || query.cats.map(nameOf).join(', ');
+  // בתיבה של דף הבית רק המילים של המבקר. התחומים שנבחרו כתובים בשורה 1, מתחת לתיבה.
+  const shownWhat = query.q || (whatBox ? '' : query.cats.map(nameOf).join(', '));
   const named = query.q ? matchNames(query.q, catalog.courses) : null;
   const similar = named ? similarTo(named.courses, catalog.courses) : [];
   const why = query.why ? whyOption(query.why) : null;
@@ -335,6 +348,123 @@ export function Notebook({
     scrollToResults();
   }
 
+  const whatExample = whatBox ? BOX_EXAMPLE : WHAT_EXAMPLE;
+  // שורה 1: בדף הבית היא התיבה הגדולה, ובשאר העמודים השדה בשורה. אותו שדה, אותו name ואותה הבנה.
+  const whatInput = (
+    <div
+      key={shownWhat}
+      data-copy={shownWhat || whatExample}
+      data-empty={shownWhat === '' ? '' : undefined}
+      className={cn(
+        growCopy,
+        'grid min-w-0 self-stretch after:pt-4 after:ps-3 after:pb-1 after:pe-1',
+        whatBox && 'min-h-[104px] lg:min-h-[112px]',
+      )}
+    >
+      <textarea
+        name="what"
+        rows={1}
+        defaultValue={shownWhat}
+        maxLength={MAX_Q_LENGTH}
+        autoComplete="off"
+        enterKeyHint="search"
+        aria-label="מה ללמוד"
+        aria-describedby={advisor ? WHAT_NOTE_ID : undefined}
+        placeholder={whatExample}
+        // בתיבה הגדולה התחומים לבחירה בשורה 1 שמתחת, ולא נפתחים מהתיבה.
+        onFocus={whatBox ? undefined : () => setOpen('what')}
+        onInput={(event) => syncCopy(event.currentTarget, whatExample)}
+        onKeyDown={submitOnEnter}
+        onBlur={(event) => void commitWhat(event.currentTarget.value)}
+        className={cn(
+          'col-start-1 row-start-1 min-w-0 resize-none overflow-hidden pt-4 ps-3 pb-1 pe-1 text-start',
+          penInput,
+          inputExample,
+          // הדוגמה המודפסת נשארת לקורא מסך ולמי שכבר בשדה. מחוץ לשדה מוצגת הדוגמה שנכתבת בעט.
+          '[&:not(:focus)]:placeholder:text-transparent',
+          isStruck('what') && struck,
+        )}
+      />
+      <PenExample
+        words={whatBox ? [BOX_EXAMPLE] : undefined}
+        className="col-start-1 row-start-1 self-start pt-4 ps-3 pe-1 leading-normal"
+      />
+    </div>
+  );
+  // הערה של האתר בעט, על השורה שמתחת לשדה, עם חץ שעולה אליו: גם שאלה נכתבת שם.
+  const advisorNote = (
+    <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-2.5 pb-2 lg:pt-3 lg:pb-2.5">
+      <PenNote arrow="up" className="col-start-2 ms-3 font-medium text-pretty lg:text-base">
+        <span id={WHAT_NOTE_ID}>אפשר לכתוב כאן גם שאלה. היועץ יענה מתוך מה שיש באתר.</span>
+      </PenNote>
+    </div>
+  );
+  // מה הבנו מהמילים, או הקורסים בשם הזה. בדף הבית מתחת לתיבה, ובשאר העמודים מתחת לשורות.
+  const whatStatus = (
+    <>
+      <p role="status" className={cn(smallNote, 'mt-3')}>
+        {working ? (
+          <>מבינים את ״{query.q}״…</>
+        ) : named ? null : query.q && query.cats.length > 0 ? (
+          <>
+            הבנו: {query.cats.map(nameOf).join(', ')}.{' '}
+            <button type="button" className={smallLink} onClick={() => setOpen('what')}>
+              לא מדויק?
+            </button>
+          </>
+        ) : query.q ? (
+          <>
+            לא מצאנו תחום שמתאים ל״{query.q}״.{' '}
+            <button type="button" className={smallLink} onClick={() => setOpen('what')}>
+              לבחור מהרשימה
+            </button>
+          </>
+        ) : null}
+      </p>
+      {named && !working && (
+        <>
+          {/* הערה של האתר: עט, עם חץ (מסמך העיצוב, 3א.2). */}
+          <p className="font-pen text-[15px] leading-snug font-medium text-pen lg:text-[17px]">
+            <PenArrow />
+            {named.by === 'title' ? 'יש לנו קורס בשם הזה: ' : `יש לנו קורסים של ${named.courses[0].institutionName}: `}
+            {named.courses.map((course, i) => (
+              <Fragment key={course.slug}>
+                {i > 0 && ', '}
+                <Link href={`/courses/${course.slug}`} className={smallLink}>
+                  {course.title}
+                </Link>
+              </Fragment>
+            ))}
+          </p>
+          {similar.length > 0 && (
+            <p className={cn(smallNote, 'mt-1')}>
+              קורסים דומים:{' '}
+              {similar.map((course, i) => (
+                <Fragment key={course.slug}>
+                  {i > 0 && ', '}
+                  <Link href={`/courses/${course.slug}`} className={smallLink}>
+                    {course.title}
+                  </Link>
+                </Fragment>
+              ))}
+            </p>
+          )}
+        </>
+      )}
+    </>
+  );
+  const submitButton = (
+    <button
+      type="submit"
+      className={cn(
+        buttonVariants(),
+        'mt-3.5 h-[50px] w-full font-sans text-base font-bold lg:h-[54px] lg:max-w-[400px] lg:text-[17px]',
+      )}
+    >
+      {buttonLabel}
+    </button>
+  );
+
   return (
     <>
       {/* קו השוליים של המחברת מצויר ב-NotebookPage, כדי שימשיך לאורך הרשימה והחלקים שאחריה, כמו בציור.
@@ -348,7 +478,41 @@ export function Notebook({
             if (event.key === 'Escape' && open && !(event.target as HTMLElement).closest('[role=group]')) setOpen(null);
           }}
         >
-          <p className="ms-(--margin) pt-1 ps-3 pb-1.5 text-lg leading-normal lg:text-xl">אני רוצה ללמוד</p>
+          {whatBox ? (
+            <>
+              {/* בשביל מי: שתי דלתות שוות (עיקרון 5). בחירה אחת מתוך שתיים, כמו בשורה "למה". */}
+              <div
+                role="group"
+                aria-label="בשביל מי"
+                className="grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center pb-3"
+              >
+                <span className={cn(panelLabel, 'pt-0')}>בשביל מי?</span>
+                <div className="flex flex-wrap gap-2 ps-3">
+                  <ChoiceChip pressed={!forTeam} onClick={() => setForTeam(false)}>
+                    בשבילי
+                  </ChoiceChip>
+                  <ChoiceChip pressed={forTeam} onClick={() => setForTeam(true)}>
+                    בשביל העובדים
+                  </ChoiceChip>
+                </div>
+              </div>
+              {/* התיבה: שורה 1 של המחברת, גבוהה. השוליים ריקים: הכותרת שמעליה היא השאלה. */}
+              <div className="ruled-top">
+                <div className="ruled-row ruled-active grid grid-cols-[var(--margin)_minmax(0,1fr)]">
+                  <span aria-hidden="true" />
+                  {whatInput}
+                </div>
+                {advisor && advisorNote}
+              </div>
+              <div className="ms-(--margin) ps-3">
+                {whatStatus}
+                {submitButton}
+              </div>
+              <p className="ms-(--margin) mt-9 ps-3 pb-1.5 text-lg leading-normal lg:mt-12 lg:text-xl">או בחרו בעצמכם</p>
+            </>
+          ) : (
+            <p className="ms-(--margin) pt-1 ps-3 pb-1.5 text-lg leading-normal lg:text-xl">אני רוצה ללמוד</p>
+          )}
           <ol className="ruled-top">
             <li>
               <AnswerLine
@@ -363,41 +527,27 @@ export function Notebook({
                   <p className={lineText}>
                     <PenAnswer>{shownWhat}</PenAnswer>
                   </p>
-                ) : (
-                  <div
-                    key={shownWhat}
-                    data-copy={shownWhat || WHAT_EXAMPLE}
-                    data-empty={shownWhat === '' ? '' : undefined}
-                    className={cn(growCopy, 'grid min-w-0 self-stretch after:pt-4 after:ps-3 after:pb-1 after:pe-1')}
+                ) : whatBox ? (
+                  // בדף הבית: לבחור תחום בעצמכם. התחומים נפתחים מתחת לשורה, כמו "למה".
+                  <button
+                    type="button"
+                    aria-expanded={open === 'what'}
+                    aria-controls="what-options"
+                    onClick={() => toggleOpen('what')}
+                    className={lineText}
                   >
-                    <textarea
-                      name="what"
-                      rows={1}
-                      defaultValue={shownWhat}
-                      maxLength={MAX_Q_LENGTH}
-                      autoComplete="off"
-                      enterKeyHint="search"
-                      aria-label="מה ללמוד"
-                      aria-describedby={advisor ? WHAT_NOTE_ID : undefined}
-                      placeholder={WHAT_EXAMPLE}
-                      onFocus={() => setOpen('what')}
-                      onInput={(event) => syncCopy(event.currentTarget, WHAT_EXAMPLE)}
-                      onKeyDown={submitOnEnter}
-                      onBlur={(event) => void commitWhat(event.currentTarget.value)}
-                      className={cn(
-                        'col-start-1 row-start-1 min-w-0 resize-none overflow-hidden pt-4 ps-3 pb-1 pe-1 text-start',
-                        penInput,
-                        inputExample,
-                        // הדוגמה המודפסת נשארת לקורא מסך ולמי שכבר בשדה. מחוץ לשדה מוצגת הדוגמה שנכתבת בעט.
-                        '[&:not(:focus)]:placeholder:text-transparent',
-                        isStruck('what') && struck,
-                      )}
-                    />
-                    <PenExample className="col-start-1 row-start-1 self-start pt-4 ps-3 pe-1 leading-normal" />
-                  </div>
+                    <span className="sr-only">מה: </span>
+                    {query.cats.length > 0 ? (
+                      <PenAnswer struck={isStruck('what')}>{query.cats.map(nameOf).join(', ')}</PenAnswer>
+                    ) : (
+                      <span className={example}>לבחור תחום מהרשימה</span>
+                    )}
+                  </button>
+                ) : (
+                  whatInput
                 )}
               </AnswerLine>
-              {!fixedWhat && shownWhat === '' && open !== 'what' && (
+              {!fixedWhat && !whatBox && shownWhat === '' && open !== 'what' && (
                 // דוגמאות שלוחצים עליהן: נכתבות בשורה הראשונה ומראות את הרשימה, כמו Enter.
                 <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] items-center pt-1 pb-1.5">
                   <span className={cn(panelLabel, 'pt-0')}>או</span>
@@ -417,16 +567,9 @@ export function Notebook({
                   </div>
                 </div>
               )}
-              {advisor && !fixedWhat && (
-                // הערה של האתר בעט, על השורה שמתחת לשורה הראשונה, עם חץ שעולה אליה: גם שאלה נכתבת שם.
-                <div className="ruled-row grid grid-cols-[var(--margin)_minmax(0,1fr)] pt-2.5 pb-2 lg:pt-3 lg:pb-2.5">
-                  <PenNote arrow="up" className="col-start-2 ms-3 font-medium text-pretty lg:text-base">
-                    <span id={WHAT_NOTE_ID}>אפשר לכתוב כאן גם שאלה. היועץ יענה מתוך מה שיש באתר.</span>
-                  </PenNote>
-                </div>
-              )}
+              {advisor && !fixedWhat && !whatBox && advisorNote}
               {!fixedWhat && open === 'what' && (
-                <div role="group" aria-label="מה ללמוד: אפשר לבחור תחום" className={panel}>
+                <div id="what-options" role="group" aria-label="מה ללמוד: אפשר לבחור תחום" className={panel}>
                   <span className={panelLabel}>או לבחור</span>
                   <div className="flex flex-wrap gap-2 ps-3">
                     {pickable.map((category) => (
@@ -626,68 +769,12 @@ export function Notebook({
                   לחפש בתחום אחר
                 </Link>
               </p>
-            ) : (
-              <>
-                <p role="status" className={cn(smallNote, 'mt-3')}>
-                  {working ? (
-                    <>מבינים את ״{query.q}״…</>
-                  ) : named ? null : query.q && query.cats.length > 0 ? (
-                    <>
-                      הבנו: {query.cats.map(nameOf).join(', ')}.{' '}
-                      <button type="button" className={smallLink} onClick={() => setOpen('what')}>
-                        לא מדויק?
-                      </button>
-                    </>
-                  ) : query.q ? (
-                    <>
-                      לא מצאנו תחום שמתאים ל״{query.q}״.{' '}
-                      <button type="button" className={smallLink} onClick={() => setOpen('what')}>
-                        לבחור מהרשימה
-                      </button>
-                    </>
-                  ) : null}
-                </p>
-                {named && !working && (
-                  <>
-                    {/* הערה של האתר: עט, עם חץ (מסמך העיצוב, 3א.2). */}
-                    <p className="font-pen text-[15px] leading-snug font-medium text-pen lg:text-[17px]">
-                      <PenArrow />
-                      {named.by === 'title'
-                        ? 'יש לנו קורס בשם הזה: '
-                        : `יש לנו קורסים של ${named.courses[0].institutionName}: `}
-                      {named.courses.map((course, i) => (
-                        <Fragment key={course.slug}>
-                          {i > 0 && ', '}
-                          <Link href={`/courses/${course.slug}`} className={smallLink}>
-                            {course.title}
-                          </Link>
-                        </Fragment>
-                      ))}
-                    </p>
-                    {similar.length > 0 && (
-                      <p className={cn(smallNote, 'mt-1')}>
-                        קורסים דומים:{' '}
-                        {similar.map((course, i) => (
-                          <Fragment key={course.slug}>
-                            {i > 0 && ', '}
-                            <Link href={`/courses/${course.slug}`} className={smallLink}>
-                              {course.title}
-                            </Link>
-                          </Fragment>
-                        ))}
-                      </p>
-                    )}
-                  </>
-                )}
-              </>
+            ) : whatBox ? null : (
+              whatStatus
             )}
-            <p className={cn(smallNote, 'mt-1')}>שורה בלי סימון לא מסננת את התוצאות.</p>
-            <button
-              type="submit"
-              className={cn(buttonVariants(), 'mt-3.5 h-[50px] w-full font-sans text-base font-bold lg:h-[54px] lg:max-w-[400px] lg:text-[17px]')}
-            >
-              {buttonLabel}
-            </button>
+            <p className={cn(smallNote, whatBox ? 'mt-3' : 'mt-1')}>שורה בלי סימון לא מסננת את התוצאות.</p>
+            {/* בדף הבית הכפתור מתחת לתיבה. הרשימה מתעדכנת לבד כשבוחרים בשורות. */}
+            {!whatBox && submitButton}
             {saveAnswers && activeLines(query).length > 0 && <SaveAnswers query={query} />}
           </div>
         </form>
@@ -711,6 +798,7 @@ export function Notebook({
           typeFirst={typeFirst}
           advisor={advisor ? adviser : null}
           question={query.q}
+          forTeam={whatBox && forTeam}
         />
       )}
     </>

@@ -32,11 +32,9 @@ export default async function HomePage() {
       fixedWhat={false}
       alwaysShowResults={false}
       saveAnswers
+      whatBox
       advisor={advisorEnabled()}
       hero={<HomeHero example={example} />}
-      heading="מה אתם רוצים ללמוד, ולמה?"
-      headingLevel={2}
-      intro="ארבע שורות, ונראה רק קורסים שמתאימים לכם. אפשר לכתוב במילים שלכם."
       afterForm={<SecondaryPaths />}
       after={
         <div className="lg:ms-(--margin) lg:grid lg:grid-cols-2 lg:gap-x-16 lg:ps-3">

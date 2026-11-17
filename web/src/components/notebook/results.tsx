@@ -215,6 +215,7 @@ export function Results({
   advisor = null,
   question = '',
   emptyCategory = false,
+  forTeam = false,
 }: {
   heading: string;
   results: MatchResult[];
@@ -223,6 +224,8 @@ export function Results({
   typeFirst?: string | null;
   advisor?: AdvisorApi | null;
   question?: string;
+  /** דף הבית, "בשביל העובדים": מתחת לרשימה, קישור לטופס בעמוד החברות. */
+  forTeam?: boolean;
 }) {
   const partial = results.some((r) => !r.full);
   const { shared, sharedCount, notes } = marginNotes(results);
@@ -287,6 +290,17 @@ export function Results({
             {emptyCategory ? 'מכירים קורס בתחום? בקשו שנבדוק אותו' : 'לא מצאתם? בקשו שנבדוק קורס'}
           </Link>
         </p>
+        {forTeam && (
+          // "בשביל העובדים" (מסמך העיצוב 2026-11-17): החיפוש המותאם לחברות בא בשלב 2. בינתיים, הטופס.
+          <p className="ms-(--margin) ps-3 font-sans text-[15px] font-semibold">
+            <Link
+              href="/companies#request"
+              className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
+            >
+              רוצים שנכין לכם רשימה?
+            </Link>
+          </p>
+        )}
       </section>
       {canAsk && (
         // רשימה אחרת מתחילה שאלה חדשה: תשובה על הרשימה הקודמת כבר לא נכונה לזו.
