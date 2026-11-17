@@ -51,6 +51,17 @@ describe('matchCourses', () => {
     ]);
   });
 
+  it('puts courses whose institution publishes more facts first, and only then scored before unscored', () => {
+    const courses = [
+      course({ slug: 'scored-few-facts', score: { status: 'scored', value: 9.1 }, certificate: null, nextCohortDate: null }),
+      course({ slug: 'unscored-all-facts' }),
+      course({ slug: 'scored-all-facts', score: { status: 'scored', value: 7 } }),
+      course({ slug: 'no-price', sitePrice: null }),
+    ];
+    // 6, 6, 5 ו-4 עובדות ידועות. בין שני השישה, הציון קובע.
+    expect(rows(courses).map((r) => r[0])).toEqual(['scored-all-facts', 'unscored-all-facts', 'no-price', 'scored-few-facts']);
+  });
+
   it('filters by subject, including sub-subjects, and lets the reason for learning rank without hiding', () => {
     const courses = [
       course({ slug: 'react', categorySlug: 'programming', categoryName: 'תכנות', categoryParentSlug: 'technology', courseType: 'career' }),
