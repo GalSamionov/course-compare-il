@@ -6,6 +6,7 @@ import { AtAGlance } from '@/components/course/at-a-glance';
 import { CourseActions } from '@/components/course/course-actions';
 import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
+import { PenNote } from '@/components/course/marks';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
 import { ScoreBox } from '@/components/course/score-box';
@@ -122,6 +123,21 @@ export default async function CoursePage({ params }: Props) {
                 הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
               </p>
             )}
+            {/* איך הקורס הגיע לאתר (גל, 17.11.2026). בעט, כי זה האתר שמדבר, ומיד מתחת לשם המוסד: לפני הציון ולפני הפרטים. */}
+            {course.pageUrl && (
+              <PenNote className="mt-2 max-w-[56ch] lg:mt-3 lg:text-base">
+                את הפרטים בעמוד אספנו אוטומטית{" "}
+                <a
+                  href={course.pageUrl}
+                  rel="nofollow noopener"
+                  className="underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover"
+                >
+                  מהדף של הקורס באתר המוסד
+                </a>
+                , ואנחנו קוראים אותו שוב כל שבוע.
+                {course.lastCheckedAt && <> בפעם האחרונה: {formatHebrewDate(course.lastCheckedAt)}.</>}
+              </PenNote>
+            )}
             {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
             <nav
               aria-label="בעמוד הזה"
@@ -170,7 +186,7 @@ export default async function CoursePage({ params }: Props) {
 
             {course.lastCheckedAt && (
               <p className="mt-6 font-sans text-[13px] text-ink-soft lg:mt-12 lg:text-sm">
-                פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
+                הפרטים מהדף של הקורס באתר המוסד, כפי שהיה ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
                 <Link href="/method" className="underline hover:text-link-hover">
                   איך אנחנו מסכמים ומי משלם לנו
                 </Link>
