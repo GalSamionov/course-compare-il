@@ -4,6 +4,7 @@ import { moreReviewsText } from '@/lib/format';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { closestToScore } from '@/lib/search/match';
 import type { CourseSummary } from '@/lib/search/types';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 /** חמישה קווי ספירה ביד: ארבעה עומדים, מימין לשמאל, והחמישי חוצה אותם. */
 const TALLY = [
@@ -52,6 +53,21 @@ export function ReviewTally({ have }: { have: number }) {
  * לבחירת הקורס ב-/review, ולא שלושה קורסים שרחוקים מציון בדיוק כמו כל השאר.
  */
 export function GraduatesCall({ courses }: { courses: CourseSummary[] }) {
+  // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN), ובלעדיה אין ביקורת. "סיימתם קורס?" נשאר, עם "נפתחת בקרוב"
+  // כמו בעמוד הביקורת, ובלי רשימת הקורסים שמחכים לביקורות (מסמך העיצוב 2026-11-17). מקומית וב-CI הכול כמו קודם.
+  if (!ACCOUNTS_OPEN) {
+    return (
+      <section aria-labelledby="graduates-title" className="mt-10 ms-(--margin) ps-3 lg:ms-0 lg:mt-16 lg:ps-0">
+        <h2 id="graduates-title" className="pen-rule text-[21px] leading-snug font-bold lg:text-[28px]">
+          סיימתם קורס?
+        </h2>
+        <p className="mt-2 font-sans text-[15px] leading-normal lg:text-[17px]">
+          ביקורת שלכם יכולה לתת לקורס ציון. מספיקות {MIN_REVIEWS} ביקורות מאומתות.
+        </p>
+        <PenNote className="mt-2 lg:text-base">כתיבת ביקורות נפתחת בקרוב.</PenNote>
+      </section>
+    );
+  }
   const closest = closestToScore(courses, 3);
   if (closest.length === 0) {
     return (

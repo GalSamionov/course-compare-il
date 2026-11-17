@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { HomeHero } from '@/components/home/home-hero';
+import { WhatYouSee } from '@/components/home/what-you-see';
 import { NotebookPage } from '@/components/notebook/notebook-page';
 import { GraduatesCall } from '@/components/site/graduates-call';
 import { SecondaryPaths } from '@/components/site/secondary-paths';
@@ -37,10 +38,13 @@ export default async function HomePage() {
       hero={<HomeHero example={example} />}
       afterForm={<SecondaryPaths />}
       after={
-        <div className="lg:ms-(--margin) lg:grid lg:grid-cols-2 lg:gap-x-16 lg:ps-3">
-          <GraduatesCall courses={catalog.courses} />
-          <SubjectsToc categories={catalog.categories} className="lg:ms-0 lg:ps-0" />
-        </div>
+        <>
+          <div className="lg:ms-(--margin) lg:grid lg:grid-cols-2 lg:gap-x-16 lg:ps-3">
+            <WhatYouSee />
+            <GraduatesCall courses={catalog.courses} />
+          </div>
+          <SubjectsToc categories={catalog.categories} />
+        </>
       }
     />
   );

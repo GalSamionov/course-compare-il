@@ -1,16 +1,14 @@
 import { PenArrow } from '@/components/site/pen';
-import { VerificationSteps } from '@/components/site/verification-steps';
 import type { CoursePageData } from '@/lib/data/course-page';
 import type { CourseSummary } from '@/lib/search/types';
 import { cn } from '@/lib/utils';
 import { ExampleCard } from './example-card';
 
 /**
- * הפתיחה של דף הבית (חוזה דף הבית, FIRST VIEWPORT).
- * במחשב: ההבטחה ושלושת הצעדים מימין, הסיכום של קורס מהאתר משמאל.
- * בנייד: ההבטחה, הסיכום, ואז הצעדים. הסדר בקוד הוא סדר הקריאה בנייד.
- * בלי קורס עם ציון (כמו ביום העלייה לאוויר) אין סיכום להראות, ואין עמודה ריקה: ההבטחה ברוחב קריאה,
- * והצעדים מתחתיה לכל רוחב הדף, עם החצים ביניהם.
+ * הפתיחה של דף הבית (מסמך העיצוב 2026-11-17): "לא יודעים למי לפנות?" ומשפט אחד, והתיבה מיד אחריהם (notebook.tsx).
+ * "איך האימות עובד" ירד. במקומו "מה רואים כאן", אחרי הרשימה (what-you-see.tsx).
+ * הסיכום לדוגמה מופיע רק כשיש קורס עם ציון, כמו קודם. במחשב: ההבטחה מימין והסיכום משמאל.
+ * בנייד הסיכום לא מוצג: הוא עמד בין הכותרת לתיבה ודחף את התיבה אל מתחת למסך הראשון.
  */
 export function HomeHero({ example }: { example: { course: CourseSummary; page: CoursePageData | null } | null }) {
   return (
@@ -23,11 +21,11 @@ export function HomeHero({ example }: { example: { course: CourseSummary; page: 
           id="promise"
           className="text-[33px] leading-[1.14] font-bold tracking-[-0.01em] text-balance lg:text-[54px] lg:leading-[1.08]"
         >
-          לפני שמשלמים על קורס: מה אומרים בוגרים שהוכיחו שלמדו בו
+          לא יודעים למי לפנות? כתבו מה אתם צריכים.
         </h1>
-        <p className="mt-4 max-w-[46ch] font-sans text-[17px] leading-normal text-pretty lg:mt-6 lg:text-xl">
-          השוואת קורסים בכל התחומים. ביקורת מתפרסמת רק מבוגר שהעלה חשבונית, קבלה או תעודת סיום,
-          <strong className="font-bold"> ואף מוכר קורסים לא משלם לנו.</strong>
+        <p className="mt-4 max-w-[52ch] font-sans text-[17px] leading-normal text-pretty lg:mt-6 lg:text-xl">
+          נראה לכם את האפשרויות זו לצד זו, מה כל אחד מפרסם ומה הוא לא כותב, ומה לשאול לפני שמשלמים.
+          <strong className="font-bold"> אף מוכר לא משלם לנו.</strong>
         </p>
         {example && (
           <p className="mt-5 hidden font-pen text-lg font-medium text-pen lg:block">
@@ -40,12 +38,9 @@ export function HomeHero({ example }: { example: { course: CourseSummary; page: 
         <ExampleCard
           course={example.course}
           page={example.page}
-          className="mt-9 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-2"
+          className="hidden lg:col-start-2 lg:row-start-1 lg:mt-2 lg:block"
         />
       )}
-      <VerificationSteps
-        className={cn('mt-12', example ? 'lg:col-start-1 lg:row-start-2 lg:mt-8 lg:self-end' : 'lg:mt-14')}
-      />
     </section>
   );
 }
