@@ -63,6 +63,6 @@ def test_an_institution_approved_in_ai_gets_the_four_ai_categories():
 def test_no_institution_in_the_config_still_uses_ai():
     config = load_config(Path(__file__).resolve().parent.parent / "institutions.yaml")
     assert not [i.slug for i in config.institutions if "ai" in i.categories]
-    with_ai = [i.slug for i in config.institutions if "ai-at-work" in i.categories]
-    assert len(with_ai) == 13
-    assert all(set(AI) <= set(i.categories) for i in config.institutions if i.slug in with_ai)
+    # 13 המוסדות שהיו ב-ai קיבלו את כל ארבעת התחומים. מוכרים שנוספו אחר כך (17.11.2026) בוחרים רק חלק מהם.
+    split = [i.slug for i in config.institutions if set(AI) <= set(i.categories)]
+    assert len(split) == 13
