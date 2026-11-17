@@ -6,7 +6,6 @@ import { AtAGlance } from '@/components/course/at-a-glance';
 import { CourseActions } from '@/components/course/course-actions';
 import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
-import { PenNote } from '@/components/course/marks';
 import { PriceSection } from '@/components/course/price-section';
 import { ReviewsSection } from '@/components/course/reviews-section';
 import { ScoreBox } from '@/components/course/score-box';
@@ -123,9 +122,9 @@ export default async function CoursePage({ params }: Props) {
                 הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
               </p>
             )}
-            {/* איך הקורס הגיע לאתר (גל, 17.11.2026). בעט, כי זה האתר שמדבר, ומיד מתחת לשם המוסד: לפני הציון ולפני הפרטים. */}
+            {/* מאיפה הפרטים (גל, 17.11.2026): תווית מקור קטנה, כמו "לפי 5 חשבוניות" ב"בקצרה". לא בעט: בעט היא הייתה בולטת מדי. */}
             {course.pageUrl && (
-              <PenNote className="mt-2 max-w-[56ch] lg:mt-3 lg:text-base">
+              <p className="mt-1.5 max-w-[60ch] font-sans text-[13px] leading-snug text-ink-soft lg:mt-2 lg:text-sm">
                 הפרטים כאן הם מה שהמוסד כותב על עצמו{" "}
                 <a
                   href={course.pageUrl}
@@ -136,7 +135,7 @@ export default async function CoursePage({ params }: Props) {
                 </a>
                 , ולא בדקנו אותם מעבר לזה.
                 {course.lastCheckedAt && <> הדף נקרא ב-{formatHebrewDate(course.lastCheckedAt)}.</>}
-              </PenNote>
+              </p>
             )}
             {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
             <nav
