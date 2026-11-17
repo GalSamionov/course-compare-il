@@ -42,7 +42,7 @@ export async function loadCatalog(): Promise<Catalog> {
     db
       .from('courses')
       .select(
-        'id, slug, title, category_id, site_price_ils, formats, time_slots, product_type, updated_at, institutions(name), scores(status, value, reviews_needed, per_metric)',
+        'id, slug, title, category_id, site_price_ils, total_hours, duration_months, formats, region, certificate, next_cohort_date, time_slots, product_type, updated_at, institutions(name), scores(status, value, reviews_needed, per_metric)',
       )
       .in('status', ['active', 'maybe_inactive'])
       .eq('scores.kind', 'graduate')
@@ -93,6 +93,12 @@ export async function loadCatalog(): Promise<Catalog> {
         score,
         verifiedCount: reviewCounts.get(row.id) ?? 0,
         sitePrice: row.site_price_ils,
+        totalHours: row.total_hours,
+        // numeric: כמו בעמוד הקורס, Number כדי שיגיע מספר גם כשהמסד מחזיר מחרוזת.
+        durationMonths: row.duration_months === null ? null : Number(row.duration_months),
+        region: row.region,
+        certificate: row.certificate,
+        nextCohortDate: row.next_cohort_date,
         formats: row.formats.filter(isFormat),
         timeSlots: row.time_slots.filter(isTimeSlot),
         updatedAt: row.updated_at,
