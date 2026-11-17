@@ -6,7 +6,7 @@ import {
   verifiedGraduatesText,
   verifiedReviewsText,
 } from '@/lib/format';
-import { SAMPLE_DATA, SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site';
 
 /**
  * הטקסט של קישור לעמוד קורס, כמו שהוא מופיע בוואטסאפ ובפייסבוק: כותרת, תיאור, ושורות התמונה.
@@ -31,7 +31,6 @@ export function courseShareDescription(course: Pick<CoursePageData, 'score' | 'p
   }
   if (course.paid) parts.push(`${paidRangeSentence(course.paid)}, ${invoiceCountText(course.paid)}.`);
   parts.push('אף מוכר לא משלם לנו.');
-  if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
   return parts.join(' ');
 }
 
@@ -42,9 +41,7 @@ export function courseShareMessage(course: Pick<CoursePageData, 'title' | 'insti
 
 /** הודעה על השוואה: שמות הקורסים, ומי משלם לנו. */
 export function compareShareMessage(titles: readonly string[]): string {
-  const parts = [`השוואה ב${SITE_NAME}: ${titles.join(', ')}.`, 'אף מוכר לא משלם לנו.'];
-  if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
-  return parts.join(' ');
+  return `השוואה ב${SITE_NAME}: ${titles.join(', ')}. אף מוכר לא משלם לנו.`;
 }
 
 /** הכותרת של עמוד ההסבה להייטק: בעמוד עצמו, בתצוגה של הקישור ובתמונת השיתוף. */
@@ -60,13 +57,11 @@ export function careerChangeCounts(page: { courses: readonly unknown[]; graduate
 
 /** תיאור הקישור לעמוד ההסבה, וגם השורה השנייה בהודעה בוואטסאפ. */
 export function careerChangeDescription(page: { courses: readonly unknown[]; graduates: number }): string {
-  const parts = [
+  return [
     `${careerChangeCounts(page)}.`,
     'ציון רק מבוגרים שהוכיחו שלמדו, כמה שילמו בפועל לפי חשבוניות, ומה לשאול לפני שמשלמים.',
     'אף מוסד לא משלם לנו.',
-  ];
-  if (SAMPLE_DATA) parts.push('נתוני דוגמה.');
-  return parts.join(' ');
+  ].join(' ');
 }
 
 /** ההודעה בוואטסאפ: הכותרת, ומתחתיה התיאור. */

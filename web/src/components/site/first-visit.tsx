@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useRef, useState } from 'react';
-import { Claim, Tape } from '@/components/course/marks';
+import { Claim, MarkSample, Tape } from '@/components/course/marks';
 import { PEN_LOOPS, PenArrow } from '@/components/site/pen';
 import { buttonVariants } from '@/components/ui/button';
 import { INTRO_OPEN_EVENT, WALKTHROUGH, hasSeenIntro, introAllowedOn, markIntroSeen } from '@/lib/intro';
@@ -90,7 +90,7 @@ export function FirstVisit() {
             if (event.key === 'Escape') close();
           }}
           className={cn(
-            // במחשב בפינה הימנית: בצד שמאל של עמוד הקורס עומדים הציון והכפתורים, ובדף הבית הסיכום לדוגמה.
+            // במחשב בפינה הימנית: בצד שמאל של עמוד הקורס עומדים הציון והכפתורים, ובדף הבית הסיכום של קורס.
             'fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-40 lg:inset-x-auto lg:start-7 lg:bottom-7 lg:w-[380px]',
             'animate-in fade-in slide-in-from-bottom-3 duration-300 ease-out motion-reduce:animate-none',
           )}
@@ -172,7 +172,7 @@ function StepOne() {
       </p>
       <p className="mt-2 font-pen text-sm leading-snug font-medium text-pen">
         <PenArrow />
-        כאן הכול נתוני דוגמה, עד ההשקה.
+        פרטי הקורסים לקוחים מהאתרים של המוסדות.
       </p>
     </>
   );
@@ -180,22 +180,21 @@ function StepOne() {
 
 /** אותו מקרא כמו בעמוד הקורס (course/source-legend.tsx), גדול יותר. */
 function StepTwo() {
-  const swatch = 'hl font-semibold';
   return (
     <>
       <StepTitle>הצבע אומר מאיפה המידע</StepTitle>
-      <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm leading-normal lg:text-[15px]">
+      <ul className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-sm leading-normal text-balance lg:text-[15px]">
         <li>
-          <span className={cn(swatch, 'hl-verified')}>ירוק</span> נבדק מול מסמך
+          <MarkSample source="verified">ירוק</MarkSample> נבדק מול מסמך
         </li>
         <li>
-          <span className={cn(swatch, 'hl-grads')}>צהוב</span> מה שבוגרים אמרו
+          <MarkSample source="grads">צהוב</MarkSample> מה שבוגרים אמרו
         </li>
         <li>
-          <span className={cn(swatch, 'hl-weak')}>ורוד</span> נקודת חולשה
+          <MarkSample source="weak">ורוד</MarkSample> נקודת חולשה
         </li>
         <li>
-          <Claim>קו כחול</Claim> המוסד אומר, לא נבדק
+          <Claim>קו כחול</Claim> המוסד אומר, לא&nbsp;נבדק
         </li>
       </ul>
       <p className="mt-2.5 text-[13px] leading-normal text-ink-soft lg:text-sm">פתק צהוב הוא בוגר. פתק כחול הוא המוסד.</p>

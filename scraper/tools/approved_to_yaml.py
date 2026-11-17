@@ -20,6 +20,11 @@ LINK = re.compile(r"\]\((https?://[^)\s]+)\)")
 KIND = {"מכללה": "college", "בית ספר": "school", "מרצה עצמאי": "independent"}
 SUFFIXES_2 = {"co.il", "org.il", "ac.il", "gov.il", "net.il", "muni.il", "k12.il"}
 MAX_PAGES = 60
+# תחום ברשימה המאושרת שבאתר התחלק לכמה תחומים (20261116040001_new_categories.sql). מוסד שאושר בתחום
+# מקבל את כל התחומים שבמקומו, והמודל בוחר ביניהם לכל קורס לפי התיאור.
+SPLIT: dict[str, list[str]] = {
+    "ai": ["ai-at-work", "ai-automation", "ai-no-code", "ai-content"],
+}
 # מההערות ברשימה המאושרת ומהגילוי היבש של 15.11.2026: מה לסרוק ומה לא, לכל מוסד.
 OVERRIDES: dict[str, dict] = {
     # "בית הספר נמצא בנתיב /school/ בתוך אתר prog.co.il; לסרוק רק את הנתיב הזה". מפת האתר: מיליון כתובות של פורום.
@@ -86,8 +91,9 @@ def parse(markdown: str) -> list[Entry]:
         website = site.group(1)
         host = base_host(website)
         entry = entries.setdefault(host, Entry(name=name, website=website, kind=kind_for(kind_cell)))
-        if category not in entry.categories:
-            entry.categories.append(category)
+        for slug in SPLIT.get(category, [category]):
+            if slug not in entry.categories:
+                entry.categories.append(slug)
         for url in LINK.findall(course_cell):
             course_host = base_host(url)
             if course_host == host or course_host.endswith("." + host):

@@ -5,6 +5,7 @@ import {
   LINE_KEYS,
   TIME_SLOTS,
   TIME_SLOT_LABEL,
+  type Catalog,
   type CourseFormat,
   type LineKey,
   type SearchQuery,
@@ -40,8 +41,22 @@ export function parsePrice(raw: string): number | null {
   return value > 0 ? value : null;
 }
 
-/** התשובות מהכתובת. מפתח שחסר בכתובת לוקח את הערך הממולא מראש (base). */
-export function parseQuery(params: ParamSource, base: SearchQuery = EMPTY_QUERY): SearchQuery {
+/** תחום שיצא משימוש (Catalog.moved) מוחלף בתחומים שהחליפו אותו, בלי כפילויות. כך ?cat=ai ישן עדיין מסנן. */
+export function resolveMoved(cats: readonly string[], moved: Catalog['moved']): string[] {
+  return [...new Set(cats.flatMap((slug) => moved[slug] ?? [slug]))];
+}
+
+/** לאן עובר העמוד של תחום שיצא משימוש: לתחום שהחליף אותו, או לכל הקורסים בתחומים שהחליפו אותו. */
+export function movedCategoryHref(replacements: readonly string[]): string {
+  if (replacements.length === 1) return `/categories/${replacements[0]}`;
+  return `/courses?${new URLSearchParams({ cat: replacements.join(',') })}`;
+}
+
+/**
+ * התשובות מהכתובת. מפתח שחסר בכתובת לוקח את הערך הממולא מראש (base).
+ * moved: תחומים שיצאו משימוש, מהקטלוג. תחום כזה בכתובת מוחלף בתחומים שהחליפו אותו.
+ */
+export function parseQuery(params: ParamSource, base: SearchQuery = EMPTY_QUERY, moved: Catalog['moved'] = {}): SearchQuery {
   const q = params.get('q');
   const cat = params.get('cat');
   const why = params.get('why');
@@ -51,7 +66,7 @@ export function parseQuery(params: ParamSource, base: SearchQuery = EMPTY_QUERY)
     cats:
       cat === null
         ? [...base.cats]
-        : [...new Set(cat.split(',').map((s) => s.trim()).filter((s) => SLUG.test(s)))].slice(0, 5),
+        : resolveMoved([...new Set(cat.split(',').map((s) => s.trim()).filter((s) => SLUG.test(s)))].slice(0, 5), moved),
     why: why === null ? base.why : WHY_KEYS.includes(why) ? (why as WhyKey) : null,
     when: listFrom(params.get('when'), TIME_SLOTS, base.when),
     how: listFrom(params.get('how'), COURSE_FORMATS, base.how),

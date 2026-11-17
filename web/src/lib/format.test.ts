@@ -4,6 +4,7 @@ import {
   formatHebrewDate,
   formatIls,
   invoiceCountText,
+  keepShekelWithAmount,
   missingReviewsText,
   moreReviewsText,
   outcomeBasis,
@@ -35,6 +36,10 @@ describe('formatIls', () => {
   it('adds thousands separators and the shekel sign', () => {
     expect(formatIls(14900)).toBe('14,900 ₪');
     expect(formatIls(1500)).toBe('1,500 ₪');
+  });
+  it('keeps the shekel sign on the line of its amount, in the page', () => {
+    expect(keepShekelWithAmount('בין 12,000 ל-16,000 ₪')).toBe('בין 12,000 ל-16,000\u00A0₪');
+    expect(keepShekelWithAmount('פעם בשבוע ₪ אחד')).toBe('פעם בשבוע ₪ אחד');
   });
 });
 

@@ -20,6 +20,7 @@ from .extract import Extractor, ExtractionFailed, ModelUnavailable, PageInput
 from .fetch import Fetcher
 from .pagetext import extract_page, needs_browser
 from .politeness import HostLimiter
+from .regroup import Fetched, SeriesIndex, member_plan, recompute_course
 from .series import NewPage, group_new_pages, merge_group, series_info, split_title, title_key
 
 DEFAULT_WORKERS = 4
@@ -31,7 +32,7 @@ class InstitutionWork:
     id: str
     pages: dict[str, PageState]
     courses: dict[str, dict[str, Any]]
-    categories: tuple[tuple[str, str], ...]  # (slug, name)
+    categories: tuple[tuple[str, str], ...]  # (slug, השם והתיאור: db.active_categories)
     category_ids: dict[str, str]
 
     def course_for(self, url: str, page: PageState | None) -> str | None:
@@ -93,6 +94,10 @@ def process_institution(
         known_active=sum(1 for p in work.pages.values() if p.state == "active"),
     )
     deferred: list[NewPage] = []
+    # קורסים מאוחדים (regroup.py): מי מוביל, מי שייך, ומה צריך לחשב מחדש בסוף.
+    index = SeriesIndex.build(work.pages, work.courses)
+    fetched: dict[str, Fetched] = {}
+    recompute: set[str] = set()
     for url in discovery.urls:
         if stop.is_set():
             raise ModelUnavailable("stopped: another institution hit the model outage")
@@ -117,11 +122,13 @@ def process_institution(
             result.plans.append(PagePlan(url=url, outcome="failed", fetched_at=fetched_at, course_id=course_id, error=response.error))
             continue
         content_hash = content.hash
-        if page and page.last_hash == content_hash:
+        text = content.for_model()
+        unchanged = bool(page and page.last_hash == content_hash)
+        fetched[url] = Fetched(url, fetched_at, content_hash, text, content.title, response.method, changed=not unchanged)
+        if unchanged:
             result.counts["pages_unchanged"] += 1
             result.plans.append(PagePlan(url=url, outcome="unchanged", fetched_at=fetched_at, course_id=course_id))
             continue
-        text = content.for_model()
         try:
             extraction = extractor.extract(PageInput(url=url, text=text, categories=work.categories, today=today))
         except ExtractionFailed as error:
@@ -129,6 +136,14 @@ def process_institution(
             result.plans.append(PagePlan(url=url, outcome="failed", fetched_at=fetched_at, course_id=course_id, error=f"extract: {error}"))
             continue
         result.counts["pages_new" if page is None else "pages_changed"] += 1
+        fetched[url].extraction = extraction
+        series_course = index.lead_course(url) or index.course_of_member.get(url)
+        if series_course and extraction.is_course_page:
+            # דף של קורס מאוחד השתנה: הקורס מחושב מחדש מכל הדפים שלו, בסוף.
+            recompute.add(series_course)
+            if url in index.course_of_member:
+                result.plans.append(member_plan(fetched[url], series_course, extractor.model))
+            continue
         course = work.courses.get(course_id) if course_id else None
         if course is None and extraction.is_course_page and extraction.category is not None:
             # דף חדש שהוא קורס: ההחלטה אחרי שכל הדפים של המוסד נקראו, כדי לאחד מפגשים, מחזורים ומסלולים.
@@ -164,8 +179,74 @@ def process_institution(
             # דף שאינו קורס: רק הטביעה נשמרת, כדי לדלג עליו בשבוע הבא. הטקסט לא נחוץ ותופס מקום במסד.
             plan.snapshot["page_text"] = ""
         result.plans.append(plan)
-    result.plans += decide_new_pages(deferred, work, today, extractor.model)
+    new_plans, joined = decide_new_pages(deferred, work, today, extractor.model)
+    result.plans += new_plans
+    recompute.update(joined)
+    # דף של קורס מאוחד שנעלם מהאתר: המחזור הקרוב או המסלולים אולי היו ממנו.
+    if discovery.ok and discovery.complete:
+        seen = set(discovery.seen)
+        recompute.update(c for c, urls in index.members_of_course.items() if any(u not in seen for u in urls))
+    for course_id in sorted(recompute):
+        update_series_course(course_id, index, work, fetched, joined.get(course_id, []), today, extractor.model, result)
     return result
+
+
+def update_series_course(
+    course_id: str,
+    index: SeriesIndex,
+    work: InstitutionWork,
+    fetched: dict[str, Fetched],
+    new_members: list[NewPage],
+    today: date,
+    model: str,
+    result: InstitutionResult,
+) -> None:
+    """קורס מאוחד שאחד הדפים שלו השתנה, נוסף או נעלם: חישוב מחדש (regroup.py), והתוכנית של הדף המוביל."""
+    lead_url = index.lead_of_course.get(course_id)
+    if lead_url is None:
+        return
+    cfg = work.config
+    plan = recompute_course(
+        course_id=course_id,
+        index=index,
+        pages=work.pages,
+        course=work.courses[course_id],
+        fetched=fetched,
+        new_members=new_members,
+        today=today,
+        model=model,
+        institution_slug=cfg.slug,
+        category_ids=work.category_ids,
+        institution_categories=cfg.categories,
+    )
+    lead = fetched.get(lead_url)
+    if plan is None and lead is not None and lead.changed and lead.extraction is not None:
+        # אין חישוב מאוחד (למשל המוביל כבר לא דף של קורס): ההחלטה הרגילה על הדף המוביל.
+        plan = PagePlan(
+            url=lead_url,
+            outcome="changed",
+            fetched_at=lead.fetched_at,
+            course_id=course_id,
+            snapshot={"fetch_method": lead.method, "content_hash": lead.content_hash, "page_text": lead.text, "extracted": lead.extraction.to_json(), "model": model},
+        )
+        decide_changed(
+            plan=plan,
+            extraction=lead.extraction,
+            page_text=lead.text,
+            page_title=lead.page_title,
+            page=work.pages.get(lead_url),
+            course=work.courses[course_id],
+            today=today,
+            institution_slug=cfg.slug,
+            category_ids=work.category_ids,
+            institution_categories=cfg.categories,
+            skip_fields=GROUPED_FIELDS,
+        )
+        if plan.outcome == "not_course":
+            plan.snapshot["page_text"] = ""
+    if plan is not None:
+        # אם רק דף אחר השתנה, המוביל כבר ברשימה כ"לא השתנה": מחליפים אותו.
+        result.plans = [p for p in result.plans if p.url != lead_url] + [plan]
 
 
 # בקורס שאוחד מכמה דפים, השדות האלה באו מכל הדפים. הדף המוביל לבדו לא משנה אותם.
@@ -181,10 +262,12 @@ def grouped_fields(extraction: Any, page_title: str, course: dict[str, Any] | No
     return GROUPED_FIELDS if parts.marked and parts.key == title_key(course["title"]) else frozenset()
 
 
-def decide_new_pages(pages: list[NewPage], work: InstitutionWork, today: date, model: str) -> list[PagePlan]:
-    """דפים חדשים של המוסד: קורס אחד לכל קבוצה של אותו שם בסיס (series.py), ואירוע שעבר לא נהיה טיוטה."""
+def decide_new_pages(pages: list[NewPage], work: InstitutionWork, today: date, model: str) -> tuple[list[PagePlan], dict[str, list[NewPage]]]:
+    """דפים חדשים של המוסד: קורס אחד לכל קבוצה של אותו שם בסיס (series.py), ואירוע שעבר לא נהיה טיוטה.
+    מחזיר גם את הדפים החדשים שהצטרפו לקורס קיים (course_id -> דפים), כדי לחשב אותו מחדש (regroup.py)."""
     existing = {title_key(c["title"]): cid for cid, c in work.courses.items() if c.get("title")}
     plans: list[PagePlan] = []
+    joined: dict[str, list[NewPage]] = {}
     for item in group_new_pages(pages, existing, today):
         page = item.page
         extracted = page.extraction.to_json()
@@ -203,6 +286,8 @@ def decide_new_pages(pages: list[NewPage], work: InstitutionWork, today: date, m
         elif item.role == "member":
             # עוד דף של קורס: העותק נשמר, בלי טיוטה ובלי פריט בתור משלו.
             plan.outcome = "not_course"
+            if item.existing_course_id:
+                joined.setdefault(item.existing_course_id, []).append(page)
         else:
             grouped = len(item.group) > 1
             extraction = merge_group(item.group, page, today) if grouped or (page.parts and page.parts.marked) else page.extraction
@@ -223,8 +308,11 @@ def decide_new_pages(pages: list[NewPage], work: InstitutionWork, today: date, m
                 for queued in plan.queue:
                     if queued["kind"] == "new_course":
                         queued["reasons"].append("grouped_pages")
+            if grouped or (page.parts and page.parts.marked):
+                # הבסיס לשבוע הבא: מה שחושב מכל הדפים (regroup.py).
+                extracted["series"] = {"grouped_pages": [p.url for p in item.group], "merged": extraction.to_json()["fields"]}
         plans.append(plan)
-    return plans
+    return plans, joined
 
 
 def _counts_payload(counts: Counter) -> dict[str, int]:

@@ -15,7 +15,7 @@ import { SourceRef } from './source-ref';
 /** קישור בתוך טקסט: קו דק בדיו, כמו בעמוד הקורס. הקו הכחול שמור לטענה של מוסד. */
 export const textLink = 'underline decoration-1 underline-offset-[3px] hover:text-link-hover';
 
-function Inline({ node, guide }: { node: PhrasingContent; guide: Guide }) {
+function Inline({ node, guide, continues }: { node: PhrasingContent; guide: Guide; continues: boolean }) {
   switch (node.type) {
     case 'text':
       return node.value;
@@ -47,23 +47,35 @@ function Inline({ node, guide }: { node: PhrasingContent; guide: Guide }) {
         </a>
       );
     case 'textDirective':
-      return <Directive node={node} guide={guide} />;
+      return <Directive node={node} guide={guide} continues={continues} />;
     default:
       throw new Error(`guide-content: אין עיצוב ל-${node.type} בתוך שורה`);
   }
 }
 
+/**
+ * continues: עובדה ירוקה שממשיכה רצף של עובדות ירוקות באותה פסקה, ובינה לבין הקודמת רק רווח (והמספר של המקור).
+ * הווי בעט עומד רק בתחילת הרצף: וי בכל משפט באמצע השורה מפריע לקרוא טקסט ארוך (סקירת הסיום, 16.11.2026).
+ */
 function Inlines({ nodes, guide }: { nodes: PhrasingContent[]; guide: Guide }) {
-  return nodes.map((node, i) => <Inline key={i} node={node} guide={guide} />);
+  let previous: string | null = null;
+  return nodes.map((node, i) => {
+    const name = node.type === 'textDirective' ? node.name : null;
+    const continues = name === 'verified' && previous === 'verified';
+    if (!(node.type === 'text' && node.value.trim() === '')) previous = name;
+    return <Inline key={i} node={node} guide={guide} continues={continues} />;
+  });
 }
 
-function Directive({ node, guide }: { node: TextDirective; guide: Guide }) {
+function Directive({ node, guide, continues }: { node: TextDirective; guide: Guide; continues: boolean }) {
   const children = <Inlines nodes={node.children} guide={guide} />;
   if (node.name === 'verified') {
     const ref = guide.refs[node.data?.guideRef ?? -1];
     return (
       <>
-        <Mark source="verified">{children}</Mark>
+        <Mark source="verified" cue={!continues}>
+          {children}
+        </Mark>
         {ref && <SourceRef refData={ref} />}
       </>
     );

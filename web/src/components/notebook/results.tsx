@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { SaveButton } from '@/components/account/save-button';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
-import { Soon } from '@/components/site/soon';
 import { formatIls, missingReviewsText, verifiedGraduatesText } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
@@ -170,9 +169,12 @@ export function Results({
   typeFirst = null,
   advisor = null,
   question = '',
+  emptyCategory = false,
 }: {
   heading: string;
   results: MatchResult[];
+  /** עמוד של תחום שעוד אין בו קורסים: מה שאומרים כשאין שורות שונה, ואין מה להסביר על הסדר. */
+  emptyCategory?: boolean;
   typeFirst?: string | null;
   advisor?: AdvisorApi | null;
   question?: string;
@@ -195,7 +197,9 @@ export function Results({
             {heading}
           </h2>
           <p className="mt-2 max-w-[70ch] font-sans text-[13px] leading-normal text-ink-soft lg:text-[15px]">
-            מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.
+            {emptyCategory
+              ? 'גם כאן נספור רק בוגרים שהעלו הוכחה, ואף מוכר לא ישלם על מקום ברשימה.'
+              : 'מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.'}
             {typeFirst && ` קורסים מסוג ${typeFirst} מופיעים קודם.`}
             {partial && ' קורס שמתאים חוץ מדבר אחד מופיע בסוף, וההערה בשוליים אומרת מה לא מתאים.'}
           </p>
@@ -209,9 +213,11 @@ export function Results({
           {canAsk && <AskLink />}
         </div>
         {results.length === 0 ? (
-          <p className="ms-(--margin) mt-4 ps-3 font-sans text-[15px]">
-            אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והיא לא תסנן.
-          </p>
+          emptyCategory ? null : (
+            <p className="ms-(--margin) mt-4 ps-3 font-sans text-[15px]">
+              אין קורס שמתאים לכל השורות. אפשר להוריד סימון משורה, והיא לא תסנן.
+            </p>
+          )
         ) : (
           <>
             <LedgerHead />
@@ -227,14 +233,13 @@ export function Results({
             </div>
           </>
         )}
-        {/* למי שלא מצא (מסמך העיצוב, 3א.6). הבקשה עוד לא נבנתה, וההערה בעט אומרת את זה לפני הלחיצה. */}
+        {/* למי שלא מצא (מסמך העיצוב, 3א.6): הבקשה ב-/request-course פתוחה מסבב 5. */}
         <p className="ms-(--margin) mt-2 ps-3 font-sans text-[15px] font-semibold">
           <Link
             href="/request-course"
-            className="inline-flex min-h-11 flex-wrap items-center gap-x-2.5 hover:text-link-hover"
+            className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
           >
-            <span className="underline underline-offset-[3px]">לא מצאתם? בקשו שנבדוק קורס</span>
-            <Soon />
+            {emptyCategory ? 'מכירים קורס בתחום? בקשו שנבדוק אותו' : 'לא מצאתם? בקשו שנבדוק קורס'}
           </Link>
         </p>
       </section>

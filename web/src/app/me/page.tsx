@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { MeArea } from '@/components/account/me-area';
 import { Sheet } from '@/components/site/sheet';
 import { getCatalog } from '@/lib/data/catalog';
+import { NOINDEX } from '@/lib/seo/indexing';
 import { SITE_NAME } from '@/lib/site';
 
 /**
@@ -10,7 +11,8 @@ import { SITE_NAME } from '@/lib/site';
  */
 export const ensureStatic = 'navigation';
 
-export const metadata: Metadata = { title: `האזור שלי | ${SITE_NAME}` };
+/** עמוד אישי: לא במנועי חיפוש. */
+export const metadata: Metadata = { title: `האזור שלי | ${SITE_NAME}`, robots: NOINDEX };
 
 export default async function MePage() {
   const catalog = await getCatalog();

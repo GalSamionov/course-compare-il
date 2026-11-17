@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!institution) return {};
   return {
     title: `${institution.name}: כל הקורסים באתר | ${SITE_NAME}`,
+    alternates: { canonical: `/institutions/${institution.slug}` },
     description: `הקורסים של ${institution.name} באתר, לכל אחד ציון משלו מבוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
   };
 }

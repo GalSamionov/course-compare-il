@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!lecturer) return {};
   return {
     title: `${lecturer.name}: הקורסים באתר | ${SITE_NAME}`,
+    alternates: { canonical: `/lecturers/${slug}` },
     description: `הקורסים באתר ש${lecturer.name} מלמד או מלמדת בהם, מה המוסד אומר ומה בדקנו. אף מוכר לא משלם לנו.`,
   };
 }

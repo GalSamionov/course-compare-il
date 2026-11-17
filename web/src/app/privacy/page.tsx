@@ -5,6 +5,7 @@ import { CONTACT_EMAIL, SITE_NAME } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: `מדיניות פרטיות (טיוטה) | ${SITE_NAME}`,
+  alternates: { canonical: '/privacy' },
   description: 'מה האתר שומר, למה, כמה זמן ולמי זה עובר, ואיך מבקשים לראות, לתקן או למחוק. טיוטה, לפני בדיקה של עורך דין.',
 };
 
@@ -18,7 +19,7 @@ export default function PrivacyPage() {
   const mail = <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>;
   return (
     <TextPage title="מדיניות פרטיות" draft>
-      <p>האתר עוד לא עלה לציבור, ומציג נתוני דוגמה. הטיוטה מתארת מה נאסף היום.</p>
+      <p>הטיוטה מתארת מה האתר אוסף היום.</p>
 
       <h2 id="controller">מי אחראי על המידע</h2>
       <p>

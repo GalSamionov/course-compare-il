@@ -8,6 +8,12 @@ test('course page shows the score, the legend and every section', async ({ page 
   await expect(page.getByText('23 בוגרים מאומתים')).toBeVisible();
   await expect(page.getByText('את הקורס עצמו עוד לא בדקנו')).toBeVisible();
   await expect(page.getByLabel('מקרא הסימונים')).toBeVisible();
+  // WCAG 1.4.1: כל מרקר של מקור נושא גם סימן בעט (וי, בועת דיבור, קריאה), ולא רק צבע.
+  for (const source of ['verified', 'grads', 'weak']) {
+    const marks = page.locator(`mark[data-source="${source}"]`);
+    await expect(marks.first()).toBeVisible();
+    expect(await marks.count()).toBe(await page.locator(`mark[data-source="${source}"][data-cue="${source}"]`).count());
+  }
   for (const name of ['על הקורס', 'על המרצים', 'מחיר', 'מה הבוגרים אומרים', 'ביקורות']) {
     await expect(page.getByRole('heading', { level: 2, name })).toBeVisible();
   }

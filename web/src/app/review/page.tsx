@@ -7,7 +7,7 @@ import { SITE_NAME } from '@/lib/site';
 /** סטטי, עם הקטלוג מהמטמון. */
 export const ensureStatic = 'navigation';
 
-export const metadata: Metadata = { title: `כתיבת ביקורת | ${SITE_NAME}` };
+export const metadata: Metadata = { title: `כתיבת ביקורת | ${SITE_NAME}`, alternates: { canonical: '/review' } };
 
 /** המסלול "סיימתי קורס, רוצה לכתוב עליו" מדף הבית: בוחרים קורס, ועוברים לכתיבה. */
 export default async function ReviewPage() {

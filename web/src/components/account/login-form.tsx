@@ -33,7 +33,7 @@ type SendError = 'rate' | 'not-allowed' | 'failed';
 
 const SEND_ERROR_TEXT: Record<SendError, string> = {
   rate: 'שלחנו כבר כמה קישורים בשעה האחרונה. נסו שוב בעוד כמה דקות.',
-  'not-allowed': 'עד ההשקה אפשר להתחבר רק עם המיילים של צוות האתר.',
+  'not-allowed': 'ההתחברות עוד לא פתוחה לכולם, רק לצוות האתר.',
   failed: 'לא הצלחנו לשלוח את הקישור. נסו שוב בעוד דקה.',
 };
 

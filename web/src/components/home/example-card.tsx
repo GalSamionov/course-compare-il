@@ -17,9 +17,10 @@ const cohort = (iso: string) =>
   new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(iso));
 
 /**
- * סיכום לדוגמה של קורס אחד, מסומן במרקרים, מודבק על הדף בסלוטייפ עם תווית "לדוגמה".
- * המבקר לומד את שפת הצבעים מהדוגמה לפני שהוא קורא הסבר (חוזה דף הבית, FIRST VIEWPORT).
- * כל מספר מגיע מהמסד: הקורס עם הציון הגבוה בקטלוג, והעמוד שלו. אין כאן מספר שכתוב ביד.
+ * הסיכום של קורס אחד מהאתר, מסומן במרקרים ומודבק על הדף בסלוטייפ.
+ * המבקר לומד את שפת הצבעים מסיכום אמיתי לפני שהוא קורא הסבר (חוזה דף הבית, FIRST VIEWPORT).
+ * כל מספר מגיע מהמסד: מבין הקורסים עם ציון, זה שהכי הרבה בוגרים מאומתים כתבו עליו (page.tsx), והעמוד שלו.
+ * ההערה בעט אומרת למה דווקא הוא, כדי שאף אחד לא יקרא אותו כמקום ששילמו עליו.
  */
 export function ExampleCard({ course, page, className }: { course: CourseSummary; page: CoursePageData | null; className?: string }) {
   const score = page?.score ?? null;
@@ -30,9 +31,7 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
       <div className="relative -rotate-[1.2deg] bg-white px-5 pt-8 pb-6 shadow-[0_1px_2px_rgb(0_0_0/0.18),0_18px_30px_-16px_rgb(0_0_0/0.45)] ring-1 ring-black/[0.06] lg:px-8 lg:pt-9 lg:pb-8">
         {/* במחשב הפתק של הבוגר מחזיק את הפינה, ולכן הסלוטייפ באמצע רק בנייד. */}
         <Tape width={92} tilt={-2} className="lg:hidden" />
-        <Tape side="top-start" width={96} tilt={-24} className="font-sans text-[14px] font-bold tracking-wide text-ink">
-          לדוגמה
-        </Tape>
+        <Tape side="top-start" width={96} tilt={-24} />
 
         {/*
           הכותרת קודם, ומתחתיה חותמת המוסד והתחום, כמו בראש עמוד הקורס. בלי שורה מעל הכותרת.
@@ -114,14 +113,16 @@ export function ExampleCard({ course, page, className }: { course: CourseSummary
       </div>
 
       <figcaption id="example-caption" className="mt-6 lg:mt-8 lg:max-w-[420px]">
-        <PenNote className="text-base font-medium lg:text-lg">כל צבע אומר מאיפה המידע. כאן הכול נתוני דמה.</PenNote>
+        <PenNote className="text-base font-medium text-pretty lg:text-lg">
+          כל צבע אומר מאיפה המידע. מבין הקורסים עם ציון, זה שהכי הרבה בוגרים כתבו עליו.
+        </PenNote>
         <SourceLegend variant="inline" />
         <p className="mt-1 font-sans text-[15px] font-semibold">
           <Link
             href={`/courses/${course.slug}`}
             className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
           >
-            לסיכום המלא של הקורס לדוגמה
+            לסיכום המלא של הקורס
           </Link>
         </p>
       </figcaption>

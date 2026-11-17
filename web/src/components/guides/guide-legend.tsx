@@ -1,4 +1,4 @@
-import { Claim, Tape } from '@/components/course/marks';
+import { Claim, MarkSample, Tape } from '@/components/course/marks';
 import { cn } from '@/lib/utils';
 
 /**
@@ -20,7 +20,7 @@ export function GuideLegend({ className }: { className?: string }) {
       <p className="mb-2 font-bold">מה אומר כל סימון</p>
       <ul className="flex flex-col gap-1.5">
         <li>
-          <span className="hl hl-verified font-semibold">ירוק</span> נבדק מול מסמך רשמי
+          <MarkSample source="verified">ירוק</MarkSample> נבדק מול מסמך רשמי
         </li>
         <li>
           <Claim>קו כחול</Claim> מה שמוסדות אומרים. לא בדקנו
