@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { PenArrow } from '@/components/site/pen';
+import { factsLine } from '@/lib/course/facts';
+import { showsScore } from '@/lib/course/score-shown';
 import type { CoursePageData } from '@/lib/data/course-page';
 import {
   PAID_RANGE_LEAD,
@@ -22,6 +24,8 @@ const smallLink =
  * בנייד הכול מאותו צד, זה מתחת לזה: השם, הציון עם מספר הבוגרים המאומתים, המחיר באתר ומה ששולם בפועל
  * (מרקר ירוק), ובסוף השורות הנוספות. במחשב השורה נפרשת לעמודות, כמו ברשימת הקורסים: השם והשורות הנוספות,
  * הציון, והמחיר. כך הציונים עומדים זה מתחת לזה, ואפשר להשוות בעין. בלי נקודות מובילות (The Not A Menu Rule).
+ * קורס בלי ביקורת מפורסמת (מסמך העיצוב 2026-11-17): מה המוסד מפרסם (משך, מתכונת ומיקום) במקום "עוד אין ציון בוגרים".
+ * המחיר בעמודה שלידו, כמו קודם.
  * השורה נכתבת אל הדף כשהיא נכנסת למסך (data-anim="ink"), ובריחוף העט מותח קו מתחת לשם (.pen-under).
  * detail: שורה קצרה מיד מתחת לשם, לפני הציון. בעמוד מרצה: התפקיד בקורס.
  * children: שורות נוספות בסוף. בעמוד מוסד: מה המוסד מבטיח. בעמוד מרצה: מה הבוגרים אומרים על המרצים.
@@ -43,6 +47,7 @@ export function CourseRow({
   const { score } = course;
   const product = PRODUCT_TYPE_LABEL[course.productType];
   const removed = course.status === 'removed';
+  const facts = factsLine(course).filter((part) => part.key !== 'price');
   return (
     <article
       data-anim="ink"
@@ -81,31 +86,40 @@ export function CourseRow({
         {detail}
       </div>
 
-      {score.status === 'scored' ? (
-        <p className="flex items-center gap-x-2.5 font-sans text-sm leading-snug lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:flex-col lg:items-start lg:gap-y-1 lg:pt-1">
-          <span aria-hidden="true" className="text-[28px] leading-none font-bold tabular-nums lg:text-[34px]">
-            {score.value.toFixed(1)}
-          </span>
-          <span className="sr-only">
-            {scoreLabel}: {score.value.toFixed(1)}.{' '}
-          </span>
-          <span>
-            <span aria-hidden="true" className="block">
-              {scoreLabel}
+      {showsScore(course.reviewTotal) ? (
+        score.status === 'scored' ? (
+          <p className="flex items-center gap-x-2.5 font-sans text-sm leading-snug lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:flex-col lg:items-start lg:gap-y-1 lg:pt-1">
+            <span aria-hidden="true" className="text-[28px] leading-none font-bold tabular-nums lg:text-[34px]">
+              {score.value.toFixed(1)}
             </span>
-            <span className="block text-ink-soft">{verifiedGraduatesText(score.reviewCount)}</span>
-          </span>
-        </p>
+            <span className="sr-only">
+              {scoreLabel}: {score.value.toFixed(1)}.{' '}
+            </span>
+            <span>
+              <span aria-hidden="true" className="block">
+                {scoreLabel}
+              </span>
+              <span className="block text-ink-soft">{verifiedGraduatesText(score.reviewCount)}</span>
+            </span>
+          </p>
+        ) : (
+          <p className="font-sans text-sm leading-snug lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-1.5">
+            <strong className="block text-[15px]">עוד אין ציון בוגרים</strong>
+            {score.status === 'not_enough_reviews' && score.reviewCount > 0 && (
+              <span className="block text-ink-soft">{verifiedReviewsText(score.reviewCount)}</span>
+            )}
+            {score.status === 'not_enough_reviews' && score.reviewsNeeded > 0 && (
+              <span className="block text-ink-soft">{reviewsToScoreText(score.reviewsNeeded)}</span>
+            )}
+          </p>
+        )
       ) : (
-        <p className="font-sans text-sm leading-snug lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-1.5">
-          <strong className="block text-[15px]">עוד אין ציון בוגרים</strong>
-          {score.status === 'not_enough_reviews' && score.reviewCount > 0 && (
-            <span className="block text-ink-soft">{verifiedReviewsText(score.reviewCount)}</span>
-          )}
-          {score.status === 'not_enough_reviews' && score.reviewsNeeded > 0 && (
-            <span className="block text-ink-soft">{reviewsToScoreText(score.reviewsNeeded)}</span>
-          )}
-        </p>
+        facts.length > 0 && (
+          <p className="font-sans text-[15px] leading-snug lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:pt-1.5">
+            {/* רווח קשיח לפני הנקודה, כמו ברשימת הקורסים: בשבירת שורה היא לא פותחת את הבאה. */}
+            {facts.map((part) => part.text).join(' · ')}
+          </p>
+        )
       )}
 
       <p className="font-sans text-[15px] leading-normal tabular-nums lg:col-start-3 lg:row-span-2 lg:row-start-1 lg:pt-1.5">
