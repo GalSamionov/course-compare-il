@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ChoiceChip } from '@/components/notebook/choice-chip';
 import { loginHref, rememberForLogin, toggleSaved, useAccount } from '@/lib/account/store';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 /**
  * "לשמור": כפתור עם ריבוע ווי בעט, כמו "להשוואה" בציור של האזור האישי (Me.dc.html).
@@ -15,6 +16,9 @@ export function SaveButton({ courseId, title }: { courseId: string; title: strin
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const saved = account.status === 'signed-in' && account.saved.includes(courseId);
+
+  // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN): בלי חשבון אין איפה לשמור.
+  if (!ACCOUNTS_OPEN && account.status !== 'signed-in') return null;
 
   async function onClick() {
     if (account.status === 'signed-out') {

@@ -11,6 +11,7 @@ import { findLikelyCourse, type KnownCourse } from '@/lib/course-links/match';
 import type { CourseType } from '@/lib/reviews/types';
 import { cn } from '@/lib/utils';
 import { RadioGroup, selectClass } from './review-steps';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 const IDLE: AddLinkState = { status: 'idle' };
 
@@ -122,10 +123,22 @@ export function AddCourseLink({
               קודם
             </p>
             <p className="ps-3 font-sans text-[15px] leading-normal">
-              כדי להוסיף קורס צריך להתחבר, כמו בכתיבת ביקורת.{' '}
-              <Link href={`/login?next=${encodeURIComponent(`/review#${ADD_COURSE_HASH}`)}`} className={cn(smallLink, 'font-semibold')}>
-                להתחבר
-              </Link>
+              {ACCOUNTS_OPEN ? (
+                <>
+                  כדי להוסיף קורס צריך להתחבר, כמו בכתיבת ביקורת.{' '}
+                  <Link href={`/login?next=${encodeURIComponent(`/review#${ADD_COURSE_HASH}`)}`} className={cn(smallLink, 'font-semibold')}>
+                    להתחבר
+                  </Link>
+                </>
+              ) : (
+                // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN). בקשה לבדוק קורס לא צריכה חשבון.
+                <>
+                  הוספה מקישור נפתחת בקרוב, יחד עם כתיבת הביקורות. בינתיים אפשר{' '}
+                  <Link href="/request-course" className={cn(smallLink, 'font-semibold')}>
+                    לבקש שנבדוק קורס
+                  </Link>
+                </>
+              )}
             </p>
           </div>
         </div>
