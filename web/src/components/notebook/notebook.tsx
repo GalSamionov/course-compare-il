@@ -701,7 +701,10 @@ export function Notebook({
               ? 'עוד אין קורסים בתחום'
               : active.length > 0
                 ? coursesTitle(results.length)
-                : allCoursesTitle(results.length)
+                : fixedWhat
+                  ? allCoursesTitle(results.length)
+                  : // כל הקורסים: בלי "563 קורסים" בכותרת (מסמך העיצוב 2026-11-17, עיקרון 4).
+                    'הרשימה המלאה'
           }
           emptyCategory={emptyCategory}
           results={results}

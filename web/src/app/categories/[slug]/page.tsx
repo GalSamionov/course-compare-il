@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!category) return {};
   return {
     title: `${category.name}: כל הקורסים | ${SITE_NAME}`,
-    description: `${category.description ? `${category.description} ` : ''}קורסים ב${category.name}, לפי ציון של בוגרים מאומתים בלבד. אף מוכר לא משלם לנו.`,
+    description: `${category.description ? `${category.description} ` : ''}קורסים ב${category.name}: מה כל מוסד מפרסם ומה הוא לא כותב, ומה לשאול לפני שמשלמים. אף מוכר לא משלם לנו.`,
     alternates: { canonical: `/categories/${category.slug}` },
     // תחום בלי קורסים: לא במנועי חיפוש (ולא במפת האתר), אבל הקישורים ממנו לתחומים האחרים כן נסרקים.
     ...(hasCourses(category) ? {} : { robots: { index: false, follow: true } }),
@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const crumb = 'inline-flex min-h-11 items-center underline decoration-1 underline-offset-[3px] hover:text-link-hover';
 
 const coursesText = (n: number) => (n === 1 ? 'קורס אחד' : `${n} קורסים`);
-const gradsText = (n: number) =>
-  n === 0 ? 'עוד אין בוגרים מאומתים' : n === 1 ? 'בוגר מאומת אחד' : `${n} בוגרים מאומתים`;
+/** רק כשיש בוגרים: בלי "עוד אין בוגרים מאומתים" בפתיחה של תחום (מסמך העיצוב 2026-11-17). */
+const gradsText = (n: number) => (n === 1 ? 'בוגר מאומת אחד' : `${n} בוגרים מאומתים`);
 
 /** אותה מחברת, עם שורה 1 קבועה: התחום של העמוד. */
 export default async function CategoryPage({ params }: Props) {
@@ -96,7 +96,7 @@ export default async function CategoryPage({ params }: Props) {
         // התיאור של התחום בדיו, ואחריו איך משתמשים בעמוד. בתחום בלי קורסים אין עוד מה לצמצם.
         <>
           {category.description && <span className="text-ink">{category.description} </span>}
-          {empty ? 'עוד אין בו קורסים באתר.' : 'כל הקורסים בתחום, לפי ציון הבוגרים. אפשר לצמצם בשורות 2 עד 4.'}
+          {empty ? 'עוד אין בו קורסים באתר.' : 'כל הקורסים בתחום. אפשר לצמצם בשורות 2 עד 4.'}
         </>
       }
       headSideAlign="start"
@@ -105,15 +105,16 @@ export default async function CategoryPage({ params }: Props) {
         // השורה הראשונה בעט עומדת מול פירורי הלחם (mt-6 ויעד מגע של 44), ולא צמודה לקו של כותרת האתר.
         <div className="lg:pt-8">
           {empty ? (
-            // תחום בלי קורסים: בלי "המובילים לפי בוגרים", שאין בו עוד מה לדרג.
             <PenNote arrow className="text-base font-medium lg:text-lg">
-              כשנוסיף קורס בתחום, הוא יופיע כאן עם ציון הבוגרים שלו.
+              כשנוסיף קורס בתחום, הוא יופיע כאן.
             </PenNote>
           ) : (
             <>
               <PenNote arrow className="text-base font-medium lg:text-lg">
-                בתחום: {coursesText(category.courseCount)}, {gradsText(category.gradCount)}.
+                בתחום: {coursesText(category.courseCount)}
+                {category.gradCount > 0 && `, ${gradsText(category.gradCount)}`}.
               </PenNote>
+              {/* "המובילים לפי בוגרים" מופיעים רק כשיש בתחום קורס עם ציון (top-by-graduates.tsx). */}
               <TopByGraduates courses={catalog.courses} categorySlug={category.slug} />
             </>
           )}
