@@ -136,10 +136,12 @@ institutions:
     name: "בצלאל"
     kind: college
     website: "https://be.bezalel.ac.il/"
-    categories: [ux-ui, graphic-design]
+    categories: [ux-ui, graphic-design, ai-at-work, ai-content]
     course_urls:
       - "https://be.bezalel.ac.il/ui-ux/"
       - "https://be.bezalel.ac.il/category/%D7%AA%D7%95%D7%9B%D7%A0%D7%95%D7%AA-%D7%92%D7%A8%D7%A4%D7%99%D7%95%D7%AA/"
+      - "https://be.bezalel.ac.il/%D7%A9%D7%99%D7%9E%D7%95%D7%A9-%D7%91%D7%91%D7%99%D7%A0%D7%94-%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA-%D7%91%D7%A2%D7%95%D7%9C%D7%9D-%D7%94%D7%A2%D7%91%D7%95%D7%93%D7%94-%D7%94%D7%97%D7%93/"
+      - "https://be.bezalel.ac.il/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%91%D7%A2%D7%96%D7%A8%D7%AA-ai-%D7%9C%D7%A6%D7%9C%D7%9E%D7%99%D7%9D-%D7%A2%D7%95%D7%A8%D7%9B%D7%99-%D7%95%D7%99%D7%93%D7%90%D7%95-%D7%AA%D7%A1%D7%A8%D7%99%D7%98/"
     max_pages: 60
 
   - slug: "bgu"
@@ -444,11 +446,13 @@ institutions:
     name: "אוניברסיטת בר-אילן – בית הספר להייטק וסייבר"
     kind: university
     website: "https://hitech-school.biu.ac.il/"
-    categories: [digital-marketing, data-analysis, cyber]
+    categories: [digital-marketing, data-analysis, cyber, ai-automation, ai-at-work]
     course_urls:
       - "https://hitech-school.biu.ac.il/course/digital-marketing-course"
       - "https://hitech-school.biu.ac.il/our-courses"
       - "https://hitech-school.biu.ac.il/course/cyber-course"
+      - "https://hitech-school.biu.ac.il/course/ai-auto"
+      - "https://hitech-school.biu.ac.il/course/ai-course"
     max_pages: 60
 
   - slug: "hodaya-uxui"
@@ -575,6 +579,12 @@ institutions:
     categories: [ai-at-work, ai-automation, ai-no-code, ai-content]
     course_urls:
       - "https://letsai.co.il/letsaifullcourse/"
+      - "https://letsai.co.il/product/automation-and-ai-bots/"
+      - "https://letsai.co.il/product/videoai-workshop/"
+      - "https://letsai.co.il/product/music-with-ai/"
+      - "https://letsai.co.il/product/canva-course/"
+      - "https://letsai.co.il/product/ai-in-office/"
+      - "https://letsai.co.il/product/copilot-workshop/"
     max_pages: 60
 
   - slug: "lifemichael"
@@ -807,9 +817,10 @@ institutions:
     name: "מכללת סמארט"
     kind: college
     website: "https://www.smart-college.co.il/"
-    categories: [digital-marketing]
+    categories: [digital-marketing, programming]
     course_urls:
       - "https://www.smart-college.co.il/course/seo-ppc-course/"
+      - "https://www.smart-college.co.il/course/ai/"
     max_pages: 60
 
   - slug: "studiogavra"
@@ -827,6 +838,7 @@ institutions:
     course_urls:
       - "https://successcollege.co.il/course/tech-python/"
       - "https://successcollege.co.il/course/tech-qa/"
+      - "https://successcollege.co.il/course/tech-ai/"
     max_pages: 60
 
   - slug: "svcollege"
@@ -956,4 +968,357 @@ institutions:
     categories: [digital-marketing, ai-content]
     course_urls:
       - "https://creatorz.co.il/"
+    max_pages: 20
+
+  # מקורות חדשים (19.11.2026): ספקי AI מחיפוש ברשת, ומפרסמים מספריית המודעות של מטא. נאספים רק מהאתר שלהם,
+  # ומוצגים רק הפרטים שהם עצמם מפרסמים. הרשימות המקוריות לא במאגר.
+  - slug: "magid-huji"
+    name: "מכון מגיד – מיסודה של האוניברסיטה העברית"
+    kind: university
+    website: "https://magid.huji.ac.il/"
+    categories: [ai-automation, ai-no-code]
+    course_urls:
+      - "https://magid.huji.ac.il/course-6/"
+      - "https://magid.huji.ac.il/category/no-code/"
+    max_pages: 60
+
+  - slug: "akadima-biu"
+    name: "אקדימה – אוניברסיטת בר-אילן"
+    kind: university
+    website: "https://akadima.biu.ac.il/"
+    categories: [ai-automation, ai-no-code, ai-at-work]
+    course_urls:
+      - "https://akadima.biu.ac.il/course/AI-automation"
+      - "https://akadima.biu.ac.il/course-292"
+    max_pages: 60
+
+  - slug: "ext-shenkar"
+    name: "שנקר – לימודי חוץ"
+    kind: college
+    website: "https://ext.shenkar.ac.il/"
+    categories: [ai-content, ai-at-work]
+    course_urls:
+      - "https://ext.shenkar.ac.il/courses/1267"
+      - "https://ext.shenkar.ac.il/courses/1688"
+    max_pages: 60
+
+  - slug: "hutz-haifa"
+    name: "אוניברסיטת חיפה – היחידה ללימודי חוץ"
+    kind: university
+    website: "https://hutz.haifa.ac.il/"
+    categories: [ai-no-code, ai-content]
+    course_urls:
+      - "https://hutz.haifa.ac.il/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%95%D7%AA-%D7%9C%D7%99%D7%9E%D7%95%D7%93/%D7%A0%D7%99%D7%94%D7%95%D7%9C-%D7%9E%D7%95%D7%A6%D7%A8/"
+      - "https://hutz.haifa.ac.il/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%95%D7%AA-%D7%9C%D7%99%D7%9E%D7%95%D7%93/%D7%91%D7%99%D7%AA-%D7%94%D7%A1%D7%A4%D7%A8-%D7%9C%D7%A2%D7%99%D7%A6%D7%95%D7%91/%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%91%D7%A2%D7%96%D7%A8%D7%AA-%D7%91%D7%99%D7%A0%D7%94-%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA-ai/"
+    max_pages: 60
+
+  - slug: "drushim"
+    name: "דרושים אקדמיה"
+    kind: other
+    website: "https://www.drushim.co.il/academy/"
+    categories: [ai-automation, ai-no-code, ai-content, ai-at-work]
+    course_urls:
+      - "https://www.drushim.co.il/academy/23/"
+      - "https://www.drushim.co.il/academy/4/"
+      - "https://www.drushim.co.il/academy/21/"
+      - "https://www.drushim.co.il/academy/22/"
+    include: "/academy/"
+    max_pages: 20
+
+  - slug: "fore-runi"
+    name: "FORE – אוניברסיטת רייכמן"
+    kind: university
+    website: "https://www.fore-runi.com/"
+    categories: [ai-at-work]
+    course_urls:
+      - "https://www.fore-runi.com/%D7%A7%D7%95%D7%A8%D7%A1%D7%99%D7%9D/%D7%9E%D7%A0%D7%94%D7%9C%D7%99%D7%9D/%D7%93%D7%90%D7%98%D7%94-360/"
+    max_pages: 60
+
+  - slug: "yuv"
+    name: "YUV.AI"
+    kind: independent
+    website: "https://yuv.ai/"
+    categories: [ai-automation, ai-no-code, ai-at-work]
+    course_urls:
+      - "https://yuv.ai/courses?lang=he"
+      - "https://learn.yuv.ai/ai-automations"
+      - "https://learn.yuv.ai/claude"
+    max_pages: 20
+
+  - slug: "jumpstartai"
+    name: "JumpStart AI"
+    kind: independent
+    website: "https://jumpstartai.co.il/"
+    categories: [ai-no-code, ai-content, ai-at-work]
+    course_urls:
+      - "https://jumpstartai.co.il/from-dream-2-product/"
+      - "https://jumpstartai.co.il/codeshift-ai/"
+    max_pages: 20
+
+  - slug: "smartup"
+    name: "אוטומיישן סקול"
+    kind: independent
+    website: "https://smartup.co.il/"
+    categories: [ai-automation, ai-no-code]
+    course_urls:
+      - "https://smartup.co.il/n8n-course/"
+      - "https://smartup.co.il/automation-course/"
+      - "https://smartup.co.il/vibe-coding-course/"
+    max_pages: 20
+
+  - slug: "n8nisrael"
+    name: "N8NISRAEL"
+    kind: independent
+    website: "https://n8nisrael.com/"
+    categories: [ai-automation]
+    course_urls:
+      - "https://n8nisrael.com/"
+    max_pages: 20
+
+  - slug: "liortesta"
+    name: "TestaMind – ליאור טסטא"
+    kind: independent
+    website: "https://liortesta.com/"
+    categories: [ai-automation]
+    course_urls:
+      - "https://liortesta.com/course/n8n-automation/"
+      - "https://liortesta.com/n8n/"
+    max_pages: 20
+
+  - slug: "vibecodeil"
+    name: "VibecodeIL"
+    kind: independent
+    city: "אונליין"
+    website: "https://vibecodeil.com/"
+    categories: [ai-no-code, ai-content]
+    course_urls:
+      - "https://vibecodeil.com/trainings/websites/"
+      - "https://vibecodeil.com/trainings/apps/"
+      - "https://vibecodeil.com/trainings/video/"
+    max_pages: 20
+
+  - slug: "schooliner"
+    name: "סקוליינר"
+    kind: independent
+    website: "https://schooliner.com/"
+    categories: [ai-no-code]
+    course_urls:
+      - "https://schooliner.com/vibeliner"
+    max_pages: 20
+
+  - slug: "likeapro"
+    name: "Like a Pro"
+    kind: independent
+    city: "אונליין"
+    website: "https://likeapro.co.il/"
+    categories: [ai-no-code]
+    course_urls:
+      - "https://likeapro.co.il/"
+    max_pages: 20
+
+  - slug: "ailectures"
+    name: "AI Lectures"
+    kind: independent
+    website: "https://www.ailectures.co.il/"
+    categories: [ai-at-work, ai-content, ai-no-code]
+    course_urls:
+      - "https://www.ailectures.co.il/ai-course/"
+      - "https://www.ailectures.co.il/claude-code-course/"
+      - "https://www.ailectures.co.il/managers-workshop/"
+    max_pages: 20
+
+  - slug: "bischool"
+    name: "BISchool"
+    kind: school
+    website: "https://www.bischool.org/"
+    categories: [ai-at-work, ai-content]
+    course_urls:
+      - "https://www.bischool.org/ai-online-course"
+    max_pages: 60
+
+  - slug: "iiai"
+    name: "המכון הישראלי לבינה מלאכותית"
+    kind: independent
+    website: "https://www.iiai.co.il/"
+    categories: [ai-at-work, ai-content]
+    course_urls:
+      - "https://www.iiai.co.il/workshops/ai-for-managers-workshop"
+      - "https://www.iiai.co.il/workshops/ai-for-marketing-workshop"
+      - "https://www.iiai.co.il/courses"
+    max_pages: 20
+
+  - slug: "proliti"
+    name: "פרוליטי"
+    kind: independent
+    website: "https://proliti.co.il/"
+    categories: [ai-at-work]
+    course_urls:
+      - "https://proliti.co.il/legal_ai/"
+    max_pages: 20
+
+  - slug: "practical-law"
+    name: "קבוצת פרקטיקל"
+    kind: independent
+    website: "https://practical-law.co.il/"
+    categories: [ai-at-work]
+    course_urls:
+      - "https://practical-law.co.il/%D7%94%D7%A9%D7%AA%D7%9C%D7%9E%D7%95%D7%AA-%D7%91%D7%99%D7%A0%D7%94-%D7%9E%D7%9C%D7%90%D7%9B%D7%95%D7%AA%D7%99%D7%AA-ai/"
+    max_pages: 20
+
+  - slug: "graitechschool"
+    name: "בית הספר להייטק ו-AI של Google ואוניברסיטת רייכמן"
+    kind: school
+    website: "https://graitechschool.co.il/"
+    categories: [ai-at-work, data-analysis, digital-marketing]
+    course_urls:
+      - "https://graitechschool.co.il/%D7%A7%D7%95%D7%A8%D7%A1-ai-marketing-pro/"
+      - "https://graitechschool.co.il/%D7%A7%D7%95%D7%A8%D7%A1/healthtech-data-ai-2/"
+    max_pages: 60
+
+  - slug: "iitc"
+    name: "IITC"
+    kind: college
+    website: "https://iitc.co.il/"
+    categories: [programming, ai-at-work]
+    course_urls:
+      - "https://iitc.co.il/management/intro-to-ai/"
+      - "https://iitc.co.il/cyber/ai-for-developers/"
+    max_pages: 60
+
+  - slug: "limudey-hutz"
+    name: "היחידה ללימודי חוץ – רשת המכללות ללימודי תעודה"
+    kind: college
+    website: "https://limudey-hutz.co.il/"
+    categories: [ai-automation, ai-at-work]
+    course_urls:
+      - "https://limudey-hutz.co.il/ai-workforce-architect/"
+      - "https://limudey-hutz.co.il/%D7%99%D7%95%D7%A2%D7%A6%D7%99%D7%9D-%D7%A2%D7%A1%D7%A7%D7%99%D7%99%D7%9D-ai/"
+    max_pages: 60
+
+  - slug: "zacademy"
+    name: "Zerem Academy"
+    kind: school
+    website: "https://zacademy.co.il/"
+    categories: [ai-automation]
+    course_urls:
+      - "https://zacademy.co.il/"
+    max_pages: 20
+
+  - slug: "shiroren"
+    name: "ShirOren.AI"
+    kind: independent
+    website: "https://www.shiroren.ai/"
+    categories: [ai-at-work]
+    course_urls:
+      - "https://www.shiroren.ai/"
+    max_pages: 20
+
+  - slug: "vip-no-film"
+    name: "NO-FILM"
+    kind: independent
+    website: "https://vip.no-film.ai/"
+    categories: [ai-content]
+    course_urls:
+      - "https://vip.no-film.ai/"
+    max_pages: 20
+
+  - slug: "learn-opticode"
+    name: "אקדמיית אופטיקוד"
+    kind: independent
+    website: "https://learn.opticode.co.il/"
+    categories: [ai-at-work, ai-automation]
+    course_urls:
+      - "https://learn.opticode.co.il/"
+    max_pages: 20
+
+  - slug: "lior-animation"
+    name: "אנימציות עם ליאור"
+    kind: independent
+    website: "https://lior-animation.co.il/"
+    categories: [ai-content]
+    course_urls:
+      - "https://lior-animation.co.il/"
+    max_pages: 20
+
+  - slug: "yaniv-arad"
+    name: "יניב ארד – הכשרות טכנולוגיות"
+    kind: independent
+    website: "https://www.yaniv-arad.com/"
+    categories: [programming, ai-at-work]
+    course_urls:
+      - "https://www.yaniv-arad.com/public-courses/"
+    max_pages: 20
+
+  - slug: "aiacademyisrael"
+    name: "AI Akademia"
+    kind: independent
+    website: "https://www.aiacademyisrael.online/"
+    categories: [ai-at-work]
+    course_urls:
+      - "https://www.aiacademyisrael.online/"
+    max_pages: 20
+
+  - slug: "claude-code-brainai"
+    name: "עדן ביבס – BrainAI"
+    kind: independent
+    website: "https://claude-code.brainai.co.il/"
+    categories: [ai-no-code]
+    course_urls:
+      - "https://claude-code.brainai.co.il/"
+    max_pages: 20
+
+  - slug: "nataliemilo"
+    name: "נטלי מילוא"
+    kind: independent
+    website: "https://nataliemilo.co.il/"
+    categories: [digital-marketing]
+    course_urls:
+      - "https://nataliemilo.co.il/sp/insta-ai/"
+    max_pages: 20
+
+  - slug: "nail-carizma-studio"
+    name: "נייל סטודיו אילת"
+    kind: school
+    city: "אילת"
+    website: "https://nail.carizma-studio.co.il/"
+    categories: [nails]
+    course_urls:
+      - "https://nail.carizma-studio.co.il/"
+    max_pages: 20
+
+  - slug: "school-getcake"
+    name: "Get Cake School"
+    kind: school
+    city: "אונליין"
+    website: "https://school.getcake.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://school.getcake.co.il/"
+    max_pages: 20
+
+  - slug: "shirshiz"
+    name: "SHIRSHIZ"
+    kind: independent
+    website: "https://shirshiz.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://shirshiz.co.il/"
+    max_pages: 20
+
+  - slug: "h-mitbache"
+    name: "המטבח – סדנאות בישול ואפייה"
+    kind: independent
+    website: "https://h-mitbache.co.il/"
+    categories: [cooking]
+    course_urls:
+      - "https://h-mitbache.co.il/"
+    max_pages: 20
+
+  - slug: "nur-academy"
+    name: "נור – המרכז ללימודי קולינריה מהצומח"
+    kind: school
+    website: "https://nur-academy.com/"
+    categories: [cooking]
+    course_urls:
+      - "https://nur-academy.com/"
     max_pages: 20

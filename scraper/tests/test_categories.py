@@ -65,4 +65,5 @@ def test_no_institution_in_the_config_still_uses_ai():
     assert not [i.slug for i in config.institutions if "ai" in i.categories]
     # 13 המוסדות שהיו ב-ai קיבלו את כל ארבעת התחומים. מוכרים שנוספו אחר כך (17.11.2026) בוחרים רק חלק מהם.
     split = [i.slug for i in config.institutions if set(AI) <= set(i.categories)]
-    assert len(split) == 13
+    # ועוד ספק אחד מ-19.11.2026 שמלמד בכל ארבעת התחומים.
+    assert len(split) == 14
