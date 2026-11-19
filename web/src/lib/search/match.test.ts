@@ -15,6 +15,11 @@ function course(over: Partial<CourseSummary> & { slug: string }): CourseSummary 
     score: { status: 'none' },
     verifiedCount: 0,
     sitePrice: 2000,
+    totalHours: 30,
+    durationMonths: 2,
+    region: 'חיפה',
+    certificate: 'תעודת השתתפות',
+    nextCohortDate: '2027-01-11',
     formats: ['in_person'],
     timeSlots: ['evening'],
     updatedAt: '2026-10-01T10:00:00+03:00',
@@ -44,6 +49,17 @@ describe('matchCourses', () => {
       ['new-unscored', true, ''],
       ['old-unscored', true, ''],
     ]);
+  });
+
+  it('puts courses whose institution publishes more facts first, and only then scored before unscored', () => {
+    const courses = [
+      course({ slug: 'scored-few-facts', score: { status: 'scored', value: 9.1 }, certificate: null, nextCohortDate: null }),
+      course({ slug: 'unscored-all-facts' }),
+      course({ slug: 'scored-all-facts', score: { status: 'scored', value: 7 } }),
+      course({ slug: 'no-price', sitePrice: null }),
+    ];
+    // 6, 6, 5 ו-4 עובדות ידועות. בין שני השישה, הציון קובע.
+    expect(rows(courses).map((r) => r[0])).toEqual(['scored-all-facts', 'unscored-all-facts', 'no-price', 'scored-few-facts']);
   });
 
   it('filters by subject, including sub-subjects, and lets the reason for learning rank without hiding', () => {

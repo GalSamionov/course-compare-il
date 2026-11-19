@@ -15,11 +15,14 @@ const CYCLE_MS = 3000;
  * מוסתרת מקורא מסך: השדה עצמו נושא את הדוגמה המלאה ב-placeholder.
  * נעלמת כשכותבים או כשהשדה בפוקוס (globals.css, .pen-example). לא מתחלפת כשהיא מחוץ למסך,
  * כשהלשונית מוסתרת, או כשהמבקר ביקש פחות תנועה: אז נשארת הדוגמה הראשונה.
+ * words: בדף הבית דוגמה אחת (התיבה הגדולה). עם דוגמה אחת אין החלפה ואין עמעום, אחרת היא הייתה נעלמת אחרי 3 שניות.
  */
-export function PenExample({ className }: { className?: string }) {
+export function PenExample({ words = WHAT_EXAMPLES, className }: { words?: readonly string[]; className?: string }) {
   const [index, setIndex] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
+  const rotates = words.length > 1;
   useEffect(() => {
+    if (!rotates) return;
     let visible = true;
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
@@ -28,18 +31,24 @@ export function PenExample({ className }: { className?: string }) {
     const timer = window.setInterval(() => {
       if (!visible || document.hidden) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      setIndex((n) => (n + 1) % WHAT_EXAMPLES.length);
+      setIndex((n) => (n + 1) % words.length);
     }, CYCLE_MS);
     return () => {
       window.clearInterval(timer);
       io.disconnect();
     };
-  }, []);
+  }, [rotates, words.length]);
   return (
     <span ref={ref} aria-hidden="true" className={cn('pen-example pointer-events-none', className)}>
       <span className="font-sans text-[15px] text-ink-soft lg:text-[17px]">למשל:</span>{' '}
-      <span key={index} className="pen-example-word inline-block font-pen text-[21px] font-medium text-pen/80 lg:text-[23px]">
-        {WHAT_EXAMPLES[index]}
+      <span
+        key={index}
+        className={cn(
+          'inline-block font-pen text-[21px] font-medium text-pen/80 lg:text-[23px]',
+          rotates && 'pen-example-word',
+        )}
+      >
+        {words[index % words.length]}
       </span>
     </span>
   );

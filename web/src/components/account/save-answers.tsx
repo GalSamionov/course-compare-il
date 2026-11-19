@@ -7,6 +7,7 @@ import { PenNote } from '@/components/course/marks';
 import { loginHref, rememberForLogin, saveAnswers, useAccount } from '@/lib/account/store';
 import { parseQuery, serializeQuery } from '@/lib/search/query';
 import type { SearchQuery } from '@/lib/search/types';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 const textButton =
   'inline-flex min-h-11 items-center font-sans text-[15px] font-semibold underline underline-offset-[3px] hover:text-link-hover';
@@ -26,6 +27,9 @@ export function SaveAnswers({ query }: { query: SearchQuery }) {
     account.status === 'signed-in' &&
     account.answers !== null &&
     serializeQuery(parseQuery(new URLSearchParams(account.answers.params))) === search;
+
+  // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN): בלי חשבון אין איפה לשמור.
+  if (!ACCOUNTS_OPEN && account.status !== 'signed-in') return null;
 
   if (saved) {
     return (

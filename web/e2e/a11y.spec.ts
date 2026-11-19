@@ -12,7 +12,11 @@ const PAGES = [
   // דף הבית עם תשובות: הרשימה מתחת למחברת.
   '/?cat=cooking&when=evening',
   '/categories/cooking',
+  // כל הקורסים: בלי ספירה ובלי "עוד אין ציון" (שלב 1 של "לא יודעים למי לפנות?").
+  '/courses',
   '/courses/full-stack-sample',
+  // קורס בלי ביקורות: "העובדות" ו"מה לשאול לפני שמשלמים" במקום תיבת הציון.
+  '/courses/home-cooking-sample',
   '/compare?c=full-stack-sample,baking-sample',
   '/institutions/sample-college',
   '/lecturers/yael-cohen-sample',

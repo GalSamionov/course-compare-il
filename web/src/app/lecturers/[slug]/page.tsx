@@ -11,13 +11,14 @@ import { compareByScore } from '@/lib/data/course-order';
 import { getCoursePage } from '@/lib/data/course-page';
 import { getLecturerPage, getLecturerSlugs } from '@/lib/data/lecturer-page';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /** כמו עמוד הקורס ועמוד המוסד: סטטי, ו-404 אמיתי למרצה שלא קיים. */
 export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getLecturerSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };

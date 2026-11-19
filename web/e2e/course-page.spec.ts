@@ -41,6 +41,26 @@ test('a course with too few reviews says how many are missing', async ({ page })
   await expect(page.getByTestId('score-value')).toHaveCount(0);
 });
 
+test('a course with no published review shows the facts and what to ask, not an empty score', async ({ page }) => {
+  await page.goto('/courses/home-cooking-sample');
+  await expect(page.getByTestId('score-value')).toHaveCount(0);
+  await expect(page.getByText('עוד אין ציון בוגרים')).toHaveCount(0);
+  await expect(page.getByText('את הקורס עצמו עוד לא בדקנו')).toHaveCount(0);
+
+  const facts = page.getByRole('region', { name: 'העובדות' });
+  await expect(facts).toContainText('1,800 ₪');
+  await expect(facts).toContainText('חיפה');
+  await expect(facts.locator('[data-source="claim"]').first()).toBeVisible();
+  await expect(facts.locator('mark[data-source="verified"]')).toContainText('30 שעות');
+  // לקורס הזה אין תעודה בדף.
+  await expect(facts).toContainText('לא כתוב בדף');
+
+  // המוסד מפרסם מחיר, משך, מקום ומחזור, ולכן נשארת רק השאלה על בוגרים.
+  const ask = page.getByRole('region', { name: 'מה לשאול לפני שמשלמים' });
+  await expect(ask.getByRole('listitem')).toHaveCount(1);
+  await expect(ask).toContainText('אפשר לדבר עם שני בוגרים מהמחזור הקודם?');
+});
+
 test('an unknown course returns 404', async ({ page }) => {
   const response = await page.goto('/courses/no-such-course');
   expect(response?.status()).toBe(404);

@@ -10,6 +10,7 @@ import { getCoursePage, type CoursePageData } from '@/lib/data/course-page';
 import { INSTITUTION_KIND_LABEL, getInstitutionPage, getInstitutionSlugs } from '@/lib/data/institution-page';
 import { verifiedGraduatesText } from '@/lib/format';
 import { SITE_NAME } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
 
 /**
  * כמו עמוד הקורס: העמוד כולו סטטי, ומוסד שלא נבנה מראש נבנה בבקשה הראשונה.
@@ -20,7 +21,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getInstitutionSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };
@@ -40,7 +41,6 @@ const textLink = 'underline decoration-1 underline-offset-[3px] transition-color
 const navLink = `inline-flex min-h-11 items-center ${textLink}`;
 
 const coursesText = (n: number) => (n === 1 ? 'קורס אחד באתר' : `${n} קורסים באתר`);
-const gradsText = (n: number) => (n === 0 ? 'עוד אין בוגרים מאומתים' : verifiedGraduatesText(n));
 
 /** נקודה בין הפרטים בשורה שמתחת לשם, צמודה למילה שאחריה. קישוט: קורא מסך שומע את הפרטים עצמם. */
 const Dot = () => (
@@ -81,7 +81,8 @@ export default async function InstitutionPage({ params }: Props) {
               <p className="tabular-nums">
                 {INSTITUTION_KIND_LABEL[institution.kind]}
                 <Dot />
-                {coursesText(courses.length)}, {gradsText(grads)}
+                {coursesText(courses.length)}
+                {grads > 0 && `, ${verifiedGraduatesText(grads)}`}
               </p>
               {institution.website && (
                 <p>

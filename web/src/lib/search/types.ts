@@ -67,6 +67,15 @@ export interface CourseSummary {
   /** ביקורות מאומתות שפורסמו. */
   verifiedCount: number;
   sitePrice: number | null;
+  /**
+   * "העובדות" (lib/course/facts.ts): מה שהמוסד מפרסם על הקורס. משמשות לשורת העובדות, לשאלות ולסדר ברשימות.
+   * אותם ערכים כמו בעמוד הקורס. בערך 30KB נוספים לכל הקטלוג, לפני דחיסה.
+   */
+  totalHours: number | null;
+  durationMonths: number | null;
+  region: string | null;
+  certificate: string | null;
+  nextCohortDate: string | null;
   formats: CourseFormat[];
   timeSlots: TimeSlot[];
   updatedAt: string;

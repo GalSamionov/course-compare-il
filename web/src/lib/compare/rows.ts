@@ -1,3 +1,4 @@
+import { showsScore } from '@/lib/course/score-shown';
 import type { CoursePageData, OutcomeView } from '@/lib/data/course-page';
 import {
   PAID_RANGE_LEAD,
@@ -22,6 +23,7 @@ export type CompareCourse = Pick<
   | 'institutionName'
   | 'institutionSlug'
   | 'score'
+  | 'reviewTotal'
   | 'sitePrice'
   | 'paid'
   | 'costPerHandsOnHour'
@@ -56,6 +58,7 @@ export function toCompareCourse(page: CoursePageData): CompareCourse {
     institutionName: page.institutionName,
     institutionSlug: page.institutionSlug,
     score: page.score,
+    reviewTotal: page.reviewTotal,
     sitePrice: page.sitePrice,
     paid: page.paid,
     costPerHandsOnHour: page.costPerHandsOnHour,
@@ -124,8 +127,13 @@ function said(value: string | null, source?: CellSource, missing = NO_DATA): Com
   return value ? { text: value, source } : { text: null, missing };
 }
 
-/** כמו תיבת הציון בעמוד הקורס. */
-function scoreCell(score: CompareCourse['score']): CompareCell {
+/**
+ * כמו תיבת הציון בעמוד הקורס. בלי ביקורת מפורסמת אין ציון (lib/course/score-shown.ts): התא ריק,
+ * וכשלאף קורס בהשוואה אין ביקורת, השורה והחלק יורדים לבד (buildCompareRows).
+ */
+function scoreCell(c: CompareCourse): CompareCell {
+  const { score } = c;
+  if (!showsScore(c.reviewTotal)) return { text: null, missing: 'עוד אין ביקורות' };
   if (score.status === 'scored') {
     return { text: score.value.toFixed(1), big: true, sub: verifiedGraduatesText(score.reviewCount) };
   }
@@ -136,7 +144,7 @@ function scoreCell(score: CompareCourse['score']): CompareCell {
       sub: score.reviewsNeeded > 0 ? `${reviews}, ${reviewsToScoreText(score.reviewsNeeded)}` : reviews,
     };
   }
-  return { text: 'עוד אין ציון', sub: 'עוד אין ביקורות מאומתות' };
+  return { text: 'עוד אין ציון', sub: verifiedReviewsText(c.reviewTotal) };
 }
 
 /** בכל עמודה השורה המודגשת היא תוצאה, וכמה ענו (בשאלת ההמשך) בשורה הקטנה מתחת. */
@@ -196,11 +204,11 @@ export function buildCompareRows(courses: readonly CompareCourse[]): CompareSect
       key: 'score',
       title: 'ציון הבוגרים',
       rows: [
-        row('score', 'ציון מתוך 10', 'figure', (c) => scoreCell(c.score)),
+        row('score', 'ציון מתוך 10', 'figure', scoreCell),
         row('recommend', 'ממליצים', 'figure', (c) =>
           c.score.status === 'scored' && c.score.recommendPct !== null
             ? { text: `${Math.round(c.score.recommendPct)}%` }
-            : { text: null, missing: 'עוד אין ציון' },
+            : { text: null, missing: showsScore(c.reviewTotal) ? 'עוד אין ציון' : 'עוד אין ביקורות' },
         ),
         row('outcome', 'מה קרה לבוגרים', 'text', (c) => outcomeCell(c.outcome)),
       ],

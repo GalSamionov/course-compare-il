@@ -23,7 +23,7 @@ export function SiteFooter() {
         <p className="mt-1 flex flex-wrap gap-x-3 lg:mt-0 lg:gap-x-5">
           <IntroLink className={footerLink} />
           <Link href="/method" className={footerLink}>
-            איך אנחנו מדרגים
+            איך אנחנו משווים
           </Link>
           <Link href="/who-pays-us" className={footerLink}>
             מי משלם לנו

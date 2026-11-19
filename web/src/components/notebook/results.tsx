@@ -1,7 +1,12 @@
 import Link from 'next/link';
+import { Fragment } from 'react';
 import { SaveButton } from '@/components/account/save-button';
+import { AskList } from '@/components/course/ask-before-paying';
 import { Mark, PenNote } from '@/components/course/marks';
 import { PenArrow } from '@/components/site/pen';
+import { askBeforePaying } from '@/lib/course/ask-before-paying';
+import { factsLine } from '@/lib/course/facts';
+import { showsScore } from '@/lib/course/score-shown';
 import { formatIls, missingReviewsText, verifiedGraduatesText } from '@/lib/format';
 import type { MatchResult } from '@/lib/search/match';
 import { marginNotes } from '@/lib/search/notes';
@@ -21,8 +26,6 @@ export function allCoursesTitle(n: number): string {
   return n === 1 ? 'קורס אחד' : `${n} קורסים`;
 }
 
-const verifiedText = (n: number) => (n === 0 ? 'עוד אין בוגרים מאומתים' : verifiedGraduatesText(n));
-
 /**
  * העמודות של שורת התוצאה ברשימה רחבה (מחשב): השוליים, הקורס, הציון, הבוגרים והמחיר, והכפתורים.
  * כך הציונים והמחירים עומדים זה מתחת לזה, ואפשר להשוות בעין.
@@ -33,6 +36,8 @@ const ledgerCols = '@3xl:grid-cols-[var(--margin)_minmax(0,1.7fr)_8.5rem_minmax(
  * שורת תוצאה בסגנון הסיכום: ההערה בעט בשוליים מימין, והקורס משמאלה.
  * ברוחב של 768 פיקסלים ומעלה (של הרשימה, לא של המסך) השורה נפרשת לעמודות, כמו בספר חשבונות.
  * באזור האישי, בעמודה צרה, היא נשארת כמו בנייד.
+ * בלי ביקורת מפורסמת (מסמך העיצוב 2026-11-17): שורת עובדות קצרה במקום הציון והבוגרים, רק מה שידוע.
+ * בכל שורה "מה לשאול לפני שמשלמים", מקופל, כדי שהרשימה תישאר קצרה.
  * note: ההערה בשוליים, כשהרשימה כבר כתבה את ההערה המשותפת פעם אחת (ראו marginNotes).
  * actions: הכפתורים בסוף השורה ("לשמור", ובאזור האישי גם "להשוואה").
  * highlight: באזור האישי השורה בלי העובדה המודגשת, כמו בציור (Me.dc.html).
@@ -50,6 +55,7 @@ export function ResultRow({
 }) {
   const { course } = result;
   const product = PRODUCT_TYPE_LABEL[course.productType];
+  const reviewed = showsScore(course.verifiedCount);
   return (
     <div className="@container">
       <article
@@ -75,39 +81,62 @@ export function ResultRow({
             {course.institutionName}
             {product && ` · ${product}`}
           </p>
-          {course.score.status === 'scored' ? (
-            <p className="mt-2 flex items-baseline gap-1.5 font-sans text-sm leading-tight @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-0 @3xl:flex-col @3xl:items-start @3xl:gap-1">
-              <span aria-hidden="true" className="text-[26px] leading-none font-bold @3xl:text-[34px]">
-                {course.score.value.toFixed(1)}
-              </span>
-              <span aria-hidden="true" className="@3xl:text-[13px] @3xl:text-ink-soft">
-                ציון בוגרים מתוך 10
-              </span>
-              <span className="sr-only">ציון בוגרים {course.score.value.toFixed(1)} מתוך 10</span>
-            </p>
-          ) : (
-            <p className="mt-2 font-sans text-[15px] leading-snug @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-1 @3xl:text-sm">
-              <strong>עוד אין ציון בוגרים.</strong>
-              {course.score.status === 'not_enough_reviews' && course.score.reviewsNeeded > 0 && (
-                <>
-                  {' '}
-                  <span className="text-ink-soft">{missingReviewsText(course.score.reviewsNeeded)}.</span>
-                </>
+          {reviewed ? (
+            <>
+              {course.score.status === 'scored' ? (
+                <p className="mt-2 flex items-baseline gap-1.5 font-sans text-sm leading-tight @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-0 @3xl:flex-col @3xl:items-start @3xl:gap-1">
+                  <span aria-hidden="true" className="text-[26px] leading-none font-bold @3xl:text-[34px]">
+                    {course.score.value.toFixed(1)}
+                  </span>
+                  <span aria-hidden="true" className="@3xl:text-[13px] @3xl:text-ink-soft">
+                    ציון בוגרים מתוך 10
+                  </span>
+                  <span className="sr-only">ציון בוגרים {course.score.value.toFixed(1)} מתוך 10</span>
+                </p>
+              ) : (
+                <p className="mt-2 font-sans text-[15px] leading-snug @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-1 @3xl:text-sm">
+                  <strong>עוד אין ציון בוגרים.</strong>
+                  {course.score.status === 'not_enough_reviews' && course.score.reviewsNeeded > 0 && (
+                    <>
+                      {' '}
+                      <span className="text-ink-soft">{missingReviewsText(course.score.reviewsNeeded)}.</span>
+                    </>
+                  )}
+                </p>
               )}
+              <p className="mt-1.5 font-sans text-[15px] leading-normal tabular-nums @3xl:col-start-4 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-1">
+                <span className="@3xl:block">{verifiedGraduatesText(course.verifiedCount)}</span>
+                <span className="@3xl:hidden"> · </span>
+                {course.sitePrice !== null ? (
+                  <strong className="@3xl:mt-1 @3xl:block @3xl:text-[17px]">
+                    <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi>
+                    <span className="hidden font-normal text-ink-soft @3xl:inline @3xl:text-[13px]"> באתר המוסד</span>
+                  </strong>
+                ) : (
+                  <span className="text-ink-soft @3xl:mt-1 @3xl:block">המוסד לא מפרסם מחיר</span>
+                )}
+              </p>
+            </>
+          ) : (
+            // בלי ביקורות: מחיר או "מחיר לא מפורסם", משך, מתכונת ומיקום. בדיו, כמו המחיר בשורה עם ציון.
+            <p className="mt-2 font-sans text-[15px] leading-normal @3xl:col-span-2 @3xl:col-start-3 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-1">
+              {factsLine(course).map((part, i) => (
+                <Fragment key={part.key}>
+                  {/* רווח קשיח לפני הנקודה: בשבירת שורה היא נשארת בסוף השורה, ולא פותחת את הבאה. */}
+                  {i > 0 && <span className="text-ink-soft">{' · '}</span>}
+                  {part.key !== 'price' ? (
+                    part.text
+                  ) : course.sitePrice !== null ? (
+                    <strong className="tabular-nums">
+                      <bdi dir="rtl">{part.text}</bdi>
+                    </strong>
+                  ) : (
+                    <span className="text-ink-soft">{part.text}</span>
+                  )}
+                </Fragment>
+              ))}
             </p>
           )}
-          <p className="mt-1.5 font-sans text-[15px] leading-normal tabular-nums @3xl:col-start-4 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-1">
-            <span className="@3xl:block">{verifiedText(course.verifiedCount)}</span>
-            <span className="@3xl:hidden"> · </span>
-            {course.sitePrice !== null ? (
-              <strong className="@3xl:mt-1 @3xl:block @3xl:text-[17px]">
-                <bdi dir="rtl">{formatIls(course.sitePrice)}</bdi>
-                <span className="hidden font-normal text-ink-soft @3xl:inline @3xl:text-[13px]"> באתר המוסד</span>
-              </strong>
-            ) : (
-              <span className="text-ink-soft @3xl:mt-1 @3xl:block">המוסד לא מפרסם מחיר</span>
-            )}
-          </p>
           {highlight && course.highlight && (
             <p className="mt-1.5 font-sans text-[15px] leading-normal @3xl:col-start-2 @3xl:row-start-3 @3xl:mt-2 @3xl:ps-3">
               <Mark source="grads">
@@ -115,13 +144,20 @@ export function ResultRow({
               </Mark>
             </p>
           )}
+          <details className="mt-1 font-sans @3xl:col-start-2 @3xl:row-start-4 @3xl:ps-3">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center font-pen text-[15px] font-medium text-pen transition-colors duration-150 hover:text-link-hover lg:text-base [&::-webkit-details-marker]:hidden">
+              <PenArrow />
+              מה לשאול לפני שמשלמים
+            </summary>
+            <AskList questions={askBeforePaying(course)} className="pb-2" />
+          </details>
           {actions && (
-            <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2 @3xl:col-start-5 @3xl:row-span-3 @3xl:row-start-1 @3xl:mt-0 @3xl:self-start">
+            <div className="mt-2.5 flex flex-wrap items-center gap-x-3.5 gap-y-2 @3xl:col-start-5 @3xl:row-span-4 @3xl:row-start-1 @3xl:mt-0 @3xl:self-start">
               {actions}
             </div>
           )}
         </div>
-        <p className="col-start-1 row-start-1 pt-1.5 pe-2 font-pen text-sm leading-snug font-medium text-pen @3xl:row-span-3 lg:text-[15px]">
+        <p className="col-start-1 row-start-1 pt-1.5 pe-2 font-pen text-sm leading-snug font-medium text-pen @3xl:row-span-4 lg:text-[15px]">
           {note && (
             <>
               <PenArrow />
@@ -134,8 +170,11 @@ export function ResultRow({
   );
 }
 
-/** שורת הכותרות של העמודות, רק כשהרשימה רחבה. קישוט: כל שורה אומרת את אותו דבר במילים. */
-function LedgerHead() {
+/**
+ * שורת הכותרות של העמודות, רק כשהרשימה רחבה. קישוט: כל שורה אומרת את אותו דבר במילים.
+ * reviewed: יש ברשימה קורס עם ביקורת. בלי אף אחד, שתי העמודות האמצעיות הן "מה המוסד מפרסם".
+ */
+function LedgerHead({ reviewed }: { reviewed: boolean }) {
   return (
     <div className="@container">
       <div
@@ -147,8 +186,14 @@ function LedgerHead() {
       >
         <span />
         <span className="ps-3">קורס</span>
-        <span>ציון בוגרים</span>
-        <span>בוגרים ומחיר</span>
+        {reviewed ? (
+          <>
+            <span>ציון בוגרים</span>
+            <span>בוגרים ומחיר</span>
+          </>
+        ) : (
+          <span className="col-span-2">מה המוסד מפרסם</span>
+        )}
         <span />
       </div>
     </div>
@@ -170,6 +215,7 @@ export function Results({
   advisor = null,
   question = '',
   emptyCategory = false,
+  forTeam = false,
 }: {
   heading: string;
   results: MatchResult[];
@@ -178,6 +224,8 @@ export function Results({
   typeFirst?: string | null;
   advisor?: AdvisorApi | null;
   question?: string;
+  /** דף הבית, "בשביל העובדים": מתחת לרשימה, קישור לטופס בעמוד החברות. */
+  forTeam?: boolean;
 }) {
   const partial = results.some((r) => !r.full);
   const { shared, sharedCount, notes } = marginNotes(results);
@@ -199,7 +247,7 @@ export function Results({
           <p className="mt-2 max-w-[70ch] font-sans text-[13px] leading-normal text-ink-soft lg:text-[15px]">
             {emptyCategory
               ? 'גם כאן נספור רק בוגרים שהעלו הוכחה, ואף מוכר לא ישלם על מקום ברשימה.'
-              : 'מסודר לפי ציון בוגרים. סופרים רק בוגרים שהעלו הוכחה, ואף מוכר לא שילם על מקום ברשימה.'}
+              : 'קודם קורסים שהמוסד מפרסם בהם יותר פרטים. אף מוכר לא שילם על מקום ברשימה.'}
             {typeFirst && ` קורסים מסוג ${typeFirst} מופיעים קודם.`}
             {partial && ' קורס שמתאים חוץ מדבר אחד מופיע בסוף, וההערה בשוליים אומרת מה לא מתאים.'}
           </p>
@@ -220,7 +268,7 @@ export function Results({
           )
         ) : (
           <>
-            <LedgerHead />
+            <LedgerHead reviewed={results.some((r) => showsScore(r.course.verifiedCount))} />
             <div className="ruled-top">
               {results.map((result, i) => (
                 <ResultRow
@@ -242,6 +290,17 @@ export function Results({
             {emptyCategory ? 'מכירים קורס בתחום? בקשו שנבדוק אותו' : 'לא מצאתם? בקשו שנבדוק קורס'}
           </Link>
         </p>
+        {forTeam && (
+          // "בשביל העובדים" (מסמך העיצוב 2026-11-17): החיפוש המותאם לחברות בא בשלב 2. בינתיים, הטופס.
+          <p className="ms-(--margin) ps-3 font-sans text-[15px] font-semibold">
+            <Link
+              href="/companies#request"
+              className="inline-flex min-h-11 items-center underline underline-offset-[3px] hover:text-link-hover"
+            >
+              רוצים שנכין לכם רשימה?
+            </Link>
+          </p>
+        )}
       </section>
       {canAsk && (
         // רשימה אחרת מתחילה שאלה חדשה: תשובה על הרשימה הקודמת כבר לא נכונה לזו.

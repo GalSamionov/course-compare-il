@@ -926,3 +926,32 @@ institutions:
     course_urls:
       - "https://znk.co.il/psychometry/"
     max_pages: 60
+
+  # מוכרים שמפרסמים קורסים בפייסבוק (גל, 17.11.2026). נאספים רק מהאתר שלהם, לא מפייסבוק, ומוצגים רק הפרטים
+  # שהם עצמם מפרסמים. הכתובות מהמודעות שגל בדק בבדיקת המודעה.
+  - slug: "aiagentschool"
+    name: "AI Agent School"
+    kind: independent
+    website: "https://aiagentschool.co.il/"
+    categories: [ai-automation, ai-no-code]
+    course_urls:
+      - "https://aiagentschool.co.il/"
+    max_pages: 20
+
+  - slug: "ai360"
+    name: "AI360"
+    kind: independent
+    website: "https://ai360.co.il/"
+    categories: [ai-at-work, ai-automation, ai-content]
+    course_urls:
+      - "https://ai360.co.il/"
+    max_pages: 20
+
+  - slug: "creatorz"
+    name: "Creatorz"
+    kind: independent
+    website: "https://creatorz.co.il/"
+    categories: [digital-marketing, ai-content]
+    course_urls:
+      - "https://creatorz.co.il/"
+    max_pages: 20

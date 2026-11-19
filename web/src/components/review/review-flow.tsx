@@ -34,6 +34,8 @@ import {
 import { cn } from '@/lib/utils';
 import { ProofStep, primaryButton } from './proof-step';
 import { NameStep, QuestionsStep, WhenStep, WordsStep, fieldId } from './review-steps';
+import { ACCOUNTS_OPEN } from '@/lib/site';
+import { PenNote } from '@/components/course/marks';
 
 /** הטופס: השדות, מזהה הטיוטה (אחרי צעד 1), ההודעה של גל אם חזרה, והשם כפי שהוקלד. */
 interface Draft extends DraftFields {
@@ -345,10 +347,17 @@ export function ReviewFlow({ form }: { form: ReviewFormData }) {
   if (account.status === 'signed-out' || !userId) {
     return (
       <Intro>
-        <Link href={`/login?next=${encodeURIComponent(form.writePath ?? `/courses/${form.slug}/review`)}`} className={primaryButton}>
-          להתחבר ולהתחיל
-        </Link>
-        <p className="mt-3 font-sans text-[13px] text-ink-soft">ההתחברות בקישור למייל, בלי סיסמה.</p>
+        {ACCOUNTS_OPEN ? (
+          <>
+            <Link href={`/login?next=${encodeURIComponent(form.writePath ?? `/courses/${form.slug}/review`)}`} className={primaryButton}>
+              להתחבר ולהתחיל
+            </Link>
+            <p className="mt-3 font-sans text-[13px] text-ink-soft">ההתחברות בקישור למייל, בלי סיסמה.</p>
+          </>
+        ) : (
+          // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN), ובלעדיה אין ביקורת.
+          <PenNote>כתיבת ביקורות נפתחת בקרוב.</PenNote>
+        )}
       </Intro>
     );
   }

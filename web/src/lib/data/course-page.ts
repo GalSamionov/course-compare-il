@@ -94,6 +94,8 @@ export interface CoursePageData {
   lecturers: LecturerView[];
   lecturersSummary: string | null;
   lastCheckedAt: string | null;
+  /** הדף של הקורס באתר המוסד: ממנו האוסף לקח את הפרטים, וקורא אותו שוב כל שבוע. */
+  pageUrl: string | null;
   score: ScoreView;
   /** ציונים לפי שאלה בסולם 1 עד 5. שאלות כן או לא לא כאן: הן ב-outcome, כמספר אנשים. */
   metrics: MetricRow[];
@@ -134,7 +136,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const { data: course, error } = await db
     .from('courses')
     .select(
-      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, product_type, institutions(name, slug), categories(name, slug)',
+      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, page_url, product_type, institutions(name, slug), categories(name, slug)',
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -288,6 +290,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     lecturers,
     lecturersSummary: course.lecturers_summary,
     lastCheckedAt: course.last_checked_at,
+    pageUrl: safeHttpUrl(course.page_url),
     score,
     metrics,
     outcome,

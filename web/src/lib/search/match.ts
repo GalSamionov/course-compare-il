@@ -1,3 +1,4 @@
+import { knownFactsCount } from '@/lib/course/facts';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { activeLines } from './query';
 import { FORMAT_LABEL, TIME_SLOT_LABEL, type CourseSummary, type SearchQuery, type TimeSlot } from './types';
@@ -21,8 +22,16 @@ export function inCategories(course: CourseSummary, cats: readonly string[]): bo
   );
 }
 
-/** מסמך האם, סעיף 8: קודם קורסים עם ציון לפי הציון, אחריהם השאר לפי תאריך העדכון. */
+/**
+ * הסדר ברשימות (מסמך העיצוב 2026-11-17, "הסדר"):
+ * - קודם קורסים שהמוסד מפרסם בהם יותר פרטים: כמה מששת השדות של "העובדות" ידועים (lib/course/facts.ts);
+ * - אחר כך קורס עם ציון לפני קורס בלי ציון, ובין קורסים עם ציון הציון קובע, כמו קודם;
+ * - בלי ציון: החדש יותר קודם, ובסוף לפי slug.
+ * עמודי מוסד ומרצה מסודרים אחרת (data/course-order.ts).
+ */
 export function compareCourses(a: CourseSummary, b: CourseSummary): number {
+  const facts = knownFactsCount(b) - knownFactsCount(a);
+  if (facts !== 0) return facts;
   const scoreA = a.score.status === 'scored' ? a.score.value : null;
   const scoreB = b.score.status === 'scored' ? b.score.value : null;
   if (scoreA !== null && scoreB !== null) {

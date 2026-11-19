@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AboutSection } from '@/components/course/about-section';
+import { AskBeforePaying } from '@/components/course/ask-before-paying';
 import { AtAGlance } from '@/components/course/at-a-glance';
 import { CourseActions } from '@/components/course/course-actions';
+import { FactsBox } from '@/components/course/facts-box';
 import { GradsSection, hasGradsSection } from '@/components/course/grads-section';
 import { LecturersSection } from '@/components/course/lecturers-section';
 import { PriceSection } from '@/components/course/price-section';
@@ -14,10 +16,14 @@ import { Stamp } from '@/components/course/stamp';
 import { VideoSection } from '@/components/course/video-section';
 import { PenArrow } from '@/components/site/pen';
 import { Sheet } from '@/components/site/sheet';
+import { askBeforePaying } from '@/lib/course/ask-before-paying';
+import { showsScore } from '@/lib/course/score-shown';
 import { getCoursePage, getCourseSlugs } from '@/lib/data/course-page';
 import { formatHebrewDate } from '@/lib/format';
 import { courseShareDescription, courseShareMessage, courseShareTitle } from '@/lib/og/share-text';
 import { SITE_NAME, SITE_URL } from '@/lib/site';
+import { slugParams } from '@/lib/data/static-params';
+import { cn } from '@/lib/utils';
 
 /**
  * העמוד כולו סטטי: הנתונים מגיעים מ-getCoursePage שבמטמון (cacheLife('hours')).
@@ -28,7 +34,7 @@ export const ensureStatic = 'navigation';
 
 export async function generateStaticParams() {
   const slugs = await getCourseSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugParams(slugs);
 }
 
 type Props = { params: Promise<{ slug: string }> };
@@ -63,6 +69,10 @@ export default async function CoursePage({ params }: Props) {
   if (!course) notFound();
 
   const reviewCount = course.reviewTotal;
+  // אין ציון בלי ביקורות (מסמך העיצוב 2026-11-17): בלי ביקורת מפורסמת, "העובדות" במקום תיבת הציון,
+  // וגם בלי ההערה בעט "את הקורס עצמו עוד לא בדקנו", שתלויה על התיבה.
+  const reviewed = showsScore(reviewCount);
+  const questions = askBeforePaying(course);
   // "לשלוח בוואטסאפ": אותו טקסט כמו בתצוגה של קישור משותף, והכתובת המלאה (SITE_URL, כמו בתמונת השיתוף).
   const share = { text: courseShareMessage(course), url: `${SITE_URL}/courses/${course.slug}` };
   // הקישורים בניווט מופיעים רק כשהחלק שהם מובילים אליו מוצג, ומספר הפרקים סופר רק אותם.
@@ -94,9 +104,13 @@ export default async function CoursePage({ params }: Props) {
           )}
         </nav>
         {/*
-          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל שנשארת במקום בגלילה: הציון, "בקצרה" (מה ששולם בפועל,
-          מה קרה לבוגרים והחולשה הבולטת) ושתי הפעולות. היא נכנסת גם במסך של מחשב נייד.
-          מקרא הצבעים בעמודת הסיכום, מעל "על הקורס". בנייד: הציון, "בקצרה" והמקרא מיד אחרי הכותרת, והפעולות בסוף העמוד.
+          במחשב: עמודת הסיכום מימין, ועמודה צדדית משמאל.
+          - עם ציון: בעמודה הצדדית הציון, "בקצרה" (מה ששולם בפועל, מה קרה לבוגרים והחולשה הבולטת) ושתי הפעולות,
+            והיא נשארת במקום בגלילה. כדי שהיא תיכנס כולה גם במסך של מחשב נייד (1366 על 768),
+            "מה לשאול לפני שמשלמים" לא בה, אלא בעמודת הסיכום, מתחת למקרא.
+          - בלי ביקורות: "העובדות", "בקצרה", "מה לשאול" והפעולות. העמודה ארוכה מדי למסך נמוך, ולכן היא לא נשארת במקום.
+          מקרא הצבעים בעמודת הסיכום, מעל "על הקורס".
+          בנייד, לפי הסדר בקוד: הציון או "העובדות", "בקצרה", "מה לשאול" (עם ציון: אחרי המקרא), והפעולות בסוף העמוד.
           הסרטון של המוסד קטן, ובא אחרי "על הקורס": הוא שיווק, ולא אמור להיות כבד מהציון.
         */}
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-20">
@@ -121,6 +135,21 @@ export default async function CoursePage({ params }: Props) {
                 הקורס כבר לא מוצע. ההיסטוריה והביקורות נשארות כאן.
               </p>
             )}
+            {/* מאיפה הפרטים (גל, 17.11.2026): תווית מקור קטנה, כמו "לפי 5 חשבוניות" ב"בקצרה". לא בעט: בעט היא הייתה בולטת מדי. */}
+            {course.pageUrl && (
+              <p className="mt-1.5 max-w-[60ch] font-sans text-[13px] leading-snug text-ink-soft lg:mt-2 lg:text-sm">
+                הפרטים כאן הם מה שהמוסד כותב על עצמו{" "}
+                <a
+                  href={course.pageUrl}
+                  rel="nofollow noopener"
+                  className="underline decoration-1 underline-offset-[3px] transition-colors duration-150 hover:text-link-hover"
+                >
+                  בדף של הקורס באתר שלו
+                </a>
+                , ולא בדקנו אותם מעבר לזה.
+                {course.lastCheckedAt && <> הדף נקרא ב-{formatHebrewDate(course.lastCheckedAt)}.</>}
+              </p>
+            )}
             {/* מספר הפרקים בעמוד גלוי בניווט (חוזה עמוד הקורס, FORM), כמו מספר הפרקים על גב של כריכה. כתוב בעט: זה האתר שמסכם את הדף. */}
             <nav
               aria-label="בעמוד הזה"
@@ -139,12 +168,15 @@ export default async function CoursePage({ params }: Props) {
           </header>
 
           <aside
-            aria-label="הציון ובקצרה"
+            aria-label={reviewed ? 'הציון ובקצרה' : 'העובדות ומה לשאול'}
             className="lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:pt-3"
           >
-            <div className="lg:sticky lg:top-8 lg:pb-10">
-              <ScoreBox score={course.score} />
+            {/* בלי ביקורות העמודה ארוכה יותר (שש עובדות ושלוש שאלות), ובמסך של מחשב נייד היא לא נכנסת כולה.
+                לכן היא נשארת במקום בגלילה רק כשיש ציון, ואז "מה לשאול" בעמודת הסיכום. */}
+            <div className={cn('lg:pb-10', reviewed && 'lg:sticky lg:top-8')}>
+              {reviewed ? <ScoreBox score={course.score} /> : <FactsBox course={course} />}
               <AtAGlance course={course} />
+              {!reviewed && <AskBeforePaying questions={questions} />}
               {/* במחשב הפעולות כאן, תמיד בהישג יד. בנייד הן בסוף העמוד (החוזה של עמוד הקורס). */}
               <div className="hidden lg:block">
                 <CourseActions courseId={course.id} slug={course.slug} title={course.title} share={share} stacked />
@@ -154,6 +186,7 @@ export default async function CoursePage({ params }: Props) {
 
           <div className="lg:col-start-1 lg:row-start-2 lg:max-w-[560px]">
             <SourceLegend />
+            {reviewed && <AskBeforePaying questions={questions} />}
           </div>
 
           <div className="lg:col-start-1 lg:row-start-3 lg:max-w-[68ch] lg:text-[17px]">
@@ -169,7 +202,7 @@ export default async function CoursePage({ params }: Props) {
 
             {course.lastCheckedAt && (
               <p className="mt-6 font-sans text-[13px] text-ink-soft lg:mt-12 lg:text-sm">
-                פרטי הקורס נבדקו מול אתר המוסד ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
+                הפרטים מהדף של הקורס באתר המוסד, כפי שהיה ב-{formatHebrewDate(course.lastCheckedAt)}.{' '}
                 <Link href="/method" className="underline hover:text-link-hover">
                   איך אנחנו מסכמים ומי משלם לנו
                 </Link>

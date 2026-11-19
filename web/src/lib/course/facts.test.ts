@@ -1,0 +1,88 @@
+import { describe, expect, it } from 'vitest';
+import { courseFacts, factsLine, knownFactsCount, type FactSource } from './facts';
+
+const course = (over: Partial<FactSource> = {}): FactSource => ({
+  sitePrice: 2600,
+  totalHours: 30,
+  durationMonths: 2,
+  formats: ['in_person', 'online'],
+  region: 'חיפה',
+  certificate: 'תעודת השתתפות',
+  nextCohortDate: '2027-01-11',
+  ...over,
+});
+
+const nothing: Partial<FactSource> = {
+  sitePrice: null,
+  totalHours: null,
+  durationMonths: null,
+  formats: [],
+  region: null,
+  certificate: null,
+  nextCohortDate: null,
+};
+
+describe('courseFacts', () => {
+  it('lists the six facts in order, each with its source', () => {
+    expect(courseFacts(course())).toEqual([
+      { key: 'price', label: 'מחיר', known: true, text: '2,600 ₪', source: 'claim' },
+      { key: 'duration', label: 'משך', known: true, text: '2 חודשים, 30 שעות', source: 'verified' },
+      { key: 'format', label: 'מתכונת', known: true, text: 'בכיתה או אונליין', source: 'claim' },
+      { key: 'location', label: 'מיקום', known: true, text: 'חיפה', source: 'claim' },
+      { key: 'certificate', label: 'תעודה', known: true, text: 'תעודת השתתפות', source: 'claim' },
+      { key: 'nextCohort', label: 'מחזור הבא', known: true, text: '11.1.2027', source: 'claim' },
+    ]);
+  });
+
+  it('writes what the page does not say, and a missing price as the institution not publishing one', () => {
+    expect(courseFacts(course(nothing)).map((f) => (f.known ? f.text : f.missing))).toEqual([
+      'המוסד לא מפרסם מחיר',
+      'לא כתוב בדף',
+      'לא כתוב בדף',
+      'לא כתוב בדף',
+      'לא כתוב בדף',
+      'לא כתוב בדף',
+    ]);
+  });
+
+  it('counts a course that is only online as having a place, and says one month in words', () => {
+    const facts = courseFacts(course({ formats: ['online'], region: null, durationMonths: 1, totalHours: null }));
+    expect(facts.find((f) => f.key === 'location')).toMatchObject({ known: true, text: 'אונליין' });
+    expect(facts.find((f) => f.key === 'duration')).toMatchObject({ known: true, text: 'חודש אחד' });
+  });
+
+  it('treats a blank certificate or region as unknown', () => {
+    const facts = courseFacts(course({ certificate: '  ', region: '', formats: ['in_person'] }));
+    expect(facts.filter((f) => !f.known).map((f) => f.key)).toEqual(['location', 'certificate']);
+  });
+});
+
+describe('knownFactsCount', () => {
+  it('agrees with courseFacts', () => {
+    const cases = [
+      course(),
+      course(nothing),
+      course({ formats: ['online'], region: null }),
+      course({ sitePrice: null, certificate: '' }),
+      course({ formats: ['toString'] }),
+    ];
+    for (const c of cases) expect(knownFactsCount(c)).toBe(courseFacts(c).filter((f) => f.known).length);
+    expect(knownFactsCount(course())).toBe(6);
+    expect(knownFactsCount(course(nothing))).toBe(0);
+  });
+});
+
+describe('factsLine', () => {
+  it('shows the price, the length, the format and the place, only what is known', () => {
+    expect(factsLine(course()).map((p) => p.text)).toEqual(['2,600 ₪', '2 חודשים, 30 שעות', 'בכיתה או אונליין', 'חיפה']);
+    expect(factsLine(course(nothing)).map((p) => p.text)).toEqual(['מחיר לא מפורסם']);
+  });
+
+  it('does not write "אונליין" twice', () => {
+    expect(factsLine(course({ formats: ['online'], region: null })).map((p) => p.text)).toEqual([
+      '2,600 ₪',
+      '2 חודשים, 30 שעות',
+      'אונליין',
+    ]);
+  });
+});

@@ -20,6 +20,7 @@ import type { CourseSummary } from '@/lib/search/types';
 import { createBrowserSupabase } from '@/lib/supabase/browser-client';
 import { cn } from '@/lib/utils';
 import { PenAnswer } from './answer-line';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 /** 'empty': לחצו "לשאול" בלי לכתוב שאלה. הבדיקה בדפדפן, והשאלה לא נשלחת. */
 type AskError = AdviseError | 'network' | 'empty';
@@ -319,6 +320,8 @@ function AnswerSheet({
 /** כשנגמרו השאלות למבקר שלא מחובר: מחוברים מקבלים יותר. חוזרים לרשימה הזו אחרי ההתחברות. */
 function MoreQuestions() {
   const router = useRouter();
+  // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN): לא מציעים משהו שאי אפשר לעשות.
+  if (!ACCOUNTS_OPEN) return null;
   return (
     <p className="font-sans text-sm">
       <Link

@@ -12,6 +12,7 @@ import { isUuid, type CourseType } from '@/lib/reviews/types';
 import { createBrowserSupabase } from '@/lib/supabase/browser-client';
 import { cn } from '@/lib/utils';
 import { ReviewFlow } from './review-flow';
+import { ACCOUNTS_OPEN } from '@/lib/site';
 
 /** מה ש-my_course_link מחזירה: רק לבוגר שהוסיף את הקורס. */
 interface LinkedCourse {
@@ -82,10 +83,17 @@ export function LinkCourseReview({ metrics }: { metrics: MetricDef[] }) {
     return (
       <>
         <h1 className={title}>כתיבת ביקורת</h1>
-        <p className={line}>הקורס שהוספתם מחכה לכם. הוא עוד לא באתר, ולכן צריך להתחבר כדי להמשיך.</p>
-        <Link href={`/login?next=${encodeURIComponent(`/review/new?course=${validId}`)}`} className={primary}>
-          להתחבר ולהמשיך
-        </Link>
+        {ACCOUNTS_OPEN ? (
+          <>
+            <p className={line}>הקורס שהוספתם מחכה לכם. הוא עוד לא באתר, ולכן צריך להתחבר כדי להמשיך.</p>
+            <Link href={`/login?next=${encodeURIComponent(`/review/new?course=${validId}`)}`} className={primary}>
+              להתחבר ולהמשיך
+            </Link>
+          </>
+        ) : (
+          // ההתחברות עוד לא פתוחה באתר החי (ACCOUNTS_OPEN).
+          <p className={line}>כתיבת ביקורות נפתחת בקרוב.</p>
+        )}
       </>
     );
   }

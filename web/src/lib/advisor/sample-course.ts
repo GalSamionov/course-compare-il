@@ -38,6 +38,7 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
     lecturers: [],
     lecturersSummary: null,
     lastCheckedAt: null,
+    pageUrl: null,
     score: { status: 'scored', value: 8.4, reviewCount: 6, recommendPct: 83, stale: false },
     metrics: [{ key: 'hands_on', label: 'עבודה מעשית', mean: 4.5, n: 6 }],
     outcome: null,
