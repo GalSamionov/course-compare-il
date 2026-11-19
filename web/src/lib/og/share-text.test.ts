@@ -15,6 +15,7 @@ const FACTS = {
   durationMonths: 2,
   formats: ['in_person'],
   region: 'חיפה',
+  institutionCity: null,
   certificate: null,
   nextCohortDate: null,
 };

@@ -16,6 +16,7 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
     categoryName: 'בישול ואפייה',
     categorySlug: 'cooking',
     region: 'תל אביב',
+    institutionCity: null,
     formats: ['in_person'],
     sitePrice: 1200,
     totalHours: 24,

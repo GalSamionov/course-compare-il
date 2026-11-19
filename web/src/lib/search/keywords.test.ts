@@ -83,6 +83,7 @@ describe('matchNames', () => {
     totalHours: null,
     durationMonths: null,
     region: null,
+    institutionCity: null,
     certificate: null,
     nextCohortDate: null,
     formats: [],

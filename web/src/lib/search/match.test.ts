@@ -18,6 +18,7 @@ function course(over: Partial<CourseSummary> & { slug: string }): CourseSummary 
     totalHours: 30,
     durationMonths: 2,
     region: 'חיפה',
+    institutionCity: null,
     certificate: 'תעודת השתתפות',
     nextCohortDate: '2027-01-11',
     formats: ['in_person'],
