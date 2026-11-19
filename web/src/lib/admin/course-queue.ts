@@ -74,7 +74,7 @@ function newCourseFields(value: Json | null): NewCourseField[] {
 
 /** כל השדות של הקורס שהתור צריך: השדה שהשתנה, לערך הנוכחי. */
 const COURSE_COLUMNS =
-  'slug, title, status, site_price_ils, total_hours, lecture_hours, hands_on_hours, duration_months, schedule, formats, region, time_slots, next_cohort_date, syllabus, admission, class_size_note, certificate, institution_promises, video_url, institutions(name), categories(name)';
+  'slug, title, status, site_price_ils, total_hours, lecture_hours, hands_on_hours, duration_months, session_count, schedule, formats, region, time_slots, next_cohort_date, syllabus, admission, class_size_note, certificate, institution_promises, video_url, institutions(name), categories(name)';
 
 /**
  * כמה פריטים בעמוד: החלק העליון של הערימה. ריצה ראשונה של מוסד מכניסה עשרות קורסים חדשים, ועמוד עם כולם

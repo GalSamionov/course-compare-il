@@ -24,8 +24,8 @@ import {
   whenHowWords,
 } from '@/lib/search/query';
 import {
-  COURSE_FORMATS,
   FORMAT_LABEL,
+  SEARCH_FORMATS,
   TIME_SLOTS,
   TIME_SLOT_LABEL,
   type Catalog,
@@ -679,12 +679,12 @@ export function Notebook({
                   </div>
                   <span className={panelLabel}>איך</span>
                   <div className="flex flex-wrap gap-2 ps-3">
-                    {COURSE_FORMATS.map((format) => (
+                    {SEARCH_FORMATS.map((format) => (
                       <ChoiceChip
                         key={format}
                         checked={query.how.includes(format)}
                         onClick={() =>
-                          answer('whenhow', (c) => ({ ...c, how: toggleIn(c.how, format, COURSE_FORMATS) }))
+                          answer('whenhow', (c) => ({ ...c, how: toggleIn(c.how, format, SEARCH_FORMATS) }))
                         }
                       >
                         {FORMAT_LABEL[format]}

@@ -7,14 +7,10 @@ import {
   paidRangeSentence,
   verifiedReviewsText,
 } from '@/lib/format';
+import { FORMAT_LABEL } from '@/lib/search/types';
 import type { AdviceSource } from './types';
 
-const FORMAT_WORDS: Record<string, string> = {
-  online: 'אונליין',
-  in_person: 'בכיתה',
-  hybrid: 'משולב',
-  recorded: 'מוקלט',
-};
+const FORMAT_WORDS: Record<string, string> = FORMAT_LABEL;
 
 /**
  * טקסט מהמסד נכנס להנחיה כנתון. בלי < ו-> הוא לא יכול לסגור את <course>, או לפתוח תגית משלו.

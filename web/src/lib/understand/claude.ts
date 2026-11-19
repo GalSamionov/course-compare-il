@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { KeywordCategory } from '@/lib/search/keywords';
-import { COURSE_FORMATS, TIME_SLOTS, type CourseFormat, type TimeSlot, type Understanding } from '@/lib/search/types';
+import { SEARCH_FORMATS, TIME_SLOTS, type SearchFormat, type TimeSlot, type Understanding } from '@/lib/search/types';
 
 /** מסמך העיצוב של סבב 2, סעיף 6. */
 export const UNDERSTAND_MODEL = 'claude-haiku-5-5';
@@ -42,7 +42,7 @@ export async function understandWithClaude(
           properties: {
             categories: { type: 'array', items: { type: 'string', enum: slugs } },
             when: { type: 'array', items: { type: 'string', enum: [...TIME_SLOTS] } },
-            how: { type: 'array', items: { type: 'string', enum: [...COURSE_FORMATS] } },
+            how: { type: 'array', items: { type: 'string', enum: [...SEARCH_FORMATS] } },
           },
           required: ['categories', 'when', 'how'],
           additionalProperties: false,
@@ -72,7 +72,7 @@ function sanitize(raw: unknown, slugs: readonly string[]): Understanding {
   return {
     categories: pick(obj.categories, slugs, 3),
     when: pick<TimeSlot>(obj.when, TIME_SLOTS, 3),
-    how: pick<CourseFormat>(obj.how, COURSE_FORMATS, 2),
+    how: pick<SearchFormat>(obj.how, SEARCH_FORMATS, 2),
     source: 'ai',
   };
 }

@@ -1,13 +1,13 @@
 import {
-  COURSE_FORMATS,
   EMPTY_QUERY,
   FORMAT_LABEL,
   LINE_KEYS,
+  SEARCH_FORMATS,
   TIME_SLOTS,
   TIME_SLOT_LABEL,
   type Catalog,
-  type CourseFormat,
   type LineKey,
+  type SearchFormat,
   type SearchQuery,
   type TimeSlot,
   type Understanding,
@@ -69,7 +69,7 @@ export function parseQuery(params: ParamSource, base: SearchQuery = EMPTY_QUERY,
         : resolveMoved([...new Set(cat.split(',').map((s) => s.trim()).filter((s) => SLUG.test(s)))].slice(0, 5), moved),
     why: why === null ? base.why : WHY_KEYS.includes(why) ? (why as WhyKey) : null,
     when: listFrom(params.get('when'), TIME_SLOTS, base.when),
-    how: listFrom(params.get('how'), COURSE_FORMATS, base.how),
+    how: listFrom(params.get('how'), SEARCH_FORMATS, base.how),
     maxPrice: max === null ? base.maxPrice : parsePrice(max),
     off: listFrom(params.get('off'), LINE_KEYS, base.off),
   };
@@ -147,11 +147,11 @@ export function applyUnderstanding(current: SearchQuery, text: string, found: Un
  */
 export function whenHowWords(
   when: readonly TimeSlot[],
-  how: readonly CourseFormat[],
+  how: readonly SearchFormat[],
 ): { prefix: 'ב' | ''; words: string[] } {
   const words = [
     ...TIME_SLOTS.filter((t) => when.includes(t)).map((t) => TIME_SLOT_LABEL[t]),
-    ...COURSE_FORMATS.filter((f) => how.includes(f)).map((f) => FORMAT_LABEL[f]),
+    ...SEARCH_FORMATS.filter((f) => how.includes(f)).map((f) => FORMAT_LABEL[f]),
   ];
   return { prefix: when.length > 0 ? 'ב' : '', words };
 }

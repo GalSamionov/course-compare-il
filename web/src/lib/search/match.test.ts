@@ -109,6 +109,18 @@ describe('matchCourses', () => {
       ['no-price', true, ''],
     ]);
   });
+
+  it('finds a hybrid course for a classroom and for online, and a recorded one only for online', () => {
+    const courses = [course({ slug: 'hybrid', formats: ['hybrid'] }), course({ slug: 'recorded', formats: ['recorded'] })];
+    expect(rows(courses, { ...EMPTY_QUERY, how: ['in_person'] })).toEqual([
+      ['hybrid', true, 'בכיתה'],
+      ['recorded', false, 'רק מוקלט'],
+    ]);
+    expect(rows(courses, { ...EMPTY_QUERY, how: ['online'] })).toEqual([
+      ['hybrid', true, 'אונליין'],
+      ['recorded', true, 'אונליין'],
+    ]);
+  });
 });
 
 describe('closestToScore', () => {
