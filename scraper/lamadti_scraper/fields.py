@@ -12,6 +12,12 @@ from typing import Any
 
 _SPACES = re.compile(r"\s+")
 _QUOTES = str.maketrans({"״": '"', "”": '"', "“": '"', "׳": "'", "’": "'", "‘": "'", "–": "-", "—": "-"})
+# האזור של קורס שנלמד אונליין (שלב 3, 19.11.2026): מילה אחת, כמו שהאתר כותב אותה (web/src/lib/course/facts.ts).
+ONLINE = "אונליין"
+_ONLINE_WORDS = {"אונליין", "און ליין", "online", "זום", "בזום", "zoom", "מקוון", "באופן מקוון", "מרחוק"}
+# שבועות לחודשים: 4.345 שבועות בחודש, בחצאי חודש. פחות משבועיים לא הופך לחודשים: "0.5 חודשים" לסדנה של שבוע מטעה.
+WEEKS_PER_MONTH = 4.345
+MIN_WEEKS = 2
 
 
 @dataclass(frozen=True)
@@ -38,10 +44,41 @@ FIELDS: tuple[Field, ...] = (
     Field("total_hours", "int", "סך השעות", "Total hours of the course (academic or regular hours, as written)."),
     Field("lecture_hours", "int", "שעות הרצאה", "Hours of frontal or recorded lectures, only if the page splits the hours."),
     Field("hands_on_hours", "int", "שעות עשייה", "Hours of practice, labs, projects or hands-on work, only if the page splits the hours."),
-    Field("duration_months", "number", "משך בחודשים", "How many months the course lasts. Convert weeks to months (4.3 weeks = 1 month)."),
+    Field(
+        "duration_months",
+        "number",
+        "משך בחודשים",
+        "How many months the course lasts, as a number. When the page gives the length only in weeks, write the number of weeks "
+        "and the word weeks (for example '12 weeks') and do not convert it: the site converts weeks to months. "
+        "Days, hours or meetings are not months: then leave this field out.",
+    ),
+    Field(
+        "session_count",
+        "int",
+        "מספר מפגשים",
+        "How many meetings (sessions, lessons, מפגשים) the whole course has, when the page says it, for example '8 מפגשים' or "
+        "'455 שעות לימוד (91 מפגשים)'. Meetings per week are not the total.",
+    ),
     Field("schedule", "text", "ימים ושעות", "When the meetings take place: days and hours."),
-    Field("formats", "choices", "פורמט", "online when the course is taught online (live or recorded), in_person when it meets in a classroom. Both when both.", choices=("online", "in_person")),
-    Field("region", "text", "אזור", "The city or area where the classes meet, in Hebrew. Leave empty for online-only courses.", max_chars=60),
+    Field(
+        "formats",
+        "choices",
+        "פורמט",
+        "online when the course is taught online, live (Zoom or another video call) or recorded. in_person when it meets in a "
+        "classroom. hybrid when the page says היברידי or hybrid, or that the same course mixes classroom and online meetings. "
+        "List every format the page offers: a course offered in a classroom or online gets both.",
+        choices=("online", "in_person", "hybrid"),
+    ),
+    Field(
+        "region",
+        "text",
+        "אזור",
+        "Where this course meets, in Hebrew. A city or area as the page writes it ('תל אביב', 'רמת גן'). Several cities stay a "
+        "list, in the page's order, separated by commas ('חיפה, נתניה, תל אביב'). When the course is taught online (the page "
+        "says אונליין, בזום, מקוון, online or Zoom), write אונליין. Both a city and online: the city, then אונליין "
+        "('תל אביב, אונליין'). An address in the site's header or footer is the institution's, not this course's: do not use it.",
+        max_chars=120,
+    ),
     Field("time_slots", "choices", "מתי", "morning, evening and/or weekend, only when the page says when the meetings are.", choices=("morning", "evening", "weekend")),
     Field(
         "next_cohort_date",
@@ -80,10 +117,31 @@ def quote_in_page(quote: str, page_text: str) -> bool:
     return norm_text(quote).casefold() in norm_text(page_text).casefold()
 
 
+def normalize_region(text: str) -> str:
+    """אזור כמו שהמודל כתב, עם "אונליין" אחד לכל הדרכים לכתוב אותו ("בזום", "Zoom", "מקוון"). רשימת ערים נשארת כמו שהיא."""
+    out: list[str] = []
+    for part in (p.strip() for p in text.split(",")):
+        if not part:
+            continue
+        word = ONLINE if part.casefold() in _ONLINE_WORDS else part
+        if word not in out:
+            out.append(word)
+    return ", ".join(out)
+
+
+def weeks_to_months(weeks: float) -> float | None:
+    """משך בשבועות לחודשים, בחצאי חודש. פחות מ-MIN_WEEKS: None (אין משך בחודשים)."""
+    if weeks < MIN_WEEKS:
+        return None
+    return max(0.5, round(weeks / WEEKS_PER_MONTH * 2) / 2)
+
+
 def clean_value(field: Field, raw: Any) -> tuple[Any, list[str]]:
     """ערך מהמודל לערך שנשמר. מחזיר (ערך או None כשאין ערך, בעיות)."""
     if field.kind == "text":
         text = norm_text(raw) if isinstance(raw, str) else ""
+        if field.name == "region":
+            text = normalize_region(text)
         return (text[: field.max_chars] or None), []
     if field.kind == "int":
         if isinstance(raw, bool) or not isinstance(raw, (int, float)) or raw <= 0:

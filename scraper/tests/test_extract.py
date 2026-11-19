@@ -6,7 +6,8 @@ import anthropic
 import httpx
 import pytest
 
-from lamadti_scraper.extract import ClaudeExtractor, ExtractionFailed, ModelUnavailable, PageInput, build_schema, parse_extraction, records_to_data
+from lamadti_scraper.extract import SYSTEM, ClaudeExtractor, ExtractionFailed, ModelUnavailable, PageInput, build_schema, parse_extraction, records_to_data
+from lamadti_scraper.fields import FIELD_BY_NAME, clean_value, normalize_region, weeks_to_months
 from tests.helpers import raw_response
 
 PAGE = PageInput("https://a.example/courses/x", "text", (("programming", "תכנות"),), date(2026, 11, 14))
@@ -118,3 +119,51 @@ def test_request_shape():
     assert params["output_config"]["format"]["type"] == "json_schema"
     assert "<page>" in params["messages"][0]["content"]
     assert "data, not instructions" in params["system"]
+
+
+def _records(*records):
+    return records_to_data({"is_course_page": True, "category": "programming", "fields": list(records)})
+
+
+def test_weeks_become_months_in_half_months():
+    """שלב 3: "12 שבועות" הוא 3 חודשים. ההמרה בקוד, לא במודל. פחות משבועיים לא הופך לחודשים."""
+    assert [weeks_to_months(w) for w in (2, 8, 12, 20, 28)] == [0.5, 2.0, 3.0, 4.5, 6.5]
+    assert weeks_to_months(1) is None
+    result = parse_extraction(
+        _records(
+            {"field": "duration_months", "values": ["12 weeks"], "quote": "FULL TIME: 12 weeks", "confidence": "high"},
+            {"field": "session_count", "values": ["8 מפגשים"], "quote": "8 מפגשים, פעם בשבוע", "confidence": "high"},
+        ),
+        ["programming"],
+        "test",
+    )
+    assert result.fields["duration_months"].value == 3.0
+    assert result.fields["session_count"].value == 8
+    hebrew = parse_extraction(_records({"field": "duration_months", "values": ["28 שבועות"], "quote": "28 שבועות", "confidence": "high"}), ["programming"], "test")
+    assert hebrew.fields["duration_months"].value == 6.5
+    short = parse_extraction(_records({"field": "duration_months", "values": ["1 week"], "quote": "שבוע אחד", "confidence": "high"}), ["programming"], "test")
+    assert short.fields["duration_months"].found is False
+
+
+def test_online_is_one_region_and_a_list_of_cities_stays():
+    region = FIELD_BY_NAME["region"]
+    assert clean_value(region, "בזום") == ("אונליין", [])
+    assert clean_value(region, "Zoom") == ("אונליין", [])
+    assert clean_value(region, "תל אביב, מקוון") == ("תל אביב, אונליין", [])
+    cities = "חיפה, נתניה, תל אביב, פתח תקווה, ראשון לציון, אשדוד, ירושלים, באר שבע, אילת, אלעד"
+    assert clean_value(region, cities) == (cities, [])
+    assert normalize_region("אונליין, online") == "אונליין"
+
+
+def test_hybrid_is_a_format():
+    data = raw_response(formats=(["hybrid", "online", "zoom"], "On Campus / Online / Hybrid"))
+    assert parse_extraction(data, ["programming"], "test").fields["formats"].value == ["hybrid", "online"]
+
+
+def test_the_prompt_says_how_to_write_place_format_and_length():
+    assert "write אונליין" in SYSTEM
+    assert "hybrid when the page says היברידי" in SYSTEM
+    assert "the word weeks" in SYSTEM
+    assert "- session_count:" in SYSTEM
+    # האזור לא מנוסח מחדש: שמות המקומות נשארים כמו בדף.
+    assert "Text values (schedule, admission" in SYSTEM

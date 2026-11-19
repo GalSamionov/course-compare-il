@@ -1,7 +1,7 @@
 from datetime import date
 
 from lamadti_scraper.decide import PagePlan, PageState, decide_changed, make_slug
-from lamadti_scraper.sanity import check_field
+from lamadti_scraper.sanity import check_field, is_hard
 from tests.helpers import extraction
 
 TODAY = date(2026, 11, 14)
@@ -126,6 +126,9 @@ def test_sanity_rules():
     assert check_field("next_cohort_date", "2030-01-01", TODAY, {}) == ["cohort_far_future"]
     assert check_field("video_url", "http://example.com/v", TODAY, {}) == ["video_url_invalid"]
     assert check_field("video_url", "https://www.youtube.com/embed/abc", TODAY, {}) == []
+    assert check_field("session_count", 1001, TODAY, {}) == ["sessions_out_of_range"]
+    assert check_field("session_count", 12, TODAY, {}) == []
+    assert is_hard(["sessions_out_of_range"])  # המסד לא יקבל אותו (courses.session_count)
 
 
 def test_slug_matches_the_database_rule():
