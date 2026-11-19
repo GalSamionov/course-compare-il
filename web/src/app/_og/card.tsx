@@ -363,8 +363,11 @@ function FactsCard({ course }: { course: FactSource }) {
           ) : fact.source === 'verified' ? (
             <Marked text={clip(fact.text, 22)} size={24} source="verified" />
           ) : (
-            <div style={{ display: 'flex', borderBottom: `3px solid ${CLAIM}`, paddingBottom: 1 }}>
-              <Rtl text={clip(fact.text, 22)} size={24} style={{ flexWrap: 'nowrap' }} />
+            <div style={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'center' }}>
+              <div style={{ display: 'flex', borderBottom: `3px solid ${CLAIM}`, paddingBottom: 1 }}>
+                <Rtl text={clip(fact.text, 22)} size={24} style={{ flexWrap: 'nowrap' }} />
+              </div>
+              {fact.note && <Rtl text={fact.note} size={18} style={{ color: INK_SOFT, marginRight: 10 }} />}
             </div>
           )}
         </div>

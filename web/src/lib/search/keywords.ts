@@ -1,4 +1,4 @@
-import type { CourseFormat, CourseSummary, TimeSlot, Understanding } from './types';
+import type { CourseSummary, SearchFormat, TimeSlot, Understanding } from './types';
 
 export interface KeywordCategory {
   slug: string;
@@ -36,7 +36,7 @@ const TIME_WORDS: readonly (readonly [TimeSlot, readonly string[]])[] = [
   ['weekend', ['סופ״ש', 'סופש', 'סוף שבוע', 'סופי שבוע', 'שישי', 'שבת']],
 ];
 
-const FORMAT_WORDS: readonly (readonly [CourseFormat, readonly string[]])[] = [
+const FORMAT_WORDS: readonly (readonly [SearchFormat, readonly string[]])[] = [
   ['online', ['אונליין', 'און ליין', 'online', 'זום', 'zoom', 'מרחוק', 'מהבית']],
   ['in_person', ['פרונטלי', 'פרונטלית', 'כיתה', 'פנים מול פנים']],
 ];

@@ -1,7 +1,8 @@
 """uv run python -m lamadti_scraper <פקודה>
 
 run              הריצה השבועית. צריך SUPABASE_SECRET_KEY, ANTHROPIC_API_KEY, ו-SUPABASE_URL (או NEXT_PUBLIC_SUPABASE_URL).
-demo             שלושה שבועות של אתר הדוגמה מול המסד המקומי, עם חילוץ מוקלט. בלי מפתח Anthropic.
+                 --reextract: גם דפים שלא השתנו, של קורסים שמוצגים באתר (אחרי שינוי בהנחיה למודל).
+demo            שלושה שבועות של אתר הדוגמה מול המסד המקומי, עם חילוץ מוקלט. בלי מפתח Anthropic.
 discover         גילוי בלבד, בלי מודל ובלי מסד: כמה דפים נמצאו לכל מוסד ומאיפה. לכיוון ההגדרות.
 check-fixtures   חילוץ אמיתי עם Claude של 20 דפי הדוגמה, מול החילוץ הצפוי. בלי מסד.
 """
@@ -51,7 +52,7 @@ def cmd_run(args: argparse.Namespace) -> int:
     db = _db_from_env()
     print(f"target: {db.url}")
     try:
-        summary = run_scraper(config=config, db=db, extractor=extractor, today=date.today(), trigger=args.trigger, workers=args.workers)
+        summary = run_scraper(config=config, db=db, extractor=extractor, today=date.today(), trigger=args.trigger, workers=args.workers, reextract=args.reextract)
     except SchemaMissing as error:
         print(f"::warning::המיגרציה של האוסף עוד לא הוחלה על המסד הזה ({error}). דילוג.")
         return 0
@@ -107,6 +108,11 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--only", nargs="*", help="רק המוסדות האלה (slug), למשל לריצת ניסיון")
     run.add_argument("--replay", help="תיקייה עם חילוץ מוקלט, במקום Claude")
     run.add_argument("--variant")
+    run.add_argument(
+        "--reextract",
+        action="store_true",
+        help="לשלוח שוב למודל גם דפים שלא השתנו, של קורסים שמוצגים באתר. אחרי שינוי בהנחיה לחילוץ",
+    )
     run.set_defaults(func=cmd_run)
     demo = sub.add_parser("demo")
     demo.add_argument("--keep-visible", action="store_true", help="לא להסתיר את קורסי הדוגמה בסוף")

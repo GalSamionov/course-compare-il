@@ -5,8 +5,10 @@ const course = (over: Partial<FactSource> = {}): FactSource => ({
   sitePrice: 2600,
   totalHours: 30,
   durationMonths: 2,
+  sessionCount: null,
   formats: ['in_person', 'online'],
   region: 'חיפה',
+  institutionCity: null,
   certificate: 'תעודת השתתפות',
   nextCohortDate: '2027-01-11',
   ...over,
@@ -16,8 +18,10 @@ const nothing: Partial<FactSource> = {
   sitePrice: null,
   totalHours: null,
   durationMonths: null,
+  sessionCount: null,
   formats: [],
   region: null,
+  institutionCity: null,
   certificate: null,
   nextCohortDate: null,
 };
@@ -55,6 +59,18 @@ describe('courseFacts', () => {
     const facts = courseFacts(course({ certificate: '  ', region: '', formats: ['in_person'] }));
     expect(facts.filter((f) => !f.known).map((f) => f.key)).toEqual(['location', 'certificate']);
   });
+
+  it('counts the meetings as the length when that is all the page says (stage 3)', () => {
+    expect(courseFacts(course({ durationMonths: null, totalHours: null, sessionCount: 5 })).find((f) => f.key === 'duration')).toMatchObject({
+      known: true,
+      text: '5 מפגשים',
+      source: 'verified',
+    });
+    expect(courseFacts(course({ durationMonths: null, totalHours: null, sessionCount: 1 })).find((f) => f.key === 'duration')).toMatchObject({
+      text: 'מפגש אחד',
+    });
+    expect(factsLine(course({ sessionCount: 8 }))[1].text).toBe('2 חודשים, 8 מפגשים, 30 שעות');
+  });
 });
 
 describe('knownFactsCount', () => {
@@ -80,6 +96,50 @@ describe('factsLine', () => {
 
   it('does not write "אונליין" twice', () => {
     expect(factsLine(course({ formats: ['online'], region: null })).map((p) => p.text)).toEqual([
+      '2,600 ₪',
+      '2 חודשים, 30 שעות',
+      'אונליין',
+    ]);
+  });
+});
+
+describe('location from the institution (stage 3)', () => {
+  it('uses the institution city when the course does not say where, with where it came from', () => {
+    const c = course({ region: null, formats: ['in_person'], institutionCity: 'רמת גן' });
+    expect(courseFacts(c).find((f) => f.key === 'location')).toEqual({
+      key: 'location',
+      label: 'מיקום',
+      known: true,
+      text: 'רמת גן',
+      source: 'claim',
+      note: 'לפי כתובת המוסד',
+    });
+    expect(factsLine(c).map((p) => p.text)).toEqual(['2,600 ₪', '2 חודשים, 30 שעות', 'בכיתה', 'רמת גן (לפי כתובת המוסד)']);
+  });
+
+  it('prefers what the course says, and puts no city on a course that is only online', () => {
+    expect(courseFacts(course({ institutionCity: 'רמת גן' })).find((f) => f.key === 'location')).toMatchObject({ text: 'חיפה' });
+    expect(
+      courseFacts(course({ region: null, formats: ['online'], institutionCity: 'רמת גן' })).find((f) => f.key === 'location'),
+    ).toEqual({ key: 'location', label: 'מיקום', known: true, text: 'אונליין', source: 'claim' });
+  });
+
+  it('uses the city also when the format is unknown, and counts it as known', () => {
+    const c = course({ region: null, formats: [], institutionCity: 'רמת גן' });
+    expect(courseFacts(c).find((f) => f.key === 'location')).toMatchObject({ known: true, text: 'רמת גן' });
+    expect(knownFactsCount(c)).toBe(courseFacts(c).filter((f) => f.known).length);
+  });
+
+  it('an institution that teaches only online gives "אונליין", unless the course meets in a classroom', () => {
+    const online = course({ region: null, formats: [], institutionCity: 'אונליין' });
+    expect(courseFacts(online).find((f) => f.key === 'location')).toMatchObject({ text: 'אונליין', note: 'לפי המוסד' });
+    expect(factsLine(online).map((p) => p.text)).toEqual(['2,600 ₪', '2 חודשים, 30 שעות', 'אונליין (לפי המוסד)']);
+    const hybrid = course({ region: null, formats: ['hybrid'], institutionCity: 'אונליין' });
+    expect(courseFacts(hybrid).find((f) => f.key === 'location')).toMatchObject({ known: false });
+  });
+
+  it('does not write "אונליין" twice when the course itself says it', () => {
+    expect(factsLine(course({ region: 'אונליין', formats: ['online'] })).map((p) => p.text)).toEqual([
       '2,600 ₪',
       '2 חודשים, 30 שעות',
       'אונליין',

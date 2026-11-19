@@ -6,8 +6,10 @@ const course = (over: Partial<FactSource> = {}): FactSource => ({
   sitePrice: 2600,
   totalHours: 30,
   durationMonths: 2,
+  sessionCount: null,
   formats: ['in_person'],
   region: 'חיפה',
+  institutionCity: null,
   certificate: null,
   nextCohortDate: '2027-01-11',
   ...over,
@@ -42,5 +44,9 @@ describe('askBeforePaying', () => {
       'מתי המחזור הבא, ומה התנאים לביטול?',
       QUESTIONS.graduates,
     ]);
+  });
+
+  it('does not ask where when the institution has one city', () => {
+    expect(askBeforePaying(course({ region: null, institutionCity: 'רמת גן' }))).toEqual([QUESTIONS.graduates]);
   });
 });

@@ -75,11 +75,14 @@ export interface CoursePageData {
   categoryName: string;
   categorySlug: string;
   region: string | null;
+  /** העיר של המוסד, ל"מיקום" כשהקורס לא כותב איפה הוא (lib/course/facts.ts). */
+  institutionCity: string | null;
   formats: string[];
   sitePrice: number | null;
   totalHours: number | null;
   handsOnHours: number | null;
   durationMonths: number | null;
+  sessionCount: number | null;
   schedule: string | null;
   nextCohortDate: string | null;
   syllabus: SyllabusItem[];
@@ -136,7 +139,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const { data: course, error } = await db
     .from('courses')
     .select(
-      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, page_url, product_type, institutions(name, slug), categories(name, slug)',
+      'id, slug, title, status, region, formats, site_price_ils, total_hours, hands_on_hours, duration_months, session_count, schedule, next_cohort_date, syllabus, lecturers_note, admission, class_size_note, certificate, institution_promises, video_url, summary_good, summary_weak, lecturers_summary, last_checked_at, page_url, product_type, institutions(name, slug, city), categories(name, slug)',
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -187,7 +190,7 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
   const lecturerRows = lecturersRes.data;
   const paidRows = paidRes.data;
 
-  const institution = one(course.institutions as { name: string; slug: string } | { name: string; slug: string }[] | null);
+  const institution = one(course.institutions as { name: string; slug: string; city: string | null } | { name: string; slug: string; city: string | null }[] | null);
   const category = one(course.categories as { name: string; slug: string } | { name: string; slug: string }[] | null);
 
   type LecturerRef = {
@@ -269,11 +272,13 @@ export async function loadCoursePage(slug: string): Promise<CoursePageData | nul
     categoryName: category?.name ?? '',
     categorySlug: category?.slug ?? '',
     region: course.region,
+    institutionCity: institution?.city ?? null,
     formats: course.formats,
     sitePrice: course.site_price_ils,
     totalHours: course.total_hours,
     handsOnHours: course.hands_on_hours,
     durationMonths: course.duration_months === null ? null : Number(course.duration_months),
+    sessionCount: course.session_count,
     schedule: course.schedule,
     nextCohortDate: course.next_cohort_date,
     syllabus: (Array.isArray(course.syllabus) ? (course.syllabus as unknown as SyllabusItem[]) : [])

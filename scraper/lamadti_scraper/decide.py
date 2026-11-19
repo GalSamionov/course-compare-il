@@ -1,4 +1,4 @@
-"""ההחלטה מה עולה לבד ומה עובר לתור (סעיף 5.6, וההחלטה 2 בתוכנית). פונקציות טהורות.
+"""ההחלטה מה עולה לבד ומה עובר לתור (סעיף 5.6, וההחלטה 2 בתוכנית). פונקציות טהורות. שדה ריק שהתמלא: FILL_IN_CONFIDENCE.
 
 התוצאה היא PagePlan, ש-scraper_apply_page במסד כותב בטרנזקציה אחת.
 """
@@ -23,6 +23,10 @@ ALWAYS_QUEUE = {
     "institution_promises": "promise_changed",
     "title": "title_changed",
 }
+# שדה שהיה ריק בקורס ומקבל ערך: עולה לבד גם בביטחון בינוני, כל עוד המשפט נמצא בדף והערך סביר
+# (שלב 3, החלטה 5, 19.11.2026). אחרי החילוץ מחדש של כל הקורסים, השדות שהתמלאו לא מחכים כולם בתור.
+# ביטחון נמוך, מחיר ראשון (price_new), וסילבוס, הבטחות ושם הקורס (ALWAYS_QUEUE) עוברים לתור כמו קודם.
+FILL_IN_CONFIDENCE = frozenset({"high", "medium"})
 
 
 @dataclass
@@ -199,6 +203,8 @@ def decide_changed(
         if same_value(f, old, new):
             continue
         reasons = _reasons(f.name, fv, issues)
+        if is_empty(old) and fv.confidence in FILL_IN_CONFIDENCE:
+            reasons = [r for r in reasons if r != "low_confidence"]
         if f.name == "site_price_ils":
             if is_empty(old):
                 reasons.append("price_new")

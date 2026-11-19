@@ -17,7 +17,9 @@ function course(over: Partial<CourseSummary> & { slug: string }): CourseSummary 
     sitePrice: 2000,
     totalHours: 30,
     durationMonths: 2,
+    sessionCount: null,
     region: 'חיפה',
+    institutionCity: null,
     certificate: 'תעודת השתתפות',
     nextCohortDate: '2027-01-11',
     formats: ['in_person'],
@@ -107,6 +109,18 @@ describe('matchCourses', () => {
       ['pricey', true, ''],
       ['cheap', true, ''],
       ['no-price', true, ''],
+    ]);
+  });
+
+  it('finds a hybrid course for a classroom and for online, and a recorded one only for online', () => {
+    const courses = [course({ slug: 'hybrid', formats: ['hybrid'] }), course({ slug: 'recorded', formats: ['recorded'] })];
+    expect(rows(courses, { ...EMPTY_QUERY, how: ['in_person'] })).toEqual([
+      ['hybrid', true, 'בכיתה'],
+      ['recorded', false, 'רק מוקלט'],
+    ]);
+    expect(rows(courses, { ...EMPTY_QUERY, how: ['online'] })).toEqual([
+      ['hybrid', true, 'אונליין'],
+      ['recorded', true, 'אונליין'],
     ]);
   });
 });

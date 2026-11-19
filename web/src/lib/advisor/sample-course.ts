@@ -16,11 +16,13 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
     categoryName: 'בישול ואפייה',
     categorySlug: 'cooking',
     region: 'תל אביב',
+    institutionCity: null,
     formats: ['in_person'],
     sitePrice: 1200,
     totalHours: 24,
     handsOnHours: 18,
     durationMonths: 2,
+    sessionCount: null,
     schedule: 'שישי 9:00–13:00',
     nextCohortDate: '2026-12-04',
     syllabus: [

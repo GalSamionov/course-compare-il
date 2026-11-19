@@ -17,6 +17,10 @@ SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 DEFAULT_MAX_PAGES = 100
 HARD_MAX_PAGES = 500
 KINDS = ("college", "school", "independent", "university", "other")
+# העיר של המוסד (institutions.city, שלב 3): עיר אחת בעברית, או "אונליין" למוסד שמלמד רק אונליין.
+# "כמה סניפים" ו"לא נמצא" מהמחקר הם לא עיר: אז פשוט בלי city. אותו כלל כמו בבדיקה במסד (2 עד 40 תווים).
+CITY = re.compile(r"^[֐-׿][֐-׿\s\-'\"׳״]{1,39}$")
+NOT_A_CITY = frozenset({"כמה סניפים", "לא נמצא"})
 # כתובות שכמעט אף פעם אינן דף של קורס. חלות על כל מוסד, לפני ההגדרה שלו, כדי לא לשלם על בלוג ותגיות.
 DEFAULT_EXCLUDE = re.compile(
     r"/(blog|blogs|news|articles?|magazine|tag|tags|category|categories|author|authors|wp-content|wp-json|feed|"
@@ -46,6 +50,8 @@ class InstitutionConfig:
     # השם והסוג, כדי שהאוסף ייצור את המוסד בטבלה אם הוא עוד לא שם. המוסד אושר כבר כשנכנס לקובץ.
     name: str | None = None
     kind: str | None = None
+    # נכתבת רק כשהאוסף יוצר את המוסד. מוסד שכבר בטבלה לא משתנה (העיר שלו מ-supabase/fixes).
+    city: str | None = None
 
     @property
     def host(self) -> str:
@@ -139,11 +145,17 @@ def parse_config(data: object) -> Config:
         kind = item.get("kind")
         if kind is not None and kind not in KINDS:
             raise ConfigError(f"{where}.kind: expected one of {', '.join(KINDS)}")
+        city = item.get("city")
+        if city is not None:
+            if not isinstance(city, str) or city.strip() in NOT_A_CITY or not CITY.match(city.strip()):
+                raise ConfigError(f"{where}.city: expected one city in Hebrew, or אונליין")
+            city = city.strip()
         institution = InstitutionConfig(
             slug=slug,
             course_urls=tuple(_url(u, f"{where}.course_urls") for u in course_urls),
             name=name.strip() if name else None,
             kind=kind,
+            city=city,
             website=_url(item.get("website"), f"{where}.website"),
             categories=tuple(categories),
             sitemap=sitemap,

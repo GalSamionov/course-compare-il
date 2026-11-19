@@ -1,7 +1,7 @@
 import { knownFactsCount } from '@/lib/course/facts';
 import { MIN_REVIEWS } from '@/lib/score/constants';
 import { activeLines } from './query';
-import { FORMAT_LABEL, TIME_SLOT_LABEL, type CourseSummary, type SearchQuery, type TimeSlot } from './types';
+import { FORMAT_LABEL, TIME_SLOT_LABEL, type CourseFormat, type CourseSummary, type SearchFormat, type SearchQuery, type TimeSlot } from './types';
 import { courseTypeForWhy } from './why';
 
 export interface MatchResult {
@@ -13,6 +13,18 @@ export interface MatchResult {
 }
 
 const timeWords = (slots: readonly TimeSlot[]) => slots.map((t) => TIME_SLOT_LABEL[t]);
+
+/** משולב הוא גם בכיתה וגם אונליין, ומוקלט הוא אונליין. כך קורס כזה לא נופל מהחיפוש של "בכיתה" או "אונליין". */
+const COVERS: Record<CourseFormat, readonly SearchFormat[]> = {
+  online: ['online'],
+  in_person: ['in_person'],
+  hybrid: ['online', 'in_person'],
+  recorded: ['online'],
+};
+
+export function coversFormat(formats: readonly CourseFormat[], wanted: SearchFormat): boolean {
+  return formats.some((f) => COVERS[f].includes(wanted));
+}
 
 /** הקורס בתחום, או בתחום שמתחתיו. */
 export function inCategories(course: CourseSummary, cats: readonly string[]): boolean {
@@ -71,7 +83,7 @@ export function matchCourses(courses: readonly CourseSummary[], query: SearchQue
         );
     }
     if (how.length > 0) {
-      const shared = how.filter((f) => course.formats.includes(f));
+      const shared = how.filter((f) => coversFormat(course.formats, f));
       if (shared.length > 0) hits.push(shared.map((f) => FORMAT_LABEL[f]).join(', '));
       else
         misses.push(

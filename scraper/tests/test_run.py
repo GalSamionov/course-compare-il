@@ -193,3 +193,56 @@ def test_fixture_site_series_become_one_course_without_a_database():
         assert by_page[member]["outcome"] == "not_course" and not by_page[member]["queue"], member
     assert by_page["baking-basics-c4-2.html"]["snapshot"]["page_text"]  # העותק של מפגש נשמר
     assert by_page["tasting-evening-2024.html"]["snapshot"]["extracted"]["series"]["past_event"] is True
+
+
+def test_reextract_sends_an_unchanged_page_of_a_public_course_back_to_the_model():
+    """שלב 3, החלטה 5: אחרי שינוי בהנחיה, דף שלא השתנה של קורס שמוצג באתר נקרא שוב. בלי הדגל, או בטיוטה, הוא מדולג."""
+    from lamadti_scraper.extract import ReplayExtractor
+    from lamadti_scraper.fixtures import FIXTURES
+    from lamadti_scraper.pagetext import extract_page
+
+    with serve_fixtures() as site:
+        url = site.base + "/courses/python-basics.html"
+        cfg = InstitutionConfig(slug="scraper-demo", website=site.base + "/", categories=("programming",), include="/courses/python-basics")
+        fetcher = Fetcher(HostLimiter(local_interval=0.0))
+        try:
+            response = fetcher.get(url)
+            content_hash = extract_page(response.html, response.final_url).hash
+
+            def work(status: str) -> InstitutionWork:
+                return InstitutionWork(
+                    config=cfg,
+                    id="id-demo",
+                    pages={url: PageState(url=url, course_id="c1", last_hash=content_hash)},
+                    courses={"c1": {"id": "c1", "status": status, "title": "Python למתחילים", "page_url": url, "formats": [], "time_slots": [], "syllabus": []}},
+                    categories=(("programming", "תכנות"),),
+                    category_ids={"programming": "cat-p"},
+                )
+
+            extractor = ReplayExtractor(FIXTURES / "extractions")
+            today = date(2026, 11, 19)
+            plain = process_institution(work("active"), fetcher, extractor, today, threading.Event())
+            forced = process_institution(work("active"), fetcher, extractor, today, threading.Event(), reextract=True)
+            draft = process_institution(work("draft"), fetcher, extractor, today, threading.Event(), reextract=True)
+        finally:
+            fetcher.close()
+    assert [p.outcome for p in plain.plans] == ["unchanged"]
+    assert [p.outcome for p in forced.plans] == ["changed"]
+    assert forced.counts["pages_reextracted"] == 1 and forced.counts["pages_changed"] == 0
+    # הקורס ריק בבדיקה: שדות עם משפט מהדף עולים לבד (משימה 3).
+    assert forced.plans[0].auto_changes
+    assert [p.outcome for p in draft.plans] == ["unchanged"]
+
+
+def test_a_new_institution_gets_its_city_from_the_config():
+    """שלב 3: מוסד חדש נוצר עם העיר שלו. מוסד בלי city נוצר כמו קודם, בלי המפתח."""
+    db = CatalogDb()
+    with serve_fixtures() as site:
+        config = Config([
+            InstitutionConfig(slug="online-school", website=site.base + "/", categories=("programming",), name="בית ספר", kind="school", city="אונליין", max_pages=1),
+        ])
+        run_scraper(
+            config=config, db=db, extractor=DownExtractor(), today=date(2026, 11, 19), trigger="local",
+            limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
+        )
+    assert db.created == [{"slug": "online-school", "name": "בית ספר", "kind": "school", "website": site.base + "/", "city": "אונליין"}]

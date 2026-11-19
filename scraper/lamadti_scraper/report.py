@@ -30,6 +30,8 @@ def format_report(summary: RunSummary) -> str:
     if summary.status in ("completed", "failed"):
         lines += ["", "| | |", "|---|---|"]
         lines += [f"| {label} | {summary.counts.get(key, 0)} |" for key, label in LABELS]
+        if summary.report.get("reextract"):
+            lines += ["", f"חילוץ מחדש (--reextract): {summary.counts.get('pages_reextracted', 0)} דפים שלא השתנו נשלחו שוב למודל."]
     institutions = summary.report.get("institutions", {})
     if institutions:
         lines += ["", "### לפי מוסד", "", "| מוסד | נמצאו | נבדקו | השתנו | חדשים | נכשלו | לבד | לתור |", "|---|---|---|---|---|---|---|---|"]

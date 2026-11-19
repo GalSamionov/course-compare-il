@@ -1,13 +1,7 @@
 import type { CoursePageData } from '@/lib/data/course-page';
 import { formatHebrewDate, outcomeBasis, outcomeHeadline } from '@/lib/format';
+import { FORMAT_LABEL } from '@/lib/search/types';
 import { Claim, Mark, StickyNote } from './marks';
-
-const formatLabels: Record<string, string> = {
-  online: 'אונליין',
-  in_person: 'בכיתה',
-  hybrid: 'משולב',
-  recorded: 'מוקלט',
-};
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -23,10 +17,11 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export function AboutSection({ course }: { course: CoursePageData }) {
-  const formats = course.formats.map((f) => formatLabels[f] ?? f).join(' או ');
+  const formats = course.formats.map((f) => (FORMAT_LABEL as Record<string, string>)[f] ?? f).join(' או ');
   // שורת המשך מציגה רק את מה שידוע. חודשים ושעות נבדקו מול אתר המוסד, ולכן הם במרקר ירוק.
   const duration = [
     course.durationMonths !== null ? `${course.durationMonths} חודשים` : null,
+    course.sessionCount !== null ? (course.sessionCount === 1 ? 'מפגש אחד' : `${course.sessionCount} מפגשים`) : null,
     course.totalHours !== null ? `${course.totalHours} שעות` : null,
   ]
     .filter(Boolean)

@@ -22,7 +22,8 @@ describe('parseEdit', () => {
   it('keeps only known choices, in a fixed order, and an empty list stays a list', () => {
     expect(parseEdit('formats', ['in_person', 'online'])).toEqual({ ok: true, value: ['online', 'in_person'] });
     expect(parseEdit('time_slots', [])).toEqual({ ok: true, value: [] });
-    expect(parseEdit('formats', ['hybrid']).ok).toBe(false);
+    expect(parseEdit('formats', ['hybrid', 'online'])).toEqual({ ok: true, value: ['online', 'hybrid'] });
+    expect(parseEdit('formats', ['zoom']).ok).toBe(false);
   });
 
   it('reads one syllabus topic per line, and keeps the weak mark of a topic that was already there', () => {
@@ -38,7 +39,8 @@ describe('parseEdit', () => {
 
   it('collapses spaces in text, limits its length, and accepts only YouTube or Vimeo for the video', () => {
     expect(parseEdit('region', '  תל   אביב ')).toEqual({ ok: true, value: 'תל אביב' });
-    expect(parseEdit('region', 'א'.repeat(61)).ok).toBe(false);
+    expect(parseEdit('region', 'חיפה, נתניה, תל אביב, פתח תקווה, ראשון לציון, אשדוד, ירושלים, באר שבע, אילת, אלעד').ok).toBe(true);
+    expect(parseEdit('region', 'א'.repeat(121)).ok).toBe(false);
     expect(parseEdit('video_url', 'https://www.youtube.com/watch?v=abc').ok).toBe(true);
     expect(parseEdit('video_url', 'https://evil.example/video').ok).toBe(false);
   });
@@ -57,6 +59,8 @@ describe('display', () => {
     expect(displayValue('syllabus', [{ title: 'א', weak: false }, 'ב'])).toBe('א · ב');
     expect(displayValue('certificate', null)).toBeNull();
     expect(displayValue('formats', [])).toBeNull();
+    expect(displayValue('formats', ['hybrid', 'recorded'])).toBe('משולב, מוקלט');
+    expect(displayValue('session_count', 8)).toBe('8 מפגשים');
   });
 
   it('shows how far a price moved', () => {
@@ -113,6 +117,7 @@ describe('display', () => {
 
   it('names the reasons in Hebrew, with the field for a new course', () => {
     expect(reasonText('price_jump')).toBe('המחיר זז ביותר מ-20%');
+    expect(reasonText('sessions_out_of_range')).toBe('מספר מפגשים מחוץ לטווח (1 עד 1,000)');
     expect(reasonText('site_price_ils:low_confidence')).toBe('מחיר באתר: המודל לא היה בטוח');
     expect(reasonText('something_new')).toBe('something_new');
   });

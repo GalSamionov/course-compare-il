@@ -80,8 +80,21 @@ def add_requested(discovery: Discovery, work: InstitutionWork) -> None:
             discovery.urls.append(url)
 
 
+# קורס שמוצג באתר (ברשימות או בעמוד שלו). --reextract קורא מחדש רק את הדפים שלהם.
+PUBLIC_STATUSES = ("active", "maybe_inactive")
+
+
+def reextract_wanted(work: InstitutionWork, url: str, page: PageState | None, index: SeriesIndex) -> bool:
+    """דף של קורס שמוצג באתר, כולל דף נוסף של קורס מאוחד (regroup.py). דף בלי קורס, או של טיוטה, לא."""
+    if page is None:
+        return False
+    course_id = work.course_for(url, page) or index.course_of_member.get(url)
+    course = work.courses.get(course_id) if course_id else None
+    return course is not None and course.get("status") in PUBLIC_STATUSES
+
+
 def process_institution(
-    work: InstitutionWork, fetcher: Any, extractor: Extractor, today: date, stop: threading.Event
+    work: InstitutionWork, fetcher: Any, extractor: Extractor, today: date, stop: threading.Event, reextract: bool = False
 ) -> InstitutionResult:
     cfg = work.config
     discovery = discover(cfg, fetcher, fetcher.robots)
@@ -123,7 +136,10 @@ def process_institution(
             continue
         content_hash = content.hash
         text = content.for_model()
-        unchanged = bool(page and page.last_hash == content_hash)
+        same = bool(page and page.last_hash == content_hash)
+        # --reextract (שלב 3): אחרי שינוי בהנחיה, דף שלא השתנה של קורס שמוצג באתר נשלח שוב למודל.
+        forced = same and reextract and reextract_wanted(work, url, page, index)
+        unchanged = same and not forced
         fetched[url] = Fetched(url, fetched_at, content_hash, text, content.title, response.method, changed=not unchanged)
         if unchanged:
             result.counts["pages_unchanged"] += 1
@@ -135,7 +151,7 @@ def process_institution(
             result.counts["pages_failed"] += 1
             result.plans.append(PagePlan(url=url, outcome="failed", fetched_at=fetched_at, course_id=course_id, error=f"extract: {error}"))
             continue
-        result.counts["pages_new" if page is None else "pages_changed"] += 1
+        result.counts["pages_reextracted" if forced else "pages_new" if page is None else "pages_changed"] += 1
         fetched[url].extraction = extraction
         series_course = index.lead_course(url) or index.course_of_member.get(url)
         if series_course and extraction.is_course_page:
@@ -332,6 +348,7 @@ def run_scraper(
     trigger: str,
     limiter: HostLimiter | None = None,
     workers: int = DEFAULT_WORKERS,
+    reextract: bool = False,
     fetcher_factory: Callable[[HostLimiter], Any] = Fetcher,
     log: Callable[[str], None] = print,
 ) -> RunSummary:
@@ -342,7 +359,7 @@ def run_scraper(
     limiter = limiter or HostLimiter()
     ids = db.institution_ids([i.slug for i in config.institutions])
     all_categories = db.categories()
-    report: dict[str, Any] = {"institutions": {}, "skipped_institutions": {}, "created_institutions": [], "dropped_categories": {}}
+    report: dict[str, Any] = {"institutions": {}, "skipped_institutions": {}, "created_institutions": [], "dropped_categories": {}, "reextract": reextract}
     works: list[InstitutionWork] = []
     ready: list[tuple[InstitutionConfig, tuple[str, ...]]] = []
     for inst in config.institutions:
@@ -358,8 +375,9 @@ def run_scraper(
             continue
         ready.append((inst, known))
     # מוסד מהרשימה המאושרת שעוד לא בטבלה נוצר כאן. בלי קורס שאינו טיוטה אין לו עמוד באתר.
+    # העיר נשלחת רק כשיש: מוסד בלעדיה נוצר בדיוק כמו קודם.
     missing = [
-        {"slug": inst.slug, "name": inst.name, "kind": inst.kind, "website": inst.website}
+        {"slug": inst.slug, "name": inst.name, "kind": inst.kind, "website": inst.website, **({"city": inst.city} if inst.city else {})}
         for inst, _ in ready
         if inst.slug not in ids
     ]
@@ -391,7 +409,7 @@ def run_scraper(
     def work_on(work: InstitutionWork) -> InstitutionResult:
         fetcher = fetcher_factory(limiter)
         try:
-            return process_institution(work, fetcher, extractor, today, stop)
+            return process_institution(work, fetcher, extractor, today, stop, reextract)
         finally:
             fetcher.close()
 
@@ -435,6 +453,7 @@ def run_scraper(
                 "discovered": len(result.discovery.urls),
                 "sources": result.discovery.sources,
                 "errors": result.errors[:20],
+                "reextracted": int(inst_counts.get("pages_reextracted", 0)),
                 **_counts_payload(inst_counts),
             }
     except Exception as error:

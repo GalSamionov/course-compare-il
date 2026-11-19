@@ -31,6 +31,7 @@ const isTimeSlot = (value: string): value is TimeSlot => (TIME_SLOTS as readonly
 const isFormat = (value: string): value is CourseFormat => (COURSE_FORMATS as readonly string[]).includes(value);
 
 type PerMetric = Partial<Record<MetricKey, { mean: number; n: number }>>;
+type InstitutionRef = { name: string; city: string | null };
 
 /** הטעינה עצמה, בלי מטמון. סקריפטים מחוץ ל-Next קוראים לה ישירות. */
 export async function loadCatalog(): Promise<Catalog> {
@@ -42,7 +43,7 @@ export async function loadCatalog(): Promise<Catalog> {
     db
       .from('courses')
       .select(
-        'id, slug, title, category_id, site_price_ils, total_hours, duration_months, formats, region, certificate, next_cohort_date, time_slots, product_type, updated_at, institutions(name), scores(status, value, reviews_needed, per_metric)',
+        'id, slug, title, category_id, site_price_ils, total_hours, duration_months, session_count, formats, region, certificate, next_cohort_date, time_slots, product_type, updated_at, institutions(name, city), scores(status, value, reviews_needed, per_metric)',
       )
       .in('status', ['active', 'maybe_inactive'])
       .eq('scores.kind', 'graduate')
@@ -68,6 +69,7 @@ export async function loadCatalog(): Promise<Catalog> {
     const category = row.category_id ? byId.get(row.category_id) : undefined;
     if (!category) return [];
     const parent = category.parent_id ? byId.get(category.parent_id) : undefined;
+    const institution = one(row.institutions as InstitutionRef | InstitutionRef[] | null);
     const latest = row.scores[0];
 
     let score: RowScore = { status: 'none' };
@@ -84,7 +86,7 @@ export async function loadCatalog(): Promise<Catalog> {
         id: row.id,
         slug: row.slug,
         title: row.title,
-        institutionName: one(row.institutions as { name: string } | { name: string }[] | null)?.name ?? '',
+        institutionName: institution?.name ?? '',
         categorySlug: category.slug,
         categoryName: category.name,
         categoryParentSlug: parent?.slug ?? null,
@@ -96,7 +98,9 @@ export async function loadCatalog(): Promise<Catalog> {
         totalHours: row.total_hours,
         // numeric: כמו בעמוד הקורס, Number כדי שיגיע מספר גם כשהמסד מחזיר מחרוזת.
         durationMonths: row.duration_months === null ? null : Number(row.duration_months),
+        sessionCount: row.session_count,
         region: row.region,
+        institutionCity: institution?.city ?? null,
         certificate: row.certificate,
         nextCohortDate: row.next_cohort_date,
         formats: row.formats.filter(isFormat),

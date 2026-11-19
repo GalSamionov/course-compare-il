@@ -15,10 +15,11 @@ from .fields import quote_in_page
 PRICE_MIN, PRICE_MAX = 50, 100_000
 HOURS_MIN, HOURS_MAX = 1, 3_000
 MAX_MONTHS = 60
+SESSIONS_MIN, SESSIONS_MAX = 1, 1000
 MAX_FUTURE = timedelta(days=730)
 VIDEO_HOSTS = {"youtube.com", "www.youtube.com", "youtu.be", "www.youtube-nocookie.com", "vimeo.com", "player.vimeo.com"}
 
-HARD_ISSUES = {"price_out_of_range", "hours_out_of_range", "duration_out_of_range", "bad_date", "video_url_invalid"}
+HARD_ISSUES = {"price_out_of_range", "hours_out_of_range", "duration_out_of_range", "bad_date", "video_url_invalid", "sessions_out_of_range"}
 
 
 def check_field(name: str, value: Any, today: date, values: dict[str, Any]) -> list[str]:
@@ -34,6 +35,8 @@ def check_field(name: str, value: Any, today: date, values: dict[str, Any]) -> l
             return ["hours_exceed_total"]
     if name == "duration_months" and not 0 < value <= MAX_MONTHS:
         return ["duration_out_of_range"]
+    if name == "session_count" and not SESSIONS_MIN <= value <= SESSIONS_MAX:
+        return ["sessions_out_of_range"]
     if name == "next_cohort_date":
         day = date.fromisoformat(value)
         if day < today:
