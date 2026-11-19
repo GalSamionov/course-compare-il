@@ -375,8 +375,9 @@ def run_scraper(
             continue
         ready.append((inst, known))
     # מוסד מהרשימה המאושרת שעוד לא בטבלה נוצר כאן. בלי קורס שאינו טיוטה אין לו עמוד באתר.
+    # העיר נשלחת רק כשיש: מוסד בלעדיה נוצר בדיוק כמו קודם.
     missing = [
-        {"slug": inst.slug, "name": inst.name, "kind": inst.kind, "website": inst.website}
+        {"slug": inst.slug, "name": inst.name, "kind": inst.kind, "website": inst.website, **({"city": inst.city} if inst.city else {})}
         for inst, _ in ready
         if inst.slug not in ids
     ]

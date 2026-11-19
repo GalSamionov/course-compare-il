@@ -1,4 +1,6 @@
-from lamadti_scraper.config import parse_config
+import pytest
+
+from lamadti_scraper.config import ConfigError, parse_config
 from lamadti_scraper.discover import discover, parse_sitemap
 from lamadti_scraper.fetch import FetchResult
 from lamadti_scraper.politeness import parse_robots
@@ -115,3 +117,12 @@ def test_huge_sitemaps_stop_and_mark_discovery_incomplete(monkeypatch):
     result = discover(institution(), fetcher, FakeRobots())
     assert result.complete is False
     assert "https://a.example/b.xml" not in fetcher.calls
+
+
+def test_city_is_one_city_in_hebrew_or_online():
+    assert institution(city=" תל אביב ").city == "תל אביב"
+    assert institution(city="אונליין").city == "אונליין"
+    assert institution().city is None
+    for bad in ("כמה סניפים", "לא נמצא", "Tel Aviv", "", 5):
+        with pytest.raises(ConfigError):
+            institution(city=bad)

@@ -232,3 +232,17 @@ def test_reextract_sends_an_unchanged_page_of_a_public_course_back_to_the_model(
     # הקורס ריק בבדיקה: שדות עם משפט מהדף עולים לבד (משימה 3).
     assert forced.plans[0].auto_changes
     assert [p.outcome for p in draft.plans] == ["unchanged"]
+
+
+def test_a_new_institution_gets_its_city_from_the_config():
+    """שלב 3: מוסד חדש נוצר עם העיר שלו. מוסד בלי city נוצר כמו קודם, בלי המפתח."""
+    db = CatalogDb()
+    with serve_fixtures() as site:
+        config = Config([
+            InstitutionConfig(slug="online-school", website=site.base + "/", categories=("programming",), name="בית ספר", kind="school", city="אונליין", max_pages=1),
+        ])
+        run_scraper(
+            config=config, db=db, extractor=DownExtractor(), today=date(2026, 11, 19), trigger="local",
+            limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
+        )
+    assert db.created == [{"slug": "online-school", "name": "בית ספר", "kind": "school", "website": site.base + "/", "city": "אונליין"}]
