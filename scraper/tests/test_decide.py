@@ -142,3 +142,27 @@ def test_new_page_outside_the_institution_categories_is_not_a_course():
     plan = run(extraction(category="none", title=("ניהול רשתות", "ניהול רשתות")))
     assert plan.outcome == "not_course"
     assert plan.new_course is None and plan.queue == []
+
+
+TITLE = ("פיתוח תוכנה לדוגמה", "פיתוח תוכנה לדוגמה")
+
+
+def test_a_missing_field_filled_in_goes_up_alone_when_the_model_is_fairly_sure():
+    """שלב 3, החלטה 5: שדה שהיה ריק בקורס ומקבל ערך עם משפט מהדף עולה לבד, גם בביטחון בינוני."""
+    plan = run(extraction(title=TITLE, total_hours=(120, "120 שעות", "medium")), course=course())
+    assert plan.auto_changes == [{"field": "total_hours", "old": None, "new": 120, "quote": "120 שעות"}]
+    assert plan.queue == []
+
+
+def test_a_filled_in_field_still_needs_a_quote_from_the_page_and_some_confidence():
+    plan = run(extraction(title=TITLE, total_hours=(120, "120 שעות", "low")), course=course())
+    assert plan.auto_changes == [] and plan.queue[0]["reasons"] == ["low_confidence"]
+    plan = run(extraction(title=TITLE, total_hours=(120, "משפט שלא קיים בדף", "medium")), course=course())
+    assert plan.auto_changes == [] and plan.queue[0]["reasons"] == ["quote_not_found"]
+
+
+def test_a_changed_value_and_a_first_price_still_go_to_the_queue():
+    plan = run(extraction(title=TITLE, total_hours=(120, "120 שעות", "medium")), course=course(total_hours=100))
+    assert plan.auto_changes == [] and plan.queue[0]["reasons"] == ["low_confidence"]
+    plan = run(extraction(title=TITLE, site_price_ils=(12000, 'מחיר: 12,000 ש"ח')), course=course())
+    assert plan.auto_changes == [] and plan.queue[0]["reasons"] == ["price_new"]
