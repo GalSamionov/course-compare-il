@@ -13,6 +13,7 @@ const FACTS = {
   sitePrice: 2600,
   totalHours: 30,
   durationMonths: 2,
+  sessionCount: null,
   formats: ['in_person'],
   region: 'חיפה',
   institutionCity: null,

@@ -5,6 +5,7 @@ const course = (over: Partial<FactSource> = {}): FactSource => ({
   sitePrice: 2600,
   totalHours: 30,
   durationMonths: 2,
+  sessionCount: null,
   formats: ['in_person', 'online'],
   region: 'חיפה',
   institutionCity: null,
@@ -17,6 +18,7 @@ const nothing: Partial<FactSource> = {
   sitePrice: null,
   totalHours: null,
   durationMonths: null,
+  sessionCount: null,
   formats: [],
   region: null,
   institutionCity: null,
@@ -56,6 +58,18 @@ describe('courseFacts', () => {
   it('treats a blank certificate or region as unknown', () => {
     const facts = courseFacts(course({ certificate: '  ', region: '', formats: ['in_person'] }));
     expect(facts.filter((f) => !f.known).map((f) => f.key)).toEqual(['location', 'certificate']);
+  });
+
+  it('counts the meetings as the length when that is all the page says (stage 3)', () => {
+    expect(courseFacts(course({ durationMonths: null, totalHours: null, sessionCount: 5 })).find((f) => f.key === 'duration')).toMatchObject({
+      known: true,
+      text: '5 מפגשים',
+      source: 'verified',
+    });
+    expect(courseFacts(course({ durationMonths: null, totalHours: null, sessionCount: 1 })).find((f) => f.key === 'duration')).toMatchObject({
+      text: 'מפגש אחד',
+    });
+    expect(factsLine(course({ sessionCount: 8 }))[1].text).toBe('2 חודשים, 8 מפגשים, 30 שעות');
   });
 });
 

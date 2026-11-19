@@ -19,6 +19,8 @@ export interface FactSource {
   sitePrice: number | null;
   totalHours: number | null;
   durationMonths: number | null;
+  /** כמה מפגשים בקורס כולו (courses.session_count), כשהדף כותב. חלק מ"משך". */
+  sessionCount: number | null;
   formats: readonly string[];
   region: string | null;
   /**
@@ -73,6 +75,7 @@ function present(text: string | null): string | null {
 function durationText(c: FactSource): string | null {
   const parts: string[] = [];
   if (c.durationMonths !== null) parts.push(c.durationMonths === 1 ? 'חודש אחד' : `${c.durationMonths} חודשים`);
+  if (c.sessionCount !== null) parts.push(c.sessionCount === 1 ? 'מפגש אחד' : `${c.sessionCount} מפגשים`);
   if (c.totalHours !== null) parts.push(`${c.totalHours} שעות`);
   return parts.length > 0 ? parts.join(', ') : null;
 }
@@ -112,7 +115,7 @@ function fact(key: FactKey, text: string | null, source: 'claim' | 'verified' = 
 
 /**
  * שש העובדות, בסדר של FACT_KEYS.
- * המשך (חודשים ושעות) בירוק, כמו ב"על הקורס", בהשוואה ובהנחיות של היועץ. כל השאר טענה של המוסד, בקו כחול.
+ * המשך (חודשים, מפגשים ושעות) בירוק, כמו ב"על הקורס", בהשוואה ובהנחיות של היועץ. כל השאר טענה של המוסד, בקו כחול.
  */
 export function courseFacts(c: FactSource): Fact[] {
   const place = placeOf(c);

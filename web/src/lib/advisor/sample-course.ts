@@ -22,6 +22,7 @@ export function sampleCourse(overrides: Partial<CoursePageData> = {}): CoursePag
     totalHours: 24,
     handsOnHours: 18,
     durationMonths: 2,
+    sessionCount: null,
     schedule: 'שישי 9:00–13:00',
     nextCohortDate: '2026-12-04',
     syllabus: [

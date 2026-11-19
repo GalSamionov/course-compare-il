@@ -17,6 +17,7 @@ const course = (slug: string, overrides: Partial<CourseSummary> = {}): CourseSum
   sitePrice: null,
   totalHours: null,
   durationMonths: null,
+  sessionCount: null,
   region: null,
   institutionCity: null,
   certificate: null,

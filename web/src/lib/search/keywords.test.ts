@@ -82,6 +82,7 @@ describe('matchNames', () => {
     sitePrice: null,
     totalHours: null,
     durationMonths: null,
+    sessionCount: null,
     region: null,
     institutionCity: null,
     certificate: null,

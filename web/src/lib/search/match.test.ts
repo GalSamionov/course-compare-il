@@ -17,6 +17,7 @@ function course(over: Partial<CourseSummary> & { slug: string }): CourseSummary 
     sitePrice: 2000,
     totalHours: 30,
     durationMonths: 2,
+    sessionCount: null,
     region: 'חיפה',
     institutionCity: null,
     certificate: 'תעודת השתתפות',

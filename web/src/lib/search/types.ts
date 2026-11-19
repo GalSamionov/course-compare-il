@@ -84,6 +84,7 @@ export interface CourseSummary {
    */
   totalHours: number | null;
   durationMonths: number | null;
+  sessionCount: number | null;
   region: string | null;
   /** העיר של המוסד (institutions.city), ל"מיקום" כשהקורס לא כותב איפה הוא (lib/course/facts.ts). */
   institutionCity: string | null;

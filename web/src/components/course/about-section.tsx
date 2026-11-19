@@ -21,6 +21,7 @@ export function AboutSection({ course }: { course: CoursePageData }) {
   // שורת המשך מציגה רק את מה שידוע. חודשים ושעות נבדקו מול אתר המוסד, ולכן הם במרקר ירוק.
   const duration = [
     course.durationMonths !== null ? `${course.durationMonths} חודשים` : null,
+    course.sessionCount !== null ? (course.sessionCount === 1 ? 'מפגש אחד' : `${course.sessionCount} מפגשים`) : null,
     course.totalHours !== null ? `${course.totalHours} שעות` : null,
   ]
     .filter(Boolean)
