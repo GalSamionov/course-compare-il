@@ -246,3 +246,34 @@ def test_a_new_institution_gets_its_city_from_the_config():
             limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
         )
     assert db.created == [{"slug": "online-school", "name": "בית ספר", "kind": "school", "website": site.base + "/", "city": "אונליין"}]
+
+
+class DuplicateSlugDb(RecordingDb):
+    """המסד דוחה את הדף הראשון (slug שכבר קיים), כמו שקרה בריצה המלאה ב-19.11.2026."""
+
+    def apply_page(self, run_id, payload):
+        from lamadti_scraper.db import DbError
+
+        if not self.payloads:
+            self.payloads.append({"rejected": payload["url"]})
+            raise DbError('POST /rest/v1/rpc/scraper_apply_page: 409 23505 duplicate key value violates unique constraint "courses_slug_key"')
+        return super().apply_page(run_id, payload)
+
+
+def test_a_page_the_database_rejects_does_not_stop_the_run():
+    """דף אחד שהמסד דוחה נרשם כתקלה בדוח, ושאר הדפים נשמרים. הריצה מסתיימת, ולא נופלת באמצע השמירה."""
+    from lamadti_scraper.extract import ReplayExtractor
+    from lamadti_scraper.fixtures import FIXTURES
+    from tests.fixtures import specs
+
+    db = DuplicateSlugDb()
+    with serve_fixtures() as site:
+        config = Config([InstitutionConfig(slug="scraper-demo", website=site.base + "/", categories=tuple(specs.CATEGORIES))])
+        summary = run_scraper(
+            config=config, db=db, extractor=ReplayExtractor(FIXTURES / "extractions"), today=date(2026, 11, 14),
+            trigger="local", limiter=HostLimiter(local_interval=0.0), workers=1, log=lambda _: None,
+        )
+    assert summary.status == "completed"
+    assert db.finished == ("completed", None)
+    saved = [p for p in db.payloads if "rejected" not in p]
+    assert len(saved) == len(db.payloads) - 1 and saved  # כל השאר נשמרו

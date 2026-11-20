@@ -13,7 +13,7 @@ from datetime import date, datetime, timezone
 from typing import Any, Callable
 
 from .config import Config, InstitutionConfig
-from .db import Db
+from .db import Db, DbError
 from .decide import PagePlan, PageState, decide_changed
 from .discover import Discovery, discover
 from .extract import Extractor, ExtractionFailed, ModelUnavailable, PageInput
@@ -437,7 +437,14 @@ def run_scraper(
         for result in results:
             inst_counts = result.counts
             for plan in result.plans:
-                outcome = db.apply_page(run_id, plan.payload(result.institution_id))
+                try:
+                    outcome = db.apply_page(run_id, plan.payload(result.institution_id))
+                except DbError as error:
+                    # דף אחד שהמסד דוחה (למשל slug שכבר קיים) לא מפיל את הריצה, ולא מבטל את כל מה שכבר חולץ
+                    # מהמודל (הריצה המלאה ב-19.11.2026 נפלה כך באמצע השמירה). הדף נרשם בדוח, ונבדק שוב בשבוע הבא.
+                    result.errors.append(f"{plan.url}: {str(error)[:200]}")
+                    inst_counts["pages_failed"] += 1
+                    continue
                 inst_counts["changes_auto"] += int(outcome.get("auto", 0))
                 inst_counts["changes_queued"] += int(outcome.get("queued", 0))
             known = set(p for p, s in next(w for w in works if w.id == result.institution_id).pages.items() if s.state == "active")
